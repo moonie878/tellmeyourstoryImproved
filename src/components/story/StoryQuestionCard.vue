@@ -189,9 +189,8 @@
 </template>
 
 <script setup lang="ts">
-    import { ref, watch, nextTick, computed } from 'vue'
-    import type { StorySection } from '../../types/story'
-    import { track } from '../../lib/analytics'
+    import { ref, watch, nextTick} from 'vue'
+    import type { StorySection } from '../../types/story'   
 
     const props = defineProps<{
     section: StorySection | null
@@ -217,13 +216,7 @@
     (e: 'next'): void
     (e: 'finish'): void
     (e: 'image-error'): void
-    }>()
-
-    const isComplete = computed(() => {
-  return props.currentIndex === props.totalSections - 1 &&
-    !!props.section?.answer &&
-    props.section.answer.trim().length > 0
-})
+    }>()    
 
     const textareaRef = ref<HTMLTextAreaElement | null>(null)
 

@@ -1,10 +1,5 @@
 import { computed, type Ref } from 'vue'
 
-type UserAccessRow = {
-  access_type: string
-  story_type?: string | null
-  variant?: string | null
-}
 
 type CurrentPlan = 'free' | 'tier1' | 'tier2' | 'tier3' | 'tier4'
 

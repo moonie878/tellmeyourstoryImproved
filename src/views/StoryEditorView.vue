@@ -323,8 +323,7 @@
     import { track } from '../lib/analytics'
 
     import type {
-    PdfSettings,
-    StoryImage,
+    PdfSettings,   
     StoryProject,
     StorySection,
     StoryChapterGroup,
@@ -405,15 +404,13 @@
     return sections.value[currentSectionIndex.value] || null
     })
 
-        const {
-  hasTextExportAccess,
+        const { 
   currentPlan,
   hasTier4Access,
   showTier1,
   showTier2,
   showTier3,
-  showTier4,
-  recommendedUpgrade,
+  showTier4, 
   recommendedUpgradeText,
   upgradeMessage,
   currentPlanLabel,
@@ -424,8 +421,7 @@
   isPaidUser
 )
 
-    const {
-  startCheckout,
+    const {  
   upgradeSingleText,
   upgradeSingleImages,
   upgradeAllText,
@@ -445,8 +441,7 @@
   getAllImagesForExport,
   loadImageAsBase64,
   removeCurrentImage,
-  handleCoverImageUpload,
-  clearCurrentImagePreview,
+  handleCoverImageUpload, 
   clearCurrentImageState,
 } = useStoryImages({
   projectId,
@@ -1067,15 +1062,6 @@ function upgradeFromTopButtons() {
   upgradeWithImages()
 }
 
-function upgradeFromMidwayBanner() {
-  track('upgrade_clicked', {
-    source: 'midway_banner',
-    projectId,
-    plan: hasAllStoriesAccess.value ? 'all_images' : 'single_images',
-  })
-
-  upgradeWithImages()
-}
 
 function upgradeFromCompletionCard() {
   track('upgrade_clicked', {

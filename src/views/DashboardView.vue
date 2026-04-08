@@ -268,6 +268,8 @@
 import { supabase } from '../lib/supabase'
 import { useRouter } from 'vue-router'
 import { ref, onMounted } from 'vue'
+import { track } from '../lib/analytics'
+
 
 
 const stories = ref<any[]>([])
@@ -276,14 +278,6 @@ const isFirstTimeUser = ref(false)
     const deletingStoryId = ref<string | null>(null)
 
 const router = useRouter()
-
-async function handleLogout() {
-  const { error } = await supabase.auth.signOut()
-
-  if (!error) {
-    await router.replace('/login')
-  }
-}
 
 async function createStory(type: string) {
   const {

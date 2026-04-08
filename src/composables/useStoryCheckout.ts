@@ -1,5 +1,5 @@
 import type { Ref } from 'vue'
-import type { StoryProject, StorySection } from '../types/story'
+import type { StoryProject } from '../types/story'
 import { track } from '../lib/analytics'
 
 

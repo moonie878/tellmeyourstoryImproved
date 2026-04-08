@@ -71,7 +71,7 @@
 
                 <select
                   :value="modelValue.orientation"
-                  @change="updateField('orientation', ($event.target as HTMLSelectElement).value)"
+                  @change="updateField('orientation', ($event.target as HTMLSelectElement).value as PdfSettings['orientation'])"
                   class="mt-2 w-full rounded-xl border border-stone-300 bg-white px-4 py-3"
                 >
                   <option value="portrait">Portrait Book</option>
@@ -90,7 +90,7 @@
 
                 <select
                   :value="modelValue.layout"
-                  @change="updateField('layout', ($event.target as HTMLSelectElement).value)"
+                 @change="updateField('layout', ($event.target as HTMLSelectElement).value as PdfSettings['layout'])"
                   class="mt-2 w-full rounded-xl border border-stone-300 bg-white px-4 py-3"
                 >
                   <option value="classic">Classic</option>
@@ -110,7 +110,7 @@
 
                 <select
                   :value="modelValue.font"
-                  @change="updateField('font', ($event.target as HTMLSelectElement).value)"
+                  @change="updateField('font', ($event.target as HTMLSelectElement).value as PdfSettings['font'])"
                   class="mt-2 w-full rounded-xl border border-stone-300 bg-white px-4 py-3"
                 >
                   <option value="serif">Serif</option>
@@ -130,7 +130,7 @@
 
                 <select
                   :value="modelValue.theme"
-                  @change="updateField('theme', ($event.target as HTMLSelectElement).value)"
+                 @change="updateField('theme', ($event.target as HTMLSelectElement).value as PdfSettings['theme'])"
                   class="mt-2 w-full rounded-xl border border-stone-300 bg-white px-4 py-3"
                 >
                   <option value="warm">Warm</option>
