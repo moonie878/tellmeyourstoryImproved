@@ -11,13 +11,12 @@
               Dashboard
             </p>
 
-            <h1 class="mt-4 max-w-3xl text-3xl font-bold leading-tight text-stone-900 md:text-5xl">
-              Preserve the stories that matter most
+             <h1 class="mt-4 max-w-3xl text-3xl font-bold leading-tight text-stone-900 md:text-5xl">
+              Preserve the stories you never want to lose
             </h1>
 
             <p class="mt-4 max-w-2xl text-base leading-7 text-stone-600 md:text-lg">
-              Turn memories into beautifully written keepsakes for family, love, and legacy —
-              one answer at a time.
+              Turn memories into beautifully written keepsakes for family, love, and legacy — one answer at a time.
             </p>
 
             <div class="mt-6 flex flex-wrap gap-3">
@@ -174,6 +173,9 @@
             <p class="mt-3 min-h-[72px] text-sm leading-6 text-stone-600">
               {{ storyType.description }}
             </p>
+              <p v-if="storyType.label" class="text-xs font-medium text-[#7C5C3B]">
+              {{ storyType.label }}
+            </p>
 
             <button
               @click="createStory(storyType.id)"
@@ -257,28 +259,24 @@
                 <div class="mt-4 flex flex-col gap-1 text-sm text-stone-600">
                   <p>
                     Story access:
-                    <span
-                      v-if="hasStoryAccess(story.story_type)"
-                      class="font-medium text-green-600"
-                    >
-                      Unlocked
-                    </span>
-                    <span v-else class="font-medium text-amber-600">
-                      Free draft
-                    </span>
+                    <span v-if="hasStoryAccess(story.story_type)" class="font-medium text-green-600">
+  Ready to turn into a keepsake
+</span>
+
+<span v-else class="font-medium text-amber-600">
+  Keep writing — upgrade when you're ready
+</span>
                   </p>
 
                   <p>
                     Export:
-                    <span
-                      v-if="canExportStory(story.story_type)"
-                      class="font-medium text-green-600"
-                    >
-                      Unlocked
-                    </span>
-                    <span v-else class="font-medium text-amber-600">
-                      Locked
-                    </span>
+                    <span v-if="canExportStory(story.story_type)" class="font-medium text-green-600">
+  Export available
+</span>
+
+<span v-else class="font-medium text-amber-600">
+  Unlock when you're ready
+</span>
                   </p>
                 </div>
 
@@ -296,7 +294,7 @@
                   @click="openStory(story.id)"
                   class="cursor-pointer rounded-full bg-[#7C5C3B] px-4 py-2.5 text-sm font-medium text-white transition hover:-translate-y-1 hover:opacity-90 hover:shadow-md"
                 >
-                  {{ hasStoryAccess(story.story_type) ? 'Continue' : 'Edit Draft' }}
+                  {{ hasStoryAccess(story.story_type) ? 'Continue writing' : 'Continue writing' }}
                 </button>
 
                 <button
