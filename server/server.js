@@ -34,9 +34,13 @@ const supabaseAdmin = createClient(
 
 app.use(
   cors({
-    origin: FRONTEND_URL,
-    methods: ['GET', 'POST'],
-    credentials: false,
+    origin: [
+      'https://tellmeyourstory.uk',
+      'https://www.tellmeyourstory.uk',
+      'https://improvedtell.vercel.app' // keep this for testing if needed
+    ],
+    methods: ['GET', 'POST', 'OPTIONS'],
+    credentials: true,
   })
 )
 
