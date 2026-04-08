@@ -255,8 +255,8 @@
 </template>
 
 <script setup lang="ts">
+import { computed, ref, toRef } from 'vue'
 import sampleCoverImage from '../../assets/sample-cover.jpg'
-import { computed, toRef } from 'vue'
 import { usePremiumPreview } from '../../composables/usePremiumPreview'
 
 const props = defineProps<{
@@ -273,16 +273,16 @@ defineEmits<{
 }>()
 
 const openRef = toRef(props, 'open')
+const premiumPreviewRef = ref<HTMLElement | null>(null)
 
 const {
-  premiumPreviewRef,
   premiumPreviewSlider,
   isDraggingPremiumPreview,
   showPremiumPreviewHint,
   onPremiumPreviewPointerDown,
   onPremiumPreviewPointerMove,
   onPremiumPreviewPointerUp,
-} = usePremiumPreview(openRef)
+} = usePremiumPreview(openRef, premiumPreviewRef)
 
 const previewCoverImageSrc = computed(() => {
   return props.coverImageUrl || sampleCoverImage

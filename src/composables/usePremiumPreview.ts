@@ -1,72 +1,48 @@
 import { ref, watch, type Ref } from 'vue'
 
-export function usePremiumPreview(showModal: Ref<boolean>) {
-  const premiumPreviewRef = ref<HTMLElement | null>(null)
+export function usePremiumPreview(
+  open: Ref<boolean>,
+  premiumPreviewRef: Ref<HTMLElement | null>
+) {
   const premiumPreviewSlider = ref(50)
   const isDraggingPremiumPreview = ref(false)
-  const hasInteractedWithPremiumPreview = ref(false)
-  const showPremiumPreviewHint = ref(false)
+  const showPremiumPreviewHint = ref(true)
 
-  function clamp(value: number, min: number, max: number) {
-    return Math.min(max, Math.max(min, value))
-  }
+  function updateSliderFromEvent(event: PointerEvent) {
+    if (!premiumPreviewRef.value) return
 
-  function updatePremiumPreviewPosition(clientX: number) {
-    const container = premiumPreviewRef.value
-    if (!container) return
-
-    const rect = container.getBoundingClientRect()
-    const raw = ((clientX - rect.left) / rect.width) * 100
-    premiumPreviewSlider.value = clamp(raw, 0, 100)
-  }
-
-  function markPremiumPreviewInteracted() {
-    hasInteractedWithPremiumPreview.value = true
-    showPremiumPreviewHint.value = false
+    const rect = premiumPreviewRef.value.getBoundingClientRect()
+    const position = ((event.clientX - rect.left) / rect.width) * 100
+    premiumPreviewSlider.value = Math.max(0, Math.min(100, position))
   }
 
   function onPremiumPreviewPointerDown(event: PointerEvent) {
     isDraggingPremiumPreview.value = true
-    markPremiumPreviewInteracted()
-    premiumPreviewRef.value?.setPointerCapture?.(event.pointerId)
-    updatePremiumPreviewPosition(event.clientX)
+    showPremiumPreviewHint.value = false
+    updateSliderFromEvent(event)
   }
 
   function onPremiumPreviewPointerMove(event: PointerEvent) {
     if (!isDraggingPremiumPreview.value) return
-    updatePremiumPreviewPosition(event.clientX)
+    updateSliderFromEvent(event)
   }
 
-  function onPremiumPreviewPointerUp(event: PointerEvent) {
+  function onPremiumPreviewPointerUp() {
     isDraggingPremiumPreview.value = false
-    premiumPreviewRef.value?.releasePointerCapture?.(event.pointerId)
   }
 
-  watch(showModal, (open) => {
-    if (!open) return
-
-    premiumPreviewSlider.value = 50
-    hasInteractedWithPremiumPreview.value = false
-    showPremiumPreviewHint.value = false
-
-    setTimeout(() => {
-      if (!hasInteractedWithPremiumPreview.value) {
-        premiumPreviewSlider.value = 64
+  watch(
+    () => open.value,
+    (isOpen) => {
+      if (isOpen) {
+        premiumPreviewSlider.value = 50
+        isDraggingPremiumPreview.value = false
         showPremiumPreviewHint.value = true
-
-        setTimeout(() => {
-          premiumPreviewSlider.value = 50
-        }, 700)
-
-        setTimeout(() => {
-          showPremiumPreviewHint.value = false
-        }, 2200)
       }
-    }, 500)
-  })
+    }
+  )
 
   return {
-    premiumPreviewRef,
     premiumPreviewSlider,
     isDraggingPremiumPreview,
     showPremiumPreviewHint,
