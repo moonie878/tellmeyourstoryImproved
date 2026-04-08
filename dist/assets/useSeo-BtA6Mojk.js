@@ -1,1 +1,0 @@
-import{T as e,v as t}from"./runtime-core.esm-bundler-Dv3aYtnf.js";function n(n){let r=()=>{document.title=n.title;let e=document.querySelector(`meta[name="description"]`);e||(e=document.createElement(`meta`),e.setAttribute(`name`,`description`),document.head.appendChild(e)),e.setAttribute(`content`,n.description)};t(r),e(r)}export{n as t};

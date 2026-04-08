@@ -1,1 +1,0 @@
-function e(e,t){console.log(`[Analytics]`,e,t||{})}export{e as t};
