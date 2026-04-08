@@ -22,7 +22,11 @@
                            required
                            class="mt-1 w-full rounded-xl border border-stone-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-stone-900" />
                 </div>
+                <TurnstileWidget v-model="turnstileToken" />
 
+<p v-if="turnstileError" class="mt-2 text-sm text-red-600">
+  {{ turnstileError }}
+</p>
                 <button type="submit"
                         :disabled="loading"
                         class="w-full rounded-full bg-[#7C5C3B] hover:opacity-90 transition px-4 py-2 font-semibold text-white hover:opacity-90 disabled:opacity-60">
@@ -48,6 +52,8 @@
     import { ref } from 'vue'
     import { supabase } from '../lib/supabase'
     import { useRouter } from 'vue-router'
+    import TurnstileWidget from '../components/legal/TurnstileWidget.vue'
+import { verifyTurnstile } from '../lib/turnstile'
 
     const email = ref('')
     const password = ref('')
@@ -55,9 +61,21 @@
     const errorMessage = ref('')
     const router = useRouter()
 
+    const turnstileToken = ref('')
+const turnstileError = ref('')
+
     async function handleLogin() {
     loading.value = true
     errorMessage.value = ''
+
+turnstileError.value = ''
+
+const isHuman = await verifyTurnstile(turnstileToken.value)
+
+if (!isHuman) {
+  turnstileError.value = 'Please complete the verification and try again.'
+  return
+}
 
     const { error } = await supabase.auth.signInWithPassword({
     email: email.value,
