@@ -2,13 +2,14 @@ import type { Ref } from 'vue'
 import type { StoryProject } from '../types/story'
 import { track } from '../lib/analytics'
 
-
 type SaveCurrentAnswerFn = () => Promise<void>
 
 type StartCheckoutArgs = {
   priceId: string
   purchaseType: string
 }
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
 
 export function useStoryCheckout(
   checkoutLoading: Ref<boolean>,
@@ -20,13 +21,20 @@ export function useStoryCheckout(
   async function startCheckout({ priceId, purchaseType }: StartCheckoutArgs) {
     if (checkoutLoading.value) return
 
+    if (!API_BASE_URL) {
+      alert('Checkout is not configured yet.')
+      return
+    }
+
     checkoutLoading.value = true
     await saveCurrentAnswerBeforeCheckout()
 
     try {
       const {
         data: { user },
-      } = await import('../lib/supabase').then(({ supabase }) => supabase.auth.getUser())
+      } = await import('../lib/supabase').then(({ supabase }) =>
+        supabase.auth.getUser()
+      )
 
       if (!user) {
         checkoutLoading.value = false
@@ -34,7 +42,7 @@ export function useStoryCheckout(
         return
       }
 
-      const response = await fetch('http://localhost:3000/create-checkout-session', {
+      const response = await fetch(`${API_BASE_URL}/create-checkout-session`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -47,6 +55,14 @@ export function useStoryCheckout(
           purchaseType,
         }),
       })
+
+      if (!response.ok) {
+        const errorText = await response.text()
+        console.error('Checkout response error:', errorText)
+        checkoutLoading.value = false
+        alert('Could not start checkout.')
+        return
+      }
 
       const data = await response.json()
 
@@ -66,9 +82,10 @@ export function useStoryCheckout(
 
   async function upgradeSingleText() {
     track('upgrade_clicked', {
-    type: 'tier1',
-    projectId,
-  })
+      type: 'tier1',
+      projectId,
+    })
+
     await startCheckout({
       priceId: 'price_1THQFlJONQh8J4EOYm7qpCPs',
       purchaseType: 'single_text',
@@ -77,9 +94,10 @@ export function useStoryCheckout(
 
   async function upgradeSingleImages() {
     track('upgrade_clicked', {
-    type: 'tier2',
-    projectId,
-  })
+      type: 'tier2',
+      projectId,
+    })
+
     await startCheckout({
       priceId: 'price_1THKudJONQh8J4EO5of6l5Qy',
       purchaseType: 'single_images',
@@ -88,9 +106,10 @@ export function useStoryCheckout(
 
   async function upgradeAllText() {
     track('upgrade_clicked', {
-    type: 'tier3',
-    projectId,
-  })
+      type: 'tier3',
+      projectId,
+    })
+
     await startCheckout({
       priceId: 'price_1THQG7JONQh8J4EOQXdJb2fX',
       purchaseType: 'all_text',
@@ -99,9 +118,10 @@ export function useStoryCheckout(
 
   async function upgradeAllImages() {
     track('upgrade_clicked', {
-    type: 'tier4',
-    projectId,
-  })
+      type: 'tier4',
+      projectId,
+    })
+
     await startCheckout({
       priceId: 'price_1THQGMJONQh8J4EOTS8GyW4B',
       purchaseType: 'all_images',

@@ -6,6 +6,25 @@ require('dotenv').config()
 
 const app = express()
 
+const PORT = process.env.PORT || 3000
+const FRONTEND_URL = process.env.FRONTEND_URL
+
+if (!process.env.STRIPE_SECRET_KEY) {
+  throw new Error('Missing STRIPE_SECRET_KEY')
+}
+
+if (!process.env.SUPABASE_URL) {
+  throw new Error('Missing SUPABASE_URL')
+}
+
+if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+  throw new Error('Missing SUPABASE_SERVICE_ROLE_KEY')
+}
+
+if (!FRONTEND_URL) {
+  throw new Error('Missing FRONTEND_URL')
+}
+
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
 
 const supabaseAdmin = createClient(
@@ -13,7 +32,17 @@ const supabaseAdmin = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY
 )
 
-app.use(cors())
+app.use(
+  cors({
+    origin: FRONTEND_URL,
+    methods: ['GET', 'POST'],
+    credentials: false,
+  })
+)
+
+app.get('/health', (_req, res) => {
+  res.status(200).json({ ok: true })
+})
 
 app.post(
   '/webhook',
@@ -41,61 +70,61 @@ app.post(
       console.log('Payment successful for user:', userId)
 
       if (userId) {
-       let accessRows = []
+        let accessRows = []
 
-if (purchaseType === 'single_text') {
-  accessRows = [
-    {
-      user_id: userId,
-      access_type: 'story',
-      story_type: storyType,
-    },
-    {
-      user_id: userId,
-      access_type: 'export',
-      variant: 'text_only',
-    },
-  ]
-} else if (purchaseType === 'single_images') {
-  accessRows = [
-    {
-      user_id: userId,
-      access_type: 'story',
-      story_type: storyType,
-    },
-    {
-      user_id: userId,
-      access_type: 'export',
-      variant: 'with_images',
-    },
-  ]
-} else if (purchaseType === 'all_text') {
-  accessRows = [
-    {
-      user_id: userId,
-      access_type: 'story',
-      story_type: 'all',
-    },
-    {
-      user_id: userId,
-      access_type: 'export',
-      variant: 'text_only',
-    },
-  ]
-} else if (purchaseType === 'all_images') {
-  accessRows = [
-    {
-      user_id: userId,
-      access_type: 'story',
-      story_type: 'all',
-    },
-    {
-      user_id: userId,
-      access_type: 'export',
-      variant: 'with_images',
-    },
-  ]
-}
+        if (purchaseType === 'single_text') {
+          accessRows = [
+            {
+              user_id: userId,
+              access_type: 'story',
+              story_type: storyType,
+            },
+            {
+              user_id: userId,
+              access_type: 'export',
+              variant: 'text_only',
+            },
+          ]
+        } else if (purchaseType === 'single_images') {
+          accessRows = [
+            {
+              user_id: userId,
+              access_type: 'story',
+              story_type: storyType,
+            },
+            {
+              user_id: userId,
+              access_type: 'export',
+              variant: 'with_images',
+            },
+          ]
+        } else if (purchaseType === 'all_text') {
+          accessRows = [
+            {
+              user_id: userId,
+              access_type: 'story',
+              story_type: 'all',
+            },
+            {
+              user_id: userId,
+              access_type: 'export',
+              variant: 'text_only',
+            },
+          ]
+        } else if (purchaseType === 'all_images') {
+          accessRows = [
+            {
+              user_id: userId,
+              access_type: 'story',
+              story_type: 'all',
+            },
+            {
+              user_id: userId,
+              access_type: 'export',
+              variant: 'with_images',
+            },
+          ]
+        }
 
         const { error } = await supabaseAdmin.from('user_access').upsert(accessRows, {
           onConflict: 'user_id,access_type,story_type,variant',
@@ -119,6 +148,10 @@ app.post('/create-checkout-session', async (req, res) => {
   try {
     const { priceId, userId, storyType, projectId, purchaseType } = req.body
 
+    if (!priceId || !userId || !projectId) {
+      return res.status(400).json({ error: 'Missing required checkout data' })
+    }
+
     const session = await stripe.checkout.sessions.create({
       mode: 'payment',
       line_items: [
@@ -127,8 +160,8 @@ app.post('/create-checkout-session', async (req, res) => {
           quantity: 1,
         },
       ],
-      success_url: `http://localhost:5173/story/${projectId}?payment=success`,
-      cancel_url: `http://localhost:5173/story/${projectId}?payment=cancelled`,
+      success_url: `${FRONTEND_URL}/story/${projectId}?payment=success`,
+      cancel_url: `${FRONTEND_URL}/story/${projectId}?payment=cancelled`,
       metadata: {
         userId,
         storyType: storyType || '',
@@ -139,11 +172,11 @@ app.post('/create-checkout-session', async (req, res) => {
 
     res.json({ url: session.url })
   } catch (error) {
-    console.error(error)
+    console.error('Checkout session error:', error)
     res.status(500).json({ error: 'Failed to create checkout session' })
   }
 })
 
-app.listen(3000, () => {
-  console.log('Server running on http://localhost:3000')
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`)
 })
