@@ -143,7 +143,7 @@ function shouldInsertQuotePage(index: number) {
       const leftPageNumber = pageNumber * 2 - 1
       const rightPageNumber = pageNumber * 2
 
-      if (pageNumber > 3) {
+      if (pageNumber > 4) {
         doc.setFontSize(8)
         doc.text(storyTitle, leftCenter, 14, { align: 'center' })
         doc.text(storyTitle, rightCenter, 14, { align: 'center' })
@@ -160,12 +160,12 @@ function shouldInsertQuotePage(index: number) {
       return
     }
 
-    if (pageNumber > 3) {
-      doc.setFontSize(settings.printReady ? 8 : 9)
-      doc.text(storyTitle, pageWidth / 2, settings.printReady ? 12 : 14, {
-        align: 'center',
-      })
-    }
+    if (pageNumber > 4) {
+  doc.setFontSize(8)
+  doc.text(storyTitle, pageWidth / 2, settings.printReady ? 12 : 14, {
+    align: 'center',
+  })
+}
 
     doc.setFontSize(settings.printReady ? 9 : 9)
     doc.text(`${pageNumber}`, pageWidth / 2, pageHeight - (settings.printReady ? 12 : 10), {
@@ -361,13 +361,16 @@ function renderQuotePage(
     })
 
     doc.setFont(design.font.title, design.font.accentStyle)
-    doc.setFontSize(18)
-    setTextColor(doc, design.theme.textPrimary)
+doc.setFontSize(18)
+setTextColor(doc, design.theme.textPrimary)
 
-    const splitQuote = doc.splitTextToSize(`“${quote}”`, metrics.columnWidth - 26)
-    doc.text(splitQuote, metrics.rightX + metrics.columnWidth / 2, 98, {
-      align: 'center',
-    })
+setDrawColor(doc, design.theme.divider)
+doc.line(70, 118, 140, 118)
+
+const splitQuote = doc.splitTextToSize(`“${quote}”`, metrics.contentWidth - 26)
+doc.text(splitQuote, metrics.centerX, 145, {
+  align: 'center',
+})
 
     return
   }
@@ -438,6 +441,13 @@ function renderQuotePage(
   setTextColor(doc, design.theme.textMuted)
   doc.text(chapterLabel, metrics.centerX, 78, { align: 'center' })
 
+  doc.setFont(design.font.title, 'bold')
+doc.setFontSize(48)
+doc.setTextColor(236, 230, 223)
+doc.text(String(chapterIndex + 1), metrics.centerX, 145, {
+  align: 'center',
+})
+
   doc.setFont(design.font.title, design.font.titleStyle)
   doc.setFontSize(design.layout.chapterTitleSize + 2)
   setTextColor(doc, design.theme.textPrimary)
@@ -453,7 +463,7 @@ function renderQuotePage(
   doc.setFontSize(11)
   setTextColor(doc, design.theme.textSecondary)
   const splitIntro = doc.splitTextToSize(intro, metrics.contentWidth - 26)
-  doc.text(splitIntro, metrics.centerX, 128, {
+  doc.text(splitIntro, metrics.centerX, 132, {
     align: 'center',
   })
 }
@@ -501,7 +511,7 @@ function renderQuotePage(
     const splitAnswer = doc.splitTextToSize(answerText, metrics.contentWidth)
     doc.text(splitAnswer, answerX, yState.y)
 
-    const sectionGap = design.layout.sectionSpacing + 6
+    const sectionGap = design.layout.sectionSpacing + 8
     yState.y += splitAnswer.length * design.layout.lineHeight + sectionGap
 
     const sectionImage = images
@@ -712,20 +722,23 @@ function renderQuotePage(
     doc.addPage()
     applyPageBackground(doc, design.theme.secondaryBg, metrics.pageWidth, metrics.pageHeight)
 
-    doc.setFont(design.font.title, design.font.titleStyle)
-    doc.setFontSize(20)
-    setTextColor(doc, design.theme.textPrimary)
-    doc.text('A story worth keeping', metrics.centerX, 120, { align: 'center' })
+    doc.setFont(design.font.title, design.font.accentStyle)
+doc.setFontSize(20)
+setTextColor(doc, design.theme.textPrimary)
+doc.text('A story worth keeping', metrics.centerX, 118, { align: 'center' })
 
-    doc.setFont(design.font.body, design.font.bodyStyle)
-    doc.setFontSize(11)
-    setTextColor(doc, design.theme.textSecondary)
-    doc.text(
-      'Created with love, to be remembered for years to come.',
-      metrics.centerX,
-      135,
-      { align: 'center', maxWidth: 120 }
-    )
+setDrawColor(doc, design.theme.divider)
+doc.line(72, 128, 138, 128)
+
+doc.setFont(design.font.body, design.font.bodyStyle)
+doc.setFontSize(11)
+setTextColor(doc, design.theme.textSecondary)
+doc.text(
+  'Created with love, to be remembered for years to come.',
+  metrics.centerX,
+  145,
+  { align: 'center', maxWidth: 125 }
+)
   }
 
   async function exportWord({ project, sections }: ExportWordArgs) {
@@ -873,6 +886,11 @@ if (activeSettings.orientation === 'portrait') {
       applyPageBackground(doc, design.theme.pageBg, metrics.pageWidth, metrics.pageHeight)
       yState.y = metrics.marginTop
     }
+    if (index > 0 && index % 3 === 0 && yState.y > 180) {
+  doc.addPage()
+  applyPageBackground(doc, design.theme.pageBg, metrics.pageWidth, metrics.pageHeight)
+  yState.y = metrics.marginTop
+}
 
     await renderPortraitSection(
       doc,
