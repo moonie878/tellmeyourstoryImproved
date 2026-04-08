@@ -81,7 +81,7 @@
     <div class="rounded-2xl bg-stone-50 p-5">
       <p class="text-sm font-semibold text-stone-900">1. Choose a story</p>
 <p class="mt-2 text-sm text-stone-600">
-  Start with a Mum or Dad story and begin capturing meaningful memories straight away.
+  Start with a story for Mum, Dad, Grandparents, a Couple, or a full Life Story.
 </p>
     </div>
 
@@ -100,21 +100,39 @@
     </div>
   </div>
 
-  <div class="mt-8 flex flex-wrap gap-3">
-    <button
-      @click="createStory('mum')"
-      class="cursor-pointer rounded-full bg-[#7C5C3B] hover:opacity-90 transition px-5 py-2.5 text-sm font-medium text-white transition hover:-translate-y-1 hover:shadow-md"
-    >
-      Start Mum Keepsake
-    </button>
-
-    <button
-      @click="createStory('dad')"
-      class="cursor-pointer rounded-full border border-stone-300 bg-white px-5 py-2.5 text-sm font-medium text-stone-900 transition hover:-translate-y-1 hover:shadow-md"
-    >
-      Start Dad Keepsake
-    </button>
+  <div class="mt-8">
+  <div class="mb-4">
+    <p class="text-xs font-medium uppercase tracking-[0.2em] text-stone-500">
+      Start a new keepsake
+    </p>
+    <h2 class="mt-1 text-2xl font-semibold text-stone-900">
+      Choose the story you want to begin
+    </h2>
   </div>
+
+  <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+    <div
+      v-for="storyType in STORY_TYPES"
+      :key="storyType.id"
+      class="rounded-3xl border border-stone-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
+    >
+      <h3 class="text-lg font-semibold text-stone-900">
+        {{ storyType.title }}
+      </h3>
+
+      <p class="mt-2 text-sm leading-6 text-stone-600">
+        {{ storyType.description }}
+      </p>
+
+      <button
+        @click="createStory(storyType.id)"
+        class="mt-5 cursor-pointer rounded-full bg-[#7C5C3B] px-4 py-2.5 text-sm font-medium text-white transition hover:opacity-90"
+      >
+        Start {{ storyType.shortLabel }}
+      </button>
+    </div>
+  </div>
+</div>
   <p class="mt-4 text-sm text-stone-500">
   You can begin for free and upgrade later when you’re ready to create your finished keepsake.
 </p>
@@ -146,7 +164,7 @@
         <!-- LEFT SIDE -->
         <div class="flex-1">
           <div class="flex flex-wrap items-center gap-3">
-            <h3 class="text-xl font-semibold text-stone-900">{{ story.title }}</h3>
+            <h3 class="text-xl font-semibold text-stone-900">{{ story.displayTitle }}</h3>
 
             <span
               v-if="hasAllStoriesAccess()"
@@ -171,7 +189,7 @@
           </div>
 
           <p class="mt-2 text-sm text-stone-500">
-            {{ story.story_type }} • {{ new Date(story.created_at).toLocaleDateString() }}
+            {{ getStoryTypeLabel(story.story_type) }} • {{ new Date(story.created_at).toLocaleDateString() }}
           </p>
 
           <div class="mt-4">
@@ -269,6 +287,7 @@ import { supabase } from '../lib/supabase'
 import { useRouter } from 'vue-router'
 import { ref, onMounted } from 'vue'
 import { track } from '../lib/analytics'
+import { STORY_TYPES, getStoryMeta } from '../data/storyTypes'
 
 
 
@@ -286,24 +305,28 @@ async function createStory(type: string) {
 
   if (!user) return
 
-  const { data, error } = await supabase
-  .from('story_projects')
-  .insert([
-    {
-      user_id: user.id,
-      title: type === 'mum' ? 'Mum Story' : 'Dad Story',
-      story_type: type,
-    },
-  ])
-  .select()
-  .single()
+  const storyMeta = getStoryMeta(type)
 
-if (!error && data) {
-  router.push(`/story/${data.id}`)
-}
-track('upgrade_clicked', {
-  source: 'dashboard_start_story',
-})
+  const { data, error } = await supabase
+    .from('story_projects')
+    .insert([
+      {
+        user_id: user.id,
+        title: storyMeta?.projectTitle || 'Story',
+        story_type: type,
+      },
+    ])
+    .select()
+    .single()
+
+  if (!error && data) {
+    router.push(`/story/${data.id}`)
+  }
+
+  track('story_started', {
+    source: 'dashboard',
+    story_type: type,
+  })
 }
 
 async function fetchStories() {
@@ -318,19 +341,23 @@ async function fetchStories() {
   }
 
   if (data) {
-  const storiesWithProgress = await Promise.all(
-    data.map(async (story) => {
-      const progress = await getProgress(story)
-      return {
-        ...story,
-        progress,
-      }
-    })
-  )
+    const storiesWithProgress = await Promise.all(
+      data.map(async (story) => {
+        const progress = await getProgress(story)
+        const meta = getStoryMeta(story.story_type)
 
-  stories.value = storiesWithProgress
-  isFirstTimeUser.value = storiesWithProgress.length === 0
-}
+        return {
+          ...story,
+          progress,
+          displayTitle: meta?.title || story.title || 'Story',
+          description: meta?.description || 'Keep building this story over time.',
+        }
+      })
+    )
+
+    stories.value = storiesWithProgress
+    isFirstTimeUser.value = storiesWithProgress.length === 0
+  }
 }
 
 onMounted(async () => {
@@ -446,6 +473,10 @@ function hasAllStoriesAccess() {
       item.access_type === 'story' &&
       item.story_type === 'all'
   )
+}
+
+function getStoryTypeLabel(storyType: string) {
+  return getStoryMeta(storyType)?.title || storyType
 }
 
 </script>
