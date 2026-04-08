@@ -275,6 +275,7 @@ defineEmits<{
 const openRef = toRef(props, 'open')
 
 const {
+  premiumPreviewRef,
   premiumPreviewSlider,
   isDraggingPremiumPreview,
   showPremiumPreviewHint,
