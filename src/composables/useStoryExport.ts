@@ -87,6 +87,42 @@ export function useStoryExport() {
     return map[chapter] || 'A new chapter in this story.'
   }
 
+  function getChapterNumberLabel(chapterIndex: number) {
+  const labels = [
+    'Chapter One',
+    'Chapter Two',
+    'Chapter Three',
+    'Chapter Four',
+    'Chapter Five',
+    'Chapter Six',
+    'Chapter Seven',
+    'Chapter Eight',
+    'Chapter Nine',
+    'Chapter Ten',
+  ]
+
+  return labels[chapterIndex] || `Chapter ${chapterIndex + 1}`
+}
+
+function getQuoteFromAnswer(answer: string, maxLength = 140) {
+  const cleaned = answer.replace(/\s+/g, ' ').trim()
+
+  if (!cleaned) return ''
+
+  if (cleaned.length <= maxLength) {
+    return cleaned
+  }
+
+  const shortened = cleaned.slice(0, maxLength)
+  const lastSpace = shortened.lastIndexOf(' ')
+
+  return `${shortened.slice(0, lastSpace > 0 ? lastSpace : maxLength)}…`
+}
+
+function shouldInsertQuotePage(index: number) {
+  return index > 0 && index % 5 === 0
+}
+
   function addFooter(
     doc: jsPDF,
     pageNumber: number,   
@@ -302,70 +338,125 @@ export function useStoryExport() {
     })
   }
 
+function renderQuotePage(
+  doc: jsPDF,
+  quote: string,
+  settings: PdfSettings
+) {
+  const design = getPdfDesign(settings)
+  const metrics = getPageMetrics(settings)
+
+  doc.addPage()
+  applyPageBackground(doc, design.theme.secondaryBg, metrics.pageWidth, metrics.pageHeight)
+
+  if (settings.orientation === 'landscape-spread') {
+    setDrawColor(doc, design.theme.divider)
+    doc.line(metrics.centerX, 18, metrics.centerX, metrics.pageHeight - 18)
+
+    doc.setFont(design.font.body, 'normal')
+    doc.setFontSize(10)
+    setTextColor(doc, design.theme.textMuted)
+    doc.text('A memory worth keeping', metrics.rightX + metrics.columnWidth / 2, 64, {
+      align: 'center',
+    })
+
+    doc.setFont(design.font.title, design.font.accentStyle)
+    doc.setFontSize(18)
+    setTextColor(doc, design.theme.textPrimary)
+
+    const splitQuote = doc.splitTextToSize(`“${quote}”`, metrics.columnWidth - 26)
+    doc.text(splitQuote, metrics.rightX + metrics.columnWidth / 2, 98, {
+      align: 'center',
+    })
+
+    return
+  }
+
+  doc.setFont(design.font.body, 'normal')
+  doc.setFontSize(10)
+  setTextColor(doc, design.theme.textMuted)
+  doc.text('A memory worth keeping', metrics.centerX, 94, { align: 'center' })
+
+  doc.setFont(design.font.title, design.font.accentStyle)
+  doc.setFontSize(18)
+  setTextColor(doc, design.theme.textPrimary)
+
+  const splitQuote = doc.splitTextToSize(`“${quote}”`, metrics.contentWidth - 26)
+  doc.text(splitQuote, metrics.centerX, 132, {
+    align: 'center',
+  })
+}
+
   function renderChapterHeading(
-    doc: jsPDF,
-    chapterTitle: string,
-    y: number,
-    settings: PdfSettings
-  ) {
-    const design = getPdfDesign(settings)
-    const metrics = getPageMetrics(settings)
-    const intro = getChapterIntro(chapterTitle)
+  doc: jsPDF,
+  chapterTitle: string,
+  chapterIndex: number,
+  settings: PdfSettings
+) {
+  const design = getPdfDesign(settings)
+  const metrics = getPageMetrics(settings)
+  const intro = getChapterIntro(chapterTitle)
+  const chapterLabel = getChapterNumberLabel(chapterIndex)
+
+  applyPageBackground(doc, design.theme.secondaryBg, metrics.pageWidth, metrics.pageHeight)
+
+  if (settings.orientation === 'landscape-spread') {
+    setDrawColor(doc, design.theme.divider)
+    doc.line(metrics.centerX, 18, metrics.centerX, metrics.pageHeight - 18)
+
+    doc.setFont(design.font.body, 'normal')
+    doc.setFontSize(10)
+    setTextColor(doc, design.theme.textMuted)
+    doc.text(chapterLabel, metrics.rightX + metrics.columnWidth / 2, 56, {
+      align: 'center',
+    })
 
     doc.setFont(design.font.title, design.font.titleStyle)
-    doc.setFontSize(design.layout.chapterTitleSize)
+    doc.setFontSize(design.layout.chapterTitleSize + 2)
     setTextColor(doc, design.theme.textPrimary)
-
-    if (settings.orientation === 'landscape-spread') {
-      const chapterX = metrics.rightX + metrics.columnWidth / 2
-
-      if (settings.layout === 'minimal') {
-        doc.text(chapterTitle, metrics.rightX, y + 10)
-        setDrawColor(doc, design.theme.divider)
-        doc.line(metrics.rightX, y + 16, metrics.rightX + 70, y + 16)
-
-        doc.setFont(design.font.body, design.font.accentStyle)
-        doc.setFontSize(10.5)
-        setTextColor(doc, design.theme.textSecondary)
-        doc.text(doc.splitTextToSize(intro, metrics.columnWidth - 10), metrics.rightX, y + 26)
-        return
-      }
-
-      doc.text(chapterTitle, chapterX, y + 10, { align: 'center' })
-
-      setDrawColor(doc, design.theme.divider)
-      doc.line(metrics.rightX, y + 16, metrics.rightX + metrics.columnWidth, y + 16)
-
-      doc.setFont(design.font.body, design.font.accentStyle)
-      doc.setFontSize(10.5)
-      setTextColor(doc, design.theme.textSecondary)
-      const splitIntro = doc.splitTextToSize(intro, metrics.columnWidth - 12)
-      doc.text(splitIntro, chapterX, y + 28, { align: 'center' })
-
-      return
-    }
-
-    if (settings.printReady) {
-      doc.setFontSize(20)
-      setTextColor(doc, design.theme.textMuted)
-      doc.text('Chapter', metrics.centerX, y - 12, { align: 'center' })
-    }
-
-    doc.setFont(design.font.title, design.font.titleStyle)
-    doc.setFontSize(design.layout.chapterTitleSize)
-    setTextColor(doc, design.theme.textPrimary)
-    doc.text(chapterTitle, metrics.centerX, y, { align: 'center' })
+    doc.text(chapterTitle, metrics.rightX + metrics.columnWidth / 2, 76, {
+      align: 'center',
+      maxWidth: metrics.columnWidth - 16,
+    })
 
     setDrawColor(doc, design.theme.divider)
-    const dividerY = settings.printReady ? y + 10 : y + 5
-    doc.line(50, dividerY, 160, dividerY)
+    doc.line(metrics.rightX + 14, 86, metrics.rightX + metrics.columnWidth - 14, 86)
 
     doc.setFont(design.font.body, design.font.accentStyle)
     doc.setFontSize(11)
     setTextColor(doc, design.theme.textSecondary)
-    const splitIntro = doc.splitTextToSize(intro, metrics.contentWidth - 40)
-    doc.text(splitIntro, metrics.centerX, dividerY + 15, { align: 'center' })
+    const splitIntro = doc.splitTextToSize(intro, metrics.columnWidth - 24)
+    doc.text(splitIntro, metrics.rightX + metrics.columnWidth / 2, 102, {
+      align: 'center',
+    })
+
+    return
   }
+
+  doc.setFont(design.font.body, 'normal')
+  doc.setFontSize(10)
+  setTextColor(doc, design.theme.textMuted)
+  doc.text(chapterLabel, metrics.centerX, 78, { align: 'center' })
+
+  doc.setFont(design.font.title, design.font.titleStyle)
+  doc.setFontSize(design.layout.chapterTitleSize + 2)
+  setTextColor(doc, design.theme.textPrimary)
+  doc.text(chapterTitle, metrics.centerX, 100, {
+    align: 'center',
+    maxWidth: 130,
+  })
+
+  setDrawColor(doc, design.theme.divider)
+  doc.line(55, 112, 155, 112)
+
+  doc.setFont(design.font.body, design.font.accentStyle)
+  doc.setFontSize(11)
+  setTextColor(doc, design.theme.textSecondary)
+  const splitIntro = doc.splitTextToSize(intro, metrics.contentWidth - 26)
+  doc.text(splitIntro, metrics.centerX, 128, {
+    align: 'center',
+  })
+}
 
   async function renderPortraitSection(
     doc: jsPDF,
@@ -410,7 +501,7 @@ export function useStoryExport() {
     const splitAnswer = doc.splitTextToSize(answerText, metrics.contentWidth)
     doc.text(splitAnswer, answerX, yState.y)
 
-    const sectionGap = design.layout.sectionSpacing + 4
+    const sectionGap = design.layout.sectionSpacing + 6
     yState.y += splitAnswer.length * design.layout.lineHeight + sectionGap
 
     const sectionImage = images
@@ -753,59 +844,76 @@ export function useStoryExport() {
     doc.addPage()
     applyPageBackground(doc, design.theme.pageBg, metrics.pageWidth, metrics.pageHeight)
 
-    let currentChapter = ''
+   let currentChapter = ''
+let chapterIndex = -1
 
-    if (activeSettings.orientation === 'portrait') {
-      const yState = { y: metrics.marginTop }
+if (activeSettings.orientation === 'portrait') {
+  const yState = { y: metrics.marginTop }
 
-      for (let index = 0; index < printableSections.length; index++) {
-        const section = printableSections[index]
+  for (let index = 0; index < printableSections.length; index++) {
+    const section = printableSections[index]
 
-        if (section.chapter && section.chapter !== currentChapter) {
-          currentChapter = section.chapter
+    if (section.chapter && section.chapter !== currentChapter) {
+      currentChapter = section.chapter
+      chapterIndex += 1
 
-          doc.addPage()
-          applyPageBackground(doc, design.theme.pageBg, metrics.pageWidth, metrics.pageHeight)
-          yState.y = metrics.marginTop
+      doc.addPage()
+      renderChapterHeading(doc, currentChapter, chapterIndex, activeSettings)
 
-          const chapterStartY = activeSettings.printReady ? 60 : 50
-          renderChapterHeading(doc, currentChapter, chapterStartY, activeSettings)
+      yState.y = activeSettings.printReady ? 170 : 160
+    }
 
-          yState.y = activeSettings.printReady ? chapterStartY + 40 : chapterStartY + 30
-        }
-
-        await renderPortraitSection(
-          doc,
-          section,
-          activeSettings,
-          images,
-          yState,
-          hasImageExportAccess,
-          loadImageAsBase64
-        )
+    if (shouldInsertQuotePage(index)) {
+      const quote = getQuoteFromAnswer(printableSections[index - 1]?.answer || '')
+      if (quote) {
+        renderQuotePage(doc, quote, activeSettings)
       }
-    } else {
-      for (let index = 0; index < printableSections.length; index++) {
-        const section = printableSections[index]
 
-        if (section.chapter && section.chapter !== currentChapter) {
-          currentChapter = section.chapter
-          doc.addPage()
-          applyPageBackground(doc, design.theme.pageBg, metrics.pageWidth, metrics.pageHeight)
-          renderChapterHeading(doc, currentChapter, 36, activeSettings)
-        }
+      doc.addPage()
+      applyPageBackground(doc, design.theme.pageBg, metrics.pageWidth, metrics.pageHeight)
+      yState.y = metrics.marginTop
+    }
 
-        doc.addPage()
-        await renderSpreadSection(
-          doc,
-          section,
-          activeSettings,
-          images,
-          hasImageExportAccess,
-          loadImageAsBase64
-        )
+    await renderPortraitSection(
+      doc,
+      section,
+      activeSettings,
+      images,
+      yState,
+      hasImageExportAccess,
+      loadImageAsBase64
+    )
+  }
+} else {
+  for (let index = 0; index < printableSections.length; index++) {
+    const section = printableSections[index]
+
+    if (section.chapter && section.chapter !== currentChapter) {
+      currentChapter = section.chapter
+      chapterIndex += 1
+
+      doc.addPage()
+      renderChapterHeading(doc, currentChapter, chapterIndex, activeSettings)
+    }
+
+    if (shouldInsertQuotePage(index)) {
+      const quote = getQuoteFromAnswer(printableSections[index - 1]?.answer || '')
+      if (quote) {
+        renderQuotePage(doc, quote, activeSettings)
       }
     }
+
+    doc.addPage()
+    await renderSpreadSection(
+      doc,
+      section,
+      activeSettings,
+      images,
+      hasImageExportAccess,
+      loadImageAsBase64
+    )
+  }
+}
 
     renderClosingPage(doc, activeSettings)
 
