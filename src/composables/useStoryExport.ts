@@ -89,8 +89,7 @@ export function useStoryExport() {
 
   function addFooter(
     doc: jsPDF,
-    pageNumber: number,
-    pageCount: number,
+    pageNumber: number,   
     storyTitle: string,
     textMuted: readonly number[],
     pageWidth: number,
@@ -810,14 +809,13 @@ export function useStoryExport() {
 
     renderClosingPage(doc, activeSettings)
 
-    const pageCount = doc.getNumberOfPages()
+    const totalPages = doc.getNumberOfPages()
 
-    for (let i = 1; i <= pageCount; i++) {
+    for (let i = 1; i <= totalPages; i++) {
       doc.setPage(i)
       addFooter(
         doc,
-        i,
-        pageCount,
+        i,       
         storyTitle,
         design.theme.textMuted,
         metrics.pageWidth,
