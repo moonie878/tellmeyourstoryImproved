@@ -148,6 +148,32 @@ app.post(
 
 app.use(express.json())
 
+app.post('/verify-turnstile', express.json(), async (req, res) => {
+  try {
+    const { token } = req.body
+
+    if (!token) {
+      return res.status(400).json({ success: false, error: 'Missing token' })
+    }
+
+    const result = await verifyTurnstileToken(token, req.ip)
+
+    if (!result.success) {
+      return res.status(400).json({
+        success: false,
+        error: 'Turnstile verification failed',
+        details: result['error-codes'] || [],
+      })
+    }
+
+    return res.json({ success: true })
+  } catch (error) {
+    console.error('Turnstile verification error:', error)
+    return res.status(500).json({ success: false, error: 'Verification failed' })
+  }
+})
+
+
 app.post('/create-checkout-session', async (req, res) => {
   try {
     const { priceId, userId, storyType, projectId, purchaseType } = req.body
@@ -184,3 +210,23 @@ app.post('/create-checkout-session', async (req, res) => {
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
 })
+
+async function verifyTurnstileToken(token, remoteIp) {
+  const formData = new URLSearchParams()
+  formData.append('secret', process.env.TURNSTILE_SECRET_KEY)
+  formData.append('response', token)
+
+  if (remoteIp) {
+    formData.append('remoteip', remoteIp)
+  }
+
+  const response = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    body: formData.toString(),
+  })
+
+  return response.json()
+}
