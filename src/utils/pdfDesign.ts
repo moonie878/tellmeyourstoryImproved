@@ -2,7 +2,7 @@ import type { PdfSettings } from '../types/story'
 
 export function getDefaultPdfSettings(): PdfSettings {
   return {
-    layout: 'classic',
+    layout: 'elegant',
     font: 'serif',
     theme: 'warm',
     orientation: 'portrait',
@@ -15,13 +15,14 @@ export function getDefaultPdfSettings(): PdfSettings {
 export function getPdfDesign(settings: PdfSettings) {
   const themeMap = {
     warm: {
-      pageBg: [247, 242, 235],
-      secondaryBg: [252, 250, 247],
-      textPrimary: [40, 40, 40],
-      textSecondary: [95, 95, 95],
-      textMuted: [130, 130, 130],
-      border: [210, 205, 198],
-      divider: [225, 220, 214],
+      pageBg: [248, 244, 239],
+      secondaryBg: [252, 249, 245],
+      textPrimary: [38, 34, 32],
+      textSecondary: [92, 84, 78],
+      textMuted: [140, 132, 126],
+      border: [221, 214, 206],
+      divider: [232, 226, 219],
+      accent: [124, 92, 59],
     },
     neutral: {
       pageBg: [255, 255, 255],
@@ -30,16 +31,18 @@ export function getPdfDesign(settings: PdfSettings) {
       textSecondary: [90, 90, 90],
       textMuted: [140, 140, 140],
       border: [220, 220, 220],
-      divider: [230, 230, 230],
+      divider: [232, 232, 232],
+      accent: [90, 90, 90],
     },
     'dark-ink': {
-      pageBg: [245, 245, 244],
-      secondaryBg: [237, 237, 235],
-      textPrimary: [25, 25, 28],
-      textSecondary: [70, 70, 75],
-      textMuted: [120, 120, 125],
-      border: [200, 200, 205],
-      divider: [215, 215, 220],
+      pageBg: [244, 243, 240],
+      secondaryBg: [236, 235, 232],
+      textPrimary: [28, 28, 30],
+      textSecondary: [76, 76, 82],
+      textMuted: [128, 128, 132],
+      border: [205, 205, 210],
+      divider: [220, 220, 224],
+      accent: [66, 66, 74],
     },
   } as const
 
@@ -48,7 +51,7 @@ export function getPdfDesign(settings: PdfSettings) {
       title: 'times',
       body: 'times',
       titleStyle: 'bold',
-      questionStyle: 'bold',
+      questionStyle: 'italic',
       bodyStyle: 'normal',
       accentStyle: 'italic',
     },
@@ -74,56 +77,65 @@ export function getPdfDesign(settings: PdfSettings) {
     classic: {
       coverFrame: true,
       chapterCentered: true,
-      questionSize: 13,
-      answerSize: 11,
-      titleSize: 24,
+      questionSize: 12.5,
+      answerSize: 11.2,
+      titleSize: 26,
       subtitleSize: 13,
-      chapterTitleSize: 20,
-      lineHeight: 6.4,
+      chapterTitleSize: 22,
+      chapterIntroSize: 11,
+      lineHeight: 6.8,
       questionSpacing: 8,
-      sectionSpacing: 10,
+      sectionSpacing: 12,
       imageSpacing: 12,
-      imageMaxHeight: 120,
+      imageMaxHeight: 118,
       dividerWidth: 110,
       showSectionDividers: true,
-      questionStyle: 'bold',
+      questionStyle: 'italic',
       imageFrameStyle: 'soft',
+      pageNumberSize: 9,
+      runningHeaderSize: 8,
     },
     minimal: {
       coverFrame: false,
       chapterCentered: false,
-      questionSize: 12,
-      answerSize: 10,
-      titleSize: 26,
+      questionSize: 11.8,
+      answerSize: 10.4,
+      titleSize: 24,
       subtitleSize: 12,
-      chapterTitleSize: 17,
-      lineHeight: 5.2,
+      chapterTitleSize: 18,
+      chapterIntroSize: 10.5,
+      lineHeight: 5.8,
       questionSpacing: 6,
-      sectionSpacing: 7,
+      sectionSpacing: 8,
       imageSpacing: 10,
-      imageMaxHeight: 95,
-      dividerWidth: 70,
+      imageMaxHeight: 92,
+      dividerWidth: 65,
       showSectionDividers: false,
-      questionStyle: 'italic',
+      questionStyle: 'bold',
       imageFrameStyle: 'none',
+      pageNumberSize: 8,
+      runningHeaderSize: 8,
     },
     elegant: {
       coverFrame: true,
       chapterCentered: true,
-      questionSize: 13,
-      answerSize: 11.5,
+      questionSize: 12.8,
+      answerSize: 11.4,
       titleSize: 30,
       subtitleSize: 13,
-      chapterTitleSize: 22,
-      lineHeight: 6.8,
+      chapterTitleSize: 24,
+      chapterIntroSize: 11.2,
+      lineHeight: 7.1,
       questionSpacing: 10,
       sectionSpacing: 16,
       imageSpacing: 16,
-      imageMaxHeight: 130,
+      imageMaxHeight: 126,
       dividerWidth: 120,
       showSectionDividers: true,
       questionStyle: 'italic',
       imageFrameStyle: 'luxury',
+      pageNumberSize: 9,
+      runningHeaderSize: 8,
     },
   } as const
 
@@ -132,11 +144,11 @@ export function getPdfDesign(settings: PdfSettings) {
   const adjustedLayout = settings.printReady
     ? {
         ...baseLayout,
-        lineHeight: baseLayout.lineHeight + 0.3,
+        lineHeight: baseLayout.lineHeight + 0.2,
         sectionSpacing: baseLayout.sectionSpacing + 2,
         questionSize: baseLayout.questionSize - 0.2,
         answerSize: baseLayout.answerSize - 0.2,
-        imageMaxHeight: baseLayout.imageMaxHeight - 10,
+        imageMaxHeight: baseLayout.imageMaxHeight - 8,
       }
     : baseLayout
 
@@ -153,19 +165,19 @@ export function getPageMetrics(settings: PdfSettings) {
   if (isLandscapeSpread) {
     const spreadMap = {
       classic: {
-        leftX: 18,
-        rightX: 153,
-        columnWidth: 126,
+        leftX: 22,
+        rightX: 156,
+        columnWidth: 114,
       },
       minimal: {
-        leftX: 14,
-        rightX: 149,
-        columnWidth: 132,
+        leftX: 18,
+        rightX: 152,
+        columnWidth: 120,
       },
       elegant: {
-        leftX: 22,
-        rightX: 159,
-        columnWidth: 116,
+        leftX: 24,
+        rightX: 160,
+        columnWidth: 110,
       },
     } as const
 
@@ -201,16 +213,16 @@ export function getPageMetrics(settings: PdfSettings) {
           contentWidth: 150,
         },
         elegant: {
-          marginLeft: 26,
+          marginLeft: 28,
           marginRight: 24,
-          contentWidth: 156,
+          contentWidth: 154,
         },
       }
     : {
         classic: {
-          marginLeft: 22,
-          marginRight: 22,
-          contentWidth: 166,
+          marginLeft: 24,
+          marginRight: 24,
+          contentWidth: 162,
         },
         minimal: {
           marginLeft: 30,
@@ -218,7 +230,7 @@ export function getPageMetrics(settings: PdfSettings) {
           contentWidth: 150,
         },
         elegant: {
-          marginLeft: 24,
+          marginLeft: 26,
           marginRight: 26,
           contentWidth: 158,
         },
@@ -241,4 +253,31 @@ export function getPageMetrics(settings: PdfSettings) {
     columnWidth: portrait.contentWidth,
     isLandscapeSpread: false,
   }
+}
+
+export function getChapterIntro(chapter: string) {
+  const map: Record<string, string> = {
+    Beginnings:
+      'Every story has a beginning. These are the first memories, early years, and foundations that shaped everything that followed.',
+    Childhood:
+      'The years of discovery, play, family routines, and the small moments that often stay with us the longest.',
+    'Teenage Years':
+      'A chapter of growth, uncertainty, identity, and the experiences that begin to shape the person someone becomes.',
+    'Early Adulthood':
+      'The season of first big decisions, independence, responsibility, and finding direction.',
+    'Relationships & Love':
+      'The people, connections, and moments of love that left a lasting mark.',
+    'Family Life':
+      'A chapter shaped by home, family, care, and the memories made together.',
+    'Work & Life Path':
+      'The path of work, purpose, resilience, and the choices that helped define a life.',
+    'Memories & Milestones':
+      'The moments that changed everything, brought the most joy, or stayed unforgettable.',
+    'Values & Lessons':
+      'The beliefs, lessons, and guiding values that remained important over time.',
+    'Reflections & Legacy':
+      'A final chapter of gratitude, meaning, and what deserves to be remembered.'
+  }
+
+  return map[chapter] || 'A new chapter in this story.'
 }

@@ -47,6 +47,46 @@ export function useStoryExport() {
     doc.setDrawColor(color[0], color[1], color[2])
   }
 
+  function getStorySubtitle(project: StoryProject | null | undefined) {
+    const map: Record<string, string> = {
+      mum: 'A life told through memories, moments, and love',
+      dad: 'A life told through memories, lessons, and love',
+      grandma: 'A collection of memories, traditions, and family stories',
+      grandad: 'A collection of stories, life lessons, and legacy',
+      life: 'A life remembered through stories, moments, and reflection',
+      couple: 'A story of love, life, and the years built together',
+    }
+
+    return map[project?.story_type || ''] || 'A story told through memories, moments, and love'
+  }
+
+  function getChapterIntro(chapter: string) {
+    const map: Record<string, string> = {
+      Beginnings:
+        'Every story has a beginning. These are the earliest memories and moments that shaped everything that followed.',
+      Childhood:
+        'The years of growing up, family life, and the small moments that often stay with us the longest.',
+      'Teenage Years':
+        'A chapter of change, identity, and becoming.',
+      'Early Adulthood':
+        'The beginning of independence, responsibility, and life taking shape.',
+      'Relationships & Love':
+        'The people, connections, and moments of love that left a lasting mark.',
+      'Family Life':
+        'A chapter shaped by home, family, care, and the memories made together.',
+      'Work & Life Path':
+        'The path of work, purpose, resilience, and the choices that helped define a life.',
+      'Memories & Milestones':
+        'The moments that changed everything, brought the most joy, or were never forgotten.',
+      'Values & Lessons':
+        'The beliefs, lessons, and values that remained important over time.',
+      'Reflections & Legacy':
+        'A final chapter of gratitude, meaning, and what deserves to be remembered.',
+    }
+
+    return map[chapter] || 'A new chapter in this story.'
+  }
+
   function addFooter(
     doc: jsPDF,
     pageNumber: number,
@@ -68,13 +108,13 @@ export function useStoryExport() {
       const leftPageNumber = pageNumber * 2 - 1
       const rightPageNumber = pageNumber * 2
 
-      if (pageNumber > 1) {
-        doc.setFontSize(9)
+      if (pageNumber > 3) {
+        doc.setFontSize(8)
         doc.text(storyTitle, leftCenter, 14, { align: 'center' })
         doc.text(storyTitle, rightCenter, 14, { align: 'center' })
       }
 
-      doc.setFontSize(10)
+      doc.setFontSize(9)
       doc.text(`${leftPageNumber}`, leftCenter, pageHeight - 10, {
         align: 'center',
       })
@@ -85,29 +125,23 @@ export function useStoryExport() {
       return
     }
 
-    if (pageNumber > 1) {
-      doc.setFontSize(settings.printReady ? 9 : 10)
-      doc.text(
-        storyTitle,
-        pageWidth / 2,
-        settings.printReady ? 12 : 14,
-        { align: 'center' }
-      )
+    if (pageNumber > 3) {
+      doc.setFontSize(settings.printReady ? 8 : 9)
+      doc.text(storyTitle, pageWidth / 2, settings.printReady ? 12 : 14, {
+        align: 'center',
+      })
     }
 
-    doc.setFontSize(settings.printReady ? 9 : 10)
-    doc.text(
-      settings.printReady ? `${pageNumber}` : `Page ${pageNumber} of ${pageCount}`,
-      pageWidth / 2,
-      pageHeight - (settings.printReady ? 12 : 10),
-      { align: 'center' }
-    )
+    doc.setFontSize(settings.printReady ? 9 : 9)
+    doc.text(`${pageNumber}`, pageWidth / 2, pageHeight - (settings.printReady ? 12 : 10), {
+      align: 'center',
+    })
   }
 
   async function renderCoverPage(
     doc: jsPDF,
     storyTitle: string,
-    storyType: string,
+    storySubtitle: string,
     settings: PdfSettings,
     coverImageUrl: string,
     hasTier4Access: boolean,
@@ -115,7 +149,6 @@ export function useStoryExport() {
   ) {
     const design = getPdfDesign(settings)
     const metrics = getPageMetrics(settings)
-    const storySubtitle = `A story of ${storyType}'s life`
 
     applyPageBackground(doc, design.theme.pageBg, metrics.pageWidth, metrics.pageHeight)
 
@@ -181,15 +214,15 @@ export function useStoryExport() {
       doc.setFontSize(design.layout.subtitleSize)
       setTextColor(doc, design.theme.textSecondary)
       const splitSubtitle = doc.splitTextToSize(storySubtitle, 95)
-      doc.text(splitSubtitle, 38, 98)
+      doc.text(splitSubtitle, 38, 100)
 
       setDrawColor(doc, design.theme.divider)
       doc.line(metrics.centerX, 18, metrics.centerX, metrics.pageHeight - 18)
 
       doc.setFontSize(10)
       setTextColor(doc, design.theme.textMuted)
-      doc.text(`Created on ${new Date().toLocaleDateString()}`, 38, 165)
-      doc.text(`Story type: ${storyType}`, 38, 173)
+      doc.text('Created with love', 38, 170)
+
       return
     }
 
@@ -234,19 +267,12 @@ export function useStoryExport() {
     doc.setFont(design.font.body, 'normal')
     doc.setFontSize(design.layout.subtitleSize)
     setTextColor(doc, design.theme.textSecondary)
-    doc.text(
-      storySubtitle,
-      metrics.centerX,
-      shouldShowCoverImage ? 200 : 114,
-      { align: 'center' }
-    )
+    const subtitleY = shouldShowCoverImage ? 200 : 114
+    doc.text(storySubtitle, metrics.centerX, subtitleY, { align: 'center', maxWidth: 130 })
 
-    doc.setFontSize(11)
+    doc.setFontSize(10)
     setTextColor(doc, design.theme.textMuted)
-    doc.text(`Created on ${new Date().toLocaleDateString()}`, metrics.centerX, 238, {
-      align: 'center',
-    })
-    doc.text(`Story type: ${storyType}`, metrics.centerX, 246, { align: 'center' })
+    doc.text('Created with love', metrics.centerX, 246, { align: 'center' })
   }
 
   function renderDedicationPage(doc: jsPDF, settings: PdfSettings) {
@@ -285,6 +311,7 @@ export function useStoryExport() {
   ) {
     const design = getPdfDesign(settings)
     const metrics = getPageMetrics(settings)
+    const intro = getChapterIntro(chapterTitle)
 
     doc.setFont(design.font.title, design.font.titleStyle)
     doc.setFontSize(design.layout.chapterTitleSize)
@@ -297,6 +324,11 @@ export function useStoryExport() {
         doc.text(chapterTitle, metrics.rightX, y + 10)
         setDrawColor(doc, design.theme.divider)
         doc.line(metrics.rightX, y + 16, metrics.rightX + 70, y + 16)
+
+        doc.setFont(design.font.body, design.font.accentStyle)
+        doc.setFontSize(10.5)
+        setTextColor(doc, design.theme.textSecondary)
+        doc.text(doc.splitTextToSize(intro, metrics.columnWidth - 10), metrics.rightX, y + 26)
         return
       }
 
@@ -305,14 +337,11 @@ export function useStoryExport() {
       setDrawColor(doc, design.theme.divider)
       doc.line(metrics.rightX, y + 16, metrics.rightX + metrics.columnWidth, y + 16)
 
-      if (settings.printReady && settings.layout === 'elegant') {
-        doc.setFont(design.font.body, design.font.accentStyle)
-        doc.setFontSize(11)
-        setTextColor(doc, design.theme.textMuted)
-        doc.text('A new chapter of memories', metrics.centerX, y + 22, {
-          align: 'center',
-        })
-      }
+      doc.setFont(design.font.body, design.font.accentStyle)
+      doc.setFontSize(10.5)
+      setTextColor(doc, design.theme.textSecondary)
+      const splitIntro = doc.splitTextToSize(intro, metrics.columnWidth - 12)
+      doc.text(splitIntro, chapterX, y + 28, { align: 'center' })
 
       return
     }
@@ -331,12 +360,17 @@ export function useStoryExport() {
     setDrawColor(doc, design.theme.divider)
     const dividerY = settings.printReady ? y + 10 : y + 5
     doc.line(50, dividerY, 160, dividerY)
+
+    doc.setFont(design.font.body, design.font.accentStyle)
+    doc.setFontSize(11)
+    setTextColor(doc, design.theme.textSecondary)
+    const splitIntro = doc.splitTextToSize(intro, metrics.contentWidth - 40)
+    doc.text(splitIntro, metrics.centerX, dividerY + 15, { align: 'center' })
   }
 
   async function renderPortraitSection(
     doc: jsPDF,
     section: StorySection,
-    index: number,
     settings: PdfSettings,
     images: StoryImage[],
     yState: { y: number },
@@ -352,11 +386,11 @@ export function useStoryExport() {
       yState.y = metrics.marginTop
     }
 
-    doc.setFont(design.font.body, design.layout.questionStyle)
-    doc.setFontSize(design.layout.questionSize)
-    setTextColor(doc, design.theme.textPrimary)
+    doc.setFont(design.font.body, 'italic')
+    doc.setFontSize(design.layout.questionSize - 0.5)
+    setTextColor(doc, design.theme.textSecondary)
 
-    const questionText = `${index + 1}. ${section.question}`
+    const questionText = section.question
     const splitQuestion = doc.splitTextToSize(questionText, metrics.contentWidth)
     const answerX =
       settings.printReady && settings.layout === 'classic'
@@ -365,22 +399,19 @@ export function useStoryExport() {
           ? metrics.marginLeft + 3
           : metrics.marginLeft + 2
 
-    const questionGap = settings.printReady ? 6 : 4
+    const questionGap = settings.printReady ? 8 : 6
     doc.text(splitQuestion, answerX, yState.y)
     yState.y += splitQuestion.length * design.layout.lineHeight + questionGap
 
     doc.setFont(design.font.body, design.font.bodyStyle)
-    doc.setFontSize(design.layout.answerSize)
-    setTextColor(doc, design.theme.textSecondary)
+    doc.setFontSize(design.layout.answerSize + 0.3)
+    setTextColor(doc, design.theme.textPrimary)
 
-    const answerText = section.answer?.trim() || 'No answer provided.'
+    const answerText = section.answer.trim()
     const splitAnswer = doc.splitTextToSize(answerText, metrics.contentWidth)
     doc.text(splitAnswer, answerX, yState.y)
 
-    const sectionGap = settings.printReady
-      ? design.layout.sectionSpacing + 2
-      : design.layout.sectionSpacing
-
+    const sectionGap = design.layout.sectionSpacing + 4
     yState.y += splitAnswer.length * design.layout.lineHeight + sectionGap
 
     const sectionImage = images
@@ -442,16 +473,13 @@ export function useStoryExport() {
       doc.line(metrics.marginLeft, yState.y, metrics.pageWidth - metrics.marginRight, yState.y)
       yState.y += design.layout.sectionSpacing
     } else {
-      yState.y += settings.printReady
-        ? design.layout.sectionSpacing + 2
-        : design.layout.sectionSpacing
+      yState.y += design.layout.sectionSpacing + 2
     }
   }
 
   async function renderSpreadSection(
     doc: jsPDF,
     section: StorySection,
-    index: number,
     settings: PdfSettings,
     images: StoryImage[],
     hasImageExportAccess: boolean,
@@ -463,8 +491,8 @@ export function useStoryExport() {
     let isFirstSpreadPage = true
     let remainingAnswerLines: string[] = []
 
-    const questionText = `${index + 1}. ${section.question}`
-    const answerText = section.answer?.trim() || 'No answer provided.'
+    const questionText = section.question
+    const answerText = section.answer.trim()
 
     const splitQuestion = doc.splitTextToSize(questionText, metrics.columnWidth)
     remainingAnswerLines = doc.splitTextToSize(answerText, metrics.columnWidth)
@@ -488,17 +516,17 @@ export function useStoryExport() {
       let rightY = 32
 
       if (isFirstSpreadPage) {
-        doc.setFont(design.font.body, design.layout.questionStyle)
-        doc.setFontSize(design.layout.questionSize)
-        setTextColor(doc, design.theme.textPrimary)
+        doc.setFont(design.font.body, 'italic')
+        doc.setFontSize(design.layout.questionSize - 0.5)
+        setTextColor(doc, design.theme.textSecondary)
 
         doc.text(splitQuestion, metrics.leftX, leftY)
         leftY += splitQuestion.length * design.layout.lineHeight + design.layout.questionSpacing
       }
 
       doc.setFont(design.font.body, design.font.bodyStyle)
-      doc.setFontSize(design.layout.answerSize)
-      setTextColor(doc, design.theme.textSecondary)
+      doc.setFontSize(design.layout.answerSize + 0.3)
+      setTextColor(doc, design.theme.textPrimary)
 
       const leftAvailableHeight = metrics.maxY - leftY
       const leftLineCapacity = Math.max(
@@ -573,8 +601,8 @@ export function useStoryExport() {
 
       if (rightLines.length) {
         doc.setFont(design.font.body, design.font.bodyStyle)
-        doc.setFontSize(design.layout.answerSize)
-        setTextColor(doc, design.theme.textSecondary)
+        doc.setFontSize(design.layout.answerSize + 0.3)
+        setTextColor(doc, design.theme.textPrimary)
         doc.text(rightLines, metrics.rightX, rightY)
         rightY += rightLines.length * design.layout.lineHeight
       }
@@ -587,9 +615,36 @@ export function useStoryExport() {
     }
   }
 
+  function renderClosingPage(doc: jsPDF, settings: PdfSettings) {
+    const design = getPdfDesign(settings)
+    const metrics = getPageMetrics(settings)
+
+    doc.addPage()
+    applyPageBackground(doc, design.theme.secondaryBg, metrics.pageWidth, metrics.pageHeight)
+
+    doc.setFont(design.font.title, design.font.titleStyle)
+    doc.setFontSize(20)
+    setTextColor(doc, design.theme.textPrimary)
+    doc.text('A story worth keeping', metrics.centerX, 120, { align: 'center' })
+
+    doc.setFont(design.font.body, design.font.bodyStyle)
+    doc.setFontSize(11)
+    setTextColor(doc, design.theme.textSecondary)
+    doc.text(
+      'Created with love, to be remembered for years to come.',
+      metrics.centerX,
+      135,
+      { align: 'center', maxWidth: 120 }
+    )
+  }
+
   async function exportWord({ project, sections }: ExportWordArgs) {
     const storyTitle = project?.title || 'Tell Me Your Story'
     const children: Paragraph[] = []
+
+    const printableSections = sections.filter(
+      (section) => section.answer && section.answer.trim().length > 0
+    )
 
     children.push(
       new Paragraph({
@@ -605,12 +660,12 @@ export function useStoryExport() {
 
     children.push(new Paragraph(''))
 
-    sections.forEach((section, index) => {
+    printableSections.forEach((section) => {
       children.push(
         new Paragraph({
           children: [
             new TextRun({
-              text: `${index + 1}. ${section.question}`,
+              text: section.question,
               bold: true,
             }),
           ],
@@ -621,7 +676,7 @@ export function useStoryExport() {
         new Paragraph({
           children: [
             new TextRun({
-              text: section.answer || 'No answer provided.',
+              text: section.answer?.trim() || '',
             }),
           ],
         })
@@ -674,12 +729,16 @@ export function useStoryExport() {
     })
 
     const storyTitle = project?.title || 'Tell Me Your Story'
-    const storyType = project?.story_type || 'story'
+    const storySubtitle = getStorySubtitle(project)
+
+    const printableSections = sections.filter(
+      (section) => section.answer && section.answer.trim().length > 0
+    )
 
     await renderCoverPage(
       doc,
       storyTitle,
-      storyType,
+      storySubtitle,
       activeSettings,
       coverImageUrl,
       hasTier4Access,
@@ -700,14 +759,8 @@ export function useStoryExport() {
     if (activeSettings.orientation === 'portrait') {
       const yState = { y: metrics.marginTop }
 
-      doc.setFont(design.font.title, design.font.titleStyle)
-      doc.setFontSize(20)
-      setTextColor(doc, design.theme.textPrimary)
-      doc.text(storyTitle, metrics.marginLeft, yState.y)
-      yState.y += 15
-
-      for (let index = 0; index < sections.length; index++) {
-        const section = sections[index]
+      for (let index = 0; index < printableSections.length; index++) {
+        const section = printableSections[index]
 
         if (section.chapter && section.chapter !== currentChapter) {
           currentChapter = section.chapter
@@ -717,18 +770,14 @@ export function useStoryExport() {
           yState.y = metrics.marginTop
 
           const chapterStartY = activeSettings.printReady ? 60 : 50
-
           renderChapterHeading(doc, currentChapter, chapterStartY, activeSettings)
 
-          yState.y = activeSettings.printReady
-            ? chapterStartY + 30
-            : chapterStartY + 20
+          yState.y = activeSettings.printReady ? chapterStartY + 40 : chapterStartY + 30
         }
 
         await renderPortraitSection(
           doc,
           section,
-          index,
           activeSettings,
           images,
           yState,
@@ -737,8 +786,8 @@ export function useStoryExport() {
         )
       }
     } else {
-      for (let index = 0; index < sections.length; index++) {
-        const section = sections[index]
+      for (let index = 0; index < printableSections.length; index++) {
+        const section = printableSections[index]
 
         if (section.chapter && section.chapter !== currentChapter) {
           currentChapter = section.chapter
@@ -751,7 +800,6 @@ export function useStoryExport() {
         await renderSpreadSection(
           doc,
           section,
-          index,
           activeSettings,
           images,
           hasImageExportAccess,
@@ -759,6 +807,8 @@ export function useStoryExport() {
         )
       }
     }
+
+    renderClosingPage(doc, activeSettings)
 
     const pageCount = doc.getNumberOfPages()
 
