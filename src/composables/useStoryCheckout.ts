@@ -87,7 +87,7 @@ export function useStoryCheckout(
     })
 
     await startCheckout({
-      priceId: 'price_1TJvcYR13CJL70CCXAigfPLP',
+      priceId: 'price_1TJvcYR13CJL70CCXAigFPLP',
       purchaseType: 'single_text',
     })
   }
