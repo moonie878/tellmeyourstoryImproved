@@ -87,7 +87,7 @@ export function useStoryCheckout(
     })
 
     await startCheckout({
-      priceId: 'price_1THQFlJONQh8J4EOYm7qpCPs',
+      priceId: 'price_1TJvcYR13CJL70CCXAigFPLP',
       purchaseType: 'single_text',
     })
   }
@@ -99,7 +99,7 @@ export function useStoryCheckout(
     })
 
     await startCheckout({
-      priceId: 'price_1THKudJONQh8J4EO5of6l5Qy',
+      priceId: 'price_1TJvd3R13CJL70CCmOGoDDVT',
       purchaseType: 'single_images',
     })
   }
@@ -111,7 +111,7 @@ export function useStoryCheckout(
     })
 
     await startCheckout({
-      priceId: 'price_1THQG7JONQh8J4EOQXdJb2fX',
+      priceId: 'price_1TJvdJR13CJL70CCrdpt1bg0',
       purchaseType: 'all_text',
     })
   }
@@ -123,7 +123,7 @@ export function useStoryCheckout(
     })
 
     await startCheckout({
-      priceId: 'price_1THQGMJONQh8J4EOTS8GyW4B',
+      priceId: 'price_1TJvdiR13CJL70CCqAqRBjZq',
       purchaseType: 'all_images',
     })
   }
@@ -131,8 +131,8 @@ export function useStoryCheckout(
   async function upgradeWithImages() {
     const purchaseType = hasAllStoriesAccess.value ? 'all_images' : 'single_images'
     const priceId = hasAllStoriesAccess.value
-      ? 'price_1THQGMJONQh8J4EOTS8GyW4B'
-      : 'price_1THKudJONQh8J4EO5of6l5Qy'
+      ? 'price_1TJvdiR13CJL70CCqAqRBjZq'
+      : 'price_1TJvd3R13CJL70CCmOGoDDVT'
 
     await startCheckout({
       priceId,
