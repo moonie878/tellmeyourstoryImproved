@@ -73,11 +73,7 @@
       <div
         v-if="showTier2"
         class="relative flex h-full flex-col rounded-3xl border-2 border-stone-900 bg-white p-6 shadow-lg transition hover:-translate-y-1 hover:shadow-xl"
-      >
-        <div class="absolute -top-3 left-6 rounded-full bg-stone-900 px-3 py-1 text-xs font-medium text-white">
-          Most popular
-        </div>
-
+      >      
         <p class="text-xs font-medium uppercase tracking-[0.2em] text-stone-500">
           Tier 2
         </p>
@@ -152,7 +148,7 @@
         v-if="showTier4"
         class="flex h-full flex-col rounded-3xl border border-stone-200 bg-stone-50 p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
       >
-        <div class="absolute -top-3 left-6 rounded-full bg-stone-900 px-3 py-1 text-xs font-medium text-white">
+        <div class="mb-3 inline-block rounded-full bg-stone-900 px-3 py-1 text-xs text-white">
           Best Value
         </div>
 
