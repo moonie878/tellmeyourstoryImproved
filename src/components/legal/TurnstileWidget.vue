@@ -80,11 +80,13 @@ async function renderWidget() {
       emit('update:modelValue', token)
     },
     'expired-callback': () => {
-      emit('update:modelValue', '')
-    },
-    'error-callback': () => {
-      emit('update:modelValue', '')
-    },
+  console.warn('Turnstile expired')
+  emit('update:modelValue', '')
+},
+    'error-callback': (errorCode?: string) => {
+  console.error('Turnstile widget error:', errorCode)
+  emit('update:modelValue', '')
+}
   })
 }
 

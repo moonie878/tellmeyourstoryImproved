@@ -25,13 +25,17 @@ if (!FRONTEND_URL) {
   throw new Error('Missing FRONTEND_URL')
 }
 
+if (!process.env.TURNSTILE_SECRET_KEY) {
+  throw new Error('Missing TURNSTILE_SECRET_KEY')
+}
+
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
 
 const supabaseAdmin = createClient(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_SERVICE_ROLE_KEY
 )
-
+app.set('trust proxy', 1)
 app.use(
   cors({
     origin: [
@@ -157,6 +161,7 @@ app.post('/verify-turnstile', express.json(), async (req, res) => {
     }
 
     const result = await verifyTurnstileToken(token, req.ip)
+    console.log('Turnstile siteverify result:', result)
 
     if (!result.success) {
       return res.status(400).json({
