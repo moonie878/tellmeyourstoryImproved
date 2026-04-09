@@ -125,6 +125,15 @@ function getQuoteFromAnswer(answer: string, maxLength = 140) {
 }
 
 
+function hasAnyHighlightedSections(sections: StorySection[]) {
+  return sections.some(
+    (section) =>
+      !!section.is_highlighted &&
+      !!section.answer &&
+      section.answer.trim().length > 0
+  )
+}
+
 function shouldUseCenteredSpreadLayout(
   section: StorySection,
   hasImage: boolean
@@ -1007,6 +1016,8 @@ doc.text(
     (section) => section.answer && section.answer.trim().length > 0
   )
 
+  const hasHighlightedQuotes = hasAnyHighlightedSections(printableSections)
+
   await renderCoverPage(
     doc,
     storyTitle,
@@ -1055,7 +1066,9 @@ doc.text(
         yState.y = metrics.marginTop
       }
 
-      const shouldQuote = shouldInsertQuotePageSmart(section, index)
+      const shouldQuote = hasHighlightedQuotes
+  ? !!section.is_highlighted
+  : shouldInsertQuotePageSmart(section, index)
 
       if (shouldQuote) {
         const quote = getQuoteFromAnswer(section.answer || '')
@@ -1099,7 +1112,9 @@ doc.text(
         renderChapterHeading(doc, currentChapter, chapterIndex, activeSettings)
       }
 
-      const shouldQuote = shouldInsertQuotePageSmart(section, index)
+      const shouldQuote = hasHighlightedQuotes
+  ? !!section.is_highlighted
+  : shouldInsertQuotePageSmart(section, index)
 
       if (shouldQuote) {
         const quote = getQuoteFromAnswer(section.answer || '')
