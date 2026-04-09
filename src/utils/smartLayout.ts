@@ -9,7 +9,7 @@ export function isVeryLongAnswer(answer: string) {
 }
 
 export function shouldHighlightQuote(section: StorySection) {
-  return section.highlighted === true
+  return section.is_highlighted === true
 }
 
 export function shouldInsertQuotePageSmart(
@@ -17,7 +17,7 @@ export function shouldInsertQuotePageSmart(
   index: number
 ) {
   // priority: user selected
-  if (section.highlighted) return true
+  if (section.is_highlighted) return true
 
   // fallback: long emotional answers every ~6
   if (section.answer.length > 250 && index % 6 === 0) return true

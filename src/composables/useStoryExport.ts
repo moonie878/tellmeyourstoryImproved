@@ -124,18 +124,6 @@ function getQuoteFromAnswer(answer: string, maxLength = 140) {
   return `${shortened.slice(0, lastSpace > 0 ? lastSpace : maxLength)}…`
 }
 
-function shouldInsertQuotePage(index: number) {
-  return index > 0 && index % 5 === 0
-}
-
-function getHighlightedSections(sections: StorySection[]) {
-  return sections.filter(
-    (section) =>
-      !!section.is_highlighted &&
-      !!section.answer &&
-      section.answer.trim().length > 0
-  )
-}
 
 function shouldUseCenteredSpreadLayout(
   section: StorySection,
@@ -148,19 +136,6 @@ function shouldUseCenteredSpreadLayout(
   const totalLength = answerLength + questionLength
 
   return totalLength <= 360
-}
-
-function getQuoteForIndex(
-  index: number,
-  printableSections: StorySection[],
-  highlightedSections: StorySection[]
-) {
-  if (highlightedSections.length > 0) {
-    const highlightIndex = Math.floor(index / 5) % highlightedSections.length
-    return getQuoteFromAnswer(highlightedSections[highlightIndex]?.answer || '')
-  }
-
-  return getQuoteFromAnswer(printableSections[index - 1]?.answer || '')
 }
 
   function addFooter(
@@ -1032,8 +1007,6 @@ doc.text(
     (section) => section.answer && section.answer.trim().length > 0
   )
 
-  const highlightedSections = getHighlightedSections(printableSections)
-
   await renderCoverPage(
     doc,
     storyTitle,
@@ -1066,7 +1039,6 @@ doc.text(
         doc.addPage()
         renderChapterHeading(doc, currentChapter, chapterIndex, activeSettings)
 
-        // breathing page after chapter opener
         doc.addPage()
         applyPageBackground(doc, design.theme.secondaryBg, metrics.pageWidth, metrics.pageHeight)
         doc.setFontSize(14)
@@ -1078,34 +1050,32 @@ doc.text(
           { align: 'center' }
         )
 
-        // first content page for the chapter
         doc.addPage()
         applyPageBackground(doc, design.theme.pageBg, metrics.pageWidth, metrics.pageHeight)
         yState.y = metrics.marginTop
       }
 
-      const insertedQuotePage = shouldInsertQuotePage(index)
+      const shouldQuote = shouldInsertQuotePageSmart(section, index)
 
-      if (insertedQuotePage) {
-        const quote = getQuoteFromAnswer(printableSections[index - 1]?.answer || '')
+      if (shouldQuote) {
+        const quote = getQuoteFromAnswer(section.answer || '')
+
         if (quote) {
           renderQuotePage(doc, quote, activeSettings)
 
-          // always reset to a clean content page after quote
           doc.addPage()
           applyPageBackground(doc, design.theme.pageBg, metrics.pageWidth, metrics.pageHeight)
           yState.y = metrics.marginTop
         }
       }
 
-      const isLong = isLongAnswer(section.answer || '')
-const isVeryLong = isVeryLongAnswer(section.answer || '')
+      const isVeryLong = isVeryLongAnswer(section.answer || '')
 
-if (isVeryLong) {
-  doc.addPage()
-  applyPageBackground(doc, design.theme.pageBg, metrics.pageWidth, metrics.pageHeight)
-  yState.y = metrics.marginTop
-}
+      if (isVeryLong) {
+        doc.addPage()
+        applyPageBackground(doc, design.theme.pageBg, metrics.pageWidth, metrics.pageHeight)
+        yState.y = metrics.marginTop
+      }
 
       await renderPortraitSection(
         doc,
@@ -1131,21 +1101,14 @@ if (isVeryLong) {
 
       const shouldQuote = shouldInsertQuotePageSmart(section, index)
 
-if (shouldQuote) {
-  const quote = getQuoteFromAnswer(section.answer || '')
+      if (shouldQuote) {
+        const quote = getQuoteFromAnswer(section.answer || '')
 
-  if (quote) {
-    renderQuotePage(doc, quote, activeSettings)
+        if (quote) {
+          renderQuotePage(doc, quote, activeSettings)
+        }
+      }
 
-    // ALWAYS reset layout after quote
-    doc.addPage()
-    applyPageBackground(doc, design.theme.pageBg, metrics.pageWidth, metrics.pageHeight)
-    yState.y = metrics.marginTop
-  }
-}
-
-      // Only add one new spread page for the content section.
-      // Do not add any extra reset page after quote pages in spread mode.
       doc.addPage()
       await renderSpreadSection(
         doc,
