@@ -102,7 +102,7 @@
                         <div class="relative">
                             <img :src="currentImagePreview"
                                  alt="Uploaded story image"
-                                 class="h-64 w-full rounded-xl border border-stone-200 bg-white object-contain"
+                                 class="max-h-64 w-full rounded-2xl object-cover"
                                  @error="$emit('image-error')" />
 
                             <div v-if="!hasImageExportAccess"
@@ -187,7 +187,7 @@
   </div>
 </div>
 
-                <div class="mt-6 flex items-center justify-between gap-4">
+                <div class="sticky bottom-0 mt-6 border-t border-stone-200 bg-white pt-4">
                     <button @click="$emit('previous')"
                             :disabled="currentIndex === 0"
                             class="cursor-pointer rounded-full border border-stone-300 px-5 py-2 disabled:opacity-50 transition hover:-translate-y-1 hover:shadow-md">

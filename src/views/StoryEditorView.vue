@@ -266,7 +266,7 @@
       </div>
 
       <div class="order-1 lg:order-2">
-        <div class="lg:sticky lg:top-6">
+        <div class="lg:sticky lg:top-6 lg:max-h-[calc(100vh-3rem)] lg:overflow-y-auto lg:pr-2">
           <StoryQuestionCard
             :section="currentSection"
             :current-index="currentSectionIndex"
