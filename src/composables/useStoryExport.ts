@@ -445,10 +445,19 @@ doc.line(60, 180, 150, 180)
     doc.setFont(design.font.body, design.font.accentStyle)
 doc.setFontSize(12)
 doc.setTextColor(120, 120, 120)
-const splitIntro = doc.splitTextToSize(intro, metrics.contentWidth - 26)
-doc.text(splitIntro, metrics.centerX, 140, {
-  align: 'center',
-})
+
+const introWidth = metrics.columnWidth - 24
+const splitIntro = doc.splitTextToSize(intro, introWidth)
+
+doc.text(
+  splitIntro,
+  metrics.rightX + metrics.columnWidth / 2,
+  140,
+  {
+    align: 'center',
+    maxWidth: introWidth,
+  }
+)
 
     return
   }
@@ -510,7 +519,7 @@ doc.text(splitIntro, metrics.centerX, 156, {
 
     
     const questionText = section.question
-    const safeWidth = metrics.contentWidth - 10
+    const safeWidth = metrics.contentWidth - 4
 const splitQuestion = doc.splitTextToSize(questionText, safeWidth)
 
     const answerX =
@@ -934,6 +943,19 @@ doc.text('Take a moment to reflect on what comes next…', metrics.centerX, metr
       }      
     }
     const justInsertedQuotePage = shouldInsertQuotePage(index)
+
+if (justInsertedQuotePage) {
+  const quote = getQuoteFromAnswer(printableSections[index - 1]?.answer || '')
+  if (quote) {
+    renderQuotePage(doc, quote, activeSettings)
+
+    // always reset to a clean content page after a quote
+    doc.addPage()
+    applyPageBackground(doc, design.theme.pageBg, metrics.pageWidth, metrics.pageHeight)
+    yState.y = metrics.marginTop
+  }
+}
+
 
 if (!justInsertedQuotePage && index > 0 && index % 2 === 0) {
   doc.addPage()
