@@ -76,13 +76,13 @@
         <div class="mt-8 grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
           <button
             v-for="type in storyTypes"
-            :key="type.key"
-            @click="createStory(type.key)"
+            :key="type.id"
+            @click="createStory(type.id)"
             class="group rounded-[1.75rem] border border-stone-200 bg-stone-50 p-5 text-left transition hover:-translate-y-1 hover:border-stone-300 hover:bg-white hover:shadow-md"
           >
-            <p class="text-xs font-medium uppercase tracking-[0.2em] text-stone-500">
-              {{ type.label }}
-            </p>
+            <p v-if="type.label" class="text-xs font-medium uppercase tracking-[0.2em] text-stone-500">
+  {{ type.label }}
+</p>
             <h3 class="mt-3 text-lg font-semibold text-stone-900">
               {{ type.title }}
             </h3>
@@ -317,6 +317,7 @@ import { supabase } from '../lib/supabase'
 import { useRouter } from 'vue-router'
 import { ref, onMounted } from 'vue'
 import { track } from '../lib/analytics'
+import { STORY_TYPES } from '../data/storyTypes'
 
 const stories = ref<any[]>([])
 const userAccess = ref<any[]>([])
@@ -325,44 +326,11 @@ const deletingStoryId = ref<string | null>(null)
 
 const router = useRouter()
 
-const storyTypes = [
-  {
-    key: 'mum',
-    label: 'Most popular',
-    title: "Mum's Story",
-    description: 'Capture her memories, stories, and life lessons in a keepsake worth saving.',
-  },
-  {
-    key: 'dad',
-    label: 'Meaningful gift',
-    title: "Dad's Story",
-    description: 'Preserve his humour, memories, milestones, and the moments that shaped him.',
-  },
-  {
-    key: 'grandma',
-    label: 'Family history',
-    title: "Grandma's Story",
-    description: 'Keep treasured family memories, traditions, and stories from her life.',
-  },
-  {
-    key: 'life',
-    label: 'Full memoir',
-    title: 'Life Story',
-    description: 'Create a wider life-story keepsake that captures memories across the years.',
-  },
-]
+const storyTypes = STORY_TYPES
 
 function getStoryTitle(type: string) {
-  const titles: Record<string, string> = {
-    mum: 'Mum Story',
-    dad: 'Dad Story',
-    grandma: 'Grandma Story',
-    grandad: 'Grandad Story',
-    life: 'Life Story',
-    couple: 'Couple Story',
-  }
-
-  return titles[type] || 'New Story'
+  const story = STORY_TYPES.find((s) => s.id === type)
+  return story?.projectTitle || 'New Story'
 }
 
 function formatStoryType(type: string) {
