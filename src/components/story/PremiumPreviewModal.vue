@@ -12,10 +12,10 @@
                 Premium Preview
               </p>
               <h3 class="mt-3 text-3xl font-bold text-stone-900">
-  See how your story becomes a keepsake
+  This is your story — turned into something you can keep forever
 </h3>
 <p class="mt-3 max-w-2xl text-sm leading-6 text-stone-600">
-  Premium transforms your answers into something that feels more personal, more beautifully finished, and more worthy of printing, sharing, or gifting.
+  What you’ve written already matters. Premium simply gives it the care, structure, and design it deserves — turning it into something you can hold, share, and come back to for years.
 </p>
             </div>
 
@@ -273,14 +273,20 @@
             <div class="flex flex-col gap-6 lg:flex-row md:items-center md:justify-between">
               <div class="max-w-2xl">
                <p class="text-base font-semibold text-stone-900">
-  You’ve already written something meaningful — premium helps it feel truly special
+  You’re already creating something meaningful — this is how you turn it into a real keepsake
 </p>
 <p class="mt-2 text-sm leading-6 text-stone-600">
-  Give your story a more beautiful final form with thoughtful layout, richer presentation, and a finished keepsake feel.
+  Add thoughtful chapters, quote pages, images, and a polished layout that makes your story feel like a finished book — not just answers on a screen.
 </p>
 <p class="mt-3 text-xs text-stone-500">
   A simple one-time upgrade turns your story into something you can keep, print, and treasure.
 </p>
+<ul class="mt-4 space-y-2 text-sm text-stone-700">
+  <li>✨ Beautiful chapter layouts and structure</li>
+  <li>💬 Highlighted quote pages from meaningful moments</li>
+  <li>🖼️ Add photos throughout your story</li>
+  <li>📖 Designed to feel like a real printed book</li>
+</ul>
               </div>
 <div class="flex flex-col items-start gap-3 lg:items-end">
               <button
@@ -288,7 +294,7 @@
                 @click="$emit('upgrade')"
                 class="shrink-0 rounded-full bg-[#7C5C3B] hover:opacity-90 transition px-6 py-3 text-sm font-medium text-white transition hover:opacity-90"
               >
-                Create My Keepsake
+                Create My Keepsake Book
               </button>
 
               <button
