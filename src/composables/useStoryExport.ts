@@ -123,6 +123,15 @@ function shouldInsertQuotePage(index: number) {
   return index > 0 && index % 5 === 0
 }
 
+function getHighlightedSections(sections: StorySection[]) {
+  return sections.filter(
+    (section) =>
+      !!section.is_highlighted &&
+      !!section.answer &&
+      section.answer.trim().length > 0
+  )
+}
+
 function shouldUseCenteredSpreadLayout(
   section: StorySection,
   hasImage: boolean
@@ -134,6 +143,19 @@ function shouldUseCenteredSpreadLayout(
   const totalLength = answerLength + questionLength
 
   return totalLength <= 360
+}
+
+function getQuoteForIndex(
+  index: number,
+  printableSections: StorySection[],
+  highlightedSections: StorySection[]
+) {
+  if (highlightedSections.length > 0) {
+    const highlightIndex = Math.floor(index / 5) % highlightedSections.length
+    return getQuoteFromAnswer(highlightedSections[highlightIndex]?.answer || '')
+  }
+
+  return getQuoteFromAnswer(printableSections[index - 1]?.answer || '')
 }
 
   function addFooter(
@@ -1001,6 +1023,8 @@ doc.text(
     (section) => section.answer && section.answer.trim().length > 0
   )
 
+  const highlightedSections = getHighlightedSections(printableSections)
+
   await renderCoverPage(
     doc,
     storyTitle,
@@ -1094,7 +1118,7 @@ doc.text(
       }
 
       if (shouldInsertQuotePage(index)) {
-        const quote = getQuoteFromAnswer(printableSections[index - 1]?.answer || '')
+        const quote = getQuoteForIndex(index, printableSections, highlightedSections)
         if (quote) {
           renderQuotePage(doc, quote, activeSettings)
         }

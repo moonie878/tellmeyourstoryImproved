@@ -279,6 +279,7 @@
             :current-image-preview="currentImagePreview"
             :image-upload-status="imageUploadStatus"
             :has-image-export-access="hasImageExportAccess"
+            :is-highlighted="!!currentSection?.is_highlighted"
             @update-answer="updateCurrentAnswer"
             @image-upload="handleImageUpload"
             @remove-image="removeCurrentImage"
@@ -288,6 +289,7 @@
             @next="goToNextSection"
             @finish="handleFinish"
             @image-error="imageUploadStatus = 'This image needs refreshing. Please upload it again.'"
+            @toggle-highlight="toggleCurrentHighlight"
           />
         </div>
       </div>
@@ -639,6 +641,7 @@ watch(editorProgress, (val) => {
     chapter: s.chapter,
     question: s.question,
     answer: '',
+    is_highlighted: false,
     }))
     }
     }
@@ -661,6 +664,7 @@ watch(editorProgress, (val) => {
     return {
     ...section,
     answer: saved?.answer || '',
+    is_highlighted: saved?.is_highlighted || false,
     }
     })
     }
@@ -882,18 +886,19 @@ track('export_success', {
     isSavingAnswer.value = true
     saveError.value = ''
 
-    const { error } = await supabase.from('story_answers').upsert(
-    [
+   const { error } = await supabase.from('story_answers').upsert(
+  [
     {
-    project_id: projectId,
-    section_id: section.id,
-    answer: section.answer,
+      project_id: projectId,
+      section_id: section.id,
+      answer: section.answer,
+      is_highlighted: !!section.is_highlighted,
     },
-    ],
-    {
+  ],
+  {
     onConflict: 'project_id,section_id',
-    }
-    )
+  }
+)
 
     if (error) {
     saveStatus.value = ''
@@ -1081,6 +1086,13 @@ function upgradeFromPreviewModal() {
   })
 
   upgradeAllImages()
+}
+
+async function toggleCurrentHighlight() {
+  if (!currentSection.value) return
+
+  currentSection.value.is_highlighted = !currentSection.value.is_highlighted
+  await saveAnswer(currentSection.value)
 }
 
 </script>

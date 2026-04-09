@@ -26,6 +26,7 @@ export type StorySection = {
   chapter?: string
   question: string
   answer: string
+   is_highlighted?: boolean
 }
 
 export type StoryProject = {

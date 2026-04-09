@@ -51,6 +51,22 @@
                           class="mt-6 w-full resize-none rounded-xl border border-stone-300 p-4"
                           rows="8"
                           placeholder="Write your answer here..."></textarea>
+                          <button
+  type="button"
+  @click="$emit('toggle-highlight')"
+  class="mt-4 inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm transition"
+  :class="
+    isHighlighted
+      ? 'border-amber-300 bg-amber-50 text-amber-800'
+      : 'border-stone-300 bg-white text-stone-700 hover:bg-stone-50'
+  "
+>
+  <span>{{ isHighlighted ? '★' : '☆' }}</span>
+  <span>{{ isHighlighted ? 'Highlighted for quote pages' : 'Highlight this memory' }}</span>
+</button>
+<p class="mt-2 text-xs text-stone-500">
+  Highlighted memories may be featured as quote pages in your keepsake.
+</p>
                           <p
   v-if="!hasImageExportAccess"
   class="mt-4 text-xs text-stone-500"
@@ -204,6 +220,7 @@
     currentImagePreview: string
     imageUploadStatus: string
     hasImageExportAccess: boolean
+    isHighlighted: boolean
     }>()
 
     const emit = defineEmits<{
@@ -216,6 +233,7 @@
     (e: 'next'): void
     (e: 'finish'): void
     (e: 'image-error'): void
+    (e: 'toggle-highlight'): void
     }>()    
 
     const textareaRef = ref<HTMLTextAreaElement | null>(null)
