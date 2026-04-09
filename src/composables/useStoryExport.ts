@@ -3,6 +3,11 @@ import { Document, Packer, Paragraph, TextRun } from 'docx'
 import { saveAs } from 'file-saver'
 import type { PdfSettings, StoryImage, StoryProject, StorySection } from '../types/story'
 import { getPdfDesign, getPageMetrics } from '../utils/pdfDesign'
+import {
+  isLongAnswer,
+  isVeryLongAnswer,
+  shouldInsertQuotePageSmart,
+} from '../utils/smartLayout'
 
 type ExportPdfArgs = {
   project: StoryProject
@@ -577,7 +582,11 @@ const splitQuestion = doc.splitTextToSize(questionText, safeWidth)
    const splitAnswer = doc.splitTextToSize(answerText, safeWidth)
     doc.text(splitAnswer, answerX, yState.y)
 
-    const sectionGap = design.layout.sectionSpacing + 8
+    const isLong = isLongAnswer(section.answer || '')
+
+const sectionGap = isLong
+  ? design.layout.sectionSpacing + 12
+  : design.layout.sectionSpacing + 6
     yState.y += splitAnswer.length * design.layout.lineHeight + sectionGap
 
     const sectionImage = images
@@ -1089,11 +1098,14 @@ doc.text(
         }
       }
 
-      if (!insertedQuotePage && index > 0 && index % 2 === 0) {
-        doc.addPage()
-        applyPageBackground(doc, design.theme.pageBg, metrics.pageWidth, metrics.pageHeight)
-        yState.y = metrics.marginTop
-      }
+      const isLong = isLongAnswer(section.answer || '')
+const isVeryLong = isVeryLongAnswer(section.answer || '')
+
+if (isVeryLong) {
+  doc.addPage()
+  applyPageBackground(doc, design.theme.pageBg, metrics.pageWidth, metrics.pageHeight)
+  yState.y = metrics.marginTop
+}
 
       await renderPortraitSection(
         doc,
@@ -1117,12 +1129,20 @@ doc.text(
         renderChapterHeading(doc, currentChapter, chapterIndex, activeSettings)
       }
 
-      if (shouldInsertQuotePage(index)) {
-        const quote = getQuoteForIndex(index, printableSections, highlightedSections)
-        if (quote) {
-          renderQuotePage(doc, quote, activeSettings)
-        }
-      }
+      const shouldQuote = shouldInsertQuotePageSmart(section, index)
+
+if (shouldQuote) {
+  const quote = getQuoteFromAnswer(section.answer || '')
+
+  if (quote) {
+    renderQuotePage(doc, quote, activeSettings)
+
+    // ALWAYS reset layout after quote
+    doc.addPage()
+    applyPageBackground(doc, design.theme.pageBg, metrics.pageWidth, metrics.pageHeight)
+    yState.y = metrics.marginTop
+  }
+}
 
       // Only add one new spread page for the content section.
       // Do not add any extra reset page after quote pages in spread mode.
