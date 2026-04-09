@@ -519,7 +519,7 @@ doc.text(splitIntro, metrics.centerX, 156, {
 
     
     const questionText = section.question
-    const safeWidth = metrics.contentWidth - 4
+    const safeWidth = metrics.contentWidth
 const splitQuestion = doc.splitTextToSize(questionText, safeWidth)
 
     const answerX =
@@ -942,27 +942,25 @@ doc.text('Take a moment to reflect on what comes next…', metrics.centerX, metr
     yState.y = metrics.marginTop
       }      
     }
-    const justInsertedQuotePage = shouldInsertQuotePage(index)
+   const insertedQuotePage = shouldInsertQuotePage(index)
 
-if (justInsertedQuotePage) {
+if (insertedQuotePage) {
   const quote = getQuoteFromAnswer(printableSections[index - 1]?.answer || '')
   if (quote) {
     renderQuotePage(doc, quote, activeSettings)
 
-    // always reset to a clean content page after a quote
+    // reset to a fresh normal page after the quote
     doc.addPage()
     applyPageBackground(doc, design.theme.pageBg, metrics.pageWidth, metrics.pageHeight)
     yState.y = metrics.marginTop
   }
 }
 
-
-if (!justInsertedQuotePage && index > 0 && index % 2 === 0) {
+if (!insertedQuotePage && index > 0 && index % 2 === 0) {
   doc.addPage()
   applyPageBackground(doc, design.theme.pageBg, metrics.pageWidth, metrics.pageHeight)
   yState.y = metrics.marginTop
 }
-
     await renderPortraitSection(
       doc,
       section,
