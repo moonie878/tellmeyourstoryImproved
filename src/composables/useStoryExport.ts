@@ -3,11 +3,6 @@ import { Document, Packer, Paragraph, TextRun } from 'docx'
 import { saveAs } from 'file-saver'
 import type { PdfSettings, StoryImage, StoryProject, StorySection } from '../types/story'
 import { getPdfDesign, getPageMetrics } from '../utils/pdfDesign'
-import {
-  isLongAnswer,
-  isVeryLongAnswer,
-  shouldInsertQuotePageSmart,
-} from '../utils/smartLayout'
 
 type ExportPdfArgs = {
   project: StoryProject
@@ -124,14 +119,8 @@ function getQuoteFromAnswer(answer: string, maxLength = 140) {
   return `${shortened.slice(0, lastSpace > 0 ? lastSpace : maxLength)}…`
 }
 
-
-function hasAnyHighlightedSections(sections: StorySection[]) {
-  return sections.some(
-    (section) =>
-      !!section.is_highlighted &&
-      !!section.answer &&
-      section.answer.trim().length > 0
-  )
+function shouldInsertQuotePage(index: number) {
+  return index > 0 && index % 5 === 0
 }
 
 function shouldUseCenteredSpreadLayout(
@@ -566,11 +555,7 @@ const splitQuestion = doc.splitTextToSize(questionText, safeWidth)
    const splitAnswer = doc.splitTextToSize(answerText, safeWidth)
     doc.text(splitAnswer, answerX, yState.y)
 
-    const isLong = isLongAnswer(section.answer || '')
-
-const sectionGap = isLong
-  ? design.layout.sectionSpacing + 12
-  : design.layout.sectionSpacing + 6
+    const sectionGap = design.layout.sectionSpacing + 8
     yState.y += splitAnswer.length * design.layout.lineHeight + sectionGap
 
     const sectionImage = images
@@ -1016,8 +1001,6 @@ doc.text(
     (section) => section.answer && section.answer.trim().length > 0
   )
 
-  const hasHighlightedQuotes = hasAnyHighlightedSections(printableSections)
-
   await renderCoverPage(
     doc,
     storyTitle,
@@ -1050,6 +1033,7 @@ doc.text(
         doc.addPage()
         renderChapterHeading(doc, currentChapter, chapterIndex, activeSettings)
 
+        // breathing page after chapter opener
         doc.addPage()
         applyPageBackground(doc, design.theme.secondaryBg, metrics.pageWidth, metrics.pageHeight)
         doc.setFontSize(14)
@@ -1061,30 +1045,27 @@ doc.text(
           { align: 'center' }
         )
 
+        // first content page for the chapter
         doc.addPage()
         applyPageBackground(doc, design.theme.pageBg, metrics.pageWidth, metrics.pageHeight)
         yState.y = metrics.marginTop
       }
 
-      const shouldQuote = hasHighlightedQuotes
-  ? !!section.is_highlighted
-  : shouldInsertQuotePageSmart(section, index)
+      const insertedQuotePage = shouldInsertQuotePage(index)
 
-      if (shouldQuote) {
-        const quote = getQuoteFromAnswer(section.answer || '')
-
+      if (insertedQuotePage) {
+        const quote = getQuoteFromAnswer(printableSections[index - 1]?.answer || '')
         if (quote) {
           renderQuotePage(doc, quote, activeSettings)
 
+          // always reset to a clean content page after quote
           doc.addPage()
           applyPageBackground(doc, design.theme.pageBg, metrics.pageWidth, metrics.pageHeight)
           yState.y = metrics.marginTop
         }
       }
 
-      const isVeryLong = isVeryLongAnswer(section.answer || '')
-
-      if (isVeryLong) {
+      if (!insertedQuotePage && index > 0 && index % 2 === 0) {
         doc.addPage()
         applyPageBackground(doc, design.theme.pageBg, metrics.pageWidth, metrics.pageHeight)
         yState.y = metrics.marginTop
@@ -1112,18 +1093,15 @@ doc.text(
         renderChapterHeading(doc, currentChapter, chapterIndex, activeSettings)
       }
 
-      const shouldQuote = hasHighlightedQuotes
-  ? !!section.is_highlighted
-  : shouldInsertQuotePageSmart(section, index)
-
-      if (shouldQuote) {
-        const quote = getQuoteFromAnswer(section.answer || '')
-
+      if (shouldInsertQuotePage(index)) {
+        const quote = getQuoteFromAnswer(printableSections[index - 1]?.answer || '')
         if (quote) {
           renderQuotePage(doc, quote, activeSettings)
         }
       }
 
+      // Only add one new spread page for the content section.
+      // Do not add any extra reset page after quote pages in spread mode.
       doc.addPage()
       await renderSpreadSection(
         doc,
