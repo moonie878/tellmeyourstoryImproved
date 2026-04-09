@@ -300,6 +300,7 @@
       :has-tier4-access="hasTier4Access"
       :cover-image-url="coverImageUrl"
       :project-title="project?.title"
+      :sections="sections"
       @close="showPremiumPreview = false"
       @upgrade="upgradeFromPreviewModal"
       @open-customiser="openCustomiserFromPreview"

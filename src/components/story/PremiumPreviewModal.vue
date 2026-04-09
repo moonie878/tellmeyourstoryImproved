@@ -98,19 +98,19 @@
     </h4>
 
     <p class="mt-3 text-sm leading-6 text-stone-500">
-      A beautifully designed memory book with richer pacing, imagery, and a more polished keepsake feel.
-    </p>
+  {{ previewSubtitle }}
+</p>
 
     <div class="mt-5 border-t border-stone-200 pt-4">
       <p class="text-xs uppercase tracking-[0.24em] text-stone-500">
-        Chapter One
-      </p>
-      <h5 class="mt-2 font-serif text-2xl text-stone-900">
-        Beginnings
-      </h5>
-      <p class="mt-4 text-sm italic leading-6 text-stone-600">
-        “Home felt warm, busy, and comforting. It smelled of cooking, washing drying near the fire, and sometimes fresh bread.”
-      </p>
+  Chapter Preview
+</p>
+<h5 class="mt-2 font-serif text-2xl text-stone-900">
+  {{ previewChapter }}
+</h5>
+<p class="mt-4 text-sm italic leading-6 text-stone-600">
+  “{{ previewQuote }}”
+</p>
     </div>
   </div>
 
@@ -126,20 +126,20 @@
         {{ projectTitle || 'Your Story Title' }}
       </h4>
 
-      <p class="mt-4 text-sm leading-6 text-stone-500">
-        A life told through memories, moments, and love
-      </p>
+     <p class="mt-4 text-sm leading-6 text-stone-500">
+  {{ previewSubtitle }}
+</p>
 
       <div class="mt-8 border-t border-stone-200 pt-6">
         <p class="text-xs uppercase tracking-[0.24em] text-stone-500">
-          Chapter One
-        </p>
-        <h5 class="mt-3 font-serif text-3xl text-stone-900">
-          Beginnings
-        </h5>
-        <p class="mt-6 text-sm italic leading-7 text-stone-600">
-          “Home felt warm, busy, and comforting. It smelled of cooking, washing drying near the fire, and sometimes fresh bread.”
-        </p>
+  Chapter Preview
+</p>
+<h5 class="mt-3 font-serif text-3xl text-stone-900">
+  {{ previewChapter }}
+</h5>
+<p class="mt-6 text-sm italic leading-7 text-stone-600">
+  “{{ previewQuote }}”
+</p>
       </div>
     </div>
 
@@ -161,12 +161,12 @@
       </div>
 
       <div class="mt-5">
-        <p class="text-sm font-semibold text-stone-900">
-          A beautifully designed keepsake
-        </p>
-        <p class="mt-2 text-sm leading-6 text-stone-600">
-          Richer layouts, stronger emotional pacing, photo-led pages, and a more polished final book feel.
-        </p>
+       <p class="text-sm font-semibold text-stone-900">
+  {{ previewQuestion }}
+</p>
+<p class="mt-2 text-sm leading-6 text-stone-600">
+  Richer layouts, stronger emotional pacing, quote moments, photo-led pages, and a more polished final keepsake feel.
+</p>
       </div>
     </div>
   </div>
@@ -198,18 +198,18 @@
       </p>
 
       <div class="mt-6 border-t border-stone-200 pt-4">
-        <p class="text-sm font-semibold text-stone-800">
-          Chapter Preview
-        </p>
-        <p class="mt-1 text-xs text-stone-500">
-          Beginnings
-        </p>
-        <p class="mt-3 text-sm text-stone-700">
-          Where and when were you born?
-        </p>
-        <p class="mt-2 text-xs leading-6 text-stone-500">
-          Clean, readable, and simple — but without the richer keepsake feel.
-        </p>
+       <p class="text-sm font-semibold text-stone-800">
+  Chapter Preview
+</p>
+<p class="mt-1 text-xs text-stone-500">
+  {{ previewChapter }}
+</p>
+<p class="mt-3 text-sm text-stone-700">
+  {{ previewQuestion }}
+</p>
+<p class="mt-2 text-xs leading-6 text-stone-500">
+  Clean, readable, and simple — but without the richer keepsake feel.
+</p>
       </div>
     </div>
   </div>
@@ -323,6 +323,12 @@ const props = defineProps<{
   hasTier4Access: boolean
   coverImageUrl: string
   projectTitle?: string
+  sections?: Array<{
+    chapter?: string
+    question?: string
+    answer?: string
+    is_highlighted?: boolean
+  }>
 }>()
 
 defineEmits<{
@@ -345,5 +351,55 @@ const {
 
 const previewCoverImageSrc = computed(() => {
   return props.coverImageUrl || sampleCoverImage
+})
+
+const answeredSections = computed(() => {
+  return (props.sections || []).filter(
+    (section) => !!section.answer && section.answer.trim().length > 0
+  )
+})
+
+const highlightedSections = computed(() => {
+  return answeredSections.value.filter((section) => !!section.is_highlighted)
+})
+
+const previewChapter = computed(() => {
+  return (
+    answeredSections.value.find((section) => section.chapter)?.chapter ||
+    'Beginnings'
+  )
+})
+
+const previewQuestion = computed(() => {
+  return (
+    answeredSections.value.find((section) => section.question)?.question ||
+    'Where and when were you born?'
+  )
+})
+
+const previewQuote = computed(() => {
+  const source =
+    highlightedSections.value[0]?.answer ||
+    answeredSections.value[0]?.answer ||
+    ''
+
+  if (!source) {
+    return 'A story filled with meaningful memories, moments, and love.'
+  }
+
+  const cleaned = source.replace(/\s+/g, ' ').trim()
+
+  if (cleaned.length <= 140) return cleaned
+
+  const shortened = cleaned.slice(0, 140)
+  const lastSpace = shortened.lastIndexOf(' ')
+
+  return `${shortened.slice(0, lastSpace > 0 ? lastSpace : 140)}…`
+})
+
+const previewSubtitle = computed(() => {
+  return highlightedSections.value.length > 0
+    ? 'A more personal, beautifully finished keepsake'
+    : 'A beautifully designed memory book'
 })
 </script>
