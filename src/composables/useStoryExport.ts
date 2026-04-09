@@ -143,7 +143,7 @@ function shouldInsertQuotePage(index: number) {
       const leftPageNumber = pageNumber * 2 - 1
       const rightPageNumber = pageNumber * 2
 
-      if (pageNumber > 4) {
+      if (pageNumber > 6) {
         doc.setFontSize(8)
         doc.text(storyTitle, leftCenter, 14, { align: 'center' })
         doc.text(storyTitle, rightCenter, 14, { align: 'center' })
@@ -160,7 +160,7 @@ function shouldInsertQuotePage(index: number) {
       return
     }
 
-    if (pageNumber > 4) {
+    if (pageNumber > 6) {
   doc.setFontSize(8)
   doc.text(storyTitle, pageWidth / 2, settings.printReady ? 12 : 14, {
     align: 'center',
@@ -365,7 +365,7 @@ doc.setFontSize(18)
 setTextColor(doc, design.theme.textPrimary)
 
 setDrawColor(doc, design.theme.divider)
-doc.line(70, 118, 140, 118)
+doc.line(60, 110, 150, 110)
 
 const splitQuote = doc.splitTextToSize(`“${quote}”`, metrics.contentWidth - 26)
 doc.text(splitQuote, metrics.centerX, 145, {
@@ -381,13 +381,14 @@ doc.text(splitQuote, metrics.centerX, 145, {
   doc.text('A memory worth keeping', metrics.centerX, 94, { align: 'center' })
 
   doc.setFont(design.font.title, design.font.accentStyle)
-  doc.setFontSize(18)
+  doc.setFontSize(20)
   setTextColor(doc, design.theme.textPrimary)
 
   const splitQuote = doc.splitTextToSize(`“${quote}”`, metrics.contentWidth - 26)
   doc.text(splitQuote, metrics.centerX, 132, {
     align: 'center',
   })
+  doc.line(60, 180, 150, 180)
 }
 
   function renderChapterHeading(
@@ -463,7 +464,7 @@ doc.text(String(chapterIndex + 1), metrics.centerX, 145, {
   doc.setFontSize(11)
   setTextColor(doc, design.theme.textSecondary)
   const splitIntro = doc.splitTextToSize(intro, metrics.contentWidth - 26)
-  doc.text(splitIntro, metrics.centerX, 132, {
+  doc.text(splitIntro, metrics.centerX, 140, {
     align: 'center',
   })
 }
@@ -480,7 +481,7 @@ doc.text(String(chapterIndex + 1), metrics.centerX, 145, {
     const design = getPdfDesign(settings)
     const metrics = getPageMetrics(settings)
 
-    if (yState.y > 240) {
+    if (yState.y > 220) {
       doc.addPage()
       applyPageBackground(doc, design.theme.pageBg, metrics.pageWidth, metrics.pageHeight)
       yState.y = metrics.marginTop
