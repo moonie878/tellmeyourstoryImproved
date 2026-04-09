@@ -186,8 +186,8 @@
     </p>
   </div>
 </div>
-
-                <div class="sticky bottom-0 mt-6 border-t border-stone-200 bg-white pt-4">
+<div class="sticky bottom-0 mt-6 border-t border-stone-200 bg-white pt-4">
+                <div class="mt-6 flex items-center justify-between gap-4">
                     <button @click="$emit('previous')"
                             :disabled="currentIndex === 0"
                             class="cursor-pointer rounded-full border border-stone-300 px-5 py-2 disabled:opacity-50 transition hover:-translate-y-1 hover:shadow-md">
@@ -199,6 +199,7 @@
                         {{ currentIndex === totalSections - 1 ? 'Finish your story' : 'Next' }}
                     </button>
                 </div>
+</div>
             </div>
         </Transition>
     </div>
