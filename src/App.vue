@@ -16,6 +16,10 @@
             Home
           </router-link>
 
+           <router-link to="/contact" class="text-stone-600 hover:text-stone-900">
+            Contact
+          </router-link>
+
           <template v-if="user">
             <router-link to="/dashboard" class="text-stone-600 hover:text-stone-900">
               Dashboard
