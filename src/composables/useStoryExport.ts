@@ -143,11 +143,11 @@ function shouldInsertQuotePage(index: number) {
       const leftPageNumber = pageNumber * 2 - 1
       const rightPageNumber = pageNumber * 2
 
-      if (pageNumber > 6) {
-        doc.setFontSize(8)
-        doc.text(storyTitle, leftCenter, 14, { align: 'center' })
-        doc.text(storyTitle, rightCenter, 14, { align: 'center' })
-      }
+      if (pageNumber > 8 && pageNumber % 2 === 0) {
+  doc.setFontSize(8)
+  doc.text(storyTitle, leftCenter, 14, { align: 'center' })
+  doc.text(storyTitle, rightCenter, 14, { align: 'center' })
+}
 
       doc.setFontSize(9)
       doc.text(`${leftPageNumber}`, leftCenter, pageHeight - 10, {
@@ -160,7 +160,7 @@ function shouldInsertQuotePage(index: number) {
       return
     }
 
-    if (pageNumber > 6) {
+    if (pageNumber > 8 && pageNumber % 2 === 0) {
   doc.setFontSize(8)
   doc.text(storyTitle, pageWidth / 2, settings.printReady ? 12 : 14, {
     align: 'center',
@@ -360,17 +360,19 @@ function renderQuotePage(
       align: 'center',
     })
 
-    doc.setFont(design.font.title, design.font.accentStyle)
+    doc.setDrawColor(200, 200, 200)
+doc.line(70, 110, 140, 110)
+
+doc.setFont(design.font.title, design.font.accentStyle)
 doc.setFontSize(18)
 setTextColor(doc, design.theme.textPrimary)
-
-setDrawColor(doc, design.theme.divider)
-doc.line(60, 110, 150, 110)
 
 const splitQuote = doc.splitTextToSize(`“${quote}”`, metrics.contentWidth - 26)
 doc.text(splitQuote, metrics.centerX, 145, {
   align: 'center',
 })
+
+doc.line(70, 185, 140, 185)
 
     return
   }
@@ -427,12 +429,12 @@ doc.text(splitQuote, metrics.centerX, 145, {
     doc.line(metrics.rightX + 14, 86, metrics.rightX + metrics.columnWidth - 14, 86)
 
     doc.setFont(design.font.body, design.font.accentStyle)
-    doc.setFontSize(11)
-    setTextColor(doc, design.theme.textSecondary)
-    const splitIntro = doc.splitTextToSize(intro, metrics.columnWidth - 24)
-    doc.text(splitIntro, metrics.rightX + metrics.columnWidth / 2, 102, {
-      align: 'center',
-    })
+doc.setFontSize(12)
+doc.setTextColor(120, 120, 120)
+const splitIntro = doc.splitTextToSize(intro, metrics.contentWidth - 26)
+doc.text(splitIntro, metrics.centerX, 140, {
+  align: 'center',
+})
 
     return
   }
@@ -481,7 +483,7 @@ doc.text(String(chapterIndex + 1), metrics.centerX, 145, {
     const design = getPdfDesign(settings)
     const metrics = getPageMetrics(settings)
 
-    if (yState.y > 220) {
+    if (yState.y > 210) {
       doc.addPage()
       applyPageBackground(doc, design.theme.pageBg, metrics.pageWidth, metrics.pageHeight)
       yState.y = metrics.marginTop
@@ -570,12 +572,12 @@ doc.text(String(chapterIndex + 1), metrics.centerX, 145, {
     }
 
     if (design.layout.showSectionDividers && yState.y < metrics.maxY) {
-      setDrawColor(doc, design.theme.divider)
-      doc.line(metrics.marginLeft, yState.y, metrics.pageWidth - metrics.marginRight, yState.y)
-      yState.y += design.layout.sectionSpacing
-    } else {
-      yState.y += design.layout.sectionSpacing + 2
-    }
+  setDrawColor(doc, design.theme.divider)
+  doc.line(metrics.marginLeft, yState.y, metrics.pageWidth - metrics.marginRight, yState.y)
+  yState.y += design.layout.sectionSpacing + 6
+} else {
+  yState.y += design.layout.sectionSpacing + 8
+}
   }
 
   async function renderSpreadSection(
@@ -868,14 +870,17 @@ if (activeSettings.orientation === 'portrait') {
     const section = printableSections[index]
 
     if (section.chapter && section.chapter !== currentChapter) {
-      currentChapter = section.chapter
-      chapterIndex += 1
+  currentChapter = section.chapter
+  chapterIndex += 1
 
-      doc.addPage()
-      renderChapterHeading(doc, currentChapter, chapterIndex, activeSettings)
+  doc.addPage()
+  renderChapterHeading(doc, currentChapter, chapterIndex, activeSettings)
 
-      yState.y = activeSettings.printReady ? 170 : 160
-    }
+  // start story content on a fresh page
+  doc.addPage()
+  applyPageBackground(doc, design.theme.pageBg, metrics.pageWidth, metrics.pageHeight)
+  yState.y = metrics.marginTop
+}
 
     if (shouldInsertQuotePage(index)) {
       const quote = getQuoteFromAnswer(printableSections[index - 1]?.answer || '')
