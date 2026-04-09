@@ -143,7 +143,7 @@ function shouldInsertQuotePage(index: number) {
       const leftPageNumber = pageNumber * 2 - 1
       const rightPageNumber = pageNumber * 2
 
-      if (pageNumber > 8 && pageNumber % 2 === 0) {
+      if (pageNumber > 8 && pageNumber % 4 === 0) {
   doc.setFontSize(8)
   doc.text(storyTitle, leftCenter, 14, { align: 'center' })
   doc.text(storyTitle, rightCenter, 14, { align: 'center' })
@@ -362,6 +362,11 @@ function renderQuotePage(
 
     doc.setDrawColor(200, 200, 200)
 doc.line(70, 110, 140, 110)
+// BIG quotation mark
+doc.setFontSize(60)
+doc.setTextColor(220, 220, 220)
+doc.text('“', 60, 120)
+
 
 doc.setFont(design.font.title, design.font.accentStyle)
 doc.setFontSize(18)
@@ -372,6 +377,10 @@ doc.text(splitQuote, metrics.centerX, 145, {
   align: 'center',
 })
 
+// closing mark
+doc.setFontSize(60)
+doc.setTextColor(220, 220, 220)
+doc.text('”', 150, 190)
 doc.line(70, 185, 140, 185)
 
     return
@@ -493,6 +502,8 @@ doc.text(String(chapterIndex + 1), metrics.centerX, 145, {
     doc.setFontSize(design.layout.questionSize - 0.5)
     setTextColor(doc, design.theme.textSecondary)
 
+
+    
     const questionText = section.question
     const splitQuestion = doc.splitTextToSize(questionText, metrics.contentWidth)
     const answerX =
@@ -565,6 +576,11 @@ doc.text(String(chapterIndex + 1), metrics.centerX, 145, {
         }
 
         doc.addImage(imgData, 'PNG', x, yState.y, imgWidth, imgHeight)
+        doc.setFontSize(10)
+doc.setTextColor(140, 140, 140)
+doc.text('A moment captured in time', metrics.centerX, yState.y + 6, {
+  align: 'center',
+})
         yState.y += imgHeight + design.layout.imageSpacing
       } catch (err) {
         console.error(err)
@@ -875,6 +891,17 @@ if (activeSettings.orientation === 'portrait') {
 
   doc.addPage()
   renderChapterHeading(doc, currentChapter, chapterIndex, activeSettings)
+
+// NEW: add breathing page
+doc.addPage()
+applyPageBackground(doc, design.theme.secondaryBg, metrics.pageWidth, metrics.pageHeight)
+
+// optional small quote or empty page
+doc.setFontSize(10)
+doc.setTextColor(150, 150, 150)
+doc.text('Take a moment to reflect…', metrics.centerX, metrics.pageHeight / 2, {
+  align: 'center',
+})
 
   // start story content on a fresh page
   doc.addPage()
