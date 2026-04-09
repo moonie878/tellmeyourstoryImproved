@@ -842,185 +842,175 @@ doc.text(
   }
 
   async function exportPdf({
-    project,
-    sections,
-    settings,
-    hasTier4Access,
-    hasImageExportAccess,
-    coverImageUrl,
-    getAllImagesForExport,
-    loadImageAsBase64,
-  }: ExportPdfArgs) {
-    const activeSettings: PdfSettings = hasTier4Access
-      ? settings
-      : {
-          layout: 'classic',
-          font: 'serif',
-          theme: 'warm',
-          orientation: 'portrait',
-          includeCoverImage: hasImageExportAccess,
-          includeDedication: false,
-          printReady: false,
-        }
-
-    const design = getPdfDesign(activeSettings)
-    const metrics = getPageMetrics(activeSettings)
-
-    const doc = new jsPDF({
-      orientation: activeSettings.orientation === 'landscape-spread' ? 'l' : 'p',
-      unit: 'mm',
-      format: 'a4',
-    })
-
-    const storyTitle = project?.title || 'Tell Me Your Story'
-    const storySubtitle = getStorySubtitle(project)
-
-    const printableSections = sections.filter(
-      (section) => section.answer && section.answer.trim().length > 0
-    )
-
-    await renderCoverPage(
-      doc,
-      storyTitle,
-      storySubtitle,
-      activeSettings,
-      coverImageUrl,
-      hasTier4Access,
-      loadImageAsBase64
-    )
-
-    if (activeSettings.includeDedication && hasTier4Access) {
-      renderDedicationPage(doc, activeSettings)
-    }
-
-    const images = await getAllImagesForExport()
-
-    doc.addPage()
-    applyPageBackground(doc, design.theme.pageBg, metrics.pageWidth, metrics.pageHeight)
-
-   let currentChapter = ''
-let chapterIndex = -1
-
-if (activeSettings.orientation === 'portrait') {
-  const yState = { y: metrics.marginTop }
-
-  for (let index = 0; index < printableSections.length; index++) {
-    const section = printableSections[index]
-
-    if (section.chapter && section.chapter !== currentChapter) {
-  currentChapter = section.chapter
-  chapterIndex += 1
-
-  doc.addPage()
-  renderChapterHeading(doc, currentChapter, chapterIndex, activeSettings)
-
-// NEW: add breathing page
-doc.addPage()
-applyPageBackground(doc, design.theme.secondaryBg, metrics.pageWidth, metrics.pageHeight)
-
-// optional small quote or empty page
-doc.setFontSize(14)
-doc.setTextColor(120, 120, 120)
-doc.text('Take a moment to reflect on what comes next…', metrics.centerX, metrics.pageHeight / 2, {
-  align: 'center',
-})
-
-  // start story content on a fresh page
-  doc.addPage()
-  applyPageBackground(doc, design.theme.pageBg, metrics.pageWidth, metrics.pageHeight)
-  yState.y = metrics.marginTop
-}
-
-    if (shouldInsertQuotePage(index)) {
-      const quote = getQuoteFromAnswer(printableSections[index - 1]?.answer || '')
-      if (quote) {
-        renderQuotePage(doc, quote, activeSettings)
-
-        // start the next story content on a fresh normal page
-    doc.addPage()
-    applyPageBackground(doc, design.theme.pageBg, metrics.pageWidth, metrics.pageHeight)
-    yState.y = metrics.marginTop
-      }      
-    }
-   const insertedQuotePage = shouldInsertQuotePage(index)
-
-if (insertedQuotePage) {
-  const quote = getQuoteFromAnswer(printableSections[index - 1]?.answer || '')
-  if (quote) {
-    renderQuotePage(doc, quote, activeSettings)
-
-    // reset to a fresh normal page after the quote
-    doc.addPage()
-    applyPageBackground(doc, design.theme.pageBg, metrics.pageWidth, metrics.pageHeight)
-    yState.y = metrics.marginTop
-  }
-}
-
-if (!insertedQuotePage && index > 0 && index % 2 === 0) {
-  doc.addPage()
-  applyPageBackground(doc, design.theme.pageBg, metrics.pageWidth, metrics.pageHeight)
-  yState.y = metrics.marginTop
-}
-    await renderPortraitSection(
-      doc,
-      section,
-      activeSettings,
-      images,
-      yState,
-      hasImageExportAccess,
-      loadImageAsBase64
-    )
-  }
-} else {
-  for (let index = 0; index < printableSections.length; index++) {
-    const section = printableSections[index]
-
-    if (section.chapter && section.chapter !== currentChapter) {
-      currentChapter = section.chapter
-      chapterIndex += 1
-
-      doc.addPage()
-      renderChapterHeading(doc, currentChapter, chapterIndex, activeSettings)
-    }
-
-    if (shouldInsertQuotePage(index)) {
-      const quote = getQuoteFromAnswer(printableSections[index - 1]?.answer || '')
-      if (quote) {
-        renderQuotePage(doc, quote, activeSettings)
+  project,
+  sections,
+  settings,
+  hasTier4Access,
+  hasImageExportAccess,
+  coverImageUrl,
+  getAllImagesForExport,
+  loadImageAsBase64,
+}: ExportPdfArgs) {
+  const activeSettings: PdfSettings = hasTier4Access
+    ? settings
+    : {
+        layout: 'classic',
+        font: 'serif',
+        theme: 'warm',
+        orientation: 'portrait',
+        includeCoverImage: hasImageExportAccess,
+        includeDedication: false,
+        printReady: false,
       }
-    }
 
-    doc.addPage()
-    await renderSpreadSection(
-      doc,
-      section,
-      activeSettings,
-      images,
-      hasImageExportAccess,
-      loadImageAsBase64
-    )
+  const design = getPdfDesign(activeSettings)
+  const metrics = getPageMetrics(activeSettings)
+
+  const doc = new jsPDF({
+    orientation: activeSettings.orientation === 'landscape-spread' ? 'l' : 'p',
+    unit: 'mm',
+    format: 'a4',
+  })
+
+  const storyTitle = project?.title || 'Tell Me Your Story'
+  const storySubtitle = getStorySubtitle(project)
+
+  const printableSections = sections.filter(
+    (section) => section.answer && section.answer.trim().length > 0
+  )
+
+  await renderCoverPage(
+    doc,
+    storyTitle,
+    storySubtitle,
+    activeSettings,
+    coverImageUrl,
+    hasTier4Access,
+    loadImageAsBase64
+  )
+
+  if (activeSettings.includeDedication && hasTier4Access) {
+    renderDedicationPage(doc, activeSettings)
   }
-}
 
-    renderClosingPage(doc, activeSettings)
+  const images = await getAllImagesForExport()
 
-    const totalPages = doc.getNumberOfPages()
+  let currentChapter = ''
+  let chapterIndex = -1
 
-    for (let i = 1; i <= totalPages; i++) {
-      doc.setPage(i)
-      addFooter(
+  if (activeSettings.orientation === 'portrait') {
+    const yState = { y: metrics.marginTop }
+
+    for (let index = 0; index < printableSections.length; index++) {
+      const section = printableSections[index]
+
+      if (section.chapter && section.chapter !== currentChapter) {
+        currentChapter = section.chapter
+        chapterIndex += 1
+
+        doc.addPage()
+        renderChapterHeading(doc, currentChapter, chapterIndex, activeSettings)
+
+        // breathing page after chapter opener
+        doc.addPage()
+        applyPageBackground(doc, design.theme.secondaryBg, metrics.pageWidth, metrics.pageHeight)
+        doc.setFontSize(14)
+        doc.setTextColor(120, 120, 120)
+        doc.text(
+          'Take a moment to reflect on what comes next…',
+          metrics.centerX,
+          metrics.pageHeight / 2,
+          { align: 'center' }
+        )
+
+        // first content page for the chapter
+        doc.addPage()
+        applyPageBackground(doc, design.theme.pageBg, metrics.pageWidth, metrics.pageHeight)
+        yState.y = metrics.marginTop
+      }
+
+      const insertedQuotePage = shouldInsertQuotePage(index)
+
+      if (insertedQuotePage) {
+        const quote = getQuoteFromAnswer(printableSections[index - 1]?.answer || '')
+        if (quote) {
+          renderQuotePage(doc, quote, activeSettings)
+
+          // always reset to a clean content page after quote
+          doc.addPage()
+          applyPageBackground(doc, design.theme.pageBg, metrics.pageWidth, metrics.pageHeight)
+          yState.y = metrics.marginTop
+        }
+      }
+
+      if (!insertedQuotePage && index > 0 && index % 2 === 0) {
+        doc.addPage()
+        applyPageBackground(doc, design.theme.pageBg, metrics.pageWidth, metrics.pageHeight)
+        yState.y = metrics.marginTop
+      }
+
+      await renderPortraitSection(
         doc,
-        i,       
-        storyTitle,
-        design.theme.textMuted,
-        metrics.pageWidth,
-        metrics.pageHeight,
-        activeSettings
+        section,
+        activeSettings,
+        images,
+        yState,
+        hasImageExportAccess,
+        loadImageAsBase64
       )
     }
+  } else {
+    for (let index = 0; index < printableSections.length; index++) {
+      const section = printableSections[index]
 
-    doc.save(`${sanitizeFileName(storyTitle)}.pdf`)
+      if (section.chapter && section.chapter !== currentChapter) {
+        currentChapter = section.chapter
+        chapterIndex += 1
+
+        doc.addPage()
+        renderChapterHeading(doc, currentChapter, chapterIndex, activeSettings)
+      }
+
+      if (shouldInsertQuotePage(index)) {
+        const quote = getQuoteFromAnswer(printableSections[index - 1]?.answer || '')
+        if (quote) {
+          renderQuotePage(doc, quote, activeSettings)
+        }
+      }
+
+      // Only add one new spread page for the content section.
+      // Do not add any extra reset page after quote pages in spread mode.
+      doc.addPage()
+      await renderSpreadSection(
+        doc,
+        section,
+        activeSettings,
+        images,
+        hasImageExportAccess,
+        loadImageAsBase64
+      )
+    }
   }
+
+  renderClosingPage(doc, activeSettings)
+
+  const totalPages = doc.getNumberOfPages()
+
+  for (let i = 1; i <= totalPages; i++) {
+    doc.setPage(i)
+    addFooter(
+      doc,
+      i,
+      storyTitle,
+      design.theme.textMuted,
+      metrics.pageWidth,
+      metrics.pageHeight,
+      activeSettings
+    )
+  }
+
+  doc.save(`${sanitizeFileName(storyTitle)}.pdf`)
+}
 
   return {
     exportPdf,
