@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import { supabase } from '../lib/supabase'
 import ForgotPasswordView from '../views/ForgotPasswordView.vue'
 import ResetPasswordView from '../views/ResetPasswordView.vue'
+import ContactView from '../views/ContactView.vue'
 
 const routes = [
   {
@@ -55,6 +56,11 @@ const routes = [
   path: '/reset-password',
   name: 'reset-password',
   component: ResetPasswordView,
+},
+{
+  path: '/contact',
+  name: 'contact',
+  component: ContactView,
 },
 ]
 

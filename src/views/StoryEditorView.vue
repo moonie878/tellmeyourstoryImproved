@@ -1,4 +1,20 @@
 <template>
+  <div
+  v-if="checkoutLoading"
+  class="fixed inset-0 z-[70] flex items-center justify-center bg-black/50 px-6"
+>
+  <div class="w-full max-w-md rounded-[2rem] bg-white p-8 text-center shadow-2xl">
+    <div class="mx-auto h-10 w-10 animate-spin rounded-full border-4 border-stone-200 border-t-[#7C5C3B]"></div>
+
+    <h3 class="mt-6 text-xl font-semibold text-stone-900">
+      Preparing your checkout
+    </h3>
+
+    <p class="mt-3 text-sm leading-6 text-stone-600">
+      This can take a few moments while everything loads. Please don’t close this page.
+    </p>
+  </div>
+</div>
   <div class="min-h-screen bg-stone-50 px-6 py-12">
     <div v-if="project" class="mb-6">
       <label class="mb-2 block text-sm font-medium text-stone-600">

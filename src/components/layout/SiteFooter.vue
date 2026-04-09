@@ -15,11 +15,30 @@
           </p>
         </div>
 
-        <nav class="flex flex-wrap gap-4 text-sm text-stone-600">
-          <router-link to="/privacy" class="hover:text-stone-900">Privacy</router-link>
-          <router-link to="/cookies" class="hover:text-stone-900">Cookies</router-link>
-          <router-link to="/terms" class="hover:text-stone-900">Terms</router-link>
-        </nav>
+        <div class="mt-6 flex flex-wrap items-center justify-center gap-4 text-sm text-stone-600">
+  <router-link to="/privacy" class="hover:text-stone-900">Privacy</router-link>
+  <router-link to="/terms" class="hover:text-stone-900">Terms</router-link>
+  <router-link to="/cookies" class="hover:text-stone-900">Cookies</router-link>
+  <router-link to="/contact" class="hover:text-stone-900">Contact</router-link>
+
+  <a
+    href="https://www.tiktok.com/@yourhandle"
+    target="_blank"
+    rel="noopener noreferrer"
+    class="hover:text-stone-900"
+  >
+    TikTok
+  </a>
+
+  <a
+    href="https://www.instagram.com/yourhandle"
+    target="_blank"
+    rel="noopener noreferrer"
+    class="hover:text-stone-900"
+  >
+    Instagram
+  </a>
+</div>
       </div>
     </div>
   </footer>

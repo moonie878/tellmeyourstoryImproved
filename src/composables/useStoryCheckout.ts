@@ -27,19 +27,17 @@ export function useStoryCheckout(
     }
 
     checkoutLoading.value = true
-    await saveCurrentAnswerBeforeCheckout()
 
     try {
+      await saveCurrentAnswerBeforeCheckout()
+
+      const { supabase } = await import('../lib/supabase')
       const {
         data: { user },
-      } = await import('../lib/supabase').then(({ supabase }) =>
-        supabase.auth.getUser()
-      )
+      } = await supabase.auth.getUser()
 
       if (!user) {
-        checkoutLoading.value = false
-        alert('You must be logged in to upgrade.')
-        return
+        throw new Error('You must be logged in to upgrade.')
       }
 
       const response = await fetch(`${API_BASE_URL}/create-checkout-session`, {
@@ -59,24 +57,25 @@ export function useStoryCheckout(
       if (!response.ok) {
         const errorText = await response.text()
         console.error('Checkout response error:', errorText)
-        checkoutLoading.value = false
-        alert('Could not start checkout.')
-        return
+        throw new Error('Could not start checkout.')
       }
 
       const data = await response.json()
 
-      if (data.url) {
-        window.location.href = data.url
-        return
+      if (!data.url) {
+        throw new Error('Could not start checkout.')
       }
 
-      checkoutLoading.value = false
-      alert('Could not start checkout.')
+      window.location.href = data.url
+      return
     } catch (error) {
       console.error('Checkout error:', error)
+      alert(
+        error instanceof Error
+          ? error.message
+          : 'Could not start checkout.'
+      )
       checkoutLoading.value = false
-      alert('Could not start checkout.')
     }
   }
 
