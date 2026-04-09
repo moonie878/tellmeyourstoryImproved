@@ -350,36 +350,41 @@ function renderQuotePage(
   applyPageBackground(doc, design.theme.secondaryBg, metrics.pageWidth, metrics.pageHeight)
 
   if (settings.orientation === 'landscape-spread') {
-    setDrawColor(doc, design.theme.divider)
-    doc.line(metrics.centerX, 18, metrics.centerX, metrics.pageHeight - 18)
+  // center divider (book fold)
+  setDrawColor(doc, design.theme.divider)
+  doc.line(metrics.centerX, 18, metrics.centerX, metrics.pageHeight - 18)
 
-    doc.setFont(design.font.body, 'normal')
-    doc.setFontSize(10)
-    setTextColor(doc, design.theme.textMuted)
-    doc.text('A memory worth keeping', metrics.rightX + metrics.columnWidth / 2, 64, {
-      align: 'center',
-    })
+  const leftCenter = metrics.leftX + metrics.columnWidth / 2
+  const rightCenter = metrics.rightX + metrics.columnWidth / 2
 
-    doc.setDrawColor(200, 200, 200)
-doc.line(70, 110, 140, 110)
+  // ===== LABEL (BOTH PAGES)
+  doc.setFont(design.font.body, 'normal')
+  doc.setFontSize(10)
+  setTextColor(doc, design.theme.textMuted)
 
+  doc.text('A memory worth keeping', leftCenter, 60, { align: 'center' })
+  doc.text('A memory worth keeping', rightCenter, 60, { align: 'center' })
 
+  // ===== DIVIDER LINES (BOTH PAGES)
+  setDrawColor(doc, design.theme.divider)
 
-doc.setFont(design.font.title, design.font.accentStyle)
-doc.setFontSize(18)
-setTextColor(doc, design.theme.textPrimary)
+  doc.line(leftCenter - 35, 110, leftCenter + 35, 110)
+  doc.line(rightCenter - 35, 110, rightCenter + 35, 110)
 
-const cleanQuote = `“${quote}”`
-const splitQuote = doc.splitTextToSize(cleanQuote, 120)
+  // ===== QUOTE (CENTERED ACROSS BOTH PAGES)
+  doc.setFont(design.font.title, design.font.accentStyle)
+  doc.setFontSize(18)
+  setTextColor(doc, design.theme.textPrimary)
 
-doc.text(splitQuote, metrics.centerX, 145, {
-  align: 'center',
-})
+  const cleanQuote = `“${quote}”`
+  const splitQuote = doc.splitTextToSize(cleanQuote, 140)
 
+  doc.text(splitQuote, metrics.centerX, 145, {
+    align: 'center',
+  })
 
-
-    return
-  }
+  return
+}
 
  doc.setFont(design.font.body, 'normal')
 doc.setFontSize(10)
