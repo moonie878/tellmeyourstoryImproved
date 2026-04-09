@@ -123,6 +123,19 @@ function shouldInsertQuotePage(index: number) {
   return index > 0 && index % 5 === 0
 }
 
+function shouldUseCenteredSpreadLayout(
+  section: StorySection,
+  hasImage: boolean
+) {
+  if (hasImage) return false
+
+  const answerLength = (section.answer || '').trim().length
+  const questionLength = (section.question || '').trim().length
+  const totalLength = answerLength + questionLength
+
+  return totalLength <= 360
+}
+
   function addFooter(
     doc: jsPDF,
     pageNumber: number,   
@@ -362,8 +375,9 @@ function renderQuotePage(
   doc.setFontSize(10)
   setTextColor(doc, design.theme.textMuted)
 
-  doc.text('A memory worth keeping', leftCenter, 60, { align: 'center' })
-  doc.text('A memory worth keeping', rightCenter, 60, { align: 'center' })
+ doc.text('A memory worth keeping', metrics.centerX, 60, {
+  align: 'center',
+})
 
   // ===== DIVIDER LINES (BOTH PAGES)
   setDrawColor(doc, design.theme.divider)
@@ -640,24 +654,27 @@ yState.y += design.layout.imageSpacing
     )[0]
 
   const hasImage = !!(hasImageExportAccess && sectionImage?.image_url)
+  const useCenteredLayout = shouldUseCenteredSpreadLayout(section, hasImage)
 
-  // If there is NO image, use a wider spread text layout
-  if (!hasImage) {
-    applyPageBackground(doc, design.theme.pageBg, metrics.pageWidth, metrics.pageHeight)
+  // If there is NO image, choose smart text layout
+if (!hasImage) {
+  applyPageBackground(doc, design.theme.pageBg, metrics.pageWidth, metrics.pageHeight)
 
-    doc.setDrawColor(245, 245, 245)
-    doc.line(metrics.centerX, 18, metrics.centerX, metrics.pageHeight - 18)
+  doc.setDrawColor(245, 245, 245)
+  doc.line(metrics.centerX, 18, metrics.centerX, metrics.pageHeight - 18)
 
-    const spreadTextWidth = 130
-    const spreadCenterX = metrics.centerX
+  // SHORTER TEXT = centered across spread
+  if (useCenteredLayout) {
+    const spreadTextWidth = 120
+    const centerX = metrics.centerX
     let y = 60
 
     doc.setFont(design.font.body, 'italic')
     doc.setFontSize(design.layout.questionSize)
     setTextColor(doc, design.theme.textSecondary)
 
-    const splitQuestion = doc.splitTextToSize(questionText, spreadTextWidth)
-    doc.text(splitQuestion, spreadCenterX, y, {
+    const splitQuestion = doc.splitTextToSize(section.question, spreadTextWidth)
+    doc.text(splitQuestion, centerX, y, {
       align: 'center',
       maxWidth: spreadTextWidth,
     })
@@ -668,14 +685,81 @@ yState.y += design.layout.imageSpacing
     doc.setFontSize(design.layout.answerSize + 0.5)
     setTextColor(doc, design.theme.textPrimary)
 
-    const splitAnswer = doc.splitTextToSize(answerText, spreadTextWidth)
-    doc.text(splitAnswer, spreadCenterX, y, {
+    const splitAnswer = doc.splitTextToSize(section.answer.trim(), spreadTextWidth)
+    doc.text(splitAnswer, centerX, y, {
       align: 'center',
       maxWidth: spreadTextWidth,
     })
 
     return
   }
+
+  // LONGER TEXT = proper left/right book layout
+  let isFirstSpreadPage = true
+  let remainingAnswerLines: string[] = []
+
+  const splitQuestion = doc.splitTextToSize(section.question, metrics.columnWidth)
+  remainingAnswerLines = doc.splitTextToSize(section.answer.trim(), metrics.columnWidth)
+
+  while (isFirstSpreadPage || remainingAnswerLines.length > 0) {
+    applyPageBackground(doc, design.theme.pageBg, metrics.pageWidth, metrics.pageHeight)
+
+    doc.setDrawColor(245, 245, 245)
+    doc.line(metrics.centerX, 18, metrics.centerX, metrics.pageHeight - 18)
+
+    let leftY = 34
+    let rightY = 34
+
+    if (isFirstSpreadPage) {
+      doc.setFont(design.font.body, 'italic')
+      doc.setFontSize(design.layout.questionSize - 0.3)
+      setTextColor(doc, design.theme.textSecondary)
+
+      doc.text(splitQuestion, metrics.leftX, leftY)
+      leftY += splitQuestion.length * design.layout.lineHeight + 10
+    }
+
+    doc.setFont(design.font.body, design.font.bodyStyle)
+    doc.setFontSize(design.layout.answerSize + 0.3)
+    setTextColor(doc, design.theme.textPrimary)
+
+    const leftAvailableHeight = metrics.maxY - leftY
+    const leftLineCapacity = Math.max(
+      0,
+      Math.floor(leftAvailableHeight / design.layout.lineHeight)
+    )
+
+    const leftLines = remainingAnswerLines.slice(0, leftLineCapacity)
+    remainingAnswerLines = remainingAnswerLines.slice(leftLineCapacity)
+
+    if (leftLines.length) {
+      doc.text(leftLines, metrics.leftX, leftY)
+      leftY += leftLines.length * design.layout.lineHeight
+    }
+
+    const rightAvailableHeight = metrics.maxY - rightY
+    const rightLineCapacity = Math.max(
+      0,
+      Math.floor(rightAvailableHeight / design.layout.lineHeight)
+    )
+
+    const rightLines = remainingAnswerLines.slice(0, rightLineCapacity)
+    remainingAnswerLines = remainingAnswerLines.slice(rightLineCapacity)
+
+    if (rightLines.length) {
+      doc.text(rightLines, metrics.rightX, rightY)
+      rightY += rightLines.length * design.layout.lineHeight
+    }
+
+    isFirstSpreadPage = false
+
+    if (remainingAnswerLines.length > 0) {
+      doc.addPage()
+    }
+  }
+
+  return
+}
 
   // Image layout: keep the more editorial left/right spread
   let isFirstSpreadPage = true
