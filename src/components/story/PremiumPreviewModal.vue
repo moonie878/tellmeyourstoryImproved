@@ -41,7 +41,7 @@
 </div>
           <div
             ref="premiumPreviewRef"
-            class="relative mx-auto h-[420px] w-full max-w-5xl select-none overflow-hidden rounded-[2rem] border border-stone-200 bg-stone-100 shadow-inner touch-none md:h-[520px]"
+           class="relative mx-auto h-[360px] w-full max-w-5xl select-none overflow-hidden rounded-[2rem] border border-stone-200 bg-stone-100 shadow-inner touch-none md:h-[520px]"
             @pointerdown="onPremiumPreviewPointerDown"
             @pointermove="onPremiumPreviewPointerMove"
             @pointerup="onPremiumPreviewPointerUp"
@@ -71,61 +71,106 @@
             <!-- PREMIUM SIDE (background layer) -->
 <div class="absolute inset-0">
   <div class="absolute inset-0 flex items-center justify-center px-6 py-8 md:px-10 md:py-10">
-    <div class="grid w-full max-w-5xl items-center gap-6 md:grid-cols-2">
-      <!-- Left premium page -->
-      <div class="rounded-[2rem] border border-stone-300 bg-[#f6efe7] p-8 shadow-[0_20px_60px_rgba(0,0,0,0.12)]">
-        <p class="text-[10px] uppercase tracking-[0.28em] text-stone-500">
-          Tell Me Your Story
-        </p>
+    <div class="w-full max-w-5xl">
+  <!-- Mobile premium preview -->
+  <div class="mx-auto max-w-[340px] rounded-[1.75rem] border border-stone-300 bg-[#f6efe7] p-5 shadow-[0_20px_60px_rgba(0,0,0,0.12)] md:hidden">
+    <div class="relative overflow-hidden rounded-[1.25rem] border border-stone-200 bg-stone-100">
+      <img
+        :src="previewCoverImageSrc"
+        alt="Premium preview"
+        class="h-[180px] w-full object-cover"
+      />
 
-        <h4 class="mt-5 font-serif text-[2.4rem] leading-none text-stone-900">
-          {{ projectTitle || 'Your Story Title' }}
-        </h4>
-
-        <p class="mt-4 text-sm leading-6 text-stone-500">
-          A life told through memories, moments, and love
-        </p>
-
-        <div class="mt-8 border-t border-stone-200 pt-6">
-          <p class="text-xs uppercase tracking-[0.24em] text-stone-500">
-            Chapter One
-          </p>
-          <h5 class="mt-3 font-serif text-3xl text-stone-900">
-            Beginnings
-          </h5>
-          <p class="mt-6 text-sm italic leading-7 text-stone-600">
-            “Home felt warm, busy, and comforting. It smelled of cooking, washing drying near the fire, and sometimes fresh bread.”
-          </p>
-        </div>
-      </div>
-
-      <!-- Right premium page -->
-      <div class="rounded-[2rem] border border-stone-300 bg-[#f6efe7] p-6 shadow-[0_20px_60px_rgba(0,0,0,0.12)]">
-        <div class="relative overflow-hidden rounded-[1.5rem] border border-stone-200 bg-stone-100">
-          <img
-            :src="previewCoverImageSrc"
-            alt="Premium preview"
-            class="h-[300px] w-full object-cover"
-          />
-
-          <div
-            v-if="!coverImageUrl"
-            class="absolute left-3 top-3 rounded-full bg-white/90 px-2.5 py-1 text-[10px] font-medium text-stone-600 shadow-sm"
-          >
-            Sample preview
-          </div>
-        </div>
-
-        <div class="mt-5">
-          <p class="text-sm font-semibold text-stone-900">
-            A beautifully designed keepsake
-          </p>
-          <p class="mt-2 text-sm leading-6 text-stone-600">
-            Richer layouts, stronger emotional pacing, photo-led pages, and a more polished final book feel.
-          </p>
-        </div>
+      <div
+        v-if="!coverImageUrl"
+        class="absolute left-3 top-3 rounded-full bg-white/90 px-2.5 py-1 text-[10px] font-medium text-stone-600 shadow-sm"
+      >
+        Sample preview
       </div>
     </div>
+
+    <p class="mt-4 text-[10px] uppercase tracking-[0.28em] text-stone-500">
+      Tell Me Your Story
+    </p>
+
+    <h4 class="mt-3 font-serif text-[1.9rem] leading-none text-stone-900">
+      {{ projectTitle || 'Your Story Title' }}
+    </h4>
+
+    <p class="mt-3 text-sm leading-6 text-stone-500">
+      A beautifully designed memory book with richer pacing, imagery, and a more polished keepsake feel.
+    </p>
+
+    <div class="mt-5 border-t border-stone-200 pt-4">
+      <p class="text-xs uppercase tracking-[0.24em] text-stone-500">
+        Chapter One
+      </p>
+      <h5 class="mt-2 font-serif text-2xl text-stone-900">
+        Beginnings
+      </h5>
+      <p class="mt-4 text-sm italic leading-6 text-stone-600">
+        “Home felt warm, busy, and comforting. It smelled of cooking, washing drying near the fire, and sometimes fresh bread.”
+      </p>
+    </div>
+  </div>
+
+  <!-- Desktop premium preview -->
+  <div class="hidden items-center gap-6 md:grid md:grid-cols-2">
+    <!-- Left premium page -->
+    <div class="rounded-[2rem] border border-stone-300 bg-[#f6efe7] p-8 shadow-[0_20px_60px_rgba(0,0,0,0.12)]">
+      <p class="text-[10px] uppercase tracking-[0.28em] text-stone-500">
+        Tell Me Your Story
+      </p>
+
+      <h4 class="mt-5 font-serif text-[2.4rem] leading-none text-stone-900">
+        {{ projectTitle || 'Your Story Title' }}
+      </h4>
+
+      <p class="mt-4 text-sm leading-6 text-stone-500">
+        A life told through memories, moments, and love
+      </p>
+
+      <div class="mt-8 border-t border-stone-200 pt-6">
+        <p class="text-xs uppercase tracking-[0.24em] text-stone-500">
+          Chapter One
+        </p>
+        <h5 class="mt-3 font-serif text-3xl text-stone-900">
+          Beginnings
+        </h5>
+        <p class="mt-6 text-sm italic leading-7 text-stone-600">
+          “Home felt warm, busy, and comforting. It smelled of cooking, washing drying near the fire, and sometimes fresh bread.”
+        </p>
+      </div>
+    </div>
+
+    <!-- Right premium page -->
+    <div class="rounded-[2rem] border border-stone-300 bg-[#f6efe7] p-6 shadow-[0_20px_60px_rgba(0,0,0,0.12)]">
+      <div class="relative overflow-hidden rounded-[1.5rem] border border-stone-200 bg-stone-100">
+        <img
+          :src="previewCoverImageSrc"
+          alt="Premium preview"
+          class="h-[300px] w-full object-cover"
+        />
+
+        <div
+          v-if="!coverImageUrl"
+          class="absolute left-3 top-3 rounded-full bg-white/90 px-2.5 py-1 text-[10px] font-medium text-stone-600 shadow-sm"
+        >
+          Sample preview
+        </div>
+      </div>
+
+      <div class="mt-5">
+        <p class="text-sm font-semibold text-stone-900">
+          A beautifully designed keepsake
+        </p>
+        <p class="mt-2 text-sm leading-6 text-stone-600">
+          Richer layouts, stronger emotional pacing, photo-led pages, and a more polished final book feel.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
   </div>
 </div>
 
@@ -135,7 +180,7 @@
   :style="{ clipPath: `inset(0 ${100 - premiumPreviewSlider}% 0 0)` }"
 >
   <div class="absolute inset-0 flex items-center justify-center px-6 py-8 md:px-10 md:py-10">
-    <div class="w-full max-w-[420px] rounded-[2rem] border border-stone-200 bg-white p-6 shadow-sm">
+    <div class="w-full max-w-[320px] rounded-[2rem] border border-stone-200 bg-white p-5 shadow-sm md:max-w-[420px] md:p-6">
       <div class="mb-5 flex h-40 items-center justify-center rounded-2xl border border-dashed border-stone-300 bg-stone-50 text-sm text-stone-400">
         No cover image
       </div>
