@@ -648,12 +648,12 @@ yState.y += design.layout.imageSpacing
     doc.setDrawColor(245, 245, 245)
     doc.line(metrics.centerX, 18, metrics.centerX, metrics.pageHeight - 18)
 
-    const spreadTextWidth = 120
+    const spreadTextWidth = 130
     const spreadCenterX = metrics.centerX
-    let y = 58
+    let y = 60
 
     doc.setFont(design.font.body, 'italic')
-    doc.setFontSize(design.layout.questionSize - 0.5)
+    doc.setFontSize(design.layout.questionSize)
     setTextColor(doc, design.theme.textSecondary)
 
     const splitQuestion = doc.splitTextToSize(questionText, spreadTextWidth)
@@ -662,10 +662,10 @@ yState.y += design.layout.imageSpacing
       maxWidth: spreadTextWidth,
     })
 
-    y += splitQuestion.length * design.layout.lineHeight + 12
+    y += splitQuestion.length * design.layout.lineHeight + 10
 
     doc.setFont(design.font.body, design.font.bodyStyle)
-    doc.setFontSize(design.layout.answerSize + 0.3)
+    doc.setFontSize(design.layout.answerSize + 0.5)
     setTextColor(doc, design.theme.textPrimary)
 
     const splitAnswer = doc.splitTextToSize(answerText, spreadTextWidth)
