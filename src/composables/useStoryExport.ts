@@ -381,20 +381,25 @@ doc.text(splitQuote, metrics.centerX, 145, {
     return
   }
 
-  doc.setFont(design.font.body, 'normal')
-  doc.setFontSize(10)
-  setTextColor(doc, design.theme.textMuted)
-  doc.text('A memory worth keeping', metrics.centerX, 94, { align: 'center' })
+ doc.setFont(design.font.body, 'normal')
+doc.setFontSize(10)
+setTextColor(doc, design.theme.textMuted)
+doc.text('A memory worth keeping', metrics.centerX, 94, { align: 'center' })
 
-  doc.setFont(design.font.title, design.font.accentStyle)
-  doc.setFontSize(20)
-  setTextColor(doc, design.theme.textPrimary)
+setDrawColor(doc, design.theme.divider)
+doc.line(60, 110, 150, 110)
 
-  const splitQuote = doc.splitTextToSize(`“${quote}”`, metrics.contentWidth - 26)
-  doc.text(splitQuote, metrics.centerX, 132, {
-    align: 'center',
-  })
-  doc.line(60, 180, 150, 180)
+doc.setFont(design.font.title, design.font.accentStyle)
+doc.setFontSize(20)
+setTextColor(doc, design.theme.textPrimary)
+
+const splitQuote = doc.splitTextToSize(`“${quote}”`, metrics.contentWidth - 26)
+doc.text(splitQuote, metrics.centerX, 132, {
+  align: 'center',
+})
+
+setDrawColor(doc, design.theme.divider)
+doc.line(60, 180, 150, 180)
 }
 
   function renderChapterHeading(
@@ -573,12 +578,18 @@ const splitQuestion = doc.splitTextToSize(questionText, safeWidth)
         }
 
         doc.addImage(imgData, 'PNG', x, yState.y, imgWidth, imgHeight)
-        doc.setFontSize(10)
+
+// move below the image first
+yState.y += imgHeight + 8
+
+doc.setFontSize(10)
 doc.setTextColor(140, 140, 140)
-doc.text('A moment captured in time', metrics.centerX, yState.y + 6, {
+doc.text('A moment captured in time', metrics.centerX, yState.y, {
   align: 'center',
 })
-        yState.y += imgHeight + design.layout.imageSpacing
+
+// add spacing after caption
+yState.y += design.layout.imageSpacing
       } catch (err) {
         console.error(err)
       }
@@ -910,9 +921,16 @@ doc.text('Take a moment to reflect on what comes next…', metrics.centerX, metr
       const quote = getQuoteFromAnswer(printableSections[index - 1]?.answer || '')
       if (quote) {
         renderQuotePage(doc, quote, activeSettings)
+
+        // start the next story content on a fresh normal page
+    doc.addPage()
+    applyPageBackground(doc, design.theme.pageBg, metrics.pageWidth, metrics.pageHeight)
+    yState.y = metrics.marginTop
       }      
     }
-    if (index > 0 && index % 2 === 0) {
+    const justInsertedQuotePage = shouldInsertQuotePage(index)
+
+if (!justInsertedQuotePage && index > 0 && index % 2 === 0) {
   doc.addPage()
   applyPageBackground(doc, design.theme.pageBg, metrics.pageWidth, metrics.pageHeight)
   yState.y = metrics.marginTop
