@@ -30,18 +30,18 @@
 
         <div class="min-h-0 overflow-y-auto px-8 py-8">
           <div class="mb-4 flex items-center justify-between text-[11px] font-medium uppercase tracking-[0.22em] text-stone-500">
-            <span>Standard</span>
-            <span>Premium Keepsake</span>
-          </div>
+  <span>Standard Story</span>
+  <span>Premium Keepsake</span>
+</div>
+
 <div class="mt-5 text-center">
   <p class="text-sm text-stone-600">
-    This is your story, reimagined as a keepsake.
+    Drag the slider to see the difference between a simple story export and a more beautifully finished keepsake.
   </p>
 </div>
           <div
             ref="premiumPreviewRef"
-            class="relative mx-auto w-full max-w-5xl select-none overflow-hidden rounded-[2rem] border border-stone-200 bg-stone-100 shadow-inner touch-none"
-            style="height: 480px;"
+            class="relative mx-auto h-[420px] w-full max-w-5xl select-none overflow-hidden rounded-[2rem] border border-stone-200 bg-stone-100 shadow-inner touch-none md:h-[520px]"
             @pointerdown="onPremiumPreviewPointerDown"
             @pointermove="onPremiumPreviewPointerMove"
             @pointerup="onPremiumPreviewPointerUp"
@@ -68,93 +68,107 @@
               <div class="absolute inset-0 bg-gradient-to-br from-white/20 via-transparent to-stone-200/20"></div>
             </div>
 
-            <div class="absolute inset-0">
-              <div class="absolute inset-0 flex items-center justify-center px-10 py-10">
-                <div class="w-full max-w-[380px] rounded-[1.75rem] border border-stone-300 bg-[#f5efe6] p-6 shadow-[0_20px_60px_rgba(0,0,0,0.10)]">
-                  <div class="relative mb-5 h-40 overflow-hidden rounded-2xl border border-stone-200 bg-stone-100">
-                    <img
-                      :src="previewCoverImageSrc"
-                      alt="Premium preview"
-                      class="h-full w-full object-cover"
-                    />
+            <!-- PREMIUM SIDE (background layer) -->
+<div class="absolute inset-0">
+  <div class="absolute inset-0 flex items-center justify-center px-6 py-8 md:px-10 md:py-10">
+    <div class="grid w-full max-w-5xl items-center gap-6 md:grid-cols-2">
+      <!-- Left premium page -->
+      <div class="rounded-[2rem] border border-stone-300 bg-[#f6efe7] p-8 shadow-[0_20px_60px_rgba(0,0,0,0.12)]">
+        <p class="text-[10px] uppercase tracking-[0.28em] text-stone-500">
+          Tell Me Your Story
+        </p>
 
-                    <div
-                      v-if="!coverImageUrl"
-                      class="absolute left-3 top-3 rounded-full bg-white/90 px-2.5 py-1 text-[10px] font-medium text-stone-600 shadow-sm"
-                    >
-                      Sample preview
-                    </div>
-                  </div>
+        <h4 class="mt-5 font-serif text-[2.4rem] leading-none text-stone-900">
+          {{ projectTitle || 'Your Story Title' }}
+        </h4>
 
-                  <p class="text-center text-[10px] uppercase tracking-[0.28em] text-stone-500">
-                    Tell Me Your Story
-                  </p>
+        <p class="mt-4 text-sm leading-6 text-stone-500">
+          A life told through memories, moments, and love
+        </p>
 
-                  <h4 class="mt-4 text-center text-[2.2rem] leading-none font-serif text-stone-900">
-                    {{ projectTitle || 'Your Story Title' }}
-                  </h4>
+        <div class="mt-8 border-t border-stone-200 pt-6">
+          <p class="text-xs uppercase tracking-[0.24em] text-stone-500">
+            Chapter One
+          </p>
+          <h5 class="mt-3 font-serif text-3xl text-stone-900">
+            Beginnings
+          </h5>
+          <p class="mt-6 text-sm italic leading-7 text-stone-600">
+            “Home felt warm, busy, and comforting. It smelled of cooking, washing drying near the fire, and sometimes fresh bread.”
+          </p>
+        </div>
+      </div>
 
-                  <p class="mt-4 text-center text-sm text-stone-500">
-                    A beautifully designed memory book
-                  </p>
+      <!-- Right premium page -->
+      <div class="rounded-[2rem] border border-stone-300 bg-[#f6efe7] p-6 shadow-[0_20px_60px_rgba(0,0,0,0.12)]">
+        <div class="relative overflow-hidden rounded-[1.5rem] border border-stone-200 bg-stone-100">
+          <img
+            :src="previewCoverImageSrc"
+            alt="Premium preview"
+            class="h-[300px] w-full object-cover"
+          />
 
-                  <div class="mt-6 border-t border-stone-200 pt-5">
-                    <p class="text-sm font-semibold text-stone-800">
-                      Chapter Preview
-                    </p>
-                    <p class="mt-1 text-xs text-stone-500">
-                      Beginnings
-                    </p>
-                    <p class="mt-4 text-sm leading-relaxed text-stone-700">
-                      Where and when were you born?
-                    </p>
-                    <p class="mt-2 text-xs leading-relaxed text-stone-500">
-                      More personal, more beautiful, and designed to feel like something worth keeping.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
+          <div
+            v-if="!coverImageUrl"
+            class="absolute left-3 top-3 rounded-full bg-white/90 px-2.5 py-1 text-[10px] font-medium text-stone-600 shadow-sm"
+          >
+            Sample preview
+          </div>
+        </div>
 
-            <div
-              class="absolute inset-0 bg-stone-50"
-              :style="{ clipPath: `inset(0 ${100 - premiumPreviewSlider}% 0 0)` }"
-            >
-              <div class="absolute inset-0 flex items-center justify-center px-10 py-10">
-                <div class="w-full max-w-[380px] rounded-[1.75rem] border border-stone-200 bg-white p-5 shadow-sm">
-                  <div class="mb-5 flex h-40 items-center justify-center rounded-2xl border border-dashed border-stone-300 bg-stone-50 text-sm text-stone-400">
-                    No cover image
-                  </div>
+        <div class="mt-5">
+          <p class="text-sm font-semibold text-stone-900">
+            A beautifully designed keepsake
+          </p>
+          <p class="mt-2 text-sm leading-6 text-stone-600">
+            Richer layouts, stronger emotional pacing, photo-led pages, and a more polished final book feel.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
-                  <p class="text-center text-[10px] uppercase tracking-[0.28em] text-stone-500">
-                    Tell Me Your Story
-                  </p>
+<!-- STANDARD SIDE (revealed by slider) -->
+<div
+  class="absolute inset-0 bg-stone-50"
+  :style="{ clipPath: `inset(0 ${100 - premiumPreviewSlider}% 0 0)` }"
+>
+  <div class="absolute inset-0 flex items-center justify-center px-6 py-8 md:px-10 md:py-10">
+    <div class="w-full max-w-[420px] rounded-[2rem] border border-stone-200 bg-white p-6 shadow-sm">
+      <div class="mb-5 flex h-40 items-center justify-center rounded-2xl border border-dashed border-stone-300 bg-stone-50 text-sm text-stone-400">
+        No cover image
+      </div>
 
-                  <h4 class="mt-4 text-center text-[1.9rem] leading-none font-serif text-stone-900">
-                    {{ projectTitle || 'Your Story Title' }}
-                  </h4>
+      <p class="text-center text-[10px] uppercase tracking-[0.28em] text-stone-500">
+        Tell Me Your Story
+      </p>
 
-                  <p class="mt-4 text-center text-sm text-stone-500">
-                    A simple text-based keepsake
-                  </p>
+      <h4 class="mt-4 text-center font-serif text-[2rem] leading-none text-stone-900">
+        {{ projectTitle || 'Your Story Title' }}
+      </h4>
 
-                  <div class="mt-6 border-t border-stone-200 pt-4">
-                    <p class="text-sm font-semibold text-stone-800">
-                      Chapter Preview
-                    </p>
-                    <p class="mt-1 text-xs text-stone-500">
-                      Beginnings
-                    </p>
-                    <p class="mt-3 text-sm text-stone-700">
-                      Where and when were you born?
-                    </p>
-                    <p class="mt-2 text-xs text-stone-500">
-                      Clean, readable, and simple.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
+      <p class="mt-4 text-center text-sm text-stone-500">
+        A simple text-based keepsake
+      </p>
+
+      <div class="mt-6 border-t border-stone-200 pt-4">
+        <p class="text-sm font-semibold text-stone-800">
+          Chapter Preview
+        </p>
+        <p class="mt-1 text-xs text-stone-500">
+          Beginnings
+        </p>
+        <p class="mt-3 text-sm text-stone-700">
+          Where and when were you born?
+        </p>
+        <p class="mt-2 text-xs leading-6 text-stone-500">
+          Clean, readable, and simple — but without the richer keepsake feel.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
 
             <div
               class="absolute inset-y-0 z-10"
@@ -184,28 +198,28 @@
           <div class="mt-8 grid gap-4 md:grid-cols-3">
   <div class="rounded-2xl border border-stone-200 bg-stone-50 p-5">
     <p class="text-sm font-semibold text-stone-900">
-      Feels beautifully finished
+      Feels more like a real book
     </p>
     <p class="mt-2 text-sm leading-6 text-stone-600">
-      Premium styling gives your story a calmer, more polished presentation that feels much closer to a real book.
+      Premium layouts create more breathing space, stronger chapter moments, and a calmer, more editorial feel.
     </p>
   </div>
 
   <div class="rounded-2xl border border-stone-200 bg-stone-50 p-5">
     <p class="text-sm font-semibold text-stone-900">
-      Made to be kept
+      Worth printing and gifting
     </p>
     <p class="mt-2 text-sm leading-6 text-stone-600">
-      Turn meaningful memories into something worth printing, sharing with family, or giving as a thoughtful gift.
+      Turn meaningful answers into something polished enough to keep for yourself or give to someone you love.
     </p>
   </div>
 
   <div class="rounded-2xl border border-stone-200 bg-stone-50 p-5">
     <p class="text-sm font-semibold text-stone-900">
-      Richer layouts and images
+      Richer pages, images, and pacing
     </p>
     <p class="mt-2 text-sm leading-6 text-stone-600">
-      Unlock cover images, premium typography, portrait book and open spread formats, and a more elevated page design throughout.
+      Unlock cover images, stronger quote moments, portrait and spread layouts, and a more elevated keepsake finish.
     </p>
   </div>
 </div>

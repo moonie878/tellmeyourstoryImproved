@@ -17,8 +17,11 @@ export function usePremiumPreview(
   }
 
   function onPremiumPreviewPointerDown(event: PointerEvent) {
+    if (!premiumPreviewRef.value) return
+
     isDraggingPremiumPreview.value = true
     showPremiumPreviewHint.value = false
+    premiumPreviewRef.value.setPointerCapture?.(event.pointerId)
     updateSliderFromEvent(event)
   }
 
@@ -27,7 +30,15 @@ export function usePremiumPreview(
     updateSliderFromEvent(event)
   }
 
-  function onPremiumPreviewPointerUp() {
+  function onPremiumPreviewPointerUp(event?: PointerEvent) {
+    if (premiumPreviewRef.value && event) {
+      try {
+        premiumPreviewRef.value.releasePointerCapture?.(event.pointerId)
+      } catch {
+        // ignore release errors
+      }
+    }
+
     isDraggingPremiumPreview.value = false
   }
 
