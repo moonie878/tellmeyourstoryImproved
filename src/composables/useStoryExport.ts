@@ -143,7 +143,7 @@ function shouldInsertQuotePage(index: number) {
       const leftPageNumber = pageNumber * 2 - 1
       const rightPageNumber = pageNumber * 2
 
-      if (pageNumber > 8 && pageNumber % 4 === 0) {
+      if (pageNumber > 8 && pageNumber % 6 === 0) {
   doc.setFontSize(8)
   doc.text(storyTitle, leftCenter, 14, { align: 'center' })
   doc.text(storyTitle, rightCenter, 14, { align: 'center' })
@@ -362,26 +362,21 @@ function renderQuotePage(
 
     doc.setDrawColor(200, 200, 200)
 doc.line(70, 110, 140, 110)
-// BIG quotation mark
-doc.setFontSize(60)
-doc.setTextColor(220, 220, 220)
-doc.text('“', 60, 120)
+
 
 
 doc.setFont(design.font.title, design.font.accentStyle)
 doc.setFontSize(18)
 setTextColor(doc, design.theme.textPrimary)
 
-const splitQuote = doc.splitTextToSize(`“${quote}”`, metrics.contentWidth - 26)
+const cleanQuote = `“${quote}”`
+const splitQuote = doc.splitTextToSize(cleanQuote, 120)
+
 doc.text(splitQuote, metrics.centerX, 145, {
   align: 'center',
 })
 
-// closing mark
-doc.setFontSize(60)
-doc.setTextColor(220, 220, 220)
-doc.text('”', 150, 190)
-doc.line(70, 185, 140, 185)
+
 
     return
   }
@@ -454,9 +449,9 @@ doc.text(splitIntro, metrics.centerX, 140, {
   doc.text(chapterLabel, metrics.centerX, 78, { align: 'center' })
 
   doc.setFont(design.font.title, 'bold')
-doc.setFontSize(48)
-doc.setTextColor(236, 230, 223)
-doc.text(String(chapterIndex + 1), metrics.centerX, 145, {
+doc.setFontSize(60)
+doc.setTextColor(230, 230, 230)
+doc.text(String(chapterIndex + 1), metrics.centerX, 110, {
   align: 'center',
 })
 
@@ -505,7 +500,9 @@ doc.text(String(chapterIndex + 1), metrics.centerX, 145, {
 
     
     const questionText = section.question
-    const splitQuestion = doc.splitTextToSize(questionText, metrics.contentWidth)
+    const safeWidth = metrics.contentWidth - 10
+const splitQuestion = doc.splitTextToSize(questionText, safeWidth)
+
     const answerX =
       settings.printReady && settings.layout === 'classic'
         ? metrics.marginLeft + 2
@@ -522,7 +519,7 @@ doc.text(String(chapterIndex + 1), metrics.centerX, 145, {
     setTextColor(doc, design.theme.textPrimary)
 
     const answerText = section.answer.trim()
-    const splitAnswer = doc.splitTextToSize(answerText, metrics.contentWidth)
+   const splitAnswer = doc.splitTextToSize(answerText, safeWidth)
     doc.text(splitAnswer, answerX, yState.y)
 
     const sectionGap = design.layout.sectionSpacing + 8
@@ -897,9 +894,9 @@ doc.addPage()
 applyPageBackground(doc, design.theme.secondaryBg, metrics.pageWidth, metrics.pageHeight)
 
 // optional small quote or empty page
-doc.setFontSize(10)
-doc.setTextColor(150, 150, 150)
-doc.text('Take a moment to reflect…', metrics.centerX, metrics.pageHeight / 2, {
+doc.setFontSize(14)
+doc.setTextColor(120, 120, 120)
+doc.text('Take a moment to reflect on what comes next…', metrics.centerX, metrics.pageHeight / 2, {
   align: 'center',
 })
 
