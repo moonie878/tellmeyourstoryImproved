@@ -16,13 +16,20 @@
                 </div>
 
                 <div>
-                    <label class="text-sm font-medium">Password</label>
-                    <input v-model="password"
-                           type="password"
-                           required
-                           class="mt-1 w-full rounded-xl border border-stone-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-stone-900" />
-                </div>
-                <TurnstileWidget v-model="turnstileToken" />
+    <label class="text-sm font-medium">Password</label>
+    <input v-model="password"
+           type="password"
+           required
+           class="mt-1 w-full rounded-xl border border-stone-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-stone-900" />
+</div>
+
+<div class="text-right">
+    <router-link to="/forgot-password" class="text-sm font-medium text-stone-700 hover:text-stone-900">
+        Forgot password?
+    </router-link>
+</div>
+
+<TurnstileWidget v-model="turnstileToken" />
 
 <p v-if="turnstileError" class="mt-2 text-sm text-red-600">
   {{ turnstileError }}

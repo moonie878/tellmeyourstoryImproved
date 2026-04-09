@@ -63,31 +63,37 @@ import { verifyTurnstile } from '../lib/turnstile'
 const turnstileError = ref('')
 
     async function handleRegister() {
-    loading.value = true
-    errorMessage.value = ''
+  loading.value = true
+  errorMessage.value = ''
+  turnstileError.value = ''
 
-turnstileError.value = ''
+  try {
+    const isHuman = await verifyTurnstile(turnstileToken.value)
 
-const isHuman = await verifyTurnstile(turnstileToken.value)
-
-if (!isHuman) {
-  turnstileError.value = 'Please complete the verification and try again.'
-  return
-}
+    if (!isHuman) {
+      turnstileError.value = 'Please complete the verification and try again.'
+      loading.value = false
+      return
+    }
 
     const { error } = await supabase.auth.signUp({
-    email: email.value,
-    password: password.value,
+      email: email.value,
+      password: password.value,
     })
 
     if (error) {
-    errorMessage.value = error.message
+      errorMessage.value = error.message
     } else {
-    alert('Check your email to confirm your account!')
-    email.value = ''
-    password.value = ''
+      alert('Check your email to confirm your account!')
+      email.value = ''
+      password.value = ''
+      turnstileToken.value = ''
     }
-
+  } catch (err) {
+    console.error(err)
+    errorMessage.value = 'Something went wrong. Please try again.'
+  } finally {
     loading.value = false
-    }
+  }
+}
 </script>
