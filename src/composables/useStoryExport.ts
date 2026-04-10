@@ -390,54 +390,42 @@ export function useStoryExport() {
   }
 
   function addFooter(
-    doc: jsPDF,
-    pageNumber: number,
-    storyTitle: string,
-    textMuted: readonly number[],
-    pageWidth: number,
-    pageHeight: number,
-    settings: PdfSettings
-  ) {
-    const metrics = getPageMetrics(settings)
+  doc: jsPDF,
+  pageNumber: number,
+  storyTitle: string,
+  textMuted: readonly number[],
+  pageWidth: number,
+  pageHeight: number,
+  settings: PdfSettings,
+  pagesWithoutFooter: Set<number>
+) {
+  setTextColor(doc, textMuted)
 
-    setTextColor(doc, textMuted)
+  // Spread pages look cleaner without page numbers
+  if (settings.orientation === 'landscape-spread') {
+    return
+  }
 
-    if (settings.orientation === 'landscape-spread') {
-      const leftCenter = metrics.leftX + metrics.columnWidth / 2
-      const rightCenter = metrics.rightX + metrics.columnWidth / 2
+  if (pagesWithoutFooter.has(pageNumber)) {
+  return
+}
 
-      const leftPageNumber = pageNumber * 2 - 1
-      const rightPageNumber = pageNumber * 2
-
-      if (pageNumber > 6 && pageNumber % 8 === 0) {
-        doc.setFontSize(8)
-        doc.text(storyTitle, leftCenter, 14, { align: 'center' })
-        doc.text(storyTitle, rightCenter, 14, { align: 'center' })
-      }
-
-      doc.setFontSize(9)
-      doc.text(`${leftPageNumber}`, leftCenter, pageHeight - 10, {
-        align: 'center',
-      })
-      doc.text(`${rightPageNumber}`, rightCenter, pageHeight - 10, {
-        align: 'center',
-      })
-
-      return
-    }
-
-    if (pageNumber > 6 && pageNumber % 8 === 0) {
-      doc.setFontSize(8)
-      doc.text(storyTitle, pageWidth / 2, settings.printReady ? 12 : 14, {
-        align: 'center',
-      })
-    }
-
-    doc.setFontSize(9)
-    doc.text(`${pageNumber}`, pageWidth / 2, pageHeight - (settings.printReady ? 12 : 10), {
+  if (pageNumber > 6 && pageNumber % 8 === 0) {
+    doc.setFontSize(8)
+    doc.text(storyTitle, pageWidth / 2, settings.printReady ? 14 : 16, {
       align: 'center',
     })
   }
+
+  doc.setFontSize(9)
+
+  // Move portrait page numbers up so they do not sit too close to the border
+  const footerY = settings.printReady ? pageHeight - 18 : pageHeight - 16
+
+  doc.text(`${pageNumber}`, pageWidth / 2, footerY, {
+    align: 'center',
+  })
+}
 
   async function renderCoverPage(
     doc: jsPDF,
@@ -1080,136 +1068,79 @@ export function useStoryExport() {
   }
 
   async function renderSpreadSection(
-    doc: jsPDF,
-    section: StorySection,
-    settings: PdfSettings,
-    images: StoryImage[],
-    hasImageExportAccess: boolean,
-    loadImageAsBase64: (url: string) => Promise<string>
-  ) {
-    const design = getPdfDesign(settings)
-    const metrics = getPageMetrics(settings)
+  doc: jsPDF,
+  section: StorySection,
+  settings: PdfSettings,
+  images: StoryImage[],
+  hasImageExportAccess: boolean,
+  loadImageAsBase64: (url: string) => Promise<string>,
+  pagesWithoutFooter: Set<number>
+) {
+  const design = getPdfDesign(settings)
+  const metrics = getPageMetrics(settings)
 
-    const questionText = section.question
-    const answerText = section.answer.trim()
+  const questionText = section.question
+  const answerText = section.answer.trim()
 
-    const sectionImage = images
-      .filter((img) => img.section_id === section.id)
-      .sort(
-        (a, b) =>
-          new Date(b.created_at || '').getTime() - new Date(a.created_at || '').getTime()
-      )[0]
+  const sectionImage = images
+    .filter((img) => img.section_id === section.id)
+    .sort(
+      (a, b) =>
+        new Date(b.created_at || '').getTime() - new Date(a.created_at || '').getTime()
+    )[0]
 
-    const hasImage = !!(hasImageExportAccess && sectionImage?.image_url)
-    const useCenteredLayout = shouldUseCenteredSpreadLayout(section, hasImage)
+  const hasImage = !!(hasImageExportAccess && sectionImage?.image_url)
+  const useCenteredLayout = shouldUseCenteredSpreadLayout(section, hasImage)
 
-    if (!hasImage) {
-      applyPageBackground(doc, design.theme.pageBg, metrics.pageWidth, metrics.pageHeight)
+  if (!hasImage) {
+    applyPageBackground(doc, design.theme.pageBg, metrics.pageWidth, metrics.pageHeight)
 
+    // Only draw centre divider for normal text spreads, not centered editorial spreads
+    if (!useCenteredLayout) {
       doc.setDrawColor(245, 245, 245)
       doc.line(metrics.centerX, 18, metrics.centerX, metrics.pageHeight - 18)
+    }
 
-      if (useCenteredLayout) {
-        const spreadTextWidth = 120
-        const centerX = metrics.centerX
-        let y = 60
+    // SHORTER TEXT = centered across spread
+    if (useCenteredLayout) {
+      const spreadTextWidth = 120
+      const centerX = metrics.centerX
+      let y = 60
 
-        doc.setFont(design.font.body, 'italic')
-        doc.setFontSize(design.layout.questionSize)
-        setTextColor(doc, design.theme.textSecondary)
+      doc.setFont(design.font.body, 'italic')
+      doc.setFontSize(design.layout.questionSize)
+      setTextColor(doc, design.theme.textSecondary)
 
-        const splitQuestion = doc.splitTextToSize(section.question, spreadTextWidth)
-        doc.text(splitQuestion, centerX, y, {
-          align: 'center',
-          maxWidth: spreadTextWidth,
-        })
+      const splitQuestion = doc.splitTextToSize(section.question, spreadTextWidth)
+      doc.text(splitQuestion, centerX, y, {
+        align: 'center',
+        maxWidth: spreadTextWidth,
+      })
 
-        y += splitQuestion.length * design.layout.lineHeight + 10
+      y += splitQuestion.length * design.layout.lineHeight + 10
 
-        doc.setFont(design.font.body, design.font.bodyStyle)
-        doc.setFontSize(design.layout.answerSize + 0.5)
-        setTextColor(doc, design.theme.textPrimary)
+      doc.setFont(design.font.body, design.font.bodyStyle)
+      doc.setFontSize(design.layout.answerSize + 0.5)
+      setTextColor(doc, design.theme.textPrimary)
 
-        const splitAnswer = doc.splitTextToSize(section.answer.trim(), spreadTextWidth)
-        doc.text(splitAnswer, centerX, y, {
-          align: 'center',
-          maxWidth: spreadTextWidth,
-        })
+      const splitAnswer = doc.splitTextToSize(section.answer.trim(), spreadTextWidth)
+      doc.text(splitAnswer, centerX, y, {
+        align: 'center',
+        maxWidth: spreadTextWidth,
+      })
 
-        return
-      }
-
-      let isFirstSpreadPage = true
-      let remainingAnswerLines: string[] = []
-
-      const splitQuestion = doc.splitTextToSize(section.question, metrics.columnWidth)
-      remainingAnswerLines = doc.splitTextToSize(section.answer.trim(), metrics.columnWidth)
-
-      while (isFirstSpreadPage || remainingAnswerLines.length > 0) {
-        applyPageBackground(doc, design.theme.pageBg, metrics.pageWidth, metrics.pageHeight)
-
-        doc.setDrawColor(245, 245, 245)
-        doc.line(metrics.centerX, 18, metrics.centerX, metrics.pageHeight - 18)
-
-        let leftY = 34
-        let rightY = 34
-
-        if (isFirstSpreadPage) {
-          doc.setFont(design.font.body, 'italic')
-          doc.setFontSize(design.layout.questionSize - 0.3)
-          setTextColor(doc, design.theme.textSecondary)
-
-          doc.text(splitQuestion, metrics.leftX, leftY)
-          leftY += splitQuestion.length * design.layout.lineHeight + 10
-        }
-
-        doc.setFont(design.font.body, design.font.bodyStyle)
-        doc.setFontSize(design.layout.answerSize + 0.3)
-        setTextColor(doc, design.theme.textPrimary)
-
-        const leftAvailableHeight = metrics.maxY - leftY
-        const leftLineCapacity = Math.max(
-          0,
-          Math.floor(leftAvailableHeight / design.layout.lineHeight)
-        )
-
-        const leftLines = remainingAnswerLines.slice(0, leftLineCapacity)
-        remainingAnswerLines = remainingAnswerLines.slice(leftLineCapacity)
-
-        if (leftLines.length) {
-          doc.text(leftLines, metrics.leftX, leftY)
-        }
-
-        const rightAvailableHeight = metrics.maxY - rightY
-        const rightLineCapacity = Math.max(
-          0,
-          Math.floor(rightAvailableHeight / design.layout.lineHeight)
-        )
-
-        const rightLines = remainingAnswerLines.slice(0, rightLineCapacity)
-        remainingAnswerLines = remainingAnswerLines.slice(rightLineCapacity)
-
-        if (rightLines.length) {
-          doc.text(rightLines, metrics.rightX, rightY)
-        }
-
-        isFirstSpreadPage = false
-
-        if (remainingAnswerLines.length > 0) {
-          doc.addPage()
-        }
-      }
+      // Hide footer/page numbers on centered editorial-style spread pages
+      pagesWithoutFooter.add(doc.getNumberOfPages())
 
       return
     }
 
+    // LONGER TEXT = proper left/right book layout
     let isFirstSpreadPage = true
     let remainingAnswerLines: string[] = []
 
-    const splitQuestion = doc.splitTextToSize(questionText, metrics.columnWidth)
-    remainingAnswerLines = doc.splitTextToSize(answerText, metrics.columnWidth)
-
-    let imageRendered = false
+    const splitQuestion = doc.splitTextToSize(section.question, metrics.columnWidth)
+    remainingAnswerLines = doc.splitTextToSize(section.answer.trim(), metrics.columnWidth)
 
     while (isFirstSpreadPage || remainingAnswerLines.length > 0) {
       applyPageBackground(doc, design.theme.pageBg, metrics.pageWidth, metrics.pageHeight)
@@ -1217,16 +1148,16 @@ export function useStoryExport() {
       doc.setDrawColor(245, 245, 245)
       doc.line(metrics.centerX, 18, metrics.centerX, metrics.pageHeight - 18)
 
-      let leftY = 28
-      let rightY = 32
+      let leftY = 34
+      let rightY = 34
 
       if (isFirstSpreadPage) {
         doc.setFont(design.font.body, 'italic')
-        doc.setFontSize(design.layout.questionSize - 0.5)
+        doc.setFontSize(design.layout.questionSize - 0.3)
         setTextColor(doc, design.theme.textSecondary)
 
         doc.text(splitQuestion, metrics.leftX, leftY)
-        leftY += splitQuestion.length * design.layout.lineHeight + design.layout.questionSpacing
+        leftY += splitQuestion.length * design.layout.lineHeight + 10
       }
 
       doc.setFont(design.font.body, design.font.bodyStyle)
@@ -1246,53 +1177,6 @@ export function useStoryExport() {
         doc.text(leftLines, metrics.leftX, leftY)
       }
 
-      if (!imageRendered && hasImageExportAccess && sectionImage?.image_url) {
-        try {
-          const imgData = await loadImageAsBase64(sectionImage.image_url)
-
-          const img = new Image()
-          img.src = imgData
-
-          await new Promise((resolve, reject) => {
-            img.onload = resolve
-            img.onerror = reject
-          })
-
-          const maxWidth = metrics.columnWidth
-          const maxHeight =
-            settings.layout === 'elegant'
-              ? 100
-              : settings.layout === 'minimal'
-                ? 82
-                : 88
-
-          let imgWidth = img.width
-          let imgHeight = img.height
-
-          const ratio = Math.min(maxWidth / imgWidth, maxHeight / imgHeight)
-          imgWidth *= ratio
-          imgHeight *= ratio
-
-          const imageX = metrics.rightX + (metrics.columnWidth - imgWidth) / 2
-
-          if (design.layout.imageFrameStyle !== 'none') {
-            setDrawColor(doc, design.theme.border)
-
-            if (design.layout.imageFrameStyle === 'luxury') {
-              doc.roundedRect(imageX - 4, rightY - 4, imgWidth + 8, imgHeight + 8, 4, 4)
-            } else {
-              doc.roundedRect(imageX - 2, rightY - 2, imgWidth + 4, imgHeight + 4, 2, 2)
-            }
-          }
-
-          doc.addImage(imgData, 'PNG', imageX, rightY, imgWidth, imgHeight)
-          rightY += imgHeight + design.layout.imageSpacing
-          imageRendered = true
-        } catch (err) {
-          console.error(err)
-        }
-      }
-
       const rightAvailableHeight = metrics.maxY - rightY
       const rightLineCapacity = Math.max(
         0,
@@ -1303,9 +1187,6 @@ export function useStoryExport() {
       remainingAnswerLines = remainingAnswerLines.slice(rightLineCapacity)
 
       if (rightLines.length) {
-        doc.setFont(design.font.body, design.font.bodyStyle)
-        doc.setFontSize(design.layout.answerSize + 0.3)
-        setTextColor(doc, design.theme.textPrimary)
         doc.text(rightLines, metrics.rightX, rightY)
       }
 
@@ -1315,7 +1196,124 @@ export function useStoryExport() {
         doc.addPage()
       }
     }
+
+    return
   }
+
+  // IMAGE LAYOUT = editorial left/right spread
+  let isFirstSpreadPage = true
+  let remainingAnswerLines: string[] = []
+
+  const splitQuestion = doc.splitTextToSize(questionText, metrics.columnWidth)
+  remainingAnswerLines = doc.splitTextToSize(answerText, metrics.columnWidth)
+
+  let imageRendered = false
+
+  while (isFirstSpreadPage || remainingAnswerLines.length > 0) {
+    applyPageBackground(doc, design.theme.pageBg, metrics.pageWidth, metrics.pageHeight)
+
+    doc.setDrawColor(245, 245, 245)
+    doc.line(metrics.centerX, 18, metrics.centerX, metrics.pageHeight - 18)
+
+    let leftY = 28
+    let rightY = 32
+
+    if (isFirstSpreadPage) {
+      doc.setFont(design.font.body, 'italic')
+      doc.setFontSize(design.layout.questionSize - 0.5)
+      setTextColor(doc, design.theme.textSecondary)
+
+      doc.text(splitQuestion, metrics.leftX, leftY)
+      leftY += splitQuestion.length * design.layout.lineHeight + design.layout.questionSpacing
+    }
+
+    doc.setFont(design.font.body, design.font.bodyStyle)
+    doc.setFontSize(design.layout.answerSize + 0.3)
+    setTextColor(doc, design.theme.textPrimary)
+
+    const leftAvailableHeight = metrics.maxY - leftY
+    const leftLineCapacity = Math.max(
+      0,
+      Math.floor(leftAvailableHeight / design.layout.lineHeight)
+    )
+
+    const leftLines = remainingAnswerLines.slice(0, leftLineCapacity)
+    remainingAnswerLines = remainingAnswerLines.slice(leftLineCapacity)
+
+    if (leftLines.length) {
+      doc.text(leftLines, metrics.leftX, leftY)
+    }
+
+    if (!imageRendered && hasImageExportAccess && sectionImage?.image_url) {
+      try {
+        const imgData = await loadImageAsBase64(sectionImage.image_url)
+
+        const img = new Image()
+        img.src = imgData
+
+        await new Promise((resolve, reject) => {
+          img.onload = resolve
+          img.onerror = reject
+        })
+
+        const maxWidth = metrics.columnWidth
+        const maxHeight =
+          settings.layout === 'elegant'
+            ? 100
+            : settings.layout === 'minimal'
+              ? 82
+              : 88
+
+        let imgWidth = img.width
+        let imgHeight = img.height
+
+        const ratio = Math.min(maxWidth / imgWidth, maxHeight / imgHeight)
+        imgWidth *= ratio
+        imgHeight *= ratio
+
+        const imageX = metrics.rightX + (metrics.columnWidth - imgWidth) / 2
+
+        if (design.layout.imageFrameStyle !== 'none') {
+          setDrawColor(doc, design.theme.border)
+
+          if (design.layout.imageFrameStyle === 'luxury') {
+            doc.roundedRect(imageX - 4, rightY - 4, imgWidth + 8, imgHeight + 8, 4, 4)
+          } else {
+            doc.roundedRect(imageX - 2, rightY - 2, imgWidth + 4, imgHeight + 4, 2, 2)
+          }
+        }
+
+        doc.addImage(imgData, 'PNG', imageX, rightY, imgWidth, imgHeight)
+        rightY += imgHeight + design.layout.imageSpacing
+        imageRendered = true
+      } catch (err) {
+        console.error(err)
+      }
+    }
+
+    const rightAvailableHeight = metrics.maxY - rightY
+    const rightLineCapacity = Math.max(
+      0,
+      Math.floor(rightAvailableHeight / design.layout.lineHeight)
+    )
+
+    const rightLines = remainingAnswerLines.slice(0, rightLineCapacity)
+    remainingAnswerLines = remainingAnswerLines.slice(rightLineCapacity)
+
+    if (rightLines.length) {
+      doc.setFont(design.font.body, design.font.bodyStyle)
+      doc.setFontSize(design.layout.answerSize + 0.3)
+      setTextColor(doc, design.theme.textPrimary)
+      doc.text(rightLines, metrics.rightX, rightY)
+    }
+
+    isFirstSpreadPage = false
+
+    if (remainingAnswerLines.length > 0) {
+      doc.addPage()
+    }
+  }
+}
 
   function renderClosingPage(doc: jsPDF, settings: PdfSettings) {
     const design = getPdfDesign(settings)
@@ -1443,6 +1441,7 @@ export function useStoryExport() {
 
     const design = getPdfDesign(activeSettings)
     const metrics = getPageMetrics(activeSettings)
+    const pagesWithoutFooter = new Set<number>()
 
     const doc = new jsPDF({
       orientation: activeSettings.orientation === 'landscape-spread' ? 'l' : 'p',
@@ -1585,7 +1584,8 @@ export function useStoryExport() {
           activeSettings,
           images,
           hasImageExportAccess,
-          loadImageAsBase64
+          loadImageAsBase64,
+          pagesWithoutFooter
         )
       }
     }
@@ -1603,7 +1603,8 @@ export function useStoryExport() {
         design.theme.textMuted,
         metrics.pageWidth,
         metrics.pageHeight,
-        activeSettings
+        activeSettings,
+        pagesWithoutFooter
       )
     }
 
