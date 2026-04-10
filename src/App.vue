@@ -132,13 +132,9 @@
               Example story
             </router-link>
 
-            <a
-              href="/#pricing"
-              class="rounded-2xl px-4 py-3 text-stone-700 transition hover:bg-stone-100"
-              @click="mobileMenuOpen = false"
-            >
+            <router-link :to="{ path: '/', hash: '#pricing' }">
               Pricing
-            </a>
+            </router-link>
 
             <router-link
               to="/contact"

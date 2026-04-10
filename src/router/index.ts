@@ -27,63 +27,78 @@ const routes = [
     meta: { requiresAuth: true },
   },
   {
-  path: '/story/:id',
-  name: 'story-editor',
-  component: () => import('../views/StoryEditorView.vue'),
-  meta: { requiresAuth: true },
-},
-{
-  path: '/privacy',
-  name: 'privacy',
-  component: () => import('../views/PrivacyView.vue'),
-},
-{
-  path: '/cookies',
-  name: 'cookies',
-  component: () => import('../views/CookieView.vue'),
-},
-{
-  path: '/terms',
-  name: 'terms',
-  component: () => import('../views/TermsView.vue'),
-},
-{
-  path: '/forgot-password',
-  name: 'forgot-password',
-  component: ForgotPasswordView,
-},
-{
-  path: '/reset-password',
-  name: 'reset-password',
-  component: ResetPasswordView,
-},
-{
-  path: '/contact',
-  name: 'contact',
-  component: ContactView,
-},
-{
-  path: '/example',
-  name: 'example-story',
-  component: () => import('../views/ExampleStoryView.vue'),
-},
+    path: '/story/:id',
+    name: 'story-editor',
+    component: () => import('../views/StoryEditorView.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/privacy',
+    name: 'privacy',
+    component: () => import('../views/PrivacyView.vue'),
+  },
+  {
+    path: '/cookies',
+    name: 'cookies',
+    component: () => import('../views/CookieView.vue'),
+  },
+  {
+    path: '/terms',
+    name: 'terms',
+    component: () => import('../views/TermsView.vue'),
+  },
+  {
+    path: '/forgot-password',
+    name: 'forgot-password',
+    component: ForgotPasswordView,
+  },
+  {
+    path: '/reset-password',
+    name: 'reset-password',
+    component: ResetPasswordView,
+  },
+  {
+    path: '/contact',
+    name: 'contact',
+    component: ContactView,
+  },
+  {
+    path: '/example',
+    name: 'example-story',
+    component: () => import('../views/ExampleStoryView.vue'),
+  },
 ]
 
 const router = createRouter({
-  history: createWebHistory(),
+  history: createWebHistory(import.meta.env.BASE_URL),
   routes,
+  scrollBehavior(to, _from, savedPosition) {
+    if (savedPosition) {
+      return savedPosition
+    }
+
+    if (to.hash) {
+      return {
+        el: to.hash,
+        behavior: 'smooth',
+        top: 100,
+      }
+    }
+
+    return { top: 0 }
+  },
 })
 
-router.beforeEach(async (to, _from, next) => {
+router.beforeEach(async (to) => {
   const {
     data: { session },
   } = await supabase.auth.getSession()
 
   if (to.meta.requiresAuth && !session) {
     return '/login'
-  } else {
-    next()
   }
+
+  return true
 })
 
 export default router
