@@ -78,7 +78,7 @@
 
         <div class="flex justify-center md:justify-end">
           <img
-            src="/images/example-story/example-story-hero-cover.png"
+            src="/images/example-story-hero-cover.png"
             alt="Example story book preview"
             class="w-full max-w-md rounded-[2rem] shadow-lg"
           />
@@ -107,7 +107,7 @@
         <div class="mt-12 grid gap-6 md:grid-cols-2">
           <div class="rounded-[2rem] border border-stone-200 bg-white p-4 shadow-sm">
             <img
-              src="/images/example-story/example-story-cover.png"
+              src="/images/example-story-cover.png"
               alt="Example story cover page"
               class="w-full rounded-[1.5rem]"
             />
@@ -119,7 +119,7 @@
 
           <div class="rounded-[2rem] border border-stone-200 bg-white p-4 shadow-sm">
             <img
-              src="/images/example-story/example-story-chapter.png"
+              src="/images/example-story-chapter.png"
               alt="Example chapter page"
               class="w-full rounded-[1.5rem]"
             />
@@ -131,7 +131,7 @@
 
           <div class="rounded-[2rem] border border-stone-200 bg-white p-4 shadow-sm">
             <img
-              src="/images/example-story/example-story-quote.png"
+              src="/images/example-story-quote.png"
               alt="Example quote page"
               class="w-full rounded-[1.5rem]"
             />
@@ -143,7 +143,7 @@
 
           <div class="rounded-[2rem] border border-stone-200 bg-white p-4 shadow-sm">
             <img
-              src="/images/example-story/example-story-memory-page.png"
+              src="/images/example-story-memory-page.png"
               alt="Example story memory page"
               class="w-full rounded-[1.5rem]"
             />
@@ -155,7 +155,7 @@
 
           <div class="rounded-[2rem] border border-stone-200 bg-white p-4 shadow-sm md:col-span-2">
             <img
-              src="/images/example-story/example-story-closing.png"
+              src="/images/example-story-closing.png"
               alt="Example closing page"
               class="mx-auto w-full max-w-2xl rounded-[1.5rem]"
             />
@@ -188,7 +188,7 @@
         <div class="mt-12 grid gap-6">
           <div class="rounded-[2rem] border border-stone-200 bg-stone-50 p-4 shadow-sm">
             <img
-              src="/images/example-story/example-story-spread-quote.png"
+              src="/images/example-story-spread-quote.png"
               alt="Example spread quote page"
               class="w-full rounded-[1.5rem]"
             />
@@ -196,7 +196,7 @@
 
           <div class="rounded-[2rem] border border-stone-200 bg-stone-50 p-4 shadow-sm">
             <img
-              src="/images/example-story/example-story-spread-memory.png"
+              src="/images/example-story-spread-memory.png"
               alt="Example spread memory page"
               class="w-full rounded-[1.5rem]"
             />

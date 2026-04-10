@@ -41,7 +41,7 @@
 
         <div class="flex justify-center md:justify-end">
           <img
-            src="/images/example-story/example-story-hero-cover.png"
+            src="/images/example-story-hero-cover.png"
             alt="Tell Me Your Story keepsake preview"
             class="w-full max-w-2xl"
           />
@@ -82,7 +82,7 @@
 
         <div class="flex justify-center">
           <img
-            src="/images/example-story/example-story-memory-page.png"
+            src="/images/example-story-memory-page.png"
             alt="Example story preview"
             class="w-full max-w-xl rounded-[2rem] shadow-lg"
           />
@@ -109,19 +109,19 @@
 
         <div class="mt-12 grid gap-6 md:grid-cols-3">
           <img
-            src="/images/example-story/example-story-chapter.png"
+            src="/images/example-story-chapter.png"
             alt="Chapter page preview"
             class="w-full rounded-[2rem]"
           />
 
           <img
-            src="/images/example-story/example-story-quote.png"
+            src="/images/example-story-quote.png"
             alt="Quote page preview"
             class="w-full rounded-[2rem]"
           />
 
           <img
-            src="/images/example-story/example-story-cover.png"
+            src="/images/example-story-cover.png"
             alt="Cover page preview"
             class="w-full rounded-[2rem]"
           />
@@ -129,13 +129,13 @@
 
         <div class="mt-6 grid gap-6 md:grid-cols-2">
           <img
-            src="/images/example-story/example-story-memory-page.png"
+            src="/images/example-story-memory-page.png"
             alt="Story page preview"
             class="w-full rounded-[2rem]"
           />
 
           <img
-            src="/images/example-story/example-story-closing.png"
+            src="/images/example-story-closing.png"
             alt="Closing page preview"
             class="w-full rounded-[2rem]"
           />
