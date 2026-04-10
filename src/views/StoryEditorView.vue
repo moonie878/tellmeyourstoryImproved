@@ -68,12 +68,25 @@
           />
         </div>
       </div>
-      <button
-  @click="removeCoverImage"
-  class="mt-3 rounded-full border border-red-300 px-4 py-2 text-sm text-red-600"
->
-  Remove cover image
-</button>
+     <div class="mt-3 flex gap-3">
+  <label class="cursor-pointer rounded-full border border-stone-300 px-4 py-2 text-sm hover:bg-stone-100">
+    {{ coverImageUrl ? 'Replace image' : 'Add image' }}
+    <input
+      type="file"
+      accept="image/*"
+      @change="handleCoverImageUpload"
+      class="hidden"
+    />
+  </label>
+
+  <button
+    v-if="coverImageUrl"
+    @click="removeCoverImage"
+    class="cursor-pointer rounded-full border border-red-300 px-4 py-2 text-sm text-red-600"
+  >
+    Remove image
+  </button>
+</div>
     </div>
 
     <div
