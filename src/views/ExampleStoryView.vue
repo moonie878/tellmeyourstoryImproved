@@ -78,7 +78,7 @@
 
         <div class="flex justify-center md:justify-end">
           <img
-            src="/images/example-story/example-hero-book.png"
+            src="/images/example-story/example-story-hero-cover.png"
             alt="Example story book preview"
             class="w-full max-w-md rounded-[2rem] shadow-lg"
           />
@@ -107,7 +107,7 @@
         <div class="mt-12 grid gap-6 md:grid-cols-2">
           <div class="rounded-[2rem] border border-stone-200 bg-white p-4 shadow-sm">
             <img
-              src="/images/example-story/example-cover.png"
+              src="/images/example-story/example-story-cover.png"
               alt="Example story cover page"
               class="w-full rounded-[1.5rem]"
             />
@@ -119,7 +119,7 @@
 
           <div class="rounded-[2rem] border border-stone-200 bg-white p-4 shadow-sm">
             <img
-              src="/images/example-story/example-chapter.png"
+              src="/images/example-story/example-story-chapter.png"
               alt="Example chapter page"
               class="w-full rounded-[1.5rem]"
             />
@@ -131,19 +131,7 @@
 
           <div class="rounded-[2rem] border border-stone-200 bg-white p-4 shadow-sm">
             <img
-              src="/images/example-story/example-story-page-one.png"
-              alt="Example question and answer page"
-              class="w-full rounded-[1.5rem]"
-            />
-            <p class="mt-4 text-sm font-semibold text-stone-900">Memory pages</p>
-            <p class="mt-1 text-sm text-stone-600">
-              Guided answers are turned into calm, readable, beautifully laid out pages.
-            </p>
-          </div>
-
-          <div class="rounded-[2rem] border border-stone-200 bg-white p-4 shadow-sm">
-            <img
-              src="/images/example-story/example-quote-page.png"
+              src="/images/example-story/example-story-quote.png"
               alt="Example quote page"
               class="w-full rounded-[1.5rem]"
             />
@@ -155,21 +143,21 @@
 
           <div class="rounded-[2rem] border border-stone-200 bg-white p-4 shadow-sm">
             <img
-              src="/images/example-story/example-photo-page.png"
-              alt="Example image page"
+              src="/images/example-story/example-story-memory-page.png"
+              alt="Example story memory page"
               class="w-full rounded-[1.5rem]"
             />
-            <p class="mt-4 text-sm font-semibold text-stone-900">Photo-led pages</p>
+            <p class="mt-4 text-sm font-semibold text-stone-900">Memory page</p>
             <p class="mt-1 text-sm text-stone-600">
-              Personal images help the finished keepsake feel even more special.
+              Guided answers and personal images come together to create a story worth keeping.
             </p>
           </div>
 
-          <div class="rounded-[2rem] border border-stone-200 bg-white p-4 shadow-sm">
+          <div class="rounded-[2rem] border border-stone-200 bg-white p-4 shadow-sm md:col-span-2">
             <img
-              src="/images/example-story/example-closing-page.png"
+              src="/images/example-story/example-story-closing.png"
               alt="Example closing page"
-              class="w-full rounded-[1.5rem]"
+              class="mx-auto w-full max-w-2xl rounded-[1.5rem]"
             />
             <p class="mt-4 text-sm font-semibold text-stone-900">Closing page</p>
             <p class="mt-1 text-sm text-stone-600">
@@ -180,8 +168,45 @@
       </div>
     </section>
 
-    <!-- REASSURANCE -->
+    <!-- OPTIONAL SPREAD SECTION -->
     <section class="border-t border-stone-200 bg-white px-6 py-20">
+      <div class="mx-auto max-w-6xl">
+        <div class="max-w-2xl">
+          <p class="text-sm font-medium uppercase tracking-[0.25em] text-stone-500">
+            Also available
+          </p>
+
+          <h2 class="mt-4 text-3xl font-bold md:text-4xl">
+            Open spread layout
+          </h2>
+
+          <p class="mt-4 text-lg text-stone-600">
+            Stories can also be exported in a wider open-spread format for a more editorial book feel.
+          </p>
+        </div>
+
+        <div class="mt-12 grid gap-6">
+          <div class="rounded-[2rem] border border-stone-200 bg-stone-50 p-4 shadow-sm">
+            <img
+              src="/images/example-story/example-story-spread-quote.png"
+              alt="Example spread quote page"
+              class="w-full rounded-[1.5rem]"
+            />
+          </div>
+
+          <div class="rounded-[2rem] border border-stone-200 bg-stone-50 p-4 shadow-sm">
+            <img
+              src="/images/example-story/example-story-spread-memory.png"
+              alt="Example spread memory page"
+              class="w-full rounded-[1.5rem]"
+            />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- REASSURANCE -->
+    <section class="border-t border-stone-200 bg-[#f7f5f2] px-6 py-20">
       <div class="mx-auto max-w-4xl text-center">
         <p class="text-sm font-medium uppercase tracking-[0.25em] text-stone-500">
           Your story, your pace

@@ -15,6 +15,7 @@ type AnalyticsEvent =
   | 'home_pricing'
   | 'cover_banner'
   | 'story_started'
+  | 'example_story_clicked'
  
 
 export function track(event: AnalyticsEvent, data?: Record<string, any>) {
