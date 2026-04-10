@@ -62,11 +62,11 @@ const routes = [
   name: 'contact',
   component: ContactView,
 },
-{
-  path: '/example',
-  name: 'example-story',
-  component: () => import('../views/ExampleStoryView.vue'),
-},
+// {
+//   path: '/example',
+//   name: 'example-story',
+//   component: () => import('../views/ExampleStoryView.vue'),
+// },
 ]
 
 const router = createRouter({
