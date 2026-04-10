@@ -92,6 +92,43 @@ export function useStoryExport() {
     }
   }
 
+function getPreferredQuoteWithoutRepeats(
+  sections: StorySection[],
+  currentIndex: number,
+  usedQuotes: Set<string>
+) {
+  const previousSections = sections.slice(0, currentIndex)
+
+  const candidates = [
+    ...[...previousSections]
+      .reverse()
+      .filter(
+        (section) =>
+          !!section.is_highlighted &&
+          !!section.answer &&
+          section.answer.trim().length >= 40
+      ),
+    ...[...previousSections]
+      .reverse()
+      .filter(
+        (section) =>
+          !!section.answer &&
+          section.answer.trim().length >= 40
+      ),
+  ]
+
+  for (const section of candidates) {
+    const quote = getQuoteFromAnswer(section.answer || '')
+    if (quote && !usedQuotes.has(quote)) {
+      usedQuotes.add(quote)
+      return quote
+    }
+  }
+
+  return ''
+}
+
+  
   function drawSoftDivider(
     doc: jsPDF,
     centerX: number,
@@ -381,6 +418,16 @@ export function useStoryExport() {
     })
   }
 
+  function getImageCaption(section: StorySection) {
+  const question = (section.question || '').trim()
+
+  if (!question) return 'A moment worth remembering'
+
+  if (question.length <= 70) return question
+
+  return 'A moment connected to this story'
+}
+
   async function renderCoverPage(
     doc: jsPDF,
     storyTitle: string,
@@ -610,6 +657,20 @@ function drawSmallOrnament(
   doc.circle(centerX + 3.5, y, 0.5, 'S')
 }
 
+function shouldUseCenteredPortraitLayout(
+  section: StorySection,
+  hasImage: boolean,
+  settings: PdfSettings
+) {
+  if (settings.layout !== 'elegant') return false
+  if (hasImage) return false
+
+  const answerLength = (section.answer || '').trim().length
+  const questionLength = (section.question || '').trim().length
+
+  return answerLength > 0 && answerLength <= 180 && questionLength <= 120
+}
+
   function renderQuotePage(
     doc: jsPDF,
     quote: string,
@@ -636,13 +697,21 @@ function drawSmallOrnament(
         align: 'center',
       })
 
+const cleanQuote = `“${quote}”`
+
       drawElegantDivider(doc, settings, metrics.centerX, 92, 44, design)
 
-      doc.setFont(design.font.title, design.font.accentStyle)
-      doc.setFontSize(settings.layout === 'elegant' ? 20 : 18)
+     doc.setFont(design.font.title, design.font.accentStyle)
+doc.setFontSize(
+  settings.layout === 'elegant'
+    ? cleanQuote.length < 90
+      ? 22
+      : 19
+    : 18
+)
       setTextColor(doc, design.theme.textPrimary)
 
-      const cleanQuote = `“${quote}”`
+      
       const splitQuote = doc.splitTextToSize(cleanQuote, 136)
 
       doc.text(splitQuote, metrics.centerX, 128, {
@@ -671,7 +740,7 @@ drawSmallOrnament(doc, metrics.centerX, 90, design.theme.accent)
       drawElegantDivider(doc, settings, metrics.centerX, 90, 44, design)
 
       doc.setFont(design.font.title, 'italic')
-      doc.setFontSize(21)
+doc.setFontSize(quote.length < 90 ? 23 : 20)
       setTextColor(doc, design.theme.textPrimary)
 
       const splitQuote = doc.splitTextToSize(`“${quote}”`, 94)
@@ -807,11 +876,11 @@ drawSmallOrnament(doc, metrics.centerX, 90, design.theme.accent)
       doc.setFontSize(11)
       setTextColor(doc, design.theme.textSecondary)
 
-      const splitIntro = doc.splitTextToSize(intro, 108)
-      doc.text(splitIntro, metrics.centerX, 132, {
-        align: 'center',
-        maxWidth: 108,
-      })
+      const splitIntro = doc.splitTextToSize(intro, 96)
+doc.text(splitIntro, metrics.centerX, 134, {
+  align: 'center',
+  maxWidth: 96,
+})
 
       if (settings.chapterStyle === 'flourish') {
         drawElegantDivider(doc, settings, metrics.centerX, 176, 40, design)
@@ -923,13 +992,43 @@ drawSmallOrnament(doc, metrics.centerX, 90, design.theme.accent)
       doc.text(splitAnswer, answerX, yState.y)
       yState.y += splitAnswer.length * design.layout.lineHeight + sectionGap
     }
-
     const sectionImage = images
-      .filter((img) => img.section_id === section.id)
-      .sort(
-        (a, b) =>
-          new Date(b.created_at || '').getTime() - new Date(a.created_at || '').getTime()
-      )[0]
+  .filter((img) => img.section_id === section.id)
+  .sort(
+    (a, b) =>
+      new Date(b.created_at || '').getTime() - new Date(a.created_at || '').getTime()
+  )[0]
+
+const hasImage = !!(hasImageExportAccess && sectionImage?.image_url)
+
+if (shouldUseCenteredPortraitLayout(section, hasImage, settings)) {
+  const centerWidth = Math.min(110, metrics.contentWidth - 24)
+
+  doc.setFont(design.font.body, 'italic')
+  doc.setFontSize(design.layout.questionSize - 0.2)
+  setTextColor(doc, design.theme.textSecondary)
+
+  const splitQuestionCentered = doc.splitTextToSize(section.question, centerWidth)
+  doc.text(splitQuestionCentered, metrics.centerX, yState.y + 8, {
+    align: 'center',
+    maxWidth: centerWidth,
+  })
+
+  yState.y += splitQuestionCentered.length * design.layout.lineHeight + 14
+
+  doc.setFont(design.font.body, design.font.bodyStyle)
+  doc.setFontSize(design.layout.answerSize + 0.5)
+  setTextColor(doc, design.theme.textPrimary)
+
+  const splitAnswerCentered = doc.splitTextToSize(section.answer.trim(), centerWidth)
+  doc.text(splitAnswerCentered, metrics.centerX, yState.y, {
+    align: 'center',
+    maxWidth: centerWidth,
+  })
+
+  yState.y += splitAnswerCentered.length * design.layout.lineHeight + design.layout.sectionSpacing + 12
+  return
+} 
 
     if (hasImageExportAccess && sectionImage?.image_url) {
       try {
@@ -981,13 +1080,15 @@ drawSmallOrnament(doc, metrics.centerX, 90, design.theme.accent)
         if (settings.layout === 'elegant') {
           yState.y += 10
         } else {
-          doc.setFontSize(10)
-          doc.setTextColor(140, 140, 140)
-          doc.text('A moment captured in time', metrics.centerX, yState.y, {
-            align: 'center',
-          })
+          doc.setFont(design.font.body, 'italic')
+doc.setFontSize(9)
+setTextColor(doc, design.theme.textMuted)
+doc.text(getImageCaption(section), metrics.centerX, yState.y, {
+  align: 'center',
+  maxWidth: 120,
+})
 
-          yState.y += design.layout.imageSpacing
+yState.y += design.layout.imageSpacing
         }
       } catch (err) {
         console.error(err)
@@ -1269,14 +1370,17 @@ drawSmallOrnament(doc, metrics.centerX, 90, design.theme.accent)
     }
 
     doc.setFont(design.font.body, design.font.bodyStyle)
-    doc.setFontSize(12)
-    setTextColor(doc, design.theme.textSecondary)
-    doc.text(
-      'Created with love, to be remembered and shared for years to come.',
-      metrics.centerX,
-      145,
-      { align: 'center', maxWidth: 125 }
-    )
+doc.setFontSize(12)
+setTextColor(doc, design.theme.textSecondary)
+doc.text(
+  'This story was created to be remembered, shared, and held onto for generations.',
+  metrics.centerX,
+  145,
+  { align: 'center', maxWidth: 125 }
+)
+if (settings.layout === 'elegant') {
+  drawDoubleDivider(doc, metrics.centerX, 168, 30, design.theme.border)
+}
   }
 
   async function exportWord({ project, sections }: ExportWordArgs) {
@@ -1381,6 +1485,8 @@ drawSmallOrnament(doc, metrics.centerX, 90, design.theme.accent)
       (section) => section.answer && section.answer.trim().length > 0
     )
 
+    const usedQuotes = new Set<string>()
+
     await renderCoverPage(
       doc,
       storyTitle,
@@ -1418,14 +1524,24 @@ drawSmallOrnament(doc, metrics.centerX, 90, design.theme.accent)
           if (activeSettings.layout === 'elegant') {
             drawPageBorder(doc, activeSettings, metrics.pageWidth, metrics.pageHeight, design.theme.border)
           }
-          doc.setFontSize(14)
-          doc.setTextColor(120, 120, 120)
-          doc.text(
-            'Take a moment to reflect on what comes next…',
-            metrics.centerX,
-            metrics.pageHeight / 2,
-            { align: 'center' }
-          )
+          doc.setFont(design.font.body, 'italic')
+doc.setFontSize(13)
+setTextColor(doc, design.theme.textMuted)
+
+if (activeSettings.layout === 'elegant') {
+  drawSmallOrnament(doc, metrics.centerX, metrics.pageHeight / 2 - 16, design.theme.accent)
+}
+
+doc.text(
+  'Take a moment to reflect on what comes next…',
+  metrics.centerX,
+  metrics.pageHeight / 2,
+  { align: 'center' }
+)
+
+if (activeSettings.layout === 'elegant') {
+  drawDoubleDivider(doc, metrics.centerX, metrics.pageHeight / 2 + 14, 24, design.theme.border)
+}
 
           doc.addPage()
           applyPageBackground(doc, design.theme.pageBg, metrics.pageWidth, metrics.pageHeight)
@@ -1438,7 +1554,7 @@ drawSmallOrnament(doc, metrics.centerX, 90, design.theme.accent)
         const insertedQuotePage = shouldInsertQuotePage(index, printableSections.length)
 
         if (insertedQuotePage) {
-  const quote = getPreferredQuote(printableSections, index)
+  const quote = getPreferredQuoteWithoutRepeats(printableSections, index, usedQuotes)
   if (quote) {
     renderQuotePage(doc, quote, activeSettings)
 
@@ -1483,7 +1599,7 @@ drawSmallOrnament(doc, metrics.centerX, 90, design.theme.accent)
         }
 
        if (shouldInsertQuotePage(index, printableSections.length)) {
-  const quote = getPreferredQuote(printableSections, index)
+  const quote = getPreferredQuoteWithoutRepeats(printableSections, index, usedQuotes)
   if (quote) {
     renderQuotePage(doc, quote, activeSettings)
   }
