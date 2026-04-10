@@ -657,9 +657,7 @@ export function useStoryExport() {
     }
 
     if (settings.orientation === 'landscape-spread') {
-      setDrawColor(doc, design.theme.divider)
-      doc.line(metrics.centerX, 18, metrics.centerX, metrics.pageHeight - 18)
-
+      
       doc.setFont(design.font.body, 'normal')
       doc.setFontSize(10)
       setTextColor(doc, design.theme.textMuted)
