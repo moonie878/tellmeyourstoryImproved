@@ -68,6 +68,12 @@
           />
         </div>
       </div>
+      <button
+  @click="removeCoverImage"
+  class="mt-3 rounded-full border border-red-300 px-4 py-2 text-sm text-red-600"
+>
+  Remove cover image
+</button>
     </div>
 
     <div
@@ -588,6 +594,16 @@ watch(
     projectId,
   })
     }
+
+    async function removeCoverImage() {
+  coverImageUrl.value = ''
+  coverImageStatus.value = ''
+
+  await supabase
+    .from('story_projects')
+    .update({ cover_image_url: null })
+    .eq('id', projectId)
+}
 
     function toggleChapter(chapter: string) {
     openChapters.value[chapter] = !openChapters.value[chapter]
