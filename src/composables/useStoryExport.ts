@@ -327,46 +327,7 @@ function getPreferredQuoteWithoutRepeats(
     return totalLength <= 360
   }
 
-  function getPreferredQuote(
-  sections: StorySection[],
-  currentIndex: number
-) {
-  const previousSections = sections.slice(0, currentIndex)
 
-  const highlighted = [...previousSections]
-    .reverse()
-    .find(
-      (section) =>
-        !!section.is_highlighted &&
-        !!section.answer &&
-        section.answer.trim().length >= 40
-    )
-
-  if (highlighted) {
-    const quote = getQuoteFromAnswer(highlighted.answer)
-    if (quote) return quote
-  }
-
-  const previous = previousSections[previousSections.length - 1]
-  if (previous?.answer) {
-    const quote = getQuoteFromAnswer(previous.answer)
-    if (quote) return quote
-  }
-
-  const fallback = [...previousSections]
-    .reverse()
-    .find(
-      (section) =>
-        !!section.answer &&
-        section.answer.trim().length >= 40
-    )
-
-  if (fallback?.answer) {
-    return getQuoteFromAnswer(fallback.answer)
-  }
-
-  return ''
-}
 
   function addFooter(
     doc: jsPDF,
