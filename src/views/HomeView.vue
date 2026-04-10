@@ -5,38 +5,37 @@
       <div class="mx-auto grid max-w-6xl items-center gap-14 md:grid-cols-2">
         <div>
           <p class="text-sm font-medium uppercase tracking-[0.25em] text-stone-500">
-            Preserve precious memories
-          </p>
+  Preserve a loved one’s story
+</p>
 
-          <h1 class="mt-4 text-4xl font-bold leading-tight md:text-6xl">
-            Turn life stories into a beautiful keepsake
-          </h1>
+<h1 class="mt-4 text-4xl font-bold leading-tight md:text-6xl">
+  Turn memories into a beautiful keepsake book
+</h1>
 
-          <p class="mt-6 max-w-xl text-lg leading-8 text-stone-600">
-            Capture memories, moments, and life lessons through thoughtful questions, then turn them into a beautifully designed book you can keep, print, and share.
-          </p>
+<p class="mt-6 max-w-xl text-lg leading-8 text-stone-600">
+  Answer guided questions about someone you love, add photos, and turn their memories into a beautifully designed book you can keep, print, and share.
+</p>
 
-          <p class="mt-4 text-sm text-stone-500">
-            A meaningful gift for mums, dads, grandparents, and the people you never want to forget.
-          </p>
+<p class="mt-4 text-sm text-stone-500">
+  Perfect for mums, dads, grandparents, and family stories you never want to lose.
+</p>
 
           <div class="mt-8 flex flex-wrap gap-4">
-            <router-link
-              to="/register"
-              @click="trackStart"
-              class="rounded-full bg-[#7C5C3B] px-6 py-3 text-sm font-semibold text-white transition hover:opacity-90"
-            >
-              Get started free
-            </router-link>
+  <router-link
+    to="/register"
+    @click="trackStart"
+    class="rounded-full bg-[#7C5C3B] px-6 py-3 text-sm font-semibold text-white transition hover:opacity-90"
+  >
+    Get started free
+  </router-link>
 
-            <router-link
-              to="/login"
-              @click="trackHeroLogin"
-              class="rounded-full border border-stone-300 bg-white px-6 py-3 text-sm font-semibold text-stone-900 transition hover:bg-stone-100"
-            >
-              Login
-            </router-link>
-          </div>
+  <router-link
+    to="/example"
+    class="rounded-full border border-stone-300 bg-white px-6 py-3 text-sm font-semibold text-stone-900 transition hover:bg-stone-100"
+  >
+    View example story
+  </router-link>
+</div>
         </div>
 
         <div class="flex justify-center md:justify-end">
@@ -49,22 +48,52 @@
       </div>
     </section>
 
-    <!-- EMOTIONAL TRUST SECTION -->
-    <section class="border-t border-stone-200 bg-white px-6 py-20">
-      <div class="mx-auto max-w-4xl text-center">
-        <p class="text-sm font-medium uppercase tracking-[0.25em] text-stone-500">
-          Why it matters
-        </p>
+    <!-- EXAMPLE STORY -->
+<section class="border-t border-stone-200 bg-white px-6 py-20">
+  <div class="mx-auto max-w-6xl grid gap-12 md:grid-cols-2 items-center">
 
-        <h2 class="mt-4 text-3xl font-bold md:text-4xl">
-          The stories that matter most are often the easiest to lose
-        </h2>
+    <!-- LEFT -->
+    <div>
+      <p class="text-sm font-medium uppercase tracking-[0.25em] text-stone-500">
+        Example story
+      </p>
 
-        <p class="mt-6 text-lg leading-8 text-stone-600">
-          Tell Me Your Story helps you capture a loved one’s memories slowly and meaningfully, then turn them into something beautiful enough to keep for years.
-        </p>
-      </div>
-    </section>
+      <h2 class="mt-4 text-3xl font-bold md:text-4xl">
+        See how a story becomes a keepsake
+      </h2>
+
+      <p class="mt-6 text-lg leading-8 text-stone-600">
+        Follow a real example of a completed story — from thoughtful answers to a finished book filled with memories, photos, and meaningful moments.
+      </p>
+
+      <ul class="mt-6 space-y-2 text-sm text-stone-600">
+        <li>✔ Real answers turned into a structured story</li>
+        <li>✔ Highlighted quotes and chapter pages</li>
+        <li>✔ Designed layouts ready to print or share</li>
+      </ul>
+
+      <router-link
+        to="/example"
+        class="mt-8 inline-block rounded-full bg-[#7C5C3B] px-6 py-3 text-sm font-semibold text-white hover:opacity-90"
+      >
+        Explore example story
+      </router-link>
+    </div>
+
+    <!-- RIGHT -->
+    <div class="flex justify-center">
+      <img
+        src="/images/homepage/hero-keepsake.png"
+        alt="Example story preview"
+        class="w-full max-w-xl rounded-[2rem] shadow-lg"
+      />
+    </div>
+
+  </div>
+</section>
+
+
+   
 
     <!-- PREVIEW GALLERY -->
     <section class="px-6 py-20">
@@ -75,11 +104,11 @@
           </p>
 
           <h2 class="mt-4 text-3xl font-bold md:text-4xl">
-            Designed to feel like a real book, not just an export
+            See what your finished keepsake can look like
           </h2>
 
           <p class="mt-4 text-lg text-stone-600">
-            Elegant chapter pages, meaningful quotes, personal photos, and beautifully laid out memories.
+            From elegant chapter pages and meaningful quotes to personal photos and beautifully laid out memories.
           </p>
         </div>
 
@@ -148,12 +177,29 @@
           </div>
 
           <div class="rounded-3xl border border-stone-200 bg-stone-50 p-6">
-            <h3 class="text-xl font-semibold">3. Export the finished keepsake</h3>
-            <p class="mt-3 text-stone-600">
-              Turn the story into a beautifully designed PDF or document ready to keep, print, or gift.
-            </p>
+            <h3 class="text-xl font-semibold">3. Turn it into a keepsake book</h3>
+<p class="mt-3 text-stone-600">
+  Export a beautifully designed book to keep, print, or give as a meaningful gift.
+</p>
           </div>
         </div>
+      </div>
+    </section>
+
+     <!-- EMOTIONAL TRUST SECTION -->
+    <section class="border-t border-stone-200 bg-white px-6 py-20">
+      <div class="mx-auto max-w-4xl text-center">
+        <p class="text-sm font-medium uppercase tracking-[0.25em] text-stone-500">
+          Why it matters
+        </p>
+
+        <h2 class="mt-4 text-3xl font-bold md:text-4xl">
+          The stories that matter most are often the easiest to lose
+        </h2>
+
+        <p class="mt-6 text-lg leading-8 text-stone-600">
+          Tell Me Your Story helps you capture a loved one’s memories slowly and meaningfully, then turn them into something beautiful enough to keep for years.
+        </p>
       </div>
     </section>
 
@@ -238,10 +284,10 @@
             <p class="mt-2 text-stone-600">For one meaningful keepsake</p>
             <p class="mt-6 text-3xl font-bold">£3.99</p>
             <ul class="mt-6 space-y-2 text-sm text-stone-600">
-              <li>✔ Full story access</li>
-              <li>✔ Guided questions</li>
-              <li>✔ Export your story</li>
-            </ul>
+  <li>✔ Full guided story experience</li>
+  <li>✔ Beautiful keepsake export</li>
+  <li>✔ Ready to print, share, or gift</li>
+</ul>
 
             <button
               @click="trackPricingSingle"
@@ -276,11 +322,11 @@
     <section class="border-t border-stone-200 bg-stone-900 px-6 py-20 text-white">
       <div class="mx-auto max-w-3xl text-center">
         <h2 class="text-3xl font-bold md:text-4xl">
-          Start capturing a story worth keeping
+          Start creating a keepsake your family can treasure
         </h2>
 
         <p class="mt-4 text-lg text-stone-300">
-          Create something meaningful for yourself or someone you love.
+          Preserve a story, capture the memories that matter, and turn them into something worth holding onto.
         </p>
 
         <router-link
