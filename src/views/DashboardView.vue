@@ -1,34 +1,34 @@
 <template>
-  <div class="min-h-screen bg-stone-50 px-6 py-10 md:py-12">
-    <div class="mx-auto max-w-6xl space-y-8">
+  <div class="min-h-screen bg-stone-50 px-4 py-8 sm:px-6 md:py-12">
+    <div class="mx-auto max-w-6xl space-y-6 sm:space-y-8">
       <!-- Hero -->
       <section class="overflow-hidden rounded-[2rem] border border-stone-200 bg-white shadow-sm">
-        <div class="grid gap-8 px-6 py-8 md:grid-cols-[1.2fr_0.8fr] md:px-8 md:py-10">
-          <div>
+        <div class="grid gap-6 px-5 py-6 sm:px-6 sm:py-8 md:grid-cols-[1.2fr_0.8fr] md:gap-8 md:px-8 md:py-10">
+          <div class="text-center md:text-left">
             <p class="text-xs font-medium uppercase tracking-[0.25em] text-stone-500">
               Dashboard
             </p>
 
-            <h1 class="mt-3 text-3xl font-bold text-stone-900 md:text-4xl">
+            <h1 class="mt-3 text-2xl font-bold text-stone-900 sm:text-3xl md:text-4xl">
               Welcome to Tell Me Your Story
             </h1>
 
-            <p class="mt-4 max-w-2xl text-stone-600 leading-7">
+            <p class="mt-4 max-w-2xl text-sm leading-7 text-stone-600 sm:text-base">
               Create meaningful keepsakes, return to them whenever you like, and turn treasured
               memories into something beautifully finished.
             </p>
 
-            <div class="mt-6 flex flex-wrap gap-3">
+            <div class="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:justify-center md:justify-start">
               <button
                 @click="createStory('mum')"
-                class="rounded-full bg-[#7C5C3B] px-5 py-2.5 text-sm font-medium text-white transition hover:opacity-90"
+                class="rounded-full bg-[#7C5C3B] px-5 py-3 text-sm font-medium text-white transition hover:opacity-90"
               >
                 Start Mum Story
               </button>
 
               <button
                 @click="createStory('dad')"
-                class="rounded-full border border-stone-300 bg-white px-5 py-2.5 text-sm font-medium text-stone-900 transition hover:bg-stone-100"
+                class="rounded-full border border-stone-300 bg-white px-5 py-3 text-sm font-medium text-stone-900 transition hover:bg-stone-100"
               >
                 Start Dad Story
               </button>
@@ -45,14 +45,14 @@
           <div class="grid gap-4 sm:grid-cols-2 md:grid-cols-1">
             <div class="rounded-3xl bg-stone-50 p-5">
               <p class="text-sm font-semibold text-stone-900">Your library</p>
-              <p class="mt-2 text-sm text-stone-600">
+              <p class="mt-2 text-sm leading-6 text-stone-600">
                 Keep all your stories in one place and return whenever inspiration comes.
               </p>
             </div>
 
             <div class="rounded-3xl bg-stone-50 p-5">
               <p class="text-sm font-semibold text-stone-900">Finished keepsakes</p>
-              <p class="mt-2 text-sm text-stone-600">
+              <p class="mt-2 text-sm leading-6 text-stone-600">
                 Export polished PDFs and documents when you’re ready to preserve the story.
               </p>
             </div>
@@ -61,34 +61,38 @@
       </section>
 
       <!-- Story starters -->
-      <section class="rounded-[2rem] border border-stone-200 bg-white p-6 shadow-sm md:p-8">
-        <div class="flex items-end justify-between gap-4">
-          <div>
-            <p class="text-xs font-medium uppercase tracking-[0.25em] text-stone-500">
-              Start a new story
-            </p>
-            <h2 class="mt-2 text-2xl font-bold text-stone-900">
-              Choose the keepsake you want to create
-            </h2>
-          </div>
+      <section class="rounded-[2rem] border border-stone-200 bg-white p-5 shadow-sm sm:p-6 md:p-8">
+        <div class="text-center md:text-left">
+          <p class="text-xs font-medium uppercase tracking-[0.25em] text-stone-500">
+            Start a new story
+          </p>
+          <h2 class="mt-2 text-2xl font-bold text-stone-900">
+            Choose the keepsake you want to create
+          </h2>
         </div>
 
-        <div class="mt-8 grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
+        <div class="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           <button
             v-for="type in storyTypes"
             :key="type.id"
             @click="createStory(type.id)"
             class="group rounded-[1.75rem] border border-stone-200 bg-stone-50 p-5 text-left transition hover:-translate-y-1 hover:border-stone-300 hover:bg-white hover:shadow-md"
           >
-            <p v-if="type.label" class="text-xs font-medium uppercase tracking-[0.2em] text-stone-500">
-  {{ type.label }}
-</p>
+            <p
+              v-if="type.label"
+              class="text-xs font-medium uppercase tracking-[0.2em] text-stone-500"
+            >
+              {{ type.label }}
+            </p>
+
             <h3 class="mt-3 text-lg font-semibold text-stone-900">
               {{ type.title }}
             </h3>
+
             <p class="mt-2 text-sm leading-6 text-stone-600">
               {{ type.description }}
             </p>
+
             <p class="mt-4 text-sm font-medium text-[#7C5C3B]">
               Start story →
             </p>
@@ -99,16 +103,16 @@
       <!-- Empty state -->
       <section
         v-if="isFirstTimeUser"
-        class="rounded-[2rem] border border-stone-200 bg-white p-6 shadow-sm md:p-8"
+        class="rounded-[2rem] border border-stone-200 bg-white p-5 shadow-sm sm:p-6 md:p-8"
       >
-        <div class="max-w-3xl">
+        <div class="max-w-3xl text-center md:text-left">
           <p class="text-xs font-medium uppercase tracking-[0.25em] text-stone-500">
             Welcome
           </p>
           <h2 class="mt-3 text-2xl font-bold text-stone-900">
             Start your first keepsake in a few simple steps
           </h2>
-          <p class="mt-3 text-stone-600 leading-7">
+          <p class="mt-3 text-sm leading-7 text-stone-600 sm:text-base">
             Choose a story, answer one memory at a time, and slowly turn it into something you can
             save, print, and share.
           </p>
@@ -117,21 +121,21 @@
         <div class="mt-8 grid gap-4 md:grid-cols-3">
           <div class="rounded-2xl bg-stone-50 p-5">
             <p class="text-sm font-semibold text-stone-900">1. Choose a story</p>
-            <p class="mt-2 text-sm text-stone-600">
+            <p class="mt-2 text-sm leading-6 text-stone-600">
               Start with a meaningful story type and begin capturing memories straight away.
             </p>
           </div>
 
           <div class="rounded-2xl bg-stone-50 p-5">
             <p class="text-sm font-semibold text-stone-900">2. Answer at your own pace</p>
-            <p class="mt-2 text-sm text-stone-600">
+            <p class="mt-2 text-sm leading-6 text-stone-600">
               Write one answer at a time with autosave, so nothing feels rushed.
             </p>
           </div>
 
           <div class="rounded-2xl bg-stone-50 p-5">
             <p class="text-sm font-semibold text-stone-900">3. Turn it into a keepsake</p>
-            <p class="mt-2 text-sm text-stone-600">
+            <p class="mt-2 text-sm leading-6 text-stone-600">
               Export the finished story as a beautifully preserved PDF or Word document.
             </p>
           </div>
@@ -140,15 +144,13 @@
 
       <!-- Stories -->
       <section v-if="stories.length" class="space-y-5">
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-xs font-medium uppercase tracking-[0.25em] text-stone-500">
-              Your stories
-            </p>
-            <h2 class="mt-2 text-2xl font-bold text-stone-900">
-              Continue where you left off
-            </h2>
-          </div>
+        <div class="text-center md:text-left">
+          <p class="text-xs font-medium uppercase tracking-[0.25em] text-stone-500">
+            Your stories
+          </p>
+          <h2 class="mt-2 text-2xl font-bold text-stone-900">
+            Continue where you left off
+          </h2>
         </div>
 
         <div class="grid gap-5 lg:grid-cols-2">
@@ -182,7 +184,7 @@
               </div>
 
               <!-- Content -->
-              <div class="p-6">
+              <div class="p-5 sm:p-6">
                 <div class="flex flex-wrap items-center gap-2">
                   <h3 class="text-xl font-semibold text-stone-900">
                     {{ story.title }}
@@ -222,7 +224,7 @@
 
                   <div class="mt-2 h-2 w-full rounded-full bg-stone-200">
                     <div
-                      class="h-2 rounded-full bg-[#7C5C3B]"
+                      class="h-2 rounded-full bg-[#7C5C3B] transition-all"
                       :style="{ width: `${story.progress}%` }"
                     ></div>
                   </div>
@@ -264,20 +266,21 @@
                   }}
                 </p>
 
-                <div class="mt-6 flex flex-wrap gap-3">
+                <div class="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
                   <button
                     @click="openStory(story.id)"
-                    class="rounded-full bg-[#7C5C3B] px-4 py-2.5 text-sm font-medium text-white transition hover:opacity-90"
+                    class="rounded-full bg-[#7C5C3B] px-4 py-3 text-sm font-medium text-white transition hover:opacity-90"
                   >
                     {{ hasStoryAccess(story.story_type) ? 'Continue' : 'Edit Draft' }}
                   </button>
 
-                  <button
-                    @click.stop="deleteStory(story.id)"
-                    class="rounded-full border border-red-300 bg-white px-4 py-2.5 text-sm font-medium text-red-600 transition hover:bg-red-50"
-                  >
-                    Delete
-                  </button>
+                            <button
+            @click.stop="deleteStory(story.id)"
+            :disabled="deletingStoryId === story.id"
+            class="rounded-full border border-red-300 bg-white px-4 py-3 text-sm font-medium text-red-600 transition hover:bg-red-50 disabled:opacity-50"
+          >
+            {{ deletingStoryId === story.id ? 'Deleting...' : 'Delete' }}
+          </button>
                 </div>
               </div>
             </div>
@@ -286,22 +289,22 @@
       </section>
 
       <!-- Bottom info cards -->
-      <section class="grid gap-6 md:grid-cols-3">
-        <div class="rounded-[1.75rem] border border-stone-200 bg-white p-6 shadow-sm">
+      <section class="grid gap-5 md:grid-cols-3 md:gap-6">
+        <div class="rounded-[1.75rem] border border-stone-200 bg-white p-5 shadow-sm sm:p-6">
           <h2 class="text-lg font-semibold text-stone-900">Your stories</h2>
           <p class="mt-2 text-sm leading-6 text-stone-600">
             Start and continue keepsakes for parents, grandparents, couples, and more.
           </p>
         </div>
 
-        <div class="rounded-[1.75rem] border border-stone-200 bg-white p-6 shadow-sm">
+        <div class="rounded-[1.75rem] border border-stone-200 bg-white p-5 shadow-sm sm:p-6">
           <h2 class="text-lg font-semibold text-stone-900">Your progress</h2>
           <p class="mt-2 text-sm leading-6 text-stone-600">
             Return any time and keep building each story at your own pace.
           </p>
         </div>
 
-        <div class="rounded-[1.75rem] border border-stone-200 bg-white p-6 shadow-sm">
+        <div class="rounded-[1.75rem] border border-stone-200 bg-white p-5 shadow-sm sm:p-6">
           <h2 class="text-lg font-semibold text-stone-900">Your keepsakes</h2>
           <p class="mt-2 text-sm leading-6 text-stone-600">
             Turn completed stories into polished keepsakes you can save, print, and share.
