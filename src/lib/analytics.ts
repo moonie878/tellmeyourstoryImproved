@@ -1,3 +1,5 @@
+import { posthog } from './posthog'
+
 type AnalyticsEvent =
   | 'preview_opened'
   | 'upgrade_clicked'
@@ -16,10 +18,29 @@ type AnalyticsEvent =
   | 'cover_banner'
   | 'story_started'
   | 'example_story_clicked'
- 
 
-export function track(event: AnalyticsEvent, data?: Record<string, any>) {
-  console.log('[Analytics]', event, data || {})
+type AnalyticsValue =
+  | string
+  | number
+  | boolean
+  | null
+  | undefined
+  | Record<string, unknown>
+  | Array<unknown>
 
-  // future: send to PostHog / API / Supabase
+type TrackProperties = Record<string, AnalyticsValue>
+
+export function track(event: AnalyticsEvent, data?: TrackProperties) {
+  const payload = data || {}
+
+  // Dev log (keep this — super useful)
+  if (import.meta.env.DEV) {
+    console.log('[Analytics]', event, payload)
+  }
+
+  try {
+    posthog.capture(event, payload)
+  } catch (err) {
+    console.error('PostHog capture failed:', err)
+  }
 }
