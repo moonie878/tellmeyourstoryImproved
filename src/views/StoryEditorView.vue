@@ -270,7 +270,7 @@
       @tier4="upgradeAllImages"
     />
 
-    <div class="grid gap-6 lg:grid-cols-[320px_minmax(0,1fr)] lg:gap-8">
+    <div class="grid gap-4 lg:grid-cols-[320px_minmax(0,1fr)] lg:gap-8">
   <div class="order-2 lg:order-1 lg:self-start">
         <StoryMapSidebar
           :chapter-tree="chapterTree"
