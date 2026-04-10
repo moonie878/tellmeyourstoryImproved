@@ -1,20 +1,20 @@
 <template>
   <div
     v-if="open"
-    class="fixed inset-0 z-50 overflow-y-auto bg-black/40 px-4 py-6"
+    class="fixed inset-0 z-50 overflow-y-auto bg-black/40 px-3 py-4 sm:px-4 sm:py-6"
   >
     <div
-      class="mx-auto flex w-full max-w-5xl max-h-[92vh] flex-col overflow-hidden rounded-3xl bg-white shadow-2xl"
+      class="mx-auto flex max-h-[94vh] w-full max-w-5xl flex-col overflow-hidden rounded-3xl bg-white shadow-2xl"
     >
       <!-- Header -->
-      <div class="shrink-0 border-b border-stone-200 bg-white px-8 py-6">
+      <div class="shrink-0 border-b border-stone-200 bg-white px-4 py-5 sm:px-6 sm:py-6 md:px-8">
         <div class="flex items-start justify-between gap-4">
           <div>
-            <p class="text-xs font-medium uppercase tracking-[0.25em] text-stone-500">
+            <p class="text-[11px] font-medium uppercase tracking-[0.25em] text-stone-500 sm:text-xs">
               Keepsake Design
             </p>
 
-            <h3 class="mt-3 text-3xl font-bold text-stone-900">
+            <h3 class="mt-3 text-2xl font-bold text-stone-900 sm:text-3xl">
               {{ hasTier4Access
                 ? 'Design your story as a finished keepsake'
                 : 'Preview premium design' }}
@@ -39,7 +39,7 @@
 
           <button
             @click="$emit('close')"
-            class="rounded-full border border-stone-300 px-4 py-2 text-sm"
+            class="shrink-0 rounded-full border border-stone-300 px-4 py-2 text-sm"
           >
             Close
           </button>
@@ -47,11 +47,204 @@
       </div>
 
       <!-- Scrollable Body -->
-      <div class="min-h-0 flex-1 overflow-y-auto px-8 py-6">
-        <div class="grid gap-8 lg:grid-cols-[320px_minmax(0,1fr)]">
-          <!-- LEFT: Controls -->
-          <div>
-            <div class="mb-6 rounded-2xl border border-stone-200 bg-stone-50 p-4 text-center">
+      <div class="min-h-0 flex-1 overflow-y-auto px-4 py-5 sm:px-6 sm:py-6 md:px-8">
+        <div class="grid gap-6 lg:grid-cols-[320px_minmax(0,1fr)] lg:gap-8">
+          <!-- RIGHT: Preview first on mobile -->
+          <div class="order-1 lg:order-2">
+            <p class="text-sm font-medium text-stone-700">Live preview</p>
+            <p class="mt-1 text-xs text-stone-500">
+              Live preview updates instantly
+            </p>
+
+            <div
+              class="mt-3 rounded-3xl border border-stone-200 p-4 shadow-inner sm:p-6"
+              :class="previewThemeClass"
+            >
+              <div
+                class="relative mx-auto rounded-2xl border bg-white"
+                :class="[previewPageClass, previewStyleClass, previewInnerSpacingClass, previewPrintFrameClass]"
+              >
+                <div
+                  v-if="modelValue.orientation === 'landscape-spread'"
+                  class="absolute inset-y-4 left-1/2 w-px -translate-x-1/2 bg-stone-200"
+                ></div>
+
+                <template v-if="modelValue.orientation === 'portrait'">
+                  <div
+                    v-if="modelValue.includeCoverImage"
+                    class="relative mb-4 h-32 overflow-hidden rounded-xl border border-stone-200 bg-stone-100 sm:h-36"
+                  >
+                    <img
+                      :src="previewCoverImageSrc"
+                      alt="Preview cover"
+                      class="h-full w-full object-cover"
+                      :class="!hasTier4Access ? 'blur-sm scale-105' : ''"
+                    />
+
+                    <div
+                      v-if="!hasTier4Access"
+                      class="absolute inset-0 flex items-center justify-center bg-white/50"
+                    >
+                      <span class="rounded-full bg-white px-3 py-1 text-xs font-medium text-stone-700 shadow">
+                        Upgrade to add your own photos
+                      </span>
+                    </div>
+
+                    <div
+                      v-if="!coverImageUrl"
+                      class="absolute left-3 top-3 rounded-full bg-white/90 px-2 py-1 text-[10px] font-medium text-stone-600"
+                    >
+                      Sample preview
+                    </div>
+                  </div>
+
+                  <div
+                    v-else
+                    class="mb-4 flex h-32 items-center justify-center rounded-xl border border-dashed border-stone-300 text-sm text-stone-400 sm:h-36"
+                  >
+                    Cover image hidden
+                  </div>
+
+                  <div :class="previewPrintContentWidthClass">
+                    <p class="text-center text-[10px] uppercase tracking-[0.28em] text-stone-500">
+                      Tell Me Your Story
+                    </p>
+
+                    <div
+                      v-if="modelValue.layout === 'elegant'"
+                      class="mx-auto mt-4 h-px w-16 bg-[#c9b08c]"
+                    ></div>
+
+                    <h4
+                      class="mt-4 text-center text-stone-900"
+                      :class="[previewFontClass, previewTitleClass]"
+                    >
+                      {{ projectTitle || 'Your Story Title' }}
+                    </h4>
+
+                    <p
+                      class="mt-3 text-center text-sm text-stone-500"
+                      :class="previewPrintBodyClass"
+                    >
+                      A personal collection of memories
+                    </p>
+
+                    <div
+                      v-if="modelValue.layout === 'elegant'"
+                      class="mx-auto mt-5 h-px w-10 bg-stone-200"
+                    ></div>
+
+                    <div :class="[previewChapterBlockClass, previewPrintChapterSpacingClass]">
+                      <p class="text-center text-[10px] uppercase tracking-[0.24em] text-stone-500">
+                        Chapter One
+                      </p>
+
+                      <p class="mt-3 text-center text-lg text-stone-900" :class="previewFontClass">
+                        Beginnings
+                      </p>
+
+                      <div
+                        v-if="modelValue.layout === 'elegant'"
+                        class="mx-auto mt-3 h-px w-12 bg-[#c9b08c]"
+                      ></div>
+
+                      <p class="mt-4 text-center text-sm italic text-stone-600" :class="previewPrintBodyClass">
+                        Every story has a beginning.
+                      </p>
+
+                      <p class="mt-5 text-sm text-stone-700" :class="previewPrintBodyClass">
+                        Where and when were you born?
+                      </p>
+
+                      <p class="mt-2 text-xs text-stone-500" :class="previewPrintBodyClass">
+                        This is how your finished keepsake could feel.
+                      </p>
+                    </div>
+
+                    <p
+                      v-if="modelValue.includeDedication"
+                      class="mt-5 text-center text-xs italic text-stone-500"
+                    >
+                      Includes dedication page
+                    </p>
+                  </div>
+                </template>
+
+                <template v-else>
+                  <div
+                    class="grid h-full grid-cols-2 gap-3 sm:gap-4"
+                    :class="modelValue.printReady ? 'px-2 py-1' : ''"
+                  >
+                    <div class="pr-1 sm:pr-2">
+                      <p class="text-[10px] uppercase tracking-[0.25em] text-stone-500">
+                        Chapter
+                      </p>
+                      <h4
+                        class="mt-3 text-stone-900"
+                        :class="[previewFontClass, previewTitleClass]"
+                      >
+                        {{ projectTitle || 'Your Story Title' }}
+                      </h4>
+                      <p class="mt-3 text-sm text-stone-600" :class="previewPrintBodyClass">
+                        An open spread designed to feel like a printed keepsake book.
+                      </p>
+                      <p class="mt-4 text-xs text-stone-500">
+                        Left page
+                      </p>
+                    </div>
+
+                    <div class="pl-1 sm:pl-2">
+                      <div
+                        v-if="modelValue.includeCoverImage"
+                        class="relative mb-3 h-24 overflow-hidden rounded-xl border border-stone-200 bg-stone-100 sm:h-28"
+                      >
+                        <img
+                          :src="previewCoverImageSrc"
+                          alt="Preview spread"
+                          class="h-full w-full object-cover"
+                          :class="!hasTier4Access ? 'blur-sm scale-105' : ''"
+                        />
+
+                        <div
+                          v-if="!hasTier4Access"
+                          class="absolute inset-0 flex items-center justify-center bg-white/50"
+                        >
+                          <span class="rounded-full bg-white px-3 py-1 text-xs font-medium text-stone-700 shadow">
+                            Upgrade to add your own photos
+                          </span>
+                        </div>
+
+                        <div
+                          v-if="!coverImageUrl"
+                          class="absolute left-3 top-3 rounded-full bg-white/90 px-2 py-1 text-[10px] font-medium text-stone-600"
+                        >
+                          Sample preview
+                        </div>
+                      </div>
+
+                      <div
+                        v-else
+                        class="mb-3 flex h-24 items-center justify-center rounded-xl border border-dashed border-stone-300 text-sm text-stone-400 sm:h-28"
+                      >
+                        Image area hidden
+                      </div>
+
+                      <p class="text-sm text-stone-700" :class="previewPrintBodyClass">
+                        “Where and when were you born?”
+                      </p>
+                      <p class="mt-2 text-xs text-stone-500">
+                        Right page
+                      </p>
+                    </div>
+                  </div>
+                </template>
+              </div>
+            </div>
+          </div>
+
+          <!-- LEFT: Controls second on mobile -->
+          <div class="order-2 lg:order-1">
+            <div class="mb-5 rounded-2xl border border-stone-200 bg-stone-50 p-4 text-center">
               <p class="text-sm text-stone-600">
                 This is where your story becomes something worth keeping.
               </p>
@@ -243,208 +436,15 @@
               </div>
             </div>
           </div>
-
-          <!-- RIGHT: Preview -->
-          <div>
-            <p class="text-sm font-medium text-stone-700">Live preview</p>
-            <p class="mt-1 text-xs text-stone-500">
-              Live preview updates instantly
-            </p>
-
-            <div
-              class="mt-3 rounded-3xl border border-stone-200 p-6 shadow-inner"
-              :class="previewThemeClass"
-            >
-              <div
-                class="relative mx-auto rounded-2xl border bg-white"
-                :class="[previewPageClass, previewStyleClass, previewInnerSpacingClass, previewPrintFrameClass]"
-              >
-                <div
-                  v-if="modelValue.orientation === 'landscape-spread'"
-                  class="absolute inset-y-4 left-1/2 w-px -translate-x-1/2 bg-stone-200"
-                ></div>
-
-                <template v-if="modelValue.orientation === 'portrait'">
-                  <div
-                    v-if="modelValue.includeCoverImage"
-                    class="relative mb-4 h-36 overflow-hidden rounded-xl border border-stone-200 bg-stone-100"
-                  >
-                    <img
-                      :src="previewCoverImageSrc"
-                      alt="Preview cover"
-                      class="h-full w-full object-cover"
-                      :class="!hasTier4Access ? 'blur-sm scale-105' : ''"
-                    />
-
-                    <div
-                      v-if="!hasTier4Access"
-                      class="absolute inset-0 flex items-center justify-center bg-white/50"
-                    >
-                      <span class="rounded-full bg-white px-3 py-1 text-xs font-medium text-stone-700 shadow">
-                        Upgrade to add your own photos
-                      </span>
-                    </div>
-
-                    <div
-                      v-if="!coverImageUrl"
-                      class="absolute left-3 top-3 rounded-full bg-white/90 px-2 py-1 text-[10px] font-medium text-stone-600"
-                    >
-                      Sample preview
-                    </div>
-                  </div>
-
-                  <div
-                    v-else
-                    class="mb-4 flex h-36 items-center justify-center rounded-xl border border-dashed border-stone-300 text-sm text-stone-400"
-                  >
-                    Cover image hidden
-                  </div>
-
-                  <div :class="previewPrintContentWidthClass">
-                    <p class="text-center text-[10px] uppercase tracking-[0.28em] text-stone-500">
-                      Tell Me Your Story
-                    </p>
-
-                    <div
-                      v-if="modelValue.layout === 'elegant'"
-                      class="mx-auto mt-4 h-px w-16 bg-[#c9b08c]"
-                    ></div>
-
-                    <h4
-                      class="mt-4 text-center text-stone-900"
-                      :class="[previewFontClass, previewTitleClass]"
-                    >
-                      {{ projectTitle || 'Your Story Title' }}
-                    </h4>
-
-                    <p
-                      class="mt-3 text-center text-sm text-stone-500"
-                      :class="previewPrintBodyClass"
-                    >
-                      A personal collection of memories
-                    </p>
-
-                    <div
-                      v-if="modelValue.layout === 'elegant'"
-                      class="mx-auto mt-5 h-px w-10 bg-stone-200"
-                    ></div>
-
-                    <div :class="[previewChapterBlockClass, previewPrintChapterSpacingClass]">
-                      <p class="text-center text-[10px] uppercase tracking-[0.24em] text-stone-500">
-                        Chapter One
-                      </p>
-
-                      <p class="mt-3 text-center text-lg text-stone-900" :class="previewFontClass">
-                        Beginnings
-                      </p>
-
-                      <div
-                        v-if="modelValue.layout === 'elegant'"
-                        class="mx-auto mt-3 h-px w-12 bg-[#c9b08c]"
-                      ></div>
-
-                      <p class="mt-4 text-center text-sm italic text-stone-600" :class="previewPrintBodyClass">
-                        Every story has a beginning.
-                      </p>
-
-                      <p class="mt-5 text-sm text-stone-700" :class="previewPrintBodyClass">
-                        Where and when were you born?
-                      </p>
-
-                      <p class="mt-2 text-xs text-stone-500" :class="previewPrintBodyClass">
-                        This is how your finished keepsake could feel.
-                      </p>
-                    </div>
-
-                    <p
-                      v-if="modelValue.includeDedication"
-                      class="mt-5 text-center text-xs italic text-stone-500"
-                    >
-                      Includes dedication page
-                    </p>
-                  </div>
-                </template>
-
-                <template v-else>
-                  <div
-                    class="grid h-full grid-cols-2 gap-4"
-                    :class="modelValue.printReady ? 'px-2 py-1' : ''"
-                  >
-                    <div class="pr-2">
-                      <p class="text-[10px] uppercase tracking-[0.25em] text-stone-500">
-                        Chapter
-                      </p>
-                      <h4
-                        class="mt-3 text-stone-900"
-                        :class="[previewFontClass, previewTitleClass]"
-                      >
-                        {{ projectTitle || 'Your Story Title' }}
-                      </h4>
-                      <p class="mt-3 text-sm text-stone-600" :class="previewPrintBodyClass">
-                        An open spread designed to feel like a printed keepsake book.
-                      </p>
-                      <p class="mt-4 text-xs text-stone-500">
-                        Left page
-                      </p>
-                    </div>
-
-                    <div class="pl-2">
-                      <div
-                        v-if="modelValue.includeCoverImage"
-                        class="relative mb-3 h-28 overflow-hidden rounded-xl border border-stone-200 bg-stone-100"
-                      >
-                        <img
-                          :src="previewCoverImageSrc"
-                          alt="Preview spread"
-                          class="h-full w-full object-cover"
-                          :class="!hasTier4Access ? 'blur-sm scale-105' : ''"
-                        />
-
-                        <div
-                          v-if="!hasTier4Access"
-                          class="absolute inset-0 flex items-center justify-center bg-white/50"
-                        >
-                          <span class="rounded-full bg-white px-3 py-1 text-xs font-medium text-stone-700 shadow">
-                            Upgrade to add your own photos
-                          </span>
-                        </div>
-
-                        <div
-                          v-if="!coverImageUrl"
-                          class="absolute left-3 top-3 rounded-full bg-white/90 px-2 py-1 text-[10px] font-medium text-stone-600"
-                        >
-                          Sample preview
-                        </div>
-                      </div>
-
-                      <div
-                        v-else
-                        class="mb-3 flex h-28 items-center justify-center rounded-xl border border-dashed border-stone-300 text-sm text-stone-400"
-                      >
-                        Image area hidden
-                      </div>
-
-                      <p class="text-sm text-stone-700" :class="previewPrintBodyClass">
-                        “Where and when were you born?”
-                      </p>
-                      <p class="mt-2 text-xs text-stone-500">
-                        Right page
-                      </p>
-                    </div>
-                  </div>
-                </template>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
 
       <!-- Footer -->
-      <div class="shrink-0 border-t border-stone-200 bg-white px-8 py-5">
-        <div class="flex justify-end gap-3">
+      <div class="shrink-0 border-t border-stone-200 bg-white px-4 py-4 sm:px-6 md:px-8 md:py-5">
+        <div class="flex flex-col gap-3 sm:flex-row sm:justify-end">
           <button
             @click="$emit('close')"
-            class="rounded-full border border-stone-300 px-5 py-2 text-sm"
+            class="rounded-full border border-stone-300 px-5 py-3 text-sm"
           >
             Cancel
           </button>
@@ -452,7 +452,7 @@
           <template v-if="hasTier4Access">
             <button
               @click="$emit('save')"
-              class="rounded-full bg-[#7C5C3B] hover:opacity-90 transition px-5 py-2 text-sm text-white"
+              class="rounded-full bg-[#7C5C3B] px-5 py-3 text-sm text-white transition hover:opacity-90"
             >
               Save my keepsake design
             </button>
@@ -461,7 +461,7 @@
           <template v-else>
             <button
               @click="$emit('upgrade')"
-              class="rounded-full bg-[#7C5C3B] hover:opacity-90 transition px-5 py-2 text-sm text-white"
+              class="rounded-full bg-[#7C5C3B] px-5 py-3 text-sm text-white transition hover:opacity-90"
             >
               Unlock Premium Design
             </button>
@@ -523,8 +523,8 @@ const previewFontClass = computed(() => {
 
 const previewPageClass = computed(() => {
   return props.modelValue.orientation === 'landscape-spread'
-    ? 'w-full max-w-[42rem] h-[20rem]'
-    : 'w-72'
+    ? 'w-full max-w-[42rem] h-[18rem] sm:h-[20rem]'
+    : 'w-64 sm:w-72'
 })
 
 const previewStyleClass = computed(() => {
@@ -534,15 +534,15 @@ const previewStyleClass = computed(() => {
 })
 
 const previewInnerSpacingClass = computed(() => {
-  if (props.modelValue.layout === 'minimal') return 'p-5'
-  if (props.modelValue.layout === 'elegant') return 'px-7 py-8'
+  if (props.modelValue.layout === 'minimal') return 'p-4 sm:p-5'
+  if (props.modelValue.layout === 'elegant') return 'px-5 py-6 sm:px-7 sm:py-8'
   return 'p-4'
 })
 
 const previewTitleClass = computed(() => {
-  if (props.modelValue.layout === 'minimal') return 'text-[1.7rem] tracking-tight'
-  if (props.modelValue.layout === 'elegant') return 'text-[2.15rem] leading-tight'
-  return 'text-2xl'
+  if (props.modelValue.layout === 'minimal') return 'text-[1.5rem] tracking-tight sm:text-[1.7rem]'
+  if (props.modelValue.layout === 'elegant') return 'text-[1.9rem] leading-tight sm:text-[2.15rem]'
+  return 'text-xl sm:text-2xl'
 })
 
 const previewChapterBlockClass = computed(() => {
@@ -552,7 +552,7 @@ const previewChapterBlockClass = computed(() => {
 })
 
 const previewPrintFrameClass = computed(() => {
-  return props.modelValue.printReady ? 'px-6 py-6' : ''
+  return props.modelValue.printReady ? 'px-5 py-5 sm:px-6 sm:py-6' : ''
 })
 
 const previewPrintBodyClass = computed(() => {
