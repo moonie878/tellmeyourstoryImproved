@@ -1,8 +1,12 @@
 <template>
   <div class="min-h-screen bg-stone-50 text-stone-900">
     <header class="sticky top-0 z-40 border-b border-stone-200 bg-stone-50/90 backdrop-blur">
-      <div class="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-        <router-link to="/" class="shrink-0">
+      <div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6">
+        <router-link
+          to="/"
+          class="shrink-0"
+          @click="mobileMenuOpen = false"
+        >
           <img
             src="/logo/logo-full-new.png"
             alt="Tell Me Your Story"
@@ -12,29 +16,37 @@
 
         <!-- Desktop nav -->
         <nav class="hidden items-center gap-6 text-sm font-medium md:flex">
-          <router-link to="/" class="text-stone-600 hover:text-stone-900">
-            Home
-          </router-link>
-
-           <router-link to="/contact" class="text-stone-600 hover:text-stone-900">
-            Contact
-          </router-link>
-
           <template v-if="user">
-            <router-link to="/dashboard" class="text-stone-600 hover:text-stone-900">
+            <router-link to="/dashboard" class="text-stone-600 transition hover:text-stone-900">
               Dashboard
+            </router-link>
+
+            <router-link to="/contact" class="text-stone-600 transition hover:text-stone-900">
+              Contact
             </router-link>
 
             <button
               @click="handleLogout"
-              class="rounded-full bg-stone-900 px-4 py-2 text-white transition hover:opacity-90"
+              class="rounded-full border border-stone-300 bg-white px-4 py-2 text-stone-900 transition hover:bg-stone-100"
             >
               Logout
             </button>
           </template>
 
           <template v-else>
-            <router-link to="/login" class="text-stone-600 hover:text-stone-900">
+            <router-link to="/example" class="text-stone-600 transition hover:text-stone-900">
+              Example story
+            </router-link>
+
+            <a href="/#pricing" class="text-stone-600 transition hover:text-stone-900">
+              Pricing
+            </a>
+
+            <router-link to="/contact" class="text-stone-600 transition hover:text-stone-900">
+              Contact
+            </router-link>
+
+            <router-link to="/login" class="text-stone-600 transition hover:text-stone-900">
               Login
             </router-link>
 
@@ -42,7 +54,7 @@
               to="/register"
               class="rounded-full bg-stone-900 px-4 py-2 text-white transition hover:opacity-90"
             >
-              Get started
+              Get started free
             </router-link>
           </template>
         </nav>
@@ -51,7 +63,8 @@
         <button
           @click="mobileMenuOpen = !mobileMenuOpen"
           class="flex h-11 w-11 items-center justify-center rounded-full border border-stone-300 bg-white md:hidden"
-          aria-label="Open menu"
+          :aria-label="mobileMenuOpen ? 'Close menu' : 'Open menu'"
+          :aria-expanded="mobileMenuOpen"
         >
           <svg
             v-if="!mobileMenuOpen"
@@ -82,29 +95,29 @@
       <!-- Mobile menu -->
       <div
         v-if="mobileMenuOpen"
-        class="border-t border-stone-200 bg-white px-6 py-4 md:hidden"
+        class="border-t border-stone-200 bg-white px-4 pb-5 pt-4 shadow-sm md:hidden"
       >
-        <nav class="flex flex-col gap-3 text-sm font-medium">
-          <router-link
-            to="/"
-            class="rounded-2xl px-4 py-3 text-stone-700 hover:bg-stone-100"
-            @click="mobileMenuOpen = false"
-          >
-            Home
-          </router-link>
-
+        <nav class="flex flex-col gap-2 text-sm font-medium">
           <template v-if="user">
             <router-link
               to="/dashboard"
-              class="rounded-2xl px-4 py-3 text-stone-700 hover:bg-stone-100"
+              class="rounded-2xl px-4 py-3 text-stone-700 transition hover:bg-stone-100"
               @click="mobileMenuOpen = false"
             >
               Dashboard
             </router-link>
 
+            <router-link
+              to="/contact"
+              class="rounded-2xl px-4 py-3 text-stone-700 transition hover:bg-stone-100"
+              @click="mobileMenuOpen = false"
+            >
+              Contact
+            </router-link>
+
             <button
               @click="handleMobileLogout"
-              class="rounded-2xl bg-stone-900 px-4 py-3 text-left text-white"
+              class="mt-2 rounded-2xl border border-stone-300 bg-white px-4 py-3 text-left text-stone-900 transition hover:bg-stone-100"
             >
               Logout
             </button>
@@ -112,8 +125,32 @@
 
           <template v-else>
             <router-link
+              to="/example"
+              class="rounded-2xl px-4 py-3 text-stone-700 transition hover:bg-stone-100"
+              @click="mobileMenuOpen = false"
+            >
+              Example story
+            </router-link>
+
+            <a
+              href="/#pricing"
+              class="rounded-2xl px-4 py-3 text-stone-700 transition hover:bg-stone-100"
+              @click="mobileMenuOpen = false"
+            >
+              Pricing
+            </a>
+
+            <router-link
+              to="/contact"
+              class="rounded-2xl px-4 py-3 text-stone-700 transition hover:bg-stone-100"
+              @click="mobileMenuOpen = false"
+            >
+              Contact
+            </router-link>
+
+            <router-link
               to="/login"
-              class="rounded-2xl px-4 py-3 text-stone-700 hover:bg-stone-100"
+              class="rounded-2xl px-4 py-3 text-stone-700 transition hover:bg-stone-100"
               @click="mobileMenuOpen = false"
             >
               Login
@@ -121,10 +158,10 @@
 
             <router-link
               to="/register"
-              class="rounded-2xl bg-stone-900 px-4 py-3 text-white"
+              class="mt-2 rounded-2xl bg-stone-900 px-4 py-3 text-center text-white transition hover:opacity-90"
               @click="mobileMenuOpen = false"
             >
-              Get started
+              Get started free
             </router-link>
           </template>
         </nav>
@@ -159,6 +196,7 @@ async function getUser() {
 async function handleLogout() {
   await supabase.auth.signOut()
   user.value = null
+  mobileMenuOpen.value = false
   router.push('/login')
 }
 
