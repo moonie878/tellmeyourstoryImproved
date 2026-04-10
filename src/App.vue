@@ -4,7 +4,7 @@
       <div class="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
         <router-link to="/" class="shrink-0">
           <img
-            src="/logo/logo-full-horizontal.png"
+            src="/logo/logo-full.png"
             alt="Tell Me Your Story"
             class="h-10 w-auto object-contain transition hover:opacity-90 md:h-12"
           />
