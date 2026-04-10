@@ -71,25 +71,34 @@ export function useStoryExport() {
     }
 
     if (settings.borderStyle === 'corner-floral') {
-      doc.roundedRect(12, 14, pageWidth - 24, pageHeight - 28, 4, 4)
+  doc.roundedRect(12, 14, pageWidth - 24, pageHeight - 28, 4, 4)
 
-      doc.line(18, 24, 30, 24)
-      doc.line(18, 24, 18, 36)
+  doc.setLineWidth(0.25)
 
-      doc.line(pageWidth - 18, 24, pageWidth - 30, 24)
-      doc.line(pageWidth - 18, 24, pageWidth - 18, 36)
+  // top left
+  doc.line(18, 24, 30, 24)
+  doc.line(18, 24, 18, 36)
+  doc.line(22, 28, 26, 24)
+  doc.line(22, 28, 18, 32)
 
-      doc.line(18, pageHeight - 24, 30, pageHeight - 24)
-      doc.line(18, pageHeight - 24, 18, pageHeight - 36)
+  // top right
+  doc.line(pageWidth - 18, 24, pageWidth - 30, 24)
+  doc.line(pageWidth - 18, 24, pageWidth - 18, 36)
+  doc.line(pageWidth - 22, 28, pageWidth - 26, 24)
+  doc.line(pageWidth - 22, 28, pageWidth - 18, 32)
 
-      doc.line(pageWidth - 18, pageHeight - 24, pageWidth - 30, pageHeight - 24)
-      doc.line(pageWidth - 18, pageHeight - 24, pageWidth - 18, pageHeight - 36)
+  // bottom left
+  doc.line(18, pageHeight - 24, 30, pageHeight - 24)
+  doc.line(18, pageHeight - 24, 18, pageHeight - 36)
+  doc.line(22, pageHeight - 28, 26, pageHeight - 24)
+  doc.line(22, pageHeight - 28, 18, pageHeight - 32)
 
-      doc.circle(24, 30, 0.7, 'S')
-      doc.circle(pageWidth - 24, 30, 0.7, 'S')
-      doc.circle(24, pageHeight - 30, 0.7, 'S')
-      doc.circle(pageWidth - 24, pageHeight - 30, 0.7, 'S')
-    }
+  // bottom right
+  doc.line(pageWidth - 18, pageHeight - 24, pageWidth - 30, pageHeight - 24)
+  doc.line(pageWidth - 18, pageHeight - 24, pageWidth - 18, pageHeight - 36)
+  doc.line(pageWidth - 22, pageHeight - 28, pageWidth - 26, pageHeight - 24)
+  doc.line(pageWidth - 22, pageHeight - 28, pageWidth - 18, pageHeight - 32)
+}
   }
 
 function getPreferredQuoteWithoutRepeats(
