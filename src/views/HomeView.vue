@@ -357,12 +357,6 @@ function trackStart() {
   })
 }
 
-function trackHeroLogin() {
-  track('upgrade_clicked', {
-    source: 'home_hero_login',
-  })
-}
-
 function trackPricingFree() {
   track('upgrade_clicked', {
     source: 'home_pricing_free',
