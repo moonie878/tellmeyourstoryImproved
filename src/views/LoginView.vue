@@ -61,6 +61,7 @@
     import { useRouter } from 'vue-router'
     import TurnstileWidget from '../components/legal/TurnstileWidget.vue'
 import { verifyTurnstile } from '../lib/turnstile'
+import { track } from '../lib/analytics'
 
     const email = ref('')
     const password = ref('')
@@ -97,6 +98,9 @@ const turnstileError = ref('')
       password.value = ''
       turnstileToken.value = ''
       router.push('/dashboard')
+      track('login_completed', {
+  source: 'login_page',
+})
     }
   } catch (err) {
     errorMessage.value = 'Something went wrong. Please try again.'

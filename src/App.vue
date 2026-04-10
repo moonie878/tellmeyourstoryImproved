@@ -174,6 +174,7 @@
 import { ref, onMounted } from 'vue'
 import { supabase } from './lib/supabase'
 import { useRouter } from 'vue-router'
+import { posthog } from './lib/posthog'
 import SiteFooter from './components/layout/SiteFooter.vue'
 import CookieBanner from './components/legal/CookieBanner.vue'
 
@@ -181,16 +182,29 @@ const router = useRouter()
 const user = ref<any>(null)
 const mobileMenuOpen = ref(false)
 
+function identifyPostHogUser(currentUser: any) {
+  if (!currentUser) return
+
+  posthog.identify(currentUser.id, {
+    email: currentUser.email,
+  })
+}
+
 async function getUser() {
   const {
     data: { user: currentUser },
   } = await supabase.auth.getUser()
 
   user.value = currentUser
+
+  if (currentUser) {
+    identifyPostHogUser(currentUser)
+  }
 }
 
 async function handleLogout() {
   await supabase.auth.signOut()
+  posthog.reset()
   user.value = null
   mobileMenuOpen.value = false
   router.push('/login')
@@ -205,7 +219,14 @@ onMounted(() => {
   getUser()
 
   supabase.auth.onAuthStateChange((_event, session) => {
-    user.value = session?.user || null
+    const currentUser = session?.user || null
+    user.value = currentUser
+
+    if (currentUser) {
+      identifyPostHogUser(currentUser)
+    } else {
+      posthog.reset()
+    }
   })
 })
 </script>

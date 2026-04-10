@@ -18,6 +18,8 @@ type AnalyticsEvent =
   | 'cover_banner'
   | 'story_started'
   | 'example_story_clicked'
+  | 'login_completed'
+  | 'signup_completed'
 
 type AnalyticsValue =
   | string

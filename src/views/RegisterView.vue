@@ -53,6 +53,7 @@
     import { supabase } from '../lib/supabase'
     import TurnstileWidget from '../components/legal/TurnstileWidget.vue'
 import { verifyTurnstile } from '../lib/turnstile'
+import { track } from '../lib/analytics'
 
     const email = ref('')
     const password = ref('')
@@ -88,6 +89,9 @@ const turnstileError = ref('')
       email.value = ''
       password.value = ''
       turnstileToken.value = ''
+      track('signup_completed', {
+  source: 'register_page',
+})
     }
   } catch (err) {
     console.error(err)
