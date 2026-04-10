@@ -1,7 +1,7 @@
 <template>
   <main class="bg-[#f7f5f2] text-stone-900">
     <!-- HERO -->
-    <section class="px-4 py-16 sm:px-6 sm:py-20 md:py-28">
+    <section class="px-4 py-14 sm:px-6 sm:py-18 md:py-24">
       <div class="mx-auto grid max-w-6xl items-center gap-10 md:grid-cols-2 md:gap-14">
         <div class="text-center md:text-left">
           <p class="text-xs font-medium uppercase tracking-[0.25em] text-stone-500 sm:text-sm">
@@ -9,15 +9,15 @@
           </p>
 
           <h1 class="mt-4 text-3xl font-bold leading-tight sm:text-4xl md:text-6xl">
-            Turn memories into a beautiful keepsake book
+            Turn memories into a keepsake book you can hold onto forever
           </h1>
 
           <p class="mx-auto mt-5 max-w-xl text-base leading-7 text-stone-600 sm:text-lg sm:leading-8 md:mx-0">
-            Answer guided questions about someone you love, add photos, and turn their memories into a beautifully designed book you can keep, print, and share.
+            Answer guided questions about someone you love, add meaningful photos, and turn their memories into a beautifully designed story you can keep, print, and share.
           </p>
 
           <p class="mx-auto mt-4 max-w-lg text-sm text-stone-500 md:mx-0">
-            Perfect for mums, dads, grandparents, and family stories you never want to lose.
+            Made for mums, dads, grandparents, family stories, and the moments you never want to lose.
           </p>
 
           <div class="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:justify-center md:justify-start">
@@ -26,7 +26,7 @@
               @click="trackStart"
               class="rounded-full bg-[#7C5C3B] px-6 py-3 text-center text-sm font-semibold text-white transition hover:opacity-90"
             >
-              Get started free
+              Start your story free
             </router-link>
 
             <router-link
@@ -36,6 +36,12 @@
             >
               View example story
             </router-link>
+          </div>
+
+          <div class="mt-6 flex flex-col gap-2 text-xs text-stone-500 sm:flex-row sm:flex-wrap sm:justify-center sm:gap-4 md:justify-start">
+            <span>✔ No subscription</span>
+            <span>✔ Start for free</span>
+            <span>✔ Download when you're ready</span>
           </div>
         </div>
 
@@ -49,8 +55,25 @@
       </div>
     </section>
 
+    <!-- SOCIAL PROOF / OUTCOME -->
+    <section class="border-t border-stone-200 bg-white px-4 py-14 sm:px-6 sm:py-16">
+      <div class="mx-auto max-w-5xl text-center">
+        <p class="text-xs font-medium uppercase tracking-[0.25em] text-stone-500 sm:text-sm">
+          More than a writing tool
+        </p>
+
+        <h2 class="mt-4 text-3xl font-bold md:text-4xl">
+          This helps you create something worth keeping
+        </h2>
+
+        <p class="mx-auto mt-5 max-w-3xl text-base leading-7 text-stone-600 sm:text-lg sm:leading-8">
+          Not just answers on a screen — a finished keepsake with thoughtful structure, beautiful pages, personal photos, and memories your family can come back to for years.
+        </p>
+      </div>
+    </section>
+
     <!-- EXAMPLE STORY -->
-    <section class="border-t border-stone-200 bg-white px-4 py-16 sm:px-6 sm:py-20">
+    <section class="border-t border-stone-200 bg-[#f7f5f2] px-4 py-16 sm:px-6 sm:py-20">
       <div class="mx-auto grid max-w-6xl items-center gap-10 md:grid-cols-2 md:gap-12">
         <div class="text-center md:text-left">
           <p class="text-xs font-medium uppercase tracking-[0.25em] text-stone-500 sm:text-sm">
@@ -58,18 +81,18 @@
           </p>
 
           <h2 class="mt-4 text-3xl font-bold md:text-4xl">
-            See how a story becomes a keepsake
+            See how simple answers become a finished keepsake
           </h2>
 
           <p class="mt-5 text-base leading-7 text-stone-600 sm:text-lg sm:leading-8">
-            Follow a real example of a completed story — from thoughtful answers to a finished book filled with memories, photos, and meaningful moments.
+            Explore a real example of a completed story — from guided questions and personal memories to a keepsake book filled with chapters, quotes, and photos.
           </p>
 
-          <ul class="mt-6 space-y-3 text-left text-sm text-stone-600 md:max-w-lg">
-            <li>✔ Real answers turned into a structured story</li>
-            <li>✔ Highlighted quotes and chapter pages</li>
-            <li>✔ Designed layouts ready to print or share</li>
-          </ul>
+          <div class="mt-6 space-y-3 text-left text-sm text-stone-600 md:max-w-lg">
+            <p>✔ Real answers turned into a structured story</p>
+            <p>✔ Highlighted quote pages and chapter moments</p>
+            <p>✔ Designed layouts ready to print, save, or share</p>
+          </div>
 
           <router-link
             to="/example"
@@ -90,25 +113,25 @@
       </div>
     </section>
 
-    <!-- PREVIEW GALLERY -->
-    <section class="px-4 py-16 sm:px-6 sm:py-20">
+    <!-- TRANSFORMATION / GALLERY -->
+    <section class="border-t border-stone-200 bg-white px-4 py-16 sm:px-6 sm:py-20">
       <div class="mx-auto max-w-6xl">
         <div class="max-w-2xl text-center md:text-left">
           <p class="text-xs font-medium uppercase tracking-[0.25em] text-stone-500 sm:text-sm">
-            See the finished keepsake
+            The finished result
           </p>
 
           <h2 class="mt-4 text-3xl font-bold md:text-4xl">
-            See what your finished keepsake can look like
+            From guided answers to beautifully designed pages
           </h2>
 
           <p class="mt-4 text-base leading-7 text-stone-600 sm:text-lg">
-            From elegant chapter pages and meaningful quotes to personal photos and beautifully laid out memories.
+            Chapters, quotes, elegant layouts, and personal images all come together to make your story feel like a real keepsake book.
           </p>
         </div>
 
         <div class="mt-10 grid gap-5 md:mt-12 md:grid-cols-3 md:gap-6">
-          <div class="rounded-[2rem] border border-stone-200 bg-white p-3 shadow-sm">
+          <div class="rounded-[2rem] border border-stone-200 bg-stone-50 p-3 shadow-sm">
             <img
               src="/images/example-story-chapter.png"
               alt="Chapter page preview"
@@ -116,7 +139,7 @@
             />
           </div>
 
-          <div class="rounded-[2rem] border border-stone-200 bg-white p-3 shadow-sm">
+          <div class="rounded-[2rem] border border-stone-200 bg-stone-50 p-3 shadow-sm">
             <img
               src="/images/example-story-quote.png"
               alt="Quote page preview"
@@ -124,7 +147,7 @@
             />
           </div>
 
-          <div class="rounded-[2rem] border border-stone-200 bg-white p-3 shadow-sm">
+          <div class="rounded-[2rem] border border-stone-200 bg-stone-50 p-3 shadow-sm">
             <img
               src="/images/example-story-cover.png"
               alt="Cover page preview"
@@ -134,7 +157,7 @@
         </div>
 
         <div class="mt-5 grid gap-5 md:mt-6 md:grid-cols-2 md:gap-6">
-          <div class="rounded-[2rem] border border-stone-200 bg-white p-3 shadow-sm">
+          <div class="rounded-[2rem] border border-stone-200 bg-stone-50 p-3 shadow-sm">
             <img
               src="/images/example-story-memory-page.png"
               alt="Story page preview"
@@ -142,7 +165,7 @@
             />
           </div>
 
-          <div class="rounded-[2rem] border border-stone-200 bg-white p-3 shadow-sm">
+          <div class="rounded-[2rem] border border-stone-200 bg-stone-50 p-3 shadow-sm">
             <img
               src="/images/example-story-closing.png"
               alt="Closing page preview"
@@ -154,7 +177,7 @@
     </section>
 
     <!-- HOW IT WORKS -->
-    <section class="border-t border-stone-200 bg-white px-4 py-16 sm:px-6 sm:py-20">
+    <section class="border-t border-stone-200 bg-[#f7f5f2] px-4 py-16 sm:px-6 sm:py-20">
       <div class="mx-auto max-w-6xl">
         <div class="max-w-2xl text-center md:text-left">
           <p class="text-xs font-medium uppercase tracking-[0.25em] text-stone-500 sm:text-sm">
@@ -167,31 +190,90 @@
         </div>
 
         <div class="mt-10 grid gap-5 md:mt-12 md:grid-cols-3 md:gap-6">
-          <div class="rounded-3xl border border-stone-200 bg-stone-50 p-6">
+          <div class="rounded-3xl border border-stone-200 bg-white p-6">
             <h3 class="text-xl font-semibold">1. Choose a story</h3>
             <p class="mt-3 text-stone-600">
-              Start with a Mum, Dad, Grandparent, Life Story, or another meaningful keepsake.
+              Start with a Mum, Dad, Grandparent, Life Story, Couple Story, or another meaningful keepsake.
             </p>
           </div>
 
-          <div class="rounded-3xl border border-stone-200 bg-stone-50 p-6">
-            <h3 class="text-xl font-semibold">2. Answer thoughtful prompts</h3>
+          <div class="rounded-3xl border border-stone-200 bg-white p-6">
+            <h3 class="text-xl font-semibold">2. Answer guided prompts</h3>
             <p class="mt-3 text-stone-600">
-              Capture memories one answer at a time, with automatic saving and optional photo uploads.
+              Capture memories one answer at a time with automatic saving, highlighted moments, and optional photos.
             </p>
           </div>
 
-          <div class="rounded-3xl border border-stone-200 bg-stone-50 p-6">
-            <h3 class="text-xl font-semibold">3. Turn it into a keepsake book</h3>
+          <div class="rounded-3xl border border-stone-200 bg-white p-6">
+            <h3 class="text-xl font-semibold">3. Create your keepsake</h3>
             <p class="mt-3 text-stone-600">
-              Export a beautifully designed book to keep, print, or give as a meaningful gift.
+              Turn it into a beautifully designed book you can keep, print, share, or give as a meaningful gift.
             </p>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- EMOTIONAL TRUST SECTION -->
+    <!-- STORY TYPES -->
+    <section class="border-t border-stone-200 bg-white px-4 py-16 sm:px-6 sm:py-20">
+      <div class="mx-auto max-w-6xl">
+        <div class="max-w-2xl text-center md:text-left">
+          <p class="text-xs font-medium uppercase tracking-[0.25em] text-stone-500 sm:text-sm">
+            Story types
+          </p>
+
+          <h2 class="mt-4 text-3xl font-bold md:text-4xl">
+            Choose the story you want to preserve
+          </h2>
+        </div>
+
+        <div class="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3 md:mt-12 md:gap-6">
+          <div class="rounded-3xl border border-stone-200 bg-stone-50 p-6">
+            <h3 class="text-xl font-semibold text-stone-900">Mum’s Story</h3>
+            <p class="mt-3 text-stone-600">
+              Preserve memories, family moments, and everything that made her who she is.
+            </p>
+          </div>
+
+          <div class="rounded-3xl border border-stone-200 bg-stone-50 p-6">
+            <h3 class="text-xl font-semibold text-stone-900">Dad’s Story</h3>
+            <p class="mt-3 text-stone-600">
+              Capture his memories, lessons, humour, milestones, and life story in one place.
+            </p>
+          </div>
+
+          <div class="rounded-3xl border border-stone-200 bg-stone-50 p-6">
+            <h3 class="text-xl font-semibold text-stone-900">Grandparent Stories</h3>
+            <p class="mt-3 text-stone-600">
+              Keep family history, traditions, and stories that future generations will treasure.
+            </p>
+          </div>
+
+          <div class="rounded-3xl border border-stone-200 bg-stone-50 p-6">
+            <h3 class="text-xl font-semibold text-stone-900">Life Story</h3>
+            <p class="mt-3 text-stone-600">
+              Tell a full personal story through memories, milestones, values, and reflections.
+            </p>
+          </div>
+
+          <div class="rounded-3xl border border-stone-200 bg-stone-50 p-6">
+            <h3 class="text-xl font-semibold text-stone-900">Couple Story</h3>
+            <p class="mt-3 text-stone-600">
+              Capture the story of your relationship, your memories together, and the life you built.
+            </p>
+          </div>
+
+          <div class="rounded-3xl border border-stone-200 bg-stone-50 p-6">
+            <h3 class="text-xl font-semibold text-stone-900">More to come</h3>
+            <p class="mt-3 text-stone-600">
+              Build more keepsakes over time and preserve more family stories in one place.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- WHY IT MATTERS -->
     <section class="border-t border-stone-200 bg-[#f7f5f2] px-4 py-16 sm:px-6 sm:py-20">
       <div class="mx-auto max-w-4xl text-center">
         <p class="text-xs font-medium uppercase tracking-[0.25em] text-stone-500 sm:text-sm">
@@ -203,7 +285,7 @@
         </h2>
 
         <p class="mt-6 text-base leading-7 text-stone-600 sm:text-lg sm:leading-8">
-          Tell Me Your Story helps you capture a loved one’s memories slowly and meaningfully, then turn them into something beautiful enough to keep for years.
+          The questions we mean to ask, the memories we assume we will remember, and the moments that feel ordinary now can become the ones we miss most later. This helps you preserve them before they fade.
         </p>
       </div>
     </section>
@@ -217,7 +299,7 @@
           </p>
 
           <h2 class="mt-4 text-3xl font-bold md:text-4xl">
-            Made for families, memory keepers, and meaningful gifts
+            Made for families, meaningful gifts, and memories worth holding onto
           </h2>
         </div>
 
@@ -232,14 +314,14 @@
           <div class="rounded-3xl border border-stone-200 bg-stone-50 p-6">
             <h3 class="text-xl font-semibold text-stone-900">For meaningful gifts</h3>
             <p class="mt-3 text-stone-600">
-              Create something more personal and lasting than a generic present.
+              Create something deeply personal and lasting instead of a gift that will be forgotten.
             </p>
           </div>
 
           <div class="rounded-3xl border border-stone-200 bg-stone-50 p-6">
             <h3 class="text-xl font-semibold text-stone-900">For family history</h3>
             <p class="mt-3 text-stone-600">
-              Capture stories, values, memories, and life lessons that future generations can revisit.
+              Capture stories, values, and memories that future generations can revisit and treasure.
             </p>
           </div>
         </div>
@@ -259,7 +341,7 @@
           </h2>
 
           <p class="mt-4 text-base leading-7 text-stone-600 sm:text-lg">
-            Begin writing for free, then unlock the finished keepsake experience when you want to export.
+            Begin writing for free, then unlock the finished keepsake experience when you want to export, print, or gift it.
           </p>
         </div>
 
@@ -331,7 +413,7 @@
         </h2>
 
         <p class="mt-4 text-base leading-7 text-stone-300 sm:text-lg">
-          Preserve a story, capture the memories that matter, and turn them into something worth holding onto.
+          Start free, answer at your own pace, and turn meaningful memories into something you can keep forever.
         </p>
 
         <router-link
@@ -339,7 +421,7 @@
           @click="trackStart"
           class="mt-8 inline-block rounded-full bg-white px-6 py-3 text-sm font-semibold text-stone-900 transition hover:bg-stone-100"
         >
-          Get started free
+          Start your story free
         </router-link>
       </div>
     </section>
@@ -353,7 +435,7 @@ import { useSeo } from '../composables/useSeo'
 useSeo({
   title: 'Tell Me Your Story | Turn memories into a beautiful keepsake book',
   description:
-    'Answer guided questions about someone you love, add photos, and turn their memories into a beautifully designed book you can keep, print, and share.',
+    'Answer guided questions about someone you love, add photos, and turn their memories into a beautifully designed keepsake book you can keep, print, and share.',
 })
 
 function trackStart() {
