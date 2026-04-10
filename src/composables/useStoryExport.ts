@@ -883,115 +883,124 @@ doc.text(splitIntro, metrics.centerX, 134, {
   }
 
   async function renderPortraitSection(
-    doc: jsPDF,
-    section: StorySection,
-    settings: PdfSettings,
-    images: StoryImage[],
-    yState: { y: number },
-    hasImageExportAccess: boolean,
-    loadImageAsBase64: (url: string) => Promise<string>
-  ) {
-    const design = getPdfDesign(settings)
-    const metrics = getPageMetrics(settings)
+  doc: jsPDF,
+  section: StorySection,
+  settings: PdfSettings,
+  images: StoryImage[],
+  yState: { y: number },
+  hasImageExportAccess: boolean,
+  loadImageAsBase64: (url: string) => Promise<string>
+) {
+  const design = getPdfDesign(settings)
+  const metrics = getPageMetrics(settings)
 
-    if (yState.y > 210) {
-      doc.addPage()
-      applyPageBackground(doc, design.theme.pageBg, metrics.pageWidth, metrics.pageHeight)
-      if (settings.layout === 'elegant') {
-        drawPageBorder(doc, settings, metrics.pageWidth, metrics.pageHeight, design.theme.border)
-      }
-      yState.y = metrics.marginTop
+  if (yState.y > 210) {
+    doc.addPage()
+    applyPageBackground(doc, design.theme.pageBg, metrics.pageWidth, metrics.pageHeight)
+    if (settings.layout === 'elegant') {
+      drawPageBorder(doc, settings, metrics.pageWidth, metrics.pageHeight, design.theme.border)
     }
+    yState.y = metrics.marginTop
+  }
+
+  const sectionImage = images
+    .filter((img) => img.section_id === section.id)
+    .sort(
+      (a, b) =>
+        new Date(b.created_at || '').getTime() - new Date(a.created_at || '').getTime()
+    )[0]
+
+  const hasImage = !!(hasImageExportAccess && sectionImage?.image_url)
+
+  const questionText = section.question
+  const answerText = section.answer.trim()
+  const safeWidth = metrics.contentWidth
+
+  const answerX =
+    settings.printReady && settings.layout === 'classic'
+      ? metrics.marginLeft + 2
+      : settings.printReady
+        ? metrics.marginLeft + 3
+        : metrics.marginLeft + 2
+
+  const isCenteredLayout = shouldUseCenteredPortraitLayout(section, hasImage, settings)
+
+  if (isCenteredLayout) {
+    const centerWidth = Math.min(110, metrics.contentWidth - 24)
 
     doc.setFont(design.font.body, 'italic')
-    doc.setFontSize(
-      settings.layout === 'elegant'
-        ? design.layout.questionSize
-        : design.layout.questionSize - 0.5
-    )
+    doc.setFontSize(design.layout.questionSize - 0.2)
     setTextColor(doc, design.theme.textSecondary)
 
-    const questionText = section.question
-    const safeWidth = metrics.contentWidth
-    const splitQuestion = doc.splitTextToSize(questionText, safeWidth)
+    const splitQuestionCentered = doc.splitTextToSize(questionText, centerWidth)
+    doc.text(splitQuestionCentered, metrics.centerX, yState.y + 8, {
+      align: 'center',
+      maxWidth: centerWidth,
+    })
 
-    const answerX =
-      settings.printReady && settings.layout === 'classic'
-        ? metrics.marginLeft + 2
-        : settings.printReady
-          ? metrics.marginLeft + 3
-          : metrics.marginLeft + 2
-
-    const questionGap = settings.printReady ? 8 : 6
-    doc.text(splitQuestion, answerX, yState.y)
-    yState.y += splitQuestion.length * design.layout.lineHeight + questionGap
+    yState.y += splitQuestionCentered.length * design.layout.lineHeight + 14
 
     doc.setFont(design.font.body, design.font.bodyStyle)
-    doc.setFontSize(design.layout.answerSize + 0.3)
+    doc.setFontSize(design.layout.answerSize + 0.5)
     setTextColor(doc, design.theme.textPrimary)
 
-    const answerText = section.answer.trim()
-    const sectionGap = design.layout.sectionSpacing + 8
+    const splitAnswerCentered = doc.splitTextToSize(answerText, centerWidth)
+    doc.text(splitAnswerCentered, metrics.centerX, yState.y, {
+      align: 'center',
+      maxWidth: centerWidth,
+    })
 
-    const useDropCap =
-      settings.layout === 'elegant' &&
-      !!settings.dropCaps &&
-      answerText.length > 220
+    yState.y +=
+      splitAnswerCentered.length * design.layout.lineHeight +
+      design.layout.sectionSpacing +
+      12
 
-    if (useDropCap) {
-      const usedHeight = drawDropCapParagraph(
-        doc,
-        answerText,
-        answerX,
-        yState.y,
-        safeWidth,
-        design
-      )
-      yState.y += usedHeight + sectionGap
-    } else {
-      const splitAnswer = doc.splitTextToSize(answerText, safeWidth)
-      doc.text(splitAnswer, answerX, yState.y)
-      yState.y += splitAnswer.length * design.layout.lineHeight + sectionGap
-    }
-    const sectionImage = images
-  .filter((img) => img.section_id === section.id)
-  .sort(
-    (a, b) =>
-      new Date(b.created_at || '').getTime() - new Date(a.created_at || '').getTime()
-  )[0]
-
-const hasImage = !!(hasImageExportAccess && sectionImage?.image_url)
-
-if (shouldUseCenteredPortraitLayout(section, hasImage, settings)) {
-  const centerWidth = Math.min(110, metrics.contentWidth - 24)
+    return
+  }
 
   doc.setFont(design.font.body, 'italic')
-  doc.setFontSize(design.layout.questionSize - 0.2)
+  doc.setFontSize(
+    settings.layout === 'elegant'
+      ? design.layout.questionSize
+      : design.layout.questionSize - 0.5
+  )
   setTextColor(doc, design.theme.textSecondary)
 
-  const splitQuestionCentered = doc.splitTextToSize(section.question, centerWidth)
-  doc.text(splitQuestionCentered, metrics.centerX, yState.y + 8, {
-    align: 'center',
-    maxWidth: centerWidth,
-  })
+  const splitQuestion = doc.splitTextToSize(questionText, safeWidth)
 
-  yState.y += splitQuestionCentered.length * design.layout.lineHeight + 14
+  const questionGap = settings.printReady ? 8 : 6
+  doc.text(splitQuestion, answerX, yState.y)
+  yState.y += splitQuestion.length * design.layout.lineHeight + questionGap
 
   doc.setFont(design.font.body, design.font.bodyStyle)
-  doc.setFontSize(design.layout.answerSize + 0.5)
+  doc.setFontSize(design.layout.answerSize + 0.3)
   setTextColor(doc, design.theme.textPrimary)
 
-  const splitAnswerCentered = doc.splitTextToSize(section.answer.trim(), centerWidth)
-  doc.text(splitAnswerCentered, metrics.centerX, yState.y, {
-    align: 'center',
-    maxWidth: centerWidth,
-  })
+  const sectionGap = design.layout.sectionSpacing + 8
 
-  yState.y += splitAnswerCentered.length * design.layout.lineHeight + design.layout.sectionSpacing + 12
-  return
-} 
+  const useDropCap =
+    settings.layout === 'elegant' &&
+    !!settings.dropCaps &&
+    !isCenteredLayout &&
+    answerText.length > 120
 
-    if (hasImageExportAccess && sectionImage?.image_url) {
+  if (useDropCap) {
+    const usedHeight = drawDropCapParagraph(
+      doc,
+      answerText,
+      answerX,
+      yState.y,
+      safeWidth,
+      design
+    )
+    yState.y += usedHeight + sectionGap
+  } else {
+    const splitAnswer = doc.splitTextToSize(answerText, safeWidth)
+    doc.text(splitAnswer, answerX, yState.y)
+    yState.y += splitAnswer.length * design.layout.lineHeight + sectionGap
+  }
+
+  if (hasImageExportAccess && sectionImage?.image_url) {
       try {
         const imgData = await loadImageAsBase64(sectionImage.image_url)
 
