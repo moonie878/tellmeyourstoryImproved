@@ -1,30 +1,30 @@
 <template>
   <main class="bg-[#f7f5f2] text-stone-900">
     <!-- HERO -->
-    <section class="px-6 py-20 md:py-28">
-      <div class="mx-auto grid max-w-6xl items-center gap-14 md:grid-cols-2">
-        <div>
-          <p class="text-sm font-medium uppercase tracking-[0.25em] text-stone-500">
+    <section class="px-4 py-16 sm:px-6 sm:py-20 md:py-28">
+      <div class="mx-auto grid max-w-6xl items-center gap-10 md:grid-cols-2 md:gap-14">
+        <div class="text-center md:text-left">
+          <p class="text-xs font-medium uppercase tracking-[0.25em] text-stone-500 sm:text-sm">
             Preserve a loved one’s story
           </p>
 
-          <h1 class="mt-4 text-4xl font-bold leading-tight md:text-6xl">
+          <h1 class="mt-4 text-3xl font-bold leading-tight sm:text-4xl md:text-6xl">
             Turn memories into a beautiful keepsake book
           </h1>
 
-          <p class="mt-6 max-w-xl text-lg leading-8 text-stone-600">
+          <p class="mx-auto mt-5 max-w-xl text-base leading-7 text-stone-600 sm:text-lg sm:leading-8 md:mx-0">
             Answer guided questions about someone you love, add photos, and turn their memories into a beautifully designed book you can keep, print, and share.
           </p>
 
-          <p class="mt-4 text-sm text-stone-500">
+          <p class="mx-auto mt-4 max-w-lg text-sm text-stone-500 md:mx-0">
             Perfect for mums, dads, grandparents, and family stories you never want to lose.
           </p>
 
-          <div class="mt-8 flex flex-wrap gap-4">
+          <div class="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:justify-center md:justify-start">
             <router-link
               to="/register"
               @click="trackStart"
-              class="rounded-full bg-[#7C5C3B] px-6 py-3 text-sm font-semibold text-white transition hover:opacity-90"
+              class="rounded-full bg-[#7C5C3B] px-6 py-3 text-center text-sm font-semibold text-white transition hover:opacity-90"
             >
               Get started free
             </router-link>
@@ -32,7 +32,7 @@
             <router-link
               to="/example"
               @click="trackExampleStory"
-              class="rounded-full border border-stone-300 bg-white px-6 py-3 text-sm font-semibold text-stone-900 transition hover:bg-stone-100"
+              class="rounded-full border border-stone-300 bg-white px-6 py-3 text-center text-sm font-semibold text-stone-900 transition hover:bg-stone-100"
             >
               View example story
             </router-link>
@@ -43,17 +43,17 @@
           <img
             src="/images/example-story-hero-cover.png"
             alt="Tell Me Your Story keepsake preview"
-            class="w-full max-w-2xl"
+            class="w-full max-w-sm sm:max-w-md md:max-w-2xl"
           />
         </div>
       </div>
     </section>
 
     <!-- EXAMPLE STORY -->
-    <section class="border-t border-stone-200 bg-white px-6 py-20">
-      <div class="mx-auto grid max-w-6xl items-center gap-12 md:grid-cols-2">
-        <div>
-          <p class="text-sm font-medium uppercase tracking-[0.25em] text-stone-500">
+    <section class="border-t border-stone-200 bg-white px-4 py-16 sm:px-6 sm:py-20">
+      <div class="mx-auto grid max-w-6xl items-center gap-10 md:grid-cols-2 md:gap-12">
+        <div class="text-center md:text-left">
+          <p class="text-xs font-medium uppercase tracking-[0.25em] text-stone-500 sm:text-sm">
             Example story
           </p>
 
@@ -61,11 +61,11 @@
             See how a story becomes a keepsake
           </h2>
 
-          <p class="mt-6 text-lg leading-8 text-stone-600">
+          <p class="mt-5 text-base leading-7 text-stone-600 sm:text-lg sm:leading-8">
             Follow a real example of a completed story — from thoughtful answers to a finished book filled with memories, photos, and meaningful moments.
           </p>
 
-          <ul class="mt-6 space-y-2 text-sm text-stone-600">
+          <ul class="mt-6 space-y-3 text-left text-sm text-stone-600 md:max-w-lg">
             <li>✔ Real answers turned into a structured story</li>
             <li>✔ Highlighted quotes and chapter pages</li>
             <li>✔ Designed layouts ready to print or share</li>
@@ -74,7 +74,7 @@
           <router-link
             to="/example"
             @click="trackExampleStory"
-            class="mt-8 inline-block rounded-full bg-[#7C5C3B] px-6 py-3 text-sm font-semibold text-white hover:opacity-90"
+            class="mt-8 inline-block rounded-full bg-[#7C5C3B] px-6 py-3 text-sm font-semibold text-white transition hover:opacity-90"
           >
             Explore example story
           </router-link>
@@ -84,17 +84,17 @@
           <img
             src="/images/example-story-memory-page.png"
             alt="Example story preview"
-            class="w-full max-w-xl rounded-[2rem] shadow-lg"
+            class="w-full max-w-md rounded-[2rem] shadow-lg md:max-w-xl"
           />
         </div>
       </div>
     </section>
 
     <!-- PREVIEW GALLERY -->
-    <section class="px-6 py-20">
+    <section class="px-4 py-16 sm:px-6 sm:py-20">
       <div class="mx-auto max-w-6xl">
-        <div class="max-w-2xl">
-          <p class="text-sm font-medium uppercase tracking-[0.25em] text-stone-500">
+        <div class="max-w-2xl text-center md:text-left">
+          <p class="text-xs font-medium uppercase tracking-[0.25em] text-stone-500 sm:text-sm">
             See the finished keepsake
           </p>
 
@@ -102,52 +102,62 @@
             See what your finished keepsake can look like
           </h2>
 
-          <p class="mt-4 text-lg text-stone-600">
+          <p class="mt-4 text-base leading-7 text-stone-600 sm:text-lg">
             From elegant chapter pages and meaningful quotes to personal photos and beautifully laid out memories.
           </p>
         </div>
 
-        <div class="mt-12 grid gap-6 md:grid-cols-3">
-          <img
-            src="/images/example-story-chapter.png"
-            alt="Chapter page preview"
-            class="w-full rounded-[2rem]"
-          />
+        <div class="mt-10 grid gap-5 md:mt-12 md:grid-cols-3 md:gap-6">
+          <div class="rounded-[2rem] border border-stone-200 bg-white p-3 shadow-sm">
+            <img
+              src="/images/example-story-chapter.png"
+              alt="Chapter page preview"
+              class="w-full rounded-[1.5rem]"
+            />
+          </div>
 
-          <img
-            src="/images/example-story-quote.png"
-            alt="Quote page preview"
-            class="w-full rounded-[2rem]"
-          />
+          <div class="rounded-[2rem] border border-stone-200 bg-white p-3 shadow-sm">
+            <img
+              src="/images/example-story-quote.png"
+              alt="Quote page preview"
+              class="w-full rounded-[1.5rem]"
+            />
+          </div>
 
-          <img
-            src="/images/example-story-cover.png"
-            alt="Cover page preview"
-            class="w-full rounded-[2rem]"
-          />
+          <div class="rounded-[2rem] border border-stone-200 bg-white p-3 shadow-sm">
+            <img
+              src="/images/example-story-cover.png"
+              alt="Cover page preview"
+              class="w-full rounded-[1.5rem]"
+            />
+          </div>
         </div>
 
-        <div class="mt-6 grid gap-6 md:grid-cols-2">
-          <img
-            src="/images/example-story-memory-page.png"
-            alt="Story page preview"
-            class="w-full rounded-[2rem]"
-          />
+        <div class="mt-5 grid gap-5 md:mt-6 md:grid-cols-2 md:gap-6">
+          <div class="rounded-[2rem] border border-stone-200 bg-white p-3 shadow-sm">
+            <img
+              src="/images/example-story-memory-page.png"
+              alt="Story page preview"
+              class="w-full rounded-[1.5rem]"
+            />
+          </div>
 
-          <img
-            src="/images/example-story-closing.png"
-            alt="Closing page preview"
-            class="w-full rounded-[2rem]"
-          />
+          <div class="rounded-[2rem] border border-stone-200 bg-white p-3 shadow-sm">
+            <img
+              src="/images/example-story-closing.png"
+              alt="Closing page preview"
+              class="w-full rounded-[1.5rem]"
+            />
+          </div>
         </div>
       </div>
     </section>
 
     <!-- HOW IT WORKS -->
-    <section class="border-t border-stone-200 bg-white px-6 py-20">
+    <section class="border-t border-stone-200 bg-white px-4 py-16 sm:px-6 sm:py-20">
       <div class="mx-auto max-w-6xl">
-        <div class="max-w-2xl">
-          <p class="text-sm font-medium uppercase tracking-[0.25em] text-stone-500">
+        <div class="max-w-2xl text-center md:text-left">
+          <p class="text-xs font-medium uppercase tracking-[0.25em] text-stone-500 sm:text-sm">
             How it works
           </p>
 
@@ -156,7 +166,7 @@
           </h2>
         </div>
 
-        <div class="mt-12 grid gap-6 md:grid-cols-3">
+        <div class="mt-10 grid gap-5 md:mt-12 md:grid-cols-3 md:gap-6">
           <div class="rounded-3xl border border-stone-200 bg-stone-50 p-6">
             <h3 class="text-xl font-semibold">1. Choose a story</h3>
             <p class="mt-3 text-stone-600">
@@ -182,9 +192,9 @@
     </section>
 
     <!-- EMOTIONAL TRUST SECTION -->
-    <section class="border-t border-stone-200 bg-[#f7f5f2] px-6 py-20">
+    <section class="border-t border-stone-200 bg-[#f7f5f2] px-4 py-16 sm:px-6 sm:py-20">
       <div class="mx-auto max-w-4xl text-center">
-        <p class="text-sm font-medium uppercase tracking-[0.25em] text-stone-500">
+        <p class="text-xs font-medium uppercase tracking-[0.25em] text-stone-500 sm:text-sm">
           Why it matters
         </p>
 
@@ -192,17 +202,17 @@
           The stories that matter most are often the easiest to lose
         </h2>
 
-        <p class="mt-6 text-lg leading-8 text-stone-600">
+        <p class="mt-6 text-base leading-7 text-stone-600 sm:text-lg sm:leading-8">
           Tell Me Your Story helps you capture a loved one’s memories slowly and meaningfully, then turn them into something beautiful enough to keep for years.
         </p>
       </div>
     </section>
 
     <!-- WHO IT'S FOR -->
-    <section class="border-t border-stone-200 bg-white px-6 py-20">
+    <section class="border-t border-stone-200 bg-white px-4 py-16 sm:px-6 sm:py-20">
       <div class="mx-auto max-w-6xl">
-        <div class="max-w-2xl">
-          <p class="text-sm font-medium uppercase tracking-[0.25em] text-stone-500">
+        <div class="max-w-2xl text-center md:text-left">
+          <p class="text-xs font-medium uppercase tracking-[0.25em] text-stone-500 sm:text-sm">
             Who it’s for
           </p>
 
@@ -211,7 +221,7 @@
           </h2>
         </div>
 
-        <div class="mt-12 grid gap-6 md:grid-cols-3">
+        <div class="mt-10 grid gap-5 md:mt-12 md:grid-cols-3 md:gap-6">
           <div class="rounded-3xl border border-stone-200 bg-stone-50 p-6">
             <h3 class="text-xl font-semibold text-stone-900">For daughters and sons</h3>
             <p class="mt-3 text-stone-600">
@@ -237,10 +247,10 @@
     </section>
 
     <!-- PRICING -->
-    <section class="border-t border-stone-200 bg-white px-6 py-20">
+    <section id="pricing" class="border-t border-stone-200 bg-white px-4 py-16 sm:px-6 sm:py-20">
       <div class="mx-auto max-w-6xl">
         <div class="text-center">
-          <p class="text-sm font-medium uppercase tracking-[0.25em] text-stone-500">
+          <p class="text-xs font-medium uppercase tracking-[0.25em] text-stone-500 sm:text-sm">
             Pricing
           </p>
 
@@ -248,13 +258,13 @@
             Start free, upgrade when you’re ready
           </h2>
 
-          <p class="mt-4 text-lg text-stone-600">
+          <p class="mt-4 text-base leading-7 text-stone-600 sm:text-lg">
             Begin writing for free, then unlock the finished keepsake experience when you want to export.
           </p>
         </div>
 
-        <div class="mt-12 grid gap-6 md:grid-cols-3">
-          <div class="flex h-full flex-col rounded-3xl border border-stone-200 bg-stone-50 p-8">
+        <div class="mt-10 grid gap-5 md:mt-12 md:grid-cols-3 md:gap-6">
+          <div class="flex h-full flex-col rounded-3xl border border-stone-200 bg-stone-50 p-6 sm:p-8">
             <h3 class="text-xl font-semibold">Free</h3>
             <p class="mt-2 text-stone-600">Start capturing memories</p>
             <p class="mt-6 text-3xl font-bold">£0</p>
@@ -268,13 +278,13 @@
             <router-link
               to="/register"
               @click="trackPricingFree"
-              class="mt-auto inline-block w-full rounded-full bg-[#7C5C3B] px-4 py-2 text-center text-white transition hover:opacity-90"
+              class="mt-8 inline-block w-full rounded-full bg-[#7C5C3B] px-4 py-3 text-center text-white transition hover:opacity-90"
             >
               Start for free
             </router-link>
           </div>
 
-          <div class="flex h-full flex-col rounded-3xl border-2 border-stone-900 bg-white p-8">
+          <div class="flex h-full flex-col rounded-3xl border-2 border-stone-900 bg-white p-6 sm:p-8 shadow-sm">
             <h3 class="text-xl font-semibold">Single Story</h3>
             <p class="mt-2 text-stone-600">For one meaningful keepsake</p>
             <p class="mt-6 text-3xl font-bold">£3.99</p>
@@ -286,13 +296,13 @@
 
             <button
               @click="trackPricingSingle"
-              class="mt-auto w-full rounded-full bg-[#7C5C3B] px-4 py-2 text-white transition hover:opacity-90"
+              class="mt-8 w-full rounded-full bg-[#7C5C3B] px-4 py-3 text-white transition hover:opacity-90"
             >
               Create my story
             </button>
           </div>
 
-          <div class="flex h-full flex-col rounded-3xl border border-stone-200 bg-stone-50 p-8">
+          <div class="flex h-full flex-col rounded-3xl border border-stone-200 bg-stone-50 p-6 sm:p-8">
             <h3 class="text-xl font-semibold">All Stories</h3>
             <p class="mt-2 text-stone-600">For multiple family keepsakes</p>
             <p class="mt-6 text-3xl font-bold">£11.99</p>
@@ -304,7 +314,7 @@
 
             <button
               @click="trackPricingAll"
-              class="mt-auto w-full rounded-full bg-[#7C5C3B] px-4 py-2 text-white transition hover:opacity-90"
+              class="mt-8 w-full rounded-full bg-[#7C5C3B] px-4 py-3 text-white transition hover:opacity-90"
             >
               Create more stories
             </button>
@@ -314,13 +324,13 @@
     </section>
 
     <!-- FINAL CTA -->
-    <section class="border-t border-stone-200 bg-stone-900 px-6 py-20 text-white">
+    <section class="border-t border-stone-200 bg-stone-900 px-4 py-16 text-white sm:px-6 sm:py-20">
       <div class="mx-auto max-w-3xl text-center">
         <h2 class="text-3xl font-bold md:text-4xl">
           Start creating a keepsake your family can treasure
         </h2>
 
-        <p class="mt-4 text-lg text-stone-300">
+        <p class="mt-4 text-base leading-7 text-stone-300 sm:text-lg">
           Preserve a story, capture the memories that matter, and turn them into something worth holding onto.
         </p>
 
