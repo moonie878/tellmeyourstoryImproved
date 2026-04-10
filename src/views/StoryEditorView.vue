@@ -1,22 +1,24 @@
 <template>
   <div
-  v-if="checkoutLoading"
-  class="fixed inset-0 z-[70] flex items-center justify-center bg-black/50 px-6"
->
-  <div class="w-full max-w-md rounded-[2rem] bg-white p-8 text-center shadow-2xl">
-    <div class="mx-auto h-10 w-10 animate-spin rounded-full border-4 border-stone-200 border-t-[#7C5C3B]"></div>
+    v-if="checkoutLoading"
+    class="fixed inset-0 z-[70] flex items-center justify-center bg-black/50 px-6"
+  >
+    <div class="w-full max-w-md rounded-[2rem] bg-white p-8 text-center shadow-2xl">
+      <div class="mx-auto h-10 w-10 animate-spin rounded-full border-4 border-stone-200 border-t-[#7C5C3B]"></div>
 
-    <h3 class="mt-6 text-xl font-semibold text-stone-900">
-      Preparing your checkout
-    </h3>
+      <h3 class="mt-6 text-xl font-semibold text-stone-900">
+        Preparing your checkout
+      </h3>
 
-    <p class="mt-3 text-sm leading-6 text-stone-600">
-      This can take a few moments while everything loads. Please don’t close this page.
-    </p>
+      <p class="mt-3 text-sm leading-6 text-stone-600">
+        This can take a few moments while everything loads. Please don’t close this page.
+      </p>
+    </div>
   </div>
-</div>
-  <div class="min-h-screen bg-stone-50 px-6 py-12">
-    <div v-if="project" class="mb-6">
+
+  <div class="min-h-screen bg-stone-50 px-4 py-6 sm:px-6 sm:py-8 md:py-10">
+    <!-- Story title -->
+    <div v-if="project" class="mb-5">
       <label class="mb-2 block text-sm font-medium text-stone-600">
         Story title
       </label>
@@ -25,11 +27,12 @@
         v-model="project.title"
         @blur="saveProjectTitle"
         type="text"
-        class="w-full rounded-xl border border-stone-300 bg-white px-4 py-3 text-2xl font-bold focus:outline-none focus:ring-2 focus:ring-stone-900"
+        class="w-full rounded-xl border border-stone-300 bg-white px-4 py-3 text-xl font-bold focus:outline-none focus:ring-2 focus:ring-stone-900 sm:text-2xl"
         placeholder="Enter story title"
       />
     </div>
 
+    <!-- Cover image / premium banner -->
     <div
       v-if="hasTier4Access"
       class="mb-6 rounded-2xl border border-stone-200 bg-white p-4"
@@ -53,18 +56,16 @@
         This will appear on your cover page
       </p>
 
-      <div v-if="coverImageUrl" class="mt-4">
-        <div class="mt-4 flex justify-center">
-          <div
-            class="flex h-56 w-40 items-center justify-center overflow-hidden rounded-xl border border-stone-200 bg-white"
-          >
-            <img
-              :src="coverImageUrl"
-              alt="Cover image"
-              class="max-h-full max-w-full object-contain"
-              @error="coverImageStatus = 'Cover image needs refreshing. Please upload it again.'"
-            />
-          </div>
+      <div v-if="coverImageUrl" class="mt-4 flex justify-center">
+        <div
+          class="flex h-48 w-32 items-center justify-center overflow-hidden rounded-xl border border-stone-200 bg-white sm:h-56 sm:w-40"
+        >
+          <img
+            :src="coverImageUrl"
+            alt="Cover image"
+            class="max-h-full max-w-full object-contain"
+            @error="coverImageStatus = 'Cover image needs refreshing. Please upload it again.'"
+          />
         </div>
       </div>
     </div>
@@ -83,12 +84,13 @@
 
       <button
         @click="upgradeFromCover"
-        class="cursor-pointer mt-4 rounded-full bg-[#7C5C3B] hover:opacity-90 transition px-4 py-2 text-sm font-medium text-white"
+        class="mt-4 rounded-full bg-[#7C5C3B] px-4 py-2 text-sm font-medium text-white transition hover:opacity-90"
       >
         Unlock Premium Keepsake
       </button>
     </div>
 
+    <!-- Status messages -->
     <p
       v-if="paymentMessage"
       class="mb-4 rounded-2xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700"
@@ -118,46 +120,40 @@
       @open-customiser="showPdfCustomizer = true"
     />
 
-    <p
-      v-if="answeredProgress > 40 && !hasImageExportAccess"
-      class="mb-2 text-xs text-stone-500"
-    >
-      You’ve already written {{ answeredProgress }}% of your story — don’t lose the chance to turn it into something lasting.
-    </p>
-
-    <div class="mb-6">
-      <div class="flex flex-wrap items-center gap-4">
+    <!-- Action area -->
+    <div class="mb-6 rounded-2xl border border-stone-200 bg-white p-4 sm:p-5">
+      <div class="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
         <button
           @click="handleExportClick"
           :disabled="isExporting"
-          class="cursor-pointer h-[42px] rounded-full px-5 text-white transition transform hover:scale-[1.02] active:scale-[0.98]" 
-          :class="isPaidUser ? 'bg-[#7C5C3B] hover:opacity-90 transition' : 'cursor-not-allowed bg-stone-400'"
+          class="w-full rounded-full px-5 py-3 text-sm font-medium text-white transition sm:w-auto"
+          :class="isPaidUser ? 'bg-[#7C5C3B] hover:opacity-90' : 'cursor-not-allowed bg-stone-400'"
         >
           <span v-if="!isExporting">Create Keepsake PDF</span>
           <span v-else>Creating your keepsake… ✨</span>
         </button>
 
         <button
+          @click="openPremiumPreview"
+          class="w-full rounded-full border border-stone-900 px-5 py-3 text-sm font-medium text-stone-900 transition hover:bg-stone-100 sm:w-auto"
+        >
+          Preview Your Finished Keepsake
+        </button>
+
+        <button
           @click="exportWordHandler"
           :disabled="!isPaidUser || isExportingWord"
-          class="cursor-pointer h-[42px] rounded-full px-5 text-white transition transform hover:scale-[1.02] active:scale-[0.98]"
-          :class="isPaidUser ? 'bg-[#7C5C3B] hover:opacity-90 transition' : 'cursor-not-allowed bg-stone-400'"
+          class="w-full rounded-full px-5 py-3 text-sm font-medium text-white transition sm:w-auto"
+          :class="isPaidUser ? 'bg-[#7C5C3B] hover:opacity-90' : 'cursor-not-allowed bg-stone-400'"
         >
           <span v-if="!isExportingWord">Download Story Document</span>
           <span v-else>Preparing document...</span>
         </button>
 
         <button
-          @click="openPremiumPreview"
-          class="cursor-pointer rounded-full border border-stone-900 px-6 py-3 text-sm font-medium hover:bg-stone-100 transition transform hover:scale-[1.02]"
-        >
-          Preview Your Finished Keepsake
-        </button>
-
-        <button
           v-if="isPaidUser"
           @click="showPdfCustomizer = true"
-          class="cursor-pointer h-[42px] rounded-full border border-stone-900 px-5 text-stone-900 transition transform hover:scale-[1.02] active:scale-[0.98]"
+          class="w-full rounded-full border border-stone-900 px-5 py-3 text-sm text-stone-900 transition hover:bg-stone-100 sm:w-auto"
         >
           {{ hasTier4Access ? 'Design your keepsake' : 'Preview premium design' }}
         </button>
@@ -165,11 +161,18 @@
         <button
           v-if="isPaidUser && !hasImageExportAccess"
           @click="upgradeFromTopButtons"
-          class="cursor-pointer h-[42px] rounded-full border border-stone-900 px-5 text-stone-900 transition transform hover:scale-[1.02] active:scale-[0.98]"
+          class="w-full rounded-full border border-stone-900 px-5 py-3 text-sm text-stone-900 transition hover:bg-stone-100 sm:w-auto"
         >
           Add Photos & Premium Layouts
         </button>
       </div>
+
+      <p class="mt-3 text-sm text-stone-500">
+        Current plan:
+        <span class="font-medium text-stone-900">
+          {{ currentPlanLabel }}
+        </span>
+      </p>
 
       <div
         v-if="!hasImageExportAccess"
@@ -185,6 +188,7 @@
       </div>
     </div>
 
+    <!-- Keepsake info -->
     <div
       v-if="hasTier4Access"
       class="mb-6 rounded-2xl border border-stone-200 bg-white p-4"
@@ -209,13 +213,7 @@
       </p>
     </div>
 
-    <p class="mb-4 text-sm text-stone-500">
-      Current plan:
-      <span class="font-medium text-stone-900">
-        {{ currentPlanLabel }}
-      </span>
-    </p>
-
+    <!-- Midway upgrade -->
     <div
       v-if="showMidwayUpgrade"
       class="mb-6 rounded-3xl border border-amber-200 bg-amber-50 p-6"
@@ -235,20 +233,21 @@
       <div class="mt-4 flex flex-wrap items-center gap-3">
         <button
           @click="upgradeFromMidway"
-          class="cursor-pointer rounded-full bg-stone-900 px-5 py-2 text-sm text-white"
+          class="rounded-full bg-stone-900 px-5 py-2 text-sm text-white"
         >
           Make it a keepsake
         </button>
 
         <button
           @click="showMidwayUpgrade = false"
-          class="cursor-pointer text-sm text-amber-700 underline"
+          class="text-sm text-amber-700 underline"
         >
           Maybe later
         </button>
       </div>
     </div>
 
+    <!-- Early upgrade panel -->
     <StoryUpgradePanel
       v-if="currentPlan !== 'tier4' && answeredProgress < 20"
       :upgrade-message="upgradeMessage"
@@ -270,8 +269,9 @@
       @tier4="upgradeAllImages"
     />
 
+    <!-- Main editor -->
     <div class="grid gap-4 lg:grid-cols-[320px_minmax(0,1fr)] lg:gap-8">
-  <div class="order-2 lg:order-1 lg:self-start">
+      <div class="order-2 lg:order-1 lg:self-start">
         <StoryMapSidebar
           :chapter-tree="chapterTree"
           :current-section-index="currentSectionIndex"
@@ -311,6 +311,7 @@
       </div>
     </div>
 
+    <!-- Modals -->
     <PremiumPreviewModal
       :open="showPremiumPreview"
       :has-tier4-access="hasTier4Access"
@@ -572,16 +573,6 @@ watch(
     }
   }
 )
-
-watch(editorProgress, (val) => {
-  if (val === 100) {
-    setTimeout(() => {
-      window.scrollTo({ top: 300, behavior: 'smooth' })
-    }, 300)
-  }
-})
-    
-
     onMounted(async () => {
     await loadSections()
     await loadAnswers()
