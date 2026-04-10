@@ -214,6 +214,7 @@ export function useStoryExport() {
     return map[chapter] || 'A new chapter in this story.'
   }
 
+  
   function getChapterNumberLabel(chapterIndex: number) {
     const labels = [
       'Chapter One',
@@ -262,9 +263,19 @@ export function useStoryExport() {
   return `${shortened.slice(0, lastSpace > 0 ? lastSpace : maxLength)}…`
 }
 
-  function shouldInsertQuotePage(index: number) {
-    return index > 0 && index % 5 === 0
+ function shouldInsertQuotePage(index: number, totalSections: number) {
+  if (index === 0) return false
+
+  if (totalSections <= 8) {
+    return index === 4
   }
+
+  if (totalSections <= 16) {
+    return index > 0 && index % 6 === 0
+  }
+
+  return index > 0 && index % 5 === 0
+}
 
   function shouldUseCenteredSpreadLayout(
     section: StorySection,
@@ -278,6 +289,47 @@ export function useStoryExport() {
 
     return totalLength <= 360
   }
+
+  function getPreferredQuote(
+  sections: StorySection[],
+  currentIndex: number
+) {
+  const previousSections = sections.slice(0, currentIndex)
+
+  const highlighted = [...previousSections]
+    .reverse()
+    .find(
+      (section) =>
+        !!section.is_highlighted &&
+        !!section.answer &&
+        section.answer.trim().length >= 40
+    )
+
+  if (highlighted) {
+    const quote = getQuoteFromAnswer(highlighted.answer)
+    if (quote) return quote
+  }
+
+  const previous = previousSections[previousSections.length - 1]
+  if (previous?.answer) {
+    const quote = getQuoteFromAnswer(previous.answer)
+    if (quote) return quote
+  }
+
+  const fallback = [...previousSections]
+    .reverse()
+    .find(
+      (section) =>
+        !!section.answer &&
+        section.answer.trim().length >= 40
+    )
+
+  if (fallback?.answer) {
+    return getQuoteFromAnswer(fallback.answer)
+  }
+
+  return ''
+}
 
   function addFooter(
     doc: jsPDF,
@@ -1383,21 +1435,21 @@ drawSmallOrnament(doc, metrics.centerX, 90, design.theme.accent)
           yState.y = metrics.marginTop
         }
 
-        const insertedQuotePage = shouldInsertQuotePage(index)
+        const insertedQuotePage = shouldInsertQuotePage(index, printableSections.length)
 
         if (insertedQuotePage) {
-          const quote = getQuoteFromAnswer(printableSections[index - 1]?.answer || '')
-          if (quote) {
-            renderQuotePage(doc, quote, activeSettings)
+  const quote = getPreferredQuote(printableSections, index)
+  if (quote) {
+    renderQuotePage(doc, quote, activeSettings)
 
-            doc.addPage()
-            applyPageBackground(doc, design.theme.pageBg, metrics.pageWidth, metrics.pageHeight)
-            if (activeSettings.layout === 'elegant') {
-              drawPageBorder(doc, activeSettings, metrics.pageWidth, metrics.pageHeight, design.theme.border)
-            }
-            yState.y = metrics.marginTop
-          }
-        }
+    doc.addPage()
+    applyPageBackground(doc, design.theme.pageBg, metrics.pageWidth, metrics.pageHeight)
+    if (activeSettings.layout === 'elegant') {
+      drawPageBorder(doc, activeSettings, metrics.pageWidth, metrics.pageHeight, design.theme.border)
+    }
+    yState.y = metrics.marginTop
+  }
+}
 
         if (!insertedQuotePage && index > 0 && index % 2 === 0) {
           doc.addPage()
@@ -1430,12 +1482,12 @@ drawSmallOrnament(doc, metrics.centerX, 90, design.theme.accent)
           renderChapterHeading(doc, currentChapter, chapterIndex, activeSettings)
         }
 
-        if (shouldInsertQuotePage(index)) {
-          const quote = getQuoteFromAnswer(printableSections[index - 1]?.answer || '')
-          if (quote) {
-            renderQuotePage(doc, quote, activeSettings)
-          }
-        }
+       if (shouldInsertQuotePage(index, printableSections.length)) {
+  const quote = getPreferredQuote(printableSections, index)
+  if (quote) {
+    renderQuotePage(doc, quote, activeSettings)
+  }
+}
 
         doc.addPage()
         await renderSpreadSection(
