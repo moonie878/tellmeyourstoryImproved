@@ -232,19 +232,35 @@ export function useStoryExport() {
   }
 
   function getQuoteFromAnswer(answer: string, maxLength = 140) {
-    const cleaned = answer.replace(/\s+/g, ' ').trim()
+  const cleaned = answer.replace(/\s+/g, ' ').trim()
+  if (!cleaned) return ''
 
-    if (!cleaned) return ''
+  const sentences = cleaned
+    .split(/(?<=[.!?])\s+/)
+    .map((s) => s.trim())
+    .filter(Boolean)
 
-    if (cleaned.length <= maxLength) {
-      return cleaned
-    }
+  const strongSentence = sentences.find(
+    (sentence) =>
+      sentence.length >= 40 &&
+      sentence.length <= maxLength &&
+      !sentence.includes(':') &&
+      !sentence.toLowerCase().startsWith('because')
+  )
 
-    const shortened = cleaned.slice(0, maxLength)
-    const lastSpace = shortened.lastIndexOf(' ')
-
-    return `${shortened.slice(0, lastSpace > 0 ? lastSpace : maxLength)}…`
+  if (strongSentence) {
+    return strongSentence
   }
+
+  if (cleaned.length <= maxLength) {
+    return cleaned
+  }
+
+  const shortened = cleaned.slice(0, maxLength)
+  const lastSpace = shortened.lastIndexOf(' ')
+
+  return `${shortened.slice(0, lastSpace > 0 ? lastSpace : maxLength)}…`
+}
 
   function shouldInsertQuotePage(index: number) {
     return index > 0 && index % 5 === 0
@@ -416,6 +432,15 @@ export function useStoryExport() {
       align: 'center',
     })
 
+if (settings.layout === 'elegant') {
+  drawSmallOrnament(
+    doc,
+    metrics.centerX,
+    shouldShowCoverImage ? 162 : 64,
+    design.theme.accent
+  )
+}
+
     doc.setFont(design.font.title, design.font.titleStyle)
     doc.setFontSize(design.layout.titleSize)
     setTextColor(doc, design.theme.textPrimary)
@@ -453,6 +478,10 @@ export function useStoryExport() {
     setTextColor(doc, design.theme.textSecondary)
     const subtitleY = shouldShowCoverImage ? 200 : 114
     doc.text(storySubtitle, metrics.centerX, subtitleY, { align: 'center', maxWidth: 130 })
+
+if (settings.layout === 'elegant') {
+  drawDoubleDivider(doc, metrics.centerX, subtitleY + 16, 34, design.theme.border)
+}
 
     doc.setFontSize(10)
     setTextColor(doc, design.theme.textMuted)
@@ -498,6 +527,36 @@ export function useStoryExport() {
       drawElegantDivider(doc, settings, metrics.centerX, 166, 32, design)
     }
   }
+
+function drawDoubleDivider(
+  doc: jsPDF,
+  centerX: number,
+  y: number,
+  width: number,
+  color: readonly number[]
+) {
+  setDrawColor(doc, color)
+  doc.setLineWidth(0.2)
+  doc.line(centerX - width / 2, y, centerX + width / 2, y)
+  doc.line(centerX - width / 2 + 4, y + 2, centerX + width / 2 - 4, y + 2)
+}
+
+function drawSmallOrnament(
+  doc: jsPDF,
+  centerX: number,
+  y: number,
+  color: readonly number[]
+) {
+  setDrawColor(doc, color)
+  doc.setLineWidth(0.25)
+
+  doc.line(centerX - 16, y, centerX - 6, y)
+  doc.line(centerX + 6, y, centerX + 16, y)
+
+  doc.circle(centerX, y, 1.1, 'S')
+  doc.circle(centerX - 3.5, y, 0.5, 'S')
+  doc.circle(centerX + 3.5, y, 0.5, 'S')
+}
 
   function renderQuotePage(
     doc: jsPDF,
@@ -556,7 +615,7 @@ export function useStoryExport() {
       doc.setFontSize(9)
       setTextColor(doc, design.theme.textMuted)
       doc.text('A MEMORY WORTH KEEPING', metrics.centerX, 78, { align: 'center' })
-
+drawSmallOrnament(doc, metrics.centerX, 90, design.theme.accent)
       drawElegantDivider(doc, settings, metrics.centerX, 90, 44, design)
 
       doc.setFont(design.font.title, 'italic')
@@ -568,7 +627,7 @@ export function useStoryExport() {
         align: 'center',
         maxWidth: 94,
       })
-
+      drawDoubleDivider(doc, metrics.centerX, 182, 26, design.theme.border)
       doc.setFont(design.font.body, 'italic')
       doc.setFontSize(10)
       setTextColor(doc, design.theme.textMuted)
@@ -613,6 +672,7 @@ export function useStoryExport() {
 
     if (settings.layout === 'elegant') {
       drawPageBorder(doc, settings, metrics.pageWidth, metrics.pageHeight, design.theme.border)
+      
     }
 
     if (settings.orientation === 'landscape-spread') {
@@ -679,8 +739,9 @@ export function useStoryExport() {
       doc.setFontSize(9)
       setTextColor(doc, design.theme.textMuted)
       doc.text(chapterLabel.toUpperCase(), metrics.centerX, 68, { align: 'center' })
+      drawSmallOrnament(doc, metrics.centerX, 80, design.theme.accent)
 
-      drawElegantDivider(doc, settings, metrics.centerX, 80, 46, design)
+      drawSmallOrnament(doc, metrics.centerX, 80, design.theme.accent)
 
       doc.setFont(design.font.title, design.font.titleStyle)
       doc.setFontSize(28)
