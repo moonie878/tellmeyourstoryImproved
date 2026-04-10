@@ -3,6 +3,11 @@ export type PdfFont = 'serif' | 'clean' | 'bookish'
 export type PdfTheme = 'warm' | 'neutral' | 'dark-ink'
 export type PdfOrientation = 'portrait' | 'landscape-spread'
 
+export type PdfBorderStyle = 'none' | 'fine-line' | 'corner-floral'
+export type PdfDividerStyle = 'soft-line' | 'flourish' | 'gold-line'
+export type PdfChapterStyle = 'standard' | 'flourish'
+export type PdfOrnamentStyle = 'none' | 'floral'
+
 export type PdfSettings = {
   layout: PdfLayout
   font: PdfFont
@@ -11,6 +16,11 @@ export type PdfSettings = {
   includeCoverImage: boolean
   includeDedication: boolean
   printReady: boolean
+  borderStyle?: PdfBorderStyle
+  dividerStyle?: PdfDividerStyle
+  chapterStyle?: PdfChapterStyle
+  ornamentStyle?: PdfOrnamentStyle
+  dropCaps?: boolean
 }
 
 export type StoryImage = {
@@ -26,7 +36,7 @@ export type StorySection = {
   chapter?: string
   question: string
   answer: string
-   is_highlighted?: boolean
+  is_highlighted?: boolean
 }
 
 export type StoryProject = {

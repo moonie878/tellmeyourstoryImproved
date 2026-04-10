@@ -9,6 +9,11 @@ export function getDefaultPdfSettings(): PdfSettings {
     includeCoverImage: true,
     includeDedication: true,
     printReady: false,
+    borderStyle: 'fine-line',
+    dividerStyle: 'flourish',
+    chapterStyle: 'flourish',
+    ornamentStyle: 'none',
+    dropCaps: true,
   }
 }
 
@@ -21,8 +26,8 @@ export function getPdfDesign(settings: PdfSettings) {
       textSecondary: [92, 84, 78],
       textMuted: [140, 132, 126],
       border: [221, 214, 206],
-      divider: [232, 226, 219],
-      accent: [124, 92, 59],
+      divider: [224, 215, 203],
+      accent: [148, 116, 74],
     },
     neutral: {
       pageBg: [255, 255, 255],
@@ -32,7 +37,7 @@ export function getPdfDesign(settings: PdfSettings) {
       textMuted: [140, 140, 140],
       border: [220, 220, 220],
       divider: [232, 232, 232],
-      accent: [90, 90, 90],
+      accent: [120, 120, 120],
     },
     'dark-ink': {
       pageBg: [244, 243, 240],
@@ -42,7 +47,7 @@ export function getPdfDesign(settings: PdfSettings) {
       textMuted: [128, 128, 132],
       border: [205, 205, 210],
       divider: [220, 220, 224],
-      accent: [66, 66, 74],
+      accent: [88, 88, 96],
     },
   } as const
 
@@ -119,22 +124,22 @@ export function getPdfDesign(settings: PdfSettings) {
     elegant: {
       coverFrame: true,
       chapterCentered: true,
-      questionSize: 12.8,
-      answerSize: 11.4,
-      titleSize: 30,
-      subtitleSize: 13,
-      chapterTitleSize: 24,
-      chapterIntroSize: 11.2,
-      lineHeight: 7.1,
-      questionSpacing: 10,
-      sectionSpacing: 16,
-      imageSpacing: 16,
-      imageMaxHeight: 126,
-      dividerWidth: 120,
-      showSectionDividers: true,
+      questionSize: 11.8,
+      answerSize: 10.8,
+      titleSize: 32,
+      subtitleSize: 12.5,
+      chapterTitleSize: 26,
+      chapterIntroSize: 11,
+      lineHeight: 7.4,
+      questionSpacing: 11,
+      sectionSpacing: 20,
+      imageSpacing: 18,
+      imageMaxHeight: 118,
+      dividerWidth: 90,
+      showSectionDividers: false,
       questionStyle: 'italic',
       imageFrameStyle: 'luxury',
-      pageNumberSize: 9,
+      pageNumberSize: 8,
       runningHeaderSize: 8,
     },
   } as const
@@ -175,9 +180,9 @@ export function getPageMetrics(settings: PdfSettings) {
         columnWidth: 120,
       },
       elegant: {
-        leftX: 24,
-        rightX: 160,
-        columnWidth: 110,
+        leftX: 26,
+        rightX: 162,
+        columnWidth: 104,
       },
     } as const
 
@@ -213,9 +218,9 @@ export function getPageMetrics(settings: PdfSettings) {
           contentWidth: 150,
         },
         elegant: {
-          marginLeft: 28,
-          marginRight: 24,
-          contentWidth: 154,
+          marginLeft: 32,
+          marginRight: 28,
+          contentWidth: 146,
         },
       }
     : {
@@ -230,9 +235,9 @@ export function getPageMetrics(settings: PdfSettings) {
           contentWidth: 150,
         },
         elegant: {
-          marginLeft: 26,
-          marginRight: 26,
-          contentWidth: 158,
+          marginLeft: 30,
+          marginRight: 30,
+          contentWidth: 150,
         },
       }
 
@@ -276,7 +281,7 @@ export function getChapterIntro(chapter: string) {
     'Values & Lessons':
       'The beliefs, lessons, and guiding values that remained important over time.',
     'Reflections & Legacy':
-      'A final chapter of gratitude, meaning, and what deserves to be remembered.'
+      'A final chapter of gratitude, meaning, and what deserves to be remembered.',
   }
 
   return map[chapter] || 'A new chapter in this story.'

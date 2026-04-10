@@ -1,7 +1,12 @@
 import jsPDF from 'jspdf'
 import { Document, Packer, Paragraph, TextRun } from 'docx'
 import { saveAs } from 'file-saver'
-import type { PdfSettings, StoryImage, StoryProject, StorySection } from '../types/story'
+import type {
+  PdfSettings,
+  StoryImage,
+  StoryProject,
+  StorySection,
+} from '../types/story'
 import { getPdfDesign, getPageMetrics } from '../utils/pdfDesign'
 
 type ExportPdfArgs = {
@@ -47,6 +52,128 @@ export function useStoryExport() {
     doc.setDrawColor(color[0], color[1], color[2])
   }
 
+  function drawPageBorder(
+    doc: jsPDF,
+    settings: PdfSettings,
+    pageWidth: number,
+    pageHeight: number,
+    borderColor: readonly number[]
+  ) {
+    if (settings.borderStyle === 'none') return
+    if (settings.orientation === 'landscape-spread') return
+
+    setDrawColor(doc, borderColor)
+    doc.setLineWidth(0.3)
+
+    if (settings.borderStyle === 'fine-line') {
+      doc.roundedRect(12, 14, pageWidth - 24, pageHeight - 28, 4, 4)
+      return
+    }
+
+    if (settings.borderStyle === 'corner-floral') {
+      doc.roundedRect(12, 14, pageWidth - 24, pageHeight - 28, 4, 4)
+
+      doc.line(18, 24, 30, 24)
+      doc.line(18, 24, 18, 36)
+
+      doc.line(pageWidth - 18, 24, pageWidth - 30, 24)
+      doc.line(pageWidth - 18, 24, pageWidth - 18, 36)
+
+      doc.line(18, pageHeight - 24, 30, pageHeight - 24)
+      doc.line(18, pageHeight - 24, 18, pageHeight - 36)
+
+      doc.line(pageWidth - 18, pageHeight - 24, pageWidth - 30, pageHeight - 24)
+      doc.line(pageWidth - 18, pageHeight - 24, pageWidth - 18, pageHeight - 36)
+
+      doc.circle(24, 30, 0.7, 'S')
+      doc.circle(pageWidth - 24, 30, 0.7, 'S')
+      doc.circle(24, pageHeight - 30, 0.7, 'S')
+      doc.circle(pageWidth - 24, pageHeight - 30, 0.7, 'S')
+    }
+  }
+
+  function drawSoftDivider(
+    doc: jsPDF,
+    centerX: number,
+    y: number,
+    width: number,
+    color: readonly number[]
+  ) {
+    setDrawColor(doc, color)
+    doc.setLineWidth(0.25)
+    doc.line(centerX - width / 2, y, centerX + width / 2, y)
+  }
+
+  function drawFlourishDivider(
+    doc: jsPDF,
+    centerX: number,
+    y: number,
+    width: number,
+    color: readonly number[]
+  ) {
+    setDrawColor(doc, color)
+    doc.setLineWidth(0.35)
+
+    const half = width / 2
+    doc.line(centerX - half, y, centerX - 10, y)
+    doc.line(centerX + 10, y, centerX + half, y)
+
+    doc.circle(centerX, y, 0.8, 'S')
+    doc.circle(centerX - 4, y, 0.45, 'S')
+    doc.circle(centerX + 4, y, 0.45, 'S')
+  }
+
+  function drawElegantDivider(
+    doc: jsPDF,
+    settings: PdfSettings,
+    centerX: number,
+    y: number,
+    width: number,
+    design: ReturnType<typeof getPdfDesign>
+  ) {
+    if (settings.dividerStyle === 'flourish') {
+      drawFlourishDivider(doc, centerX, y, width, design.theme.accent)
+      return
+    }
+
+    if (settings.dividerStyle === 'gold-line') {
+      drawSoftDivider(doc, centerX, y, width, design.theme.accent)
+      return
+    }
+
+    drawSoftDivider(doc, centerX, y, width, design.theme.divider)
+  }
+
+  function drawDropCapParagraph(
+    doc: jsPDF,
+    text: string,
+    x: number,
+    y: number,
+    width: number,
+    design: ReturnType<typeof getPdfDesign>
+  ) {
+    const trimmed = text.trim()
+
+    if (!trimmed) return 0
+
+    const firstLetter = trimmed.charAt(0)
+    const rest = trimmed.slice(1).trimStart()
+
+    doc.setFont(design.font.title, 'bold')
+    doc.setFontSize(24)
+    doc.setTextColor(design.theme.accent[0], design.theme.accent[1], design.theme.accent[2])
+    doc.text(firstLetter, x, y + 2)
+
+    doc.setFont(design.font.body, design.font.bodyStyle)
+    doc.setFontSize(design.layout.answerSize + 0.3)
+    setTextColor(doc, design.theme.textPrimary)
+
+    const splitRest = doc.splitTextToSize(rest, width - 10)
+    doc.text(splitRest, x + 10, y)
+
+    return Math.max(12, splitRest.length * design.layout.lineHeight)
+  }
+
   function getStorySubtitle(project: StoryProject | null | undefined) {
     const map: Record<string, string> = {
       mum: 'A life told through memories, moments, and love',
@@ -88,57 +215,57 @@ export function useStoryExport() {
   }
 
   function getChapterNumberLabel(chapterIndex: number) {
-  const labels = [
-    'Chapter One',
-    'Chapter Two',
-    'Chapter Three',
-    'Chapter Four',
-    'Chapter Five',
-    'Chapter Six',
-    'Chapter Seven',
-    'Chapter Eight',
-    'Chapter Nine',
-    'Chapter Ten',
-  ]
+    const labels = [
+      'Chapter One',
+      'Chapter Two',
+      'Chapter Three',
+      'Chapter Four',
+      'Chapter Five',
+      'Chapter Six',
+      'Chapter Seven',
+      'Chapter Eight',
+      'Chapter Nine',
+      'Chapter Ten',
+    ]
 
-  return labels[chapterIndex] || `Chapter ${chapterIndex + 1}`
-}
-
-function getQuoteFromAnswer(answer: string, maxLength = 140) {
-  const cleaned = answer.replace(/\s+/g, ' ').trim()
-
-  if (!cleaned) return ''
-
-  if (cleaned.length <= maxLength) {
-    return cleaned
+    return labels[chapterIndex] || `Chapter ${chapterIndex + 1}`
   }
 
-  const shortened = cleaned.slice(0, maxLength)
-  const lastSpace = shortened.lastIndexOf(' ')
+  function getQuoteFromAnswer(answer: string, maxLength = 140) {
+    const cleaned = answer.replace(/\s+/g, ' ').trim()
 
-  return `${shortened.slice(0, lastSpace > 0 ? lastSpace : maxLength)}…`
-}
+    if (!cleaned) return ''
 
-function shouldInsertQuotePage(index: number) {
-  return index > 0 && index % 5 === 0
-}
+    if (cleaned.length <= maxLength) {
+      return cleaned
+    }
 
-function shouldUseCenteredSpreadLayout(
-  section: StorySection,
-  hasImage: boolean
-) {
-  if (hasImage) return false
+    const shortened = cleaned.slice(0, maxLength)
+    const lastSpace = shortened.lastIndexOf(' ')
 
-  const answerLength = (section.answer || '').trim().length
-  const questionLength = (section.question || '').trim().length
-  const totalLength = answerLength + questionLength
+    return `${shortened.slice(0, lastSpace > 0 ? lastSpace : maxLength)}…`
+  }
 
-  return totalLength <= 360
-}
+  function shouldInsertQuotePage(index: number) {
+    return index > 0 && index % 5 === 0
+  }
+
+  function shouldUseCenteredSpreadLayout(
+    section: StorySection,
+    hasImage: boolean
+  ) {
+    if (hasImage) return false
+
+    const answerLength = (section.answer || '').trim().length
+    const questionLength = (section.question || '').trim().length
+    const totalLength = answerLength + questionLength
+
+    return totalLength <= 360
+  }
 
   function addFooter(
     doc: jsPDF,
-    pageNumber: number,   
+    pageNumber: number,
     storyTitle: string,
     textMuted: readonly number[],
     pageWidth: number,
@@ -157,10 +284,10 @@ function shouldUseCenteredSpreadLayout(
       const rightPageNumber = pageNumber * 2
 
       if (pageNumber > 6 && pageNumber % 8 === 0) {
-  doc.setFontSize(8)
-  doc.text(storyTitle, leftCenter, 14, { align: 'center' })
-  doc.text(storyTitle, rightCenter, 14, { align: 'center' })
-}
+        doc.setFontSize(8)
+        doc.text(storyTitle, leftCenter, 14, { align: 'center' })
+        doc.text(storyTitle, rightCenter, 14, { align: 'center' })
+      }
 
       doc.setFontSize(9)
       doc.text(`${leftPageNumber}`, leftCenter, pageHeight - 10, {
@@ -174,13 +301,13 @@ function shouldUseCenteredSpreadLayout(
     }
 
     if (pageNumber > 6 && pageNumber % 8 === 0) {
-  doc.setFontSize(8)
-  doc.text(storyTitle, pageWidth / 2, settings.printReady ? 12 : 14, {
-    align: 'center',
-  })
-}
+      doc.setFontSize(8)
+      doc.text(storyTitle, pageWidth / 2, settings.printReady ? 12 : 14, {
+        align: 'center',
+      })
+    }
 
-    doc.setFontSize(settings.printReady ? 9 : 9)
+    doc.setFontSize(9)
     doc.text(`${pageNumber}`, pageWidth / 2, pageHeight - (settings.printReady ? 12 : 10), {
       align: 'center',
     })
@@ -200,7 +327,15 @@ function shouldUseCenteredSpreadLayout(
 
     applyPageBackground(doc, design.theme.pageBg, metrics.pageWidth, metrics.pageHeight)
 
-    if (design.layout.coverFrame && settings.orientation === 'portrait') {
+    if (settings.layout === 'elegant') {
+      drawPageBorder(doc, settings, metrics.pageWidth, metrics.pageHeight, design.theme.border)
+    }
+
+    if (
+      design.layout.coverFrame &&
+      settings.orientation === 'portrait' &&
+      settings.layout !== 'elegant'
+    ) {
       setDrawColor(doc, design.theme.border)
       doc.roundedRect(15, 20, metrics.pageWidth - 30, metrics.pageHeight - 40, 8, 8)
     }
@@ -304,12 +439,13 @@ function shouldUseCenteredSpreadLayout(
       }
     )
 
-    setDrawColor(doc, design.theme.divider)
-    doc.line(
-      55,
+    drawElegantDivider(
+      doc,
+      settings,
+      metrics.centerX,
       shouldShowCoverImage ? 188 : 100,
-      155,
-      shouldShowCoverImage ? 188 : 100
+      settings.layout === 'elegant' ? 54 : 100,
+      design
     )
 
     doc.setFont(design.font.body, 'normal')
@@ -331,6 +467,10 @@ function shouldUseCenteredSpreadLayout(
     doc.addPage()
     applyPageBackground(doc, design.theme.secondaryBg, metrics.pageWidth, metrics.pageHeight)
 
+    if (settings.layout === 'elegant') {
+      drawPageBorder(doc, settings, metrics.pageWidth, metrics.pageHeight, design.theme.border)
+    }
+
     doc.setFont(design.font.body, design.font.accentStyle)
     doc.setFontSize(settings.layout === 'elegant' ? 20 : 18)
     setTextColor(doc, design.theme.textSecondary)
@@ -345,168 +485,259 @@ function shouldUseCenteredSpreadLayout(
       return
     }
 
+    if (settings.layout === 'elegant') {
+      drawElegantDivider(doc, settings, metrics.centerX, 116, 40, design)
+    }
+
     doc.text(dedication, metrics.centerX, 140, {
       align: 'center',
       maxWidth: 140,
     })
+
+    if (settings.layout === 'elegant') {
+      drawElegantDivider(doc, settings, metrics.centerX, 166, 32, design)
+    }
   }
 
-function renderQuotePage(
-  doc: jsPDF,
-  quote: string,
-  settings: PdfSettings
-) {
-  const design = getPdfDesign(settings)
-  const metrics = getPageMetrics(settings)
+  function renderQuotePage(
+    doc: jsPDF,
+    quote: string,
+    settings: PdfSettings
+  ) {
+    const design = getPdfDesign(settings)
+    const metrics = getPageMetrics(settings)
 
-  doc.addPage()
-  applyPageBackground(doc, design.theme.secondaryBg, metrics.pageWidth, metrics.pageHeight)
+    doc.addPage()
+    applyPageBackground(doc, design.theme.secondaryBg, metrics.pageWidth, metrics.pageHeight)
 
-  if (settings.orientation === 'landscape-spread') {
-  // center divider (book fold)
-  setDrawColor(doc, design.theme.divider)
-  doc.line(metrics.centerX, 18, metrics.centerX, metrics.pageHeight - 18)
+    if (settings.layout === 'elegant') {
+      drawPageBorder(doc, settings, metrics.pageWidth, metrics.pageHeight, design.theme.border)
+    }
 
-  const leftCenter = metrics.leftX + metrics.columnWidth / 2
-  const rightCenter = metrics.rightX + metrics.columnWidth / 2
+    if (settings.orientation === 'landscape-spread') {
+      setDrawColor(doc, design.theme.divider)
+      doc.line(metrics.centerX, 18, metrics.centerX, metrics.pageHeight - 18)
 
-  // ===== LABEL (BOTH PAGES)
-  doc.setFont(design.font.body, 'normal')
-  doc.setFontSize(10)
-  setTextColor(doc, design.theme.textMuted)
+      doc.setFont(design.font.body, 'normal')
+      doc.setFontSize(10)
+      setTextColor(doc, design.theme.textMuted)
+      doc.text('A memory worth keeping', metrics.centerX, 60, {
+        align: 'center',
+      })
 
- doc.text('A memory worth keeping', metrics.centerX, 60, {
-  align: 'center',
-})
+      drawElegantDivider(doc, settings, metrics.centerX, 92, 44, design)
 
-  // ===== DIVIDER LINES (BOTH PAGES)
-  setDrawColor(doc, design.theme.divider)
+      doc.setFont(design.font.title, design.font.accentStyle)
+      doc.setFontSize(settings.layout === 'elegant' ? 20 : 18)
+      setTextColor(doc, design.theme.textPrimary)
 
-  doc.line(leftCenter - 35, 110, leftCenter + 35, 110)
-  doc.line(rightCenter - 35, 110, rightCenter + 35, 110)
+      const cleanQuote = `“${quote}”`
+      const splitQuote = doc.splitTextToSize(cleanQuote, 136)
 
-  // ===== QUOTE (CENTERED ACROSS BOTH PAGES)
-  doc.setFont(design.font.title, design.font.accentStyle)
-  doc.setFontSize(18)
-  setTextColor(doc, design.theme.textPrimary)
+      doc.text(splitQuote, metrics.centerX, 128, {
+        align: 'center',
+        maxWidth: 136,
+      })
 
-  const cleanQuote = `“${quote}”`
-  const splitQuote = doc.splitTextToSize(cleanQuote, 140)
+      if (settings.layout === 'elegant') {
+        doc.setFont(design.font.body, 'italic')
+        doc.setFontSize(9)
+        setTextColor(doc, design.theme.textMuted)
+        doc.text('held onto with love', metrics.centerX, 168, {
+          align: 'center',
+        })
+      }
 
-  doc.text(splitQuote, metrics.centerX, 145, {
-    align: 'center',
-  })
+      return
+    }
 
-  return
-}
+    if (settings.layout === 'elegant') {
+      doc.setFont(design.font.body, 'normal')
+      doc.setFontSize(9)
+      setTextColor(doc, design.theme.textMuted)
+      doc.text('A MEMORY WORTH KEEPING', metrics.centerX, 78, { align: 'center' })
 
- doc.setFont(design.font.body, 'normal')
-doc.setFontSize(10)
-setTextColor(doc, design.theme.textMuted)
-doc.text('A memory worth keeping', metrics.centerX, 94, { align: 'center' })
+      drawElegantDivider(doc, settings, metrics.centerX, 90, 44, design)
 
-setDrawColor(doc, design.theme.divider)
-doc.line(60, 110, 150, 110)
+      doc.setFont(design.font.title, 'italic')
+      doc.setFontSize(21)
+      setTextColor(doc, design.theme.textPrimary)
 
-doc.setFont(design.font.title, design.font.accentStyle)
-doc.setFontSize(20)
-setTextColor(doc, design.theme.textPrimary)
+      const splitQuote = doc.splitTextToSize(`“${quote}”`, 94)
+      doc.text(splitQuote, metrics.centerX, 126, {
+        align: 'center',
+        maxWidth: 94,
+      })
 
-const splitQuote = doc.splitTextToSize(`“${quote}”`, metrics.contentWidth - 26)
-doc.text(splitQuote, metrics.centerX, 132, {
-  align: 'center',
-})
+      doc.setFont(design.font.body, 'italic')
+      doc.setFontSize(10)
+      setTextColor(doc, design.theme.textMuted)
+      doc.text('held onto with love', metrics.centerX, 194, { align: 'center' })
 
-setDrawColor(doc, design.theme.divider)
-doc.line(60, 180, 150, 180)
-}
-
-  function renderChapterHeading(
-  doc: jsPDF,
-  chapterTitle: string,
-  chapterIndex: number,
-  settings: PdfSettings
-) {
-  const design = getPdfDesign(settings)
-  const metrics = getPageMetrics(settings)
-  const intro = getChapterIntro(chapterTitle)
-  const chapterLabel = getChapterNumberLabel(chapterIndex)
-
-  applyPageBackground(doc, design.theme.secondaryBg, metrics.pageWidth, metrics.pageHeight)
-
-  if (settings.orientation === 'landscape-spread') {
-    setDrawColor(doc, design.theme.divider)
-    doc.line(metrics.centerX, 18, metrics.centerX, metrics.pageHeight - 18)
+      return
+    }
 
     doc.setFont(design.font.body, 'normal')
     doc.setFontSize(10)
     setTextColor(doc, design.theme.textMuted)
-    doc.text(chapterLabel, metrics.rightX + metrics.columnWidth / 2, 56, {
+    doc.text('A memory worth keeping', metrics.centerX, 94, { align: 'center' })
+
+    setDrawColor(doc, design.theme.divider)
+    doc.line(60, 110, 150, 110)
+
+    doc.setFont(design.font.title, design.font.accentStyle)
+    doc.setFontSize(20)
+    setTextColor(doc, design.theme.textPrimary)
+
+    const splitQuote = doc.splitTextToSize(`“${quote}”`, metrics.contentWidth - 26)
+    doc.text(splitQuote, metrics.centerX, 132, {
+      align: 'center',
+    })
+
+    setDrawColor(doc, design.theme.divider)
+    doc.line(60, 180, 150, 180)
+  }
+
+  function renderChapterHeading(
+    doc: jsPDF,
+    chapterTitle: string,
+    chapterIndex: number,
+    settings: PdfSettings
+  ) {
+    const design = getPdfDesign(settings)
+    const metrics = getPageMetrics(settings)
+    const intro = getChapterIntro(chapterTitle)
+    const chapterLabel = getChapterNumberLabel(chapterIndex)
+
+    applyPageBackground(doc, design.theme.secondaryBg, metrics.pageWidth, metrics.pageHeight)
+
+    if (settings.layout === 'elegant') {
+      drawPageBorder(doc, settings, metrics.pageWidth, metrics.pageHeight, design.theme.border)
+    }
+
+    if (settings.orientation === 'landscape-spread') {
+      setDrawColor(doc, design.theme.divider)
+      doc.line(metrics.centerX, 18, metrics.centerX, metrics.pageHeight - 18)
+
+      doc.setFont(design.font.body, 'normal')
+      doc.setFontSize(10)
+      setTextColor(doc, design.theme.textMuted)
+      doc.text(chapterLabel, metrics.rightX + metrics.columnWidth / 2, 56, {
+        align: 'center',
+      })
+
+      drawElegantDivider(
+        doc,
+        settings,
+        metrics.rightX + metrics.columnWidth / 2,
+        68,
+        36,
+        design
+      )
+
+      doc.setFont(design.font.title, design.font.titleStyle)
+      doc.setFontSize(design.layout.chapterTitleSize + 2)
+      setTextColor(doc, design.theme.textPrimary)
+      doc.text(chapterTitle, metrics.rightX + metrics.columnWidth / 2, 88, {
+        align: 'center',
+        maxWidth: metrics.columnWidth - 18,
+      })
+
+      doc.setFont(design.font.body, design.font.accentStyle)
+      doc.setFontSize(12)
+      setTextColor(doc, design.theme.textSecondary)
+
+      const introWidth = metrics.columnWidth - 24
+      const splitIntro = doc.splitTextToSize(intro, introWidth)
+
+      doc.text(
+        splitIntro,
+        metrics.rightX + metrics.columnWidth / 2,
+        126,
+        {
+          align: 'center',
+          maxWidth: introWidth,
+        }
+      )
+
+      if (settings.layout === 'elegant' && settings.chapterStyle === 'flourish') {
+        drawElegantDivider(
+          doc,
+          settings,
+          metrics.rightX + metrics.columnWidth / 2,
+          162,
+          28,
+          design
+        )
+      }
+
+      return
+    }
+
+    if (settings.layout === 'elegant') {
+      doc.setFont(design.font.body, 'normal')
+      doc.setFontSize(9)
+      setTextColor(doc, design.theme.textMuted)
+      doc.text(chapterLabel.toUpperCase(), metrics.centerX, 68, { align: 'center' })
+
+      drawElegantDivider(doc, settings, metrics.centerX, 80, 46, design)
+
+      doc.setFont(design.font.title, design.font.titleStyle)
+      doc.setFontSize(28)
+      setTextColor(doc, design.theme.textPrimary)
+      doc.text(chapterTitle, metrics.centerX, 108, {
+        align: 'center',
+        maxWidth: 118,
+      })
+
+      doc.setFont(design.font.body, 'italic')
+      doc.setFontSize(11)
+      setTextColor(doc, design.theme.textSecondary)
+
+      const splitIntro = doc.splitTextToSize(intro, 108)
+      doc.text(splitIntro, metrics.centerX, 132, {
+        align: 'center',
+        maxWidth: 108,
+      })
+
+      if (settings.chapterStyle === 'flourish') {
+        drawElegantDivider(doc, settings, metrics.centerX, 176, 40, design)
+      }
+
+      return
+    }
+
+    doc.setFont(design.font.body, 'normal')
+    doc.setFontSize(10)
+    setTextColor(doc, design.theme.textMuted)
+    doc.text(chapterLabel, metrics.centerX, 72, { align: 'center' })
+
+    doc.setFont(design.font.title, 'bold')
+    doc.setFontSize(80)
+    doc.setTextColor(235, 235, 235)
+    doc.text(String(chapterIndex + 1), metrics.centerX, 118, {
       align: 'center',
     })
 
     doc.setFont(design.font.title, design.font.titleStyle)
-    doc.setFontSize(design.layout.chapterTitleSize + 2)
+    doc.setFontSize(26)
     setTextColor(doc, design.theme.textPrimary)
-    doc.text(chapterTitle, metrics.rightX + metrics.columnWidth / 2, 76, {
+    doc.text(chapterTitle, metrics.centerX, 138, {
       align: 'center',
-      maxWidth: metrics.columnWidth - 16,
+      maxWidth: 130,
     })
 
     setDrawColor(doc, design.theme.divider)
-    doc.line(metrics.rightX + 14, 86, metrics.rightX + metrics.columnWidth - 14, 86)
+    doc.line(55, 112, 155, 112)
 
     doc.setFont(design.font.body, design.font.accentStyle)
-doc.setFontSize(12)
-doc.setTextColor(120, 120, 120)
-
-const introWidth = metrics.columnWidth - 24
-const splitIntro = doc.splitTextToSize(intro, introWidth)
-
-doc.text(
-  splitIntro,
-  metrics.rightX + metrics.columnWidth / 2,
-  140,
-  {
-    align: 'center',
-    maxWidth: introWidth,
+    doc.setFontSize(12)
+    doc.setTextColor(120, 120, 120)
+    const splitIntro = doc.splitTextToSize(intro, metrics.contentWidth - 26)
+    doc.text(splitIntro, metrics.centerX, 156, {
+      align: 'center',
+    })
   }
-)
-
-    return
-  }
-
-  doc.setFont(design.font.body, 'normal')
-doc.setFontSize(10)
-setTextColor(doc, design.theme.textMuted)
-doc.text(chapterLabel, metrics.centerX, 72, { align: 'center' })
-
-doc.setFont(design.font.title, 'bold')
-doc.setFontSize(80)
-doc.setTextColor(235, 235, 235)
-doc.text(String(chapterIndex + 1), metrics.centerX, 118, {
-  align: 'center',
-})
-
-doc.setFont(design.font.title, design.font.titleStyle)
-doc.setFontSize(26)
-setTextColor(doc, design.theme.textPrimary)
-doc.text(chapterTitle, metrics.centerX, 138, {
-  align: 'center',
-  maxWidth: 130,
-})
-
-  setDrawColor(doc, design.theme.divider)
-  doc.line(55, 112, 155, 112)
-
-  doc.setFont(design.font.body, design.font.accentStyle)
-doc.setFontSize(12)
-doc.setTextColor(120, 120, 120)
-const splitIntro = doc.splitTextToSize(intro, metrics.contentWidth - 26)
-doc.text(splitIntro, metrics.centerX, 156, {
-  align: 'center',
-})
-}
 
   async function renderPortraitSection(
     doc: jsPDF,
@@ -523,18 +754,23 @@ doc.text(splitIntro, metrics.centerX, 156, {
     if (yState.y > 210) {
       doc.addPage()
       applyPageBackground(doc, design.theme.pageBg, metrics.pageWidth, metrics.pageHeight)
+      if (settings.layout === 'elegant') {
+        drawPageBorder(doc, settings, metrics.pageWidth, metrics.pageHeight, design.theme.border)
+      }
       yState.y = metrics.marginTop
     }
 
     doc.setFont(design.font.body, 'italic')
-    doc.setFontSize(design.layout.questionSize - 0.5)
+    doc.setFontSize(
+      settings.layout === 'elegant'
+        ? design.layout.questionSize
+        : design.layout.questionSize - 0.5
+    )
     setTextColor(doc, design.theme.textSecondary)
 
-
-    
     const questionText = section.question
     const safeWidth = metrics.contentWidth
-const splitQuestion = doc.splitTextToSize(questionText, safeWidth)
+    const splitQuestion = doc.splitTextToSize(questionText, safeWidth)
 
     const answerX =
       settings.printReady && settings.layout === 'classic'
@@ -552,11 +788,28 @@ const splitQuestion = doc.splitTextToSize(questionText, safeWidth)
     setTextColor(doc, design.theme.textPrimary)
 
     const answerText = section.answer.trim()
-   const splitAnswer = doc.splitTextToSize(answerText, safeWidth)
-    doc.text(splitAnswer, answerX, yState.y)
-
     const sectionGap = design.layout.sectionSpacing + 8
-    yState.y += splitAnswer.length * design.layout.lineHeight + sectionGap
+
+    const useDropCap =
+      settings.layout === 'elegant' &&
+      !!settings.dropCaps &&
+      answerText.length > 220
+
+    if (useDropCap) {
+      const usedHeight = drawDropCapParagraph(
+        doc,
+        answerText,
+        answerX,
+        yState.y,
+        safeWidth,
+        design
+      )
+      yState.y += usedHeight + sectionGap
+    } else {
+      const splitAnswer = doc.splitTextToSize(answerText, safeWidth)
+      doc.text(splitAnswer, answerX, yState.y)
+      yState.y += splitAnswer.length * design.layout.lineHeight + sectionGap
+    }
 
     const sectionImage = images
       .filter((img) => img.section_id === section.id)
@@ -590,6 +843,9 @@ const splitQuestion = doc.splitTextToSize(questionText, safeWidth)
         if (yState.y + imgHeight > metrics.maxY) {
           doc.addPage()
           applyPageBackground(doc, design.theme.pageBg, metrics.pageWidth, metrics.pageHeight)
+          if (settings.layout === 'elegant') {
+            drawPageBorder(doc, settings, metrics.pageWidth, metrics.pageHeight, design.theme.border)
+          }
           yState.y = metrics.marginTop
         }
 
@@ -607,276 +863,274 @@ const splitQuestion = doc.splitTextToSize(questionText, safeWidth)
 
         doc.addImage(imgData, 'PNG', x, yState.y, imgWidth, imgHeight)
 
-// move below the image first
-yState.y += imgHeight + 8
+        yState.y += imgHeight + 8
 
-doc.setFontSize(10)
-doc.setTextColor(140, 140, 140)
-doc.text('A moment captured in time', metrics.centerX, yState.y, {
-  align: 'center',
-})
+        if (settings.layout === 'elegant') {
+          yState.y += 10
+        } else {
+          doc.setFontSize(10)
+          doc.setTextColor(140, 140, 140)
+          doc.text('A moment captured in time', metrics.centerX, yState.y, {
+            align: 'center',
+          })
 
-// add spacing after caption
-yState.y += design.layout.imageSpacing
+          yState.y += design.layout.imageSpacing
+        }
       } catch (err) {
         console.error(err)
       }
     }
 
-    if (design.layout.showSectionDividers && yState.y < metrics.maxY) {
-  setDrawColor(doc, design.theme.divider)
-  doc.line(metrics.marginLeft, yState.y, metrics.pageWidth - metrics.marginRight, yState.y)
-  yState.y += design.layout.sectionSpacing + 6
-} else {
-  yState.y += design.layout.sectionSpacing + 8
-}
+    if (
+      design.layout.showSectionDividers &&
+      settings.layout !== 'elegant' &&
+      yState.y < metrics.maxY
+    ) {
+      setDrawColor(doc, design.theme.divider)
+      doc.line(metrics.marginLeft, yState.y, metrics.pageWidth - metrics.marginRight, yState.y)
+      yState.y += design.layout.sectionSpacing + 6
+    } else {
+      yState.y += design.layout.sectionSpacing + 8
+    }
   }
 
   async function renderSpreadSection(
-  doc: jsPDF,
-  section: StorySection,
-  settings: PdfSettings,
-  images: StoryImage[],
-  hasImageExportAccess: boolean,
-  loadImageAsBase64: (url: string) => Promise<string>
-) {
-  const design = getPdfDesign(settings)
-  const metrics = getPageMetrics(settings)
+    doc: jsPDF,
+    section: StorySection,
+    settings: PdfSettings,
+    images: StoryImage[],
+    hasImageExportAccess: boolean,
+    loadImageAsBase64: (url: string) => Promise<string>
+  ) {
+    const design = getPdfDesign(settings)
+    const metrics = getPageMetrics(settings)
 
-  const questionText = section.question
-  const answerText = section.answer.trim()
+    const questionText = section.question
+    const answerText = section.answer.trim()
 
-  const sectionImage = images
-    .filter((img) => img.section_id === section.id)
-    .sort(
-      (a, b) =>
-        new Date(b.created_at || '').getTime() - new Date(a.created_at || '').getTime()
-    )[0]
+    const sectionImage = images
+      .filter((img) => img.section_id === section.id)
+      .sort(
+        (a, b) =>
+          new Date(b.created_at || '').getTime() - new Date(a.created_at || '').getTime()
+      )[0]
 
-  const hasImage = !!(hasImageExportAccess && sectionImage?.image_url)
-  const useCenteredLayout = shouldUseCenteredSpreadLayout(section, hasImage)
+    const hasImage = !!(hasImageExportAccess && sectionImage?.image_url)
+    const useCenteredLayout = shouldUseCenteredSpreadLayout(section, hasImage)
 
-  // If there is NO image, choose smart text layout
-if (!hasImage) {
-  applyPageBackground(doc, design.theme.pageBg, metrics.pageWidth, metrics.pageHeight)
+    if (!hasImage) {
+      applyPageBackground(doc, design.theme.pageBg, metrics.pageWidth, metrics.pageHeight)
 
-  doc.setDrawColor(245, 245, 245)
-  doc.line(metrics.centerX, 18, metrics.centerX, metrics.pageHeight - 18)
+      doc.setDrawColor(245, 245, 245)
+      doc.line(metrics.centerX, 18, metrics.centerX, metrics.pageHeight - 18)
 
-  // SHORTER TEXT = centered across spread
-  if (useCenteredLayout) {
-    const spreadTextWidth = 120
-    const centerX = metrics.centerX
-    let y = 60
+      if (useCenteredLayout) {
+        const spreadTextWidth = 120
+        const centerX = metrics.centerX
+        let y = 60
 
-    doc.setFont(design.font.body, 'italic')
-    doc.setFontSize(design.layout.questionSize)
-    setTextColor(doc, design.theme.textSecondary)
+        doc.setFont(design.font.body, 'italic')
+        doc.setFontSize(design.layout.questionSize)
+        setTextColor(doc, design.theme.textSecondary)
 
-    const splitQuestion = doc.splitTextToSize(section.question, spreadTextWidth)
-    doc.text(splitQuestion, centerX, y, {
-      align: 'center',
-      maxWidth: spreadTextWidth,
-    })
-
-    y += splitQuestion.length * design.layout.lineHeight + 10
-
-    doc.setFont(design.font.body, design.font.bodyStyle)
-    doc.setFontSize(design.layout.answerSize + 0.5)
-    setTextColor(doc, design.theme.textPrimary)
-
-    const splitAnswer = doc.splitTextToSize(section.answer.trim(), spreadTextWidth)
-    doc.text(splitAnswer, centerX, y, {
-      align: 'center',
-      maxWidth: spreadTextWidth,
-    })
-
-    return
-  }
-
-  // LONGER TEXT = proper left/right book layout
-  let isFirstSpreadPage = true
-  let remainingAnswerLines: string[] = []
-
-  const splitQuestion = doc.splitTextToSize(section.question, metrics.columnWidth)
-  remainingAnswerLines = doc.splitTextToSize(section.answer.trim(), metrics.columnWidth)
-
-  while (isFirstSpreadPage || remainingAnswerLines.length > 0) {
-    applyPageBackground(doc, design.theme.pageBg, metrics.pageWidth, metrics.pageHeight)
-
-    doc.setDrawColor(245, 245, 245)
-    doc.line(metrics.centerX, 18, metrics.centerX, metrics.pageHeight - 18)
-
-    let leftY = 34
-    let rightY = 34
-
-    if (isFirstSpreadPage) {
-      doc.setFont(design.font.body, 'italic')
-      doc.setFontSize(design.layout.questionSize - 0.3)
-      setTextColor(doc, design.theme.textSecondary)
-
-      doc.text(splitQuestion, metrics.leftX, leftY)
-      leftY += splitQuestion.length * design.layout.lineHeight + 10
-    }
-
-    doc.setFont(design.font.body, design.font.bodyStyle)
-    doc.setFontSize(design.layout.answerSize + 0.3)
-    setTextColor(doc, design.theme.textPrimary)
-
-    const leftAvailableHeight = metrics.maxY - leftY
-    const leftLineCapacity = Math.max(
-      0,
-      Math.floor(leftAvailableHeight / design.layout.lineHeight)
-    )
-
-    const leftLines = remainingAnswerLines.slice(0, leftLineCapacity)
-    remainingAnswerLines = remainingAnswerLines.slice(leftLineCapacity)
-
-    if (leftLines.length) {
-      doc.text(leftLines, metrics.leftX, leftY)
-      leftY += leftLines.length * design.layout.lineHeight
-    }
-
-    const rightAvailableHeight = metrics.maxY - rightY
-    const rightLineCapacity = Math.max(
-      0,
-      Math.floor(rightAvailableHeight / design.layout.lineHeight)
-    )
-
-    const rightLines = remainingAnswerLines.slice(0, rightLineCapacity)
-    remainingAnswerLines = remainingAnswerLines.slice(rightLineCapacity)
-
-    if (rightLines.length) {
-      doc.text(rightLines, metrics.rightX, rightY)
-      rightY += rightLines.length * design.layout.lineHeight
-    }
-
-    isFirstSpreadPage = false
-
-    if (remainingAnswerLines.length > 0) {
-      doc.addPage()
-    }
-  }
-
-  return
-}
-
-  // Image layout: keep the more editorial left/right spread
-  let isFirstSpreadPage = true
-  let remainingAnswerLines: string[] = []
-
-  const splitQuestion = doc.splitTextToSize(questionText, metrics.columnWidth)
-  remainingAnswerLines = doc.splitTextToSize(answerText, metrics.columnWidth)
-
-  let imageRendered = false
-
-  while (isFirstSpreadPage || remainingAnswerLines.length > 0) {
-    applyPageBackground(doc, design.theme.pageBg, metrics.pageWidth, metrics.pageHeight)
-
-    doc.setDrawColor(245, 245, 245)
-    doc.line(metrics.centerX, 18, metrics.centerX, metrics.pageHeight - 18)
-
-    let leftY = 28
-    let rightY = 32
-
-    if (isFirstSpreadPage) {
-      doc.setFont(design.font.body, 'italic')
-      doc.setFontSize(design.layout.questionSize - 0.5)
-      setTextColor(doc, design.theme.textSecondary)
-
-      doc.text(splitQuestion, metrics.leftX, leftY)
-      leftY += splitQuestion.length * design.layout.lineHeight + design.layout.questionSpacing
-    }
-
-    doc.setFont(design.font.body, design.font.bodyStyle)
-    doc.setFontSize(design.layout.answerSize + 0.3)
-    setTextColor(doc, design.theme.textPrimary)
-
-    const leftAvailableHeight = metrics.maxY - leftY
-    const leftLineCapacity = Math.max(
-      0,
-      Math.floor(leftAvailableHeight / design.layout.lineHeight)
-    )
-
-    const leftLines = remainingAnswerLines.slice(0, leftLineCapacity)
-    remainingAnswerLines = remainingAnswerLines.slice(leftLineCapacity)
-
-    if (leftLines.length) {
-      doc.text(leftLines, metrics.leftX, leftY)
-      leftY += leftLines.length * design.layout.lineHeight
-    }
-
-    if (!imageRendered && hasImageExportAccess && sectionImage?.image_url) {
-      try {
-        const imgData = await loadImageAsBase64(sectionImage.image_url)
-
-        const img = new Image()
-        img.src = imgData
-
-        await new Promise((resolve, reject) => {
-          img.onload = resolve
-          img.onerror = reject
+        const splitQuestion = doc.splitTextToSize(section.question, spreadTextWidth)
+        doc.text(splitQuestion, centerX, y, {
+          align: 'center',
+          maxWidth: spreadTextWidth,
         })
 
-        const maxWidth = metrics.columnWidth
-        const maxHeight =
-          settings.layout === 'elegant'
-            ? 100
-            : settings.layout === 'minimal'
-              ? 82
-              : 88
+        y += splitQuestion.length * design.layout.lineHeight + 10
 
-        let imgWidth = img.width
-        let imgHeight = img.height
+        doc.setFont(design.font.body, design.font.bodyStyle)
+        doc.setFontSize(design.layout.answerSize + 0.5)
+        setTextColor(doc, design.theme.textPrimary)
 
-        const ratio = Math.min(maxWidth / imgWidth, maxHeight / imgHeight)
-        imgWidth *= ratio
-        imgHeight *= ratio
+        const splitAnswer = doc.splitTextToSize(section.answer.trim(), spreadTextWidth)
+        doc.text(splitAnswer, centerX, y, {
+          align: 'center',
+          maxWidth: spreadTextWidth,
+        })
 
-        const imageX = metrics.rightX + (metrics.columnWidth - imgWidth) / 2
+        return
+      }
 
-        if (design.layout.imageFrameStyle !== 'none') {
-          setDrawColor(doc, design.theme.border)
+      let isFirstSpreadPage = true
+      let remainingAnswerLines: string[] = []
 
-          if (design.layout.imageFrameStyle === 'luxury') {
-            doc.roundedRect(imageX - 4, rightY - 4, imgWidth + 8, imgHeight + 8, 4, 4)
-          } else {
-            doc.roundedRect(imageX - 2, rightY - 2, imgWidth + 4, imgHeight + 4, 2, 2)
-          }
+      const splitQuestion = doc.splitTextToSize(section.question, metrics.columnWidth)
+      remainingAnswerLines = doc.splitTextToSize(section.answer.trim(), metrics.columnWidth)
+
+      while (isFirstSpreadPage || remainingAnswerLines.length > 0) {
+        applyPageBackground(doc, design.theme.pageBg, metrics.pageWidth, metrics.pageHeight)
+
+        doc.setDrawColor(245, 245, 245)
+        doc.line(metrics.centerX, 18, metrics.centerX, metrics.pageHeight - 18)
+
+        let leftY = 34
+        let rightY = 34
+
+        if (isFirstSpreadPage) {
+          doc.setFont(design.font.body, 'italic')
+          doc.setFontSize(design.layout.questionSize - 0.3)
+          setTextColor(doc, design.theme.textSecondary)
+
+          doc.text(splitQuestion, metrics.leftX, leftY)
+          leftY += splitQuestion.length * design.layout.lineHeight + 10
         }
 
-        doc.addImage(imgData, 'PNG', imageX, rightY, imgWidth, imgHeight)
-        rightY += imgHeight + design.layout.imageSpacing
-        imageRendered = true
-      } catch (err) {
-        console.error(err)
+        doc.setFont(design.font.body, design.font.bodyStyle)
+        doc.setFontSize(design.layout.answerSize + 0.3)
+        setTextColor(doc, design.theme.textPrimary)
+
+        const leftAvailableHeight = metrics.maxY - leftY
+        const leftLineCapacity = Math.max(
+          0,
+          Math.floor(leftAvailableHeight / design.layout.lineHeight)
+        )
+
+        const leftLines = remainingAnswerLines.slice(0, leftLineCapacity)
+        remainingAnswerLines = remainingAnswerLines.slice(leftLineCapacity)
+
+        if (leftLines.length) {
+          doc.text(leftLines, metrics.leftX, leftY)
+        }
+
+        const rightAvailableHeight = metrics.maxY - rightY
+        const rightLineCapacity = Math.max(
+          0,
+          Math.floor(rightAvailableHeight / design.layout.lineHeight)
+        )
+
+        const rightLines = remainingAnswerLines.slice(0, rightLineCapacity)
+        remainingAnswerLines = remainingAnswerLines.slice(rightLineCapacity)
+
+        if (rightLines.length) {
+          doc.text(rightLines, metrics.rightX, rightY)
+        }
+
+        isFirstSpreadPage = false
+
+        if (remainingAnswerLines.length > 0) {
+          doc.addPage()
+        }
       }
+
+      return
     }
 
-    const rightAvailableHeight = metrics.maxY - rightY
-    const rightLineCapacity = Math.max(
-      0,
-      Math.floor(rightAvailableHeight / design.layout.lineHeight)
-    )
+    let isFirstSpreadPage = true
+    let remainingAnswerLines: string[] = []
 
-    const rightLines = remainingAnswerLines.slice(0, rightLineCapacity)
-    remainingAnswerLines = remainingAnswerLines.slice(rightLineCapacity)
+    const splitQuestion = doc.splitTextToSize(questionText, metrics.columnWidth)
+    remainingAnswerLines = doc.splitTextToSize(answerText, metrics.columnWidth)
 
-    if (rightLines.length) {
+    let imageRendered = false
+
+    while (isFirstSpreadPage || remainingAnswerLines.length > 0) {
+      applyPageBackground(doc, design.theme.pageBg, metrics.pageWidth, metrics.pageHeight)
+
+      doc.setDrawColor(245, 245, 245)
+      doc.line(metrics.centerX, 18, metrics.centerX, metrics.pageHeight - 18)
+
+      let leftY = 28
+      let rightY = 32
+
+      if (isFirstSpreadPage) {
+        doc.setFont(design.font.body, 'italic')
+        doc.setFontSize(design.layout.questionSize - 0.5)
+        setTextColor(doc, design.theme.textSecondary)
+
+        doc.text(splitQuestion, metrics.leftX, leftY)
+        leftY += splitQuestion.length * design.layout.lineHeight + design.layout.questionSpacing
+      }
+
       doc.setFont(design.font.body, design.font.bodyStyle)
       doc.setFontSize(design.layout.answerSize + 0.3)
       setTextColor(doc, design.theme.textPrimary)
-      doc.text(rightLines, metrics.rightX, rightY)
-      rightY += rightLines.length * design.layout.lineHeight
-    }
 
-    isFirstSpreadPage = false
+      const leftAvailableHeight = metrics.maxY - leftY
+      const leftLineCapacity = Math.max(
+        0,
+        Math.floor(leftAvailableHeight / design.layout.lineHeight)
+      )
 
-    if (remainingAnswerLines.length > 0) {
-      doc.addPage()
+      const leftLines = remainingAnswerLines.slice(0, leftLineCapacity)
+      remainingAnswerLines = remainingAnswerLines.slice(leftLineCapacity)
+
+      if (leftLines.length) {
+        doc.text(leftLines, metrics.leftX, leftY)
+      }
+
+      if (!imageRendered && hasImageExportAccess && sectionImage?.image_url) {
+        try {
+          const imgData = await loadImageAsBase64(sectionImage.image_url)
+
+          const img = new Image()
+          img.src = imgData
+
+          await new Promise((resolve, reject) => {
+            img.onload = resolve
+            img.onerror = reject
+          })
+
+          const maxWidth = metrics.columnWidth
+          const maxHeight =
+            settings.layout === 'elegant'
+              ? 100
+              : settings.layout === 'minimal'
+                ? 82
+                : 88
+
+          let imgWidth = img.width
+          let imgHeight = img.height
+
+          const ratio = Math.min(maxWidth / imgWidth, maxHeight / imgHeight)
+          imgWidth *= ratio
+          imgHeight *= ratio
+
+          const imageX = metrics.rightX + (metrics.columnWidth - imgWidth) / 2
+
+          if (design.layout.imageFrameStyle !== 'none') {
+            setDrawColor(doc, design.theme.border)
+
+            if (design.layout.imageFrameStyle === 'luxury') {
+              doc.roundedRect(imageX - 4, rightY - 4, imgWidth + 8, imgHeight + 8, 4, 4)
+            } else {
+              doc.roundedRect(imageX - 2, rightY - 2, imgWidth + 4, imgHeight + 4, 2, 2)
+            }
+          }
+
+          doc.addImage(imgData, 'PNG', imageX, rightY, imgWidth, imgHeight)
+          rightY += imgHeight + design.layout.imageSpacing
+          imageRendered = true
+        } catch (err) {
+          console.error(err)
+        }
+      }
+
+      const rightAvailableHeight = metrics.maxY - rightY
+      const rightLineCapacity = Math.max(
+        0,
+        Math.floor(rightAvailableHeight / design.layout.lineHeight)
+      )
+
+      const rightLines = remainingAnswerLines.slice(0, rightLineCapacity)
+      remainingAnswerLines = remainingAnswerLines.slice(rightLineCapacity)
+
+      if (rightLines.length) {
+        doc.setFont(design.font.body, design.font.bodyStyle)
+        doc.setFontSize(design.layout.answerSize + 0.3)
+        setTextColor(doc, design.theme.textPrimary)
+        doc.text(rightLines, metrics.rightX, rightY)
+      }
+
+      isFirstSpreadPage = false
+
+      if (remainingAnswerLines.length > 0) {
+        doc.addPage()
+      }
     }
   }
-}
 
   function renderClosingPage(doc: jsPDF, settings: PdfSettings) {
     const design = getPdfDesign(settings)
@@ -885,23 +1139,31 @@ if (!hasImage) {
     doc.addPage()
     applyPageBackground(doc, design.theme.secondaryBg, metrics.pageWidth, metrics.pageHeight)
 
+    if (settings.layout === 'elegant') {
+      drawPageBorder(doc, settings, metrics.pageWidth, metrics.pageHeight, design.theme.border)
+    }
+
     doc.setFont(design.font.title, design.font.accentStyle)
-doc.setFontSize(20)
-setTextColor(doc, design.theme.textPrimary)
-doc.text('A story worth keeping', metrics.centerX, 118, { align: 'center' })
+    doc.setFontSize(20)
+    setTextColor(doc, design.theme.textPrimary)
+    doc.text('A story worth keeping', metrics.centerX, 118, { align: 'center' })
 
-setDrawColor(doc, design.theme.divider)
-doc.line(72, 128, 138, 128)
+    if (settings.layout === 'elegant') {
+      drawElegantDivider(doc, settings, metrics.centerX, 128, 36, design)
+    } else {
+      setDrawColor(doc, design.theme.divider)
+      doc.line(72, 128, 138, 128)
+    }
 
-doc.setFont(design.font.body, design.font.bodyStyle)
-doc.setFontSize(12)
-setTextColor(doc, design.theme.textSecondary)
-doc.text(
-  'Created with love, to be remembered and shared for years to come.',
-  metrics.centerX,
-  145,
-  { align: 'center', maxWidth: 125 }
-)
+    doc.setFont(design.font.body, design.font.bodyStyle)
+    doc.setFontSize(12)
+    setTextColor(doc, design.theme.textSecondary)
+    doc.text(
+      'Created with love, to be remembered and shared for years to come.',
+      metrics.centerX,
+      145,
+      { align: 'center', maxWidth: 125 }
+    )
   }
 
   async function exportWord({ project, sections }: ExportWordArgs) {
@@ -964,175 +1226,187 @@ doc.text(
   }
 
   async function exportPdf({
-  project,
-  sections,
-  settings,
-  hasTier4Access,
-  hasImageExportAccess,
-  coverImageUrl,
-  getAllImagesForExport,
-  loadImageAsBase64,
-}: ExportPdfArgs) {
-  const activeSettings: PdfSettings = hasTier4Access
-    ? settings
-    : {
-        layout: 'classic',
-        font: 'serif',
-        theme: 'warm',
-        orientation: 'portrait',
-        includeCoverImage: hasImageExportAccess,
-        includeDedication: false,
-        printReady: false,
-      }
-
-  const design = getPdfDesign(activeSettings)
-  const metrics = getPageMetrics(activeSettings)
-
-  const doc = new jsPDF({
-    orientation: activeSettings.orientation === 'landscape-spread' ? 'l' : 'p',
-    unit: 'mm',
-    format: 'a4',
-  })
-
-  const storyTitle = project?.title || 'Tell Me Your Story'
-  const storySubtitle = getStorySubtitle(project)
-
-  const printableSections = sections.filter(
-    (section) => section.answer && section.answer.trim().length > 0
-  )
-
-  await renderCoverPage(
-    doc,
-    storyTitle,
-    storySubtitle,
-    activeSettings,
-    coverImageUrl,
+    project,
+    sections,
+    settings,
     hasTier4Access,
-    loadImageAsBase64
-  )
+    hasImageExportAccess,
+    coverImageUrl,
+    getAllImagesForExport,
+    loadImageAsBase64,
+  }: ExportPdfArgs) {
+    const activeSettings: PdfSettings = hasTier4Access
+      ? settings
+      : {
+          layout: 'classic',
+          font: 'serif',
+          theme: 'warm',
+          orientation: 'portrait',
+          includeCoverImage: hasImageExportAccess,
+          includeDedication: false,
+          printReady: false,
+          borderStyle: 'none',
+          dividerStyle: 'soft-line',
+          chapterStyle: 'standard',
+          ornamentStyle: 'none',
+          dropCaps: false,
+        }
 
-  if (activeSettings.includeDedication && hasTier4Access) {
-    renderDedicationPage(doc, activeSettings)
-  }
+    const design = getPdfDesign(activeSettings)
+    const metrics = getPageMetrics(activeSettings)
 
-  const images = await getAllImagesForExport()
+    const doc = new jsPDF({
+      orientation: activeSettings.orientation === 'landscape-spread' ? 'l' : 'p',
+      unit: 'mm',
+      format: 'a4',
+    })
 
-  let currentChapter = ''
-  let chapterIndex = -1
+    const storyTitle = project?.title || 'Tell Me Your Story'
+    const storySubtitle = getStorySubtitle(project)
 
-  if (activeSettings.orientation === 'portrait') {
-    const yState = { y: metrics.marginTop }
+    const printableSections = sections.filter(
+      (section) => section.answer && section.answer.trim().length > 0
+    )
 
-    for (let index = 0; index < printableSections.length; index++) {
-      const section = printableSections[index]
+    await renderCoverPage(
+      doc,
+      storyTitle,
+      storySubtitle,
+      activeSettings,
+      coverImageUrl,
+      hasTier4Access,
+      loadImageAsBase64
+    )
 
-      if (section.chapter && section.chapter !== currentChapter) {
-        currentChapter = section.chapter
-        chapterIndex += 1
+    if (activeSettings.includeDedication && hasTier4Access) {
+      renderDedicationPage(doc, activeSettings)
+    }
 
-        doc.addPage()
-        renderChapterHeading(doc, currentChapter, chapterIndex, activeSettings)
+    const images = await getAllImagesForExport()
 
-        // breathing page after chapter opener
-        doc.addPage()
-        applyPageBackground(doc, design.theme.secondaryBg, metrics.pageWidth, metrics.pageHeight)
-        doc.setFontSize(14)
-        doc.setTextColor(120, 120, 120)
-        doc.text(
-          'Take a moment to reflect on what comes next…',
-          metrics.centerX,
-          metrics.pageHeight / 2,
-          { align: 'center' }
-        )
+    let currentChapter = ''
+    let chapterIndex = -1
 
-        // first content page for the chapter
-        doc.addPage()
-        applyPageBackground(doc, design.theme.pageBg, metrics.pageWidth, metrics.pageHeight)
-        yState.y = metrics.marginTop
-      }
+    if (activeSettings.orientation === 'portrait') {
+      const yState = { y: metrics.marginTop }
 
-      const insertedQuotePage = shouldInsertQuotePage(index)
+      for (let index = 0; index < printableSections.length; index++) {
+        const section = printableSections[index]
 
-      if (insertedQuotePage) {
-        const quote = getQuoteFromAnswer(printableSections[index - 1]?.answer || '')
-        if (quote) {
-          renderQuotePage(doc, quote, activeSettings)
+        if (section.chapter && section.chapter !== currentChapter) {
+          currentChapter = section.chapter
+          chapterIndex += 1
 
-          // always reset to a clean content page after quote
+          doc.addPage()
+          renderChapterHeading(doc, currentChapter, chapterIndex, activeSettings)
+
+          doc.addPage()
+          applyPageBackground(doc, design.theme.secondaryBg, metrics.pageWidth, metrics.pageHeight)
+          if (activeSettings.layout === 'elegant') {
+            drawPageBorder(doc, activeSettings, metrics.pageWidth, metrics.pageHeight, design.theme.border)
+          }
+          doc.setFontSize(14)
+          doc.setTextColor(120, 120, 120)
+          doc.text(
+            'Take a moment to reflect on what comes next…',
+            metrics.centerX,
+            metrics.pageHeight / 2,
+            { align: 'center' }
+          )
+
           doc.addPage()
           applyPageBackground(doc, design.theme.pageBg, metrics.pageWidth, metrics.pageHeight)
+          if (activeSettings.layout === 'elegant') {
+            drawPageBorder(doc, activeSettings, metrics.pageWidth, metrics.pageHeight, design.theme.border)
+          }
           yState.y = metrics.marginTop
         }
-      }
 
-      if (!insertedQuotePage && index > 0 && index % 2 === 0) {
-        doc.addPage()
-        applyPageBackground(doc, design.theme.pageBg, metrics.pageWidth, metrics.pageHeight)
-        yState.y = metrics.marginTop
-      }
+        const insertedQuotePage = shouldInsertQuotePage(index)
 
-      await renderPortraitSection(
-        doc,
-        section,
-        activeSettings,
-        images,
-        yState,
-        hasImageExportAccess,
-        loadImageAsBase64
-      )
-    }
-  } else {
-    for (let index = 0; index < printableSections.length; index++) {
-      const section = printableSections[index]
+        if (insertedQuotePage) {
+          const quote = getQuoteFromAnswer(printableSections[index - 1]?.answer || '')
+          if (quote) {
+            renderQuotePage(doc, quote, activeSettings)
 
-      if (section.chapter && section.chapter !== currentChapter) {
-        currentChapter = section.chapter
-        chapterIndex += 1
-
-        doc.addPage()
-        renderChapterHeading(doc, currentChapter, chapterIndex, activeSettings)
-      }
-
-      if (shouldInsertQuotePage(index)) {
-        const quote = getQuoteFromAnswer(printableSections[index - 1]?.answer || '')
-        if (quote) {
-          renderQuotePage(doc, quote, activeSettings)
+            doc.addPage()
+            applyPageBackground(doc, design.theme.pageBg, metrics.pageWidth, metrics.pageHeight)
+            if (activeSettings.layout === 'elegant') {
+              drawPageBorder(doc, activeSettings, metrics.pageWidth, metrics.pageHeight, design.theme.border)
+            }
+            yState.y = metrics.marginTop
+          }
         }
-      }
 
-      // Only add one new spread page for the content section.
-      // Do not add any extra reset page after quote pages in spread mode.
-      doc.addPage()
-      await renderSpreadSection(
+        if (!insertedQuotePage && index > 0 && index % 2 === 0) {
+          doc.addPage()
+          applyPageBackground(doc, design.theme.pageBg, metrics.pageWidth, metrics.pageHeight)
+          if (activeSettings.layout === 'elegant') {
+            drawPageBorder(doc, activeSettings, metrics.pageWidth, metrics.pageHeight, design.theme.border)
+          }
+          yState.y = metrics.marginTop
+        }
+
+        await renderPortraitSection(
+          doc,
+          section,
+          activeSettings,
+          images,
+          yState,
+          hasImageExportAccess,
+          loadImageAsBase64
+        )
+      }
+    } else {
+      for (let index = 0; index < printableSections.length; index++) {
+        const section = printableSections[index]
+
+        if (section.chapter && section.chapter !== currentChapter) {
+          currentChapter = section.chapter
+          chapterIndex += 1
+
+          doc.addPage()
+          renderChapterHeading(doc, currentChapter, chapterIndex, activeSettings)
+        }
+
+        if (shouldInsertQuotePage(index)) {
+          const quote = getQuoteFromAnswer(printableSections[index - 1]?.answer || '')
+          if (quote) {
+            renderQuotePage(doc, quote, activeSettings)
+          }
+        }
+
+        doc.addPage()
+        await renderSpreadSection(
+          doc,
+          section,
+          activeSettings,
+          images,
+          hasImageExportAccess,
+          loadImageAsBase64
+        )
+      }
+    }
+
+    renderClosingPage(doc, activeSettings)
+
+    const totalPages = doc.getNumberOfPages()
+
+    for (let i = 1; i <= totalPages; i++) {
+      doc.setPage(i)
+      addFooter(
         doc,
-        section,
-        activeSettings,
-        images,
-        hasImageExportAccess,
-        loadImageAsBase64
+        i,
+        storyTitle,
+        design.theme.textMuted,
+        metrics.pageWidth,
+        metrics.pageHeight,
+        activeSettings
       )
     }
+
+    doc.save(`${sanitizeFileName(storyTitle)}.pdf`)
   }
-
-  renderClosingPage(doc, activeSettings)
-
-  const totalPages = doc.getNumberOfPages()
-
-  for (let i = 1; i <= totalPages; i++) {
-    doc.setPage(i)
-    addFooter(
-      doc,
-      i,
-      storyTitle,
-      design.theme.textMuted,
-      metrics.pageWidth,
-      metrics.pageHeight,
-      activeSettings
-    )
-  }
-
-  doc.save(`${sanitizeFileName(storyTitle)}.pdf`)
-}
 
   return {
     exportPdf,

@@ -49,7 +49,6 @@
       <!-- Scrollable Body -->
       <div class="min-h-0 flex-1 overflow-y-auto px-8 py-6">
         <div class="grid gap-8 lg:grid-cols-[320px_minmax(0,1fr)]">
-
           <!-- LEFT: Controls -->
           <div>
             <div class="mb-6 rounded-2xl border border-stone-200 bg-stone-50 p-4 text-center">
@@ -59,7 +58,6 @@
             </div>
 
             <div class="space-y-5">
-
               <!-- Layout -->
               <div>
                 <label class="block text-xs font-medium uppercase tracking-[0.15em] text-stone-500">
@@ -90,7 +88,7 @@
 
                 <select
                   :value="modelValue.layout"
-                 @change="updateField('layout', ($event.target as HTMLSelectElement).value as PdfSettings['layout'])"
+                  @change="updateField('layout', ($event.target as HTMLSelectElement).value as PdfSettings['layout'])"
                   class="mt-2 w-full rounded-xl border border-stone-300 bg-white px-4 py-3"
                 >
                   <option value="classic">Classic</option>
@@ -130,13 +128,84 @@
 
                 <select
                   :value="modelValue.theme"
-                 @change="updateField('theme', ($event.target as HTMLSelectElement).value as PdfSettings['theme'])"
+                  @change="updateField('theme', ($event.target as HTMLSelectElement).value as PdfSettings['theme'])"
                   class="mt-2 w-full rounded-xl border border-stone-300 bg-white px-4 py-3"
                 >
                   <option value="warm">Warm</option>
                   <option value="neutral">Neutral</option>
                   <option value="dark-ink">Dark Ink</option>
                 </select>
+              </div>
+
+              <!-- Elegant Options -->
+              <div
+                v-if="modelValue.layout === 'elegant'"
+                class="space-y-5 rounded-2xl border border-stone-200 bg-stone-50 p-4"
+              >
+                <div>
+                  <label class="block text-xs font-medium uppercase tracking-[0.15em] text-stone-500">
+                    Border style
+                  </label>
+                  <p class="mt-1 text-xs text-stone-500">
+                    Add a refined frame around elegant pages.
+                  </p>
+
+                  <select
+                    :value="modelValue.borderStyle || 'fine-line'"
+                    @change="updateField('borderStyle', ($event.target as HTMLSelectElement).value as PdfSettings['borderStyle'])"
+                    class="mt-2 w-full rounded-xl border border-stone-300 bg-white px-4 py-3"
+                  >
+                    <option value="none">None</option>
+                    <option value="fine-line">Fine line</option>
+                    <option value="corner-floral">Floral corners</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label class="block text-xs font-medium uppercase tracking-[0.15em] text-stone-500">
+                    Divider style
+                  </label>
+                  <p class="mt-1 text-xs text-stone-500">
+                    Choose the decorative detail used on chapter and quote pages.
+                  </p>
+
+                  <select
+                    :value="modelValue.dividerStyle || 'flourish'"
+                    @change="updateField('dividerStyle', ($event.target as HTMLSelectElement).value as PdfSettings['dividerStyle'])"
+                    class="mt-2 w-full rounded-xl border border-stone-300 bg-white px-4 py-3"
+                  >
+                    <option value="soft-line">Soft line</option>
+                    <option value="flourish">Chapter flourish</option>
+                    <option value="gold-line">Antique gold line</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label class="block text-xs font-medium uppercase tracking-[0.15em] text-stone-500">
+                    Chapter style
+                  </label>
+                  <p class="mt-1 text-xs text-stone-500">
+                    Control how decorative chapter opening pages feel.
+                  </p>
+
+                  <select
+                    :value="modelValue.chapterStyle || 'flourish'"
+                    @change="updateField('chapterStyle', ($event.target as HTMLSelectElement).value as PdfSettings['chapterStyle'])"
+                    class="mt-2 w-full rounded-xl border border-stone-300 bg-white px-4 py-3"
+                  >
+                    <option value="standard">Standard</option>
+                    <option value="flourish">Flourish</option>
+                  </select>
+                </div>
+
+                <label class="flex items-center gap-3 text-sm text-stone-700">
+                  <input
+                    :checked="!!modelValue.dropCaps"
+                    type="checkbox"
+                    @change="updateField('dropCaps', ($event.target as HTMLInputElement).checked)"
+                  />
+                  Use decorative drop caps
+                </label>
               </div>
 
               <!-- Toggles -->
@@ -172,7 +241,6 @@
                   Adds safer margins and calmer page spacing for printing and binding.
                 </p>
               </div>
-
             </div>
           </div>
 
@@ -188,165 +256,186 @@
               :class="previewThemeClass"
             >
               <div
-  class="relative mx-auto rounded-2xl border bg-white"
-  :class="[previewPageClass, previewStyleClass, previewInnerSpacingClass, previewPrintFrameClass]"
->
-  <div
-    v-if="modelValue.orientation === 'landscape-spread'"
-    class="absolute inset-y-4 left-1/2 w-px -translate-x-1/2 bg-stone-200"
-  ></div>
+                class="relative mx-auto rounded-2xl border bg-white"
+                :class="[previewPageClass, previewStyleClass, previewInnerSpacingClass, previewPrintFrameClass]"
+              >
+                <div
+                  v-if="modelValue.orientation === 'landscape-spread'"
+                  class="absolute inset-y-4 left-1/2 w-px -translate-x-1/2 bg-stone-200"
+                ></div>
 
-  <template v-if="modelValue.orientation === 'portrait'">
-    <div
-      v-if="modelValue.includeCoverImage"
-      class="relative mb-4 h-36 overflow-hidden rounded-xl border border-stone-200 bg-stone-100"
-    >
-      <img
-        :src="previewCoverImageSrc"
-        alt="Preview cover"
-        class="h-full w-full object-cover"
-        :class="!hasTier4Access ? 'blur-sm scale-105' : ''"
-      />
+                <template v-if="modelValue.orientation === 'portrait'">
+                  <div
+                    v-if="modelValue.includeCoverImage"
+                    class="relative mb-4 h-36 overflow-hidden rounded-xl border border-stone-200 bg-stone-100"
+                  >
+                    <img
+                      :src="previewCoverImageSrc"
+                      alt="Preview cover"
+                      class="h-full w-full object-cover"
+                      :class="!hasTier4Access ? 'blur-sm scale-105' : ''"
+                    />
 
-      <div
-        v-if="!hasTier4Access"
-        class="absolute inset-0 flex items-center justify-center bg-white/50"
-      >
-        <span class="rounded-full bg-white px-3 py-1 text-xs font-medium text-stone-700 shadow">
-          Upgrade to add your own photos
-        </span>
-      </div>
+                    <div
+                      v-if="!hasTier4Access"
+                      class="absolute inset-0 flex items-center justify-center bg-white/50"
+                    >
+                      <span class="rounded-full bg-white px-3 py-1 text-xs font-medium text-stone-700 shadow">
+                        Upgrade to add your own photos
+                      </span>
+                    </div>
 
-      <div
-        v-if="!coverImageUrl"
-        class="absolute left-3 top-3 rounded-full bg-white/90 px-2 py-1 text-[10px] font-medium text-stone-600"
-      >
-        Sample preview
-      </div>
-    </div>
+                    <div
+                      v-if="!coverImageUrl"
+                      class="absolute left-3 top-3 rounded-full bg-white/90 px-2 py-1 text-[10px] font-medium text-stone-600"
+                    >
+                      Sample preview
+                    </div>
+                  </div>
 
-    <div
-      v-else
-      class="mb-4 flex h-36 items-center justify-center rounded-xl border border-dashed border-stone-300 text-sm text-stone-400"
-    >
-      Cover image hidden
-    </div>
+                  <div
+                    v-else
+                    class="mb-4 flex h-36 items-center justify-center rounded-xl border border-dashed border-stone-300 text-sm text-stone-400"
+                  >
+                    Cover image hidden
+                  </div>
 
-    <div :class="previewPrintContentWidthClass">
-      <p class="text-center text-[10px] uppercase tracking-[0.25em] text-stone-500">
-        Tell Me Your Story
-      </p>
+                  <div :class="previewPrintContentWidthClass">
+                    <p class="text-center text-[10px] uppercase tracking-[0.28em] text-stone-500">
+                      Tell Me Your Story
+                    </p>
 
-      <h4
-        class="mt-3 text-center text-stone-900"
-        :class="[previewFontClass, previewTitleClass]"
-      >
-        {{ projectTitle || 'Your Story Title' }}
-      </h4>
+                    <div
+                      v-if="modelValue.layout === 'elegant'"
+                      class="mx-auto mt-4 h-px w-16 bg-[#c9b08c]"
+                    ></div>
 
-      <p
-        class="mt-3 text-center text-sm text-stone-500"
-        :class="previewPrintBodyClass"
-      >
-        A personal collection of memories
-      </p>
+                    <h4
+                      class="mt-4 text-center text-stone-900"
+                      :class="[previewFontClass, previewTitleClass]"
+                    >
+                      {{ projectTitle || 'Your Story Title' }}
+                    </h4>
 
-      <div :class="[previewChapterBlockClass, previewPrintChapterSpacingClass]">
-        <p class="text-sm font-semibold text-stone-800">
-          Chapter Preview
-        </p>
-        <p class="mt-1 text-xs text-stone-500">
-          Beginnings
-        </p>
-        <p class="mt-3 text-sm text-stone-700" :class="previewPrintBodyClass">
-          Where and when were you born?
-        </p>
-        <p class="mt-2 text-xs text-stone-500" :class="previewPrintBodyClass">
-          This is how your finished keepsake could feel.
-        </p>
-      </div>
+                    <p
+                      class="mt-3 text-center text-sm text-stone-500"
+                      :class="previewPrintBodyClass"
+                    >
+                      A personal collection of memories
+                    </p>
 
-      <p
-        v-if="modelValue.includeDedication"
-        class="mt-5 text-center text-xs italic text-stone-500"
-      >
-        Includes dedication page
-      </p>
-    </div>
-  </template>
+                    <div
+                      v-if="modelValue.layout === 'elegant'"
+                      class="mx-auto mt-5 h-px w-10 bg-stone-200"
+                    ></div>
 
-  <template v-else>
-    <div
-      class="grid h-full grid-cols-2 gap-4"
-      :class="modelValue.printReady ? 'px-2 py-1' : ''"
-    >
-      <div class="pr-2">
-        <p class="text-[10px] uppercase tracking-[0.25em] text-stone-500">
-          Chapter
-        </p>
-        <h4
-          class="mt-3 text-stone-900"
-          :class="[previewFontClass, previewTitleClass]"
-        >
-          {{ projectTitle || 'Your Story Title' }}
-        </h4>
-        <p class="mt-3 text-sm text-stone-600" :class="previewPrintBodyClass">
-          An open spread designed to feel like a printed keepsake book.
-        </p>
-        <p class="mt-4 text-xs text-stone-500">
-          Left page
-        </p>
-      </div>
+                    <div :class="[previewChapterBlockClass, previewPrintChapterSpacingClass]">
+                      <p class="text-center text-[10px] uppercase tracking-[0.24em] text-stone-500">
+                        Chapter One
+                      </p>
 
-      <div class="pl-2">
-        <div
-          v-if="modelValue.includeCoverImage"
-          class="relative mb-3 h-28 overflow-hidden rounded-xl border border-stone-200 bg-stone-100"
-        >
-          <img
-            :src="previewCoverImageSrc"
-            alt="Preview spread"
-            class="h-full w-full object-cover"
-            :class="!hasTier4Access ? 'blur-sm scale-105' : ''"
-          />
+                      <p class="mt-3 text-center text-lg text-stone-900" :class="previewFontClass">
+                        Beginnings
+                      </p>
 
-          <div
-            v-if="!hasTier4Access"
-            class="absolute inset-0 flex items-center justify-center bg-white/50"
-          >
-            <span class="rounded-full bg-white px-3 py-1 text-xs font-medium text-stone-700 shadow">
-              Upgrade to add your own photos
-            </span>
-          </div>
+                      <div
+                        v-if="modelValue.layout === 'elegant'"
+                        class="mx-auto mt-3 h-px w-12 bg-[#c9b08c]"
+                      ></div>
 
-          <div
-            v-if="!coverImageUrl"
-            class="absolute left-3 top-3 rounded-full bg-white/90 px-2 py-1 text-[10px] font-medium text-stone-600"
-          >
-            Sample preview
-          </div>
-        </div>
+                      <p class="mt-4 text-center text-sm italic text-stone-600" :class="previewPrintBodyClass">
+                        Every story has a beginning.
+                      </p>
 
-        <div
-          v-else
-          class="mb-3 flex h-28 items-center justify-center rounded-xl border border-dashed border-stone-300 text-sm text-stone-400"
-        >
-          Image area hidden
-        </div>
+                      <p class="mt-5 text-sm text-stone-700" :class="previewPrintBodyClass">
+                        Where and when were you born?
+                      </p>
 
-        <p class="text-sm text-stone-700" :class="previewPrintBodyClass">
-          “Where and when were you born?”
-        </p>
-        <p class="mt-2 text-xs text-stone-500">
-          Right page
-        </p>
-      </div>
-    </div>
-  </template>
-</div>
+                      <p class="mt-2 text-xs text-stone-500" :class="previewPrintBodyClass">
+                        This is how your finished keepsake could feel.
+                      </p>
+                    </div>
+
+                    <p
+                      v-if="modelValue.includeDedication"
+                      class="mt-5 text-center text-xs italic text-stone-500"
+                    >
+                      Includes dedication page
+                    </p>
+                  </div>
+                </template>
+
+                <template v-else>
+                  <div
+                    class="grid h-full grid-cols-2 gap-4"
+                    :class="modelValue.printReady ? 'px-2 py-1' : ''"
+                  >
+                    <div class="pr-2">
+                      <p class="text-[10px] uppercase tracking-[0.25em] text-stone-500">
+                        Chapter
+                      </p>
+                      <h4
+                        class="mt-3 text-stone-900"
+                        :class="[previewFontClass, previewTitleClass]"
+                      >
+                        {{ projectTitle || 'Your Story Title' }}
+                      </h4>
+                      <p class="mt-3 text-sm text-stone-600" :class="previewPrintBodyClass">
+                        An open spread designed to feel like a printed keepsake book.
+                      </p>
+                      <p class="mt-4 text-xs text-stone-500">
+                        Left page
+                      </p>
+                    </div>
+
+                    <div class="pl-2">
+                      <div
+                        v-if="modelValue.includeCoverImage"
+                        class="relative mb-3 h-28 overflow-hidden rounded-xl border border-stone-200 bg-stone-100"
+                      >
+                        <img
+                          :src="previewCoverImageSrc"
+                          alt="Preview spread"
+                          class="h-full w-full object-cover"
+                          :class="!hasTier4Access ? 'blur-sm scale-105' : ''"
+                        />
+
+                        <div
+                          v-if="!hasTier4Access"
+                          class="absolute inset-0 flex items-center justify-center bg-white/50"
+                        >
+                          <span class="rounded-full bg-white px-3 py-1 text-xs font-medium text-stone-700 shadow">
+                            Upgrade to add your own photos
+                          </span>
+                        </div>
+
+                        <div
+                          v-if="!coverImageUrl"
+                          class="absolute left-3 top-3 rounded-full bg-white/90 px-2 py-1 text-[10px] font-medium text-stone-600"
+                        >
+                          Sample preview
+                        </div>
+                      </div>
+
+                      <div
+                        v-else
+                        class="mb-3 flex h-28 items-center justify-center rounded-xl border border-dashed border-stone-300 text-sm text-stone-400"
+                      >
+                        Image area hidden
+                      </div>
+
+                      <p class="text-sm text-stone-700" :class="previewPrintBodyClass">
+                        “Where and when were you born?”
+                      </p>
+                      <p class="mt-2 text-xs text-stone-500">
+                        Right page
+                      </p>
+                    </div>
+                  </div>
+                </template>
+              </div>
             </div>
           </div>
-
         </div>
       </div>
 
@@ -388,99 +477,103 @@
 </template>
 
 <script setup lang="ts">
-    import { computed } from 'vue'
-    import sampleCoverImage from '../../assets/sample-cover.jpg'
-    import type { PdfSettings } from '../../types/story'
+import { computed } from 'vue'
+import sampleCoverImage from '../../assets/sample-cover.jpg'
+import type { PdfSettings } from '../../types/story'
 
-    const props = defineProps<{
-    open: boolean
-    modelValue: PdfSettings
-    hasTier4Access: boolean
-    coverImageUrl: string
-    projectTitle?: string
-    }>()
+const props = defineProps<{
+  open: boolean
+  modelValue: PdfSettings
+  hasTier4Access: boolean
+  coverImageUrl: string
+  projectTitle?: string
+}>()
 
-    const emit = defineEmits<{
-    (e: 'update:modelValue', value: PdfSettings): void
-    (e: 'close'): void
-    (e: 'save'): void
-    (e: 'upgrade'): void
-    }>()
+const emit = defineEmits<{
+  (e: 'update:modelValue', value: PdfSettings): void
+  (e: 'close'): void
+  (e: 'save'): void
+  (e: 'upgrade'): void
+}>()
 
-    function updateField<K extends keyof PdfSettings>(key: K, value: PdfSettings[K]) {
-    emit('update:modelValue', {
+function updateField<K extends keyof PdfSettings>(key: K, value: PdfSettings[K]) {
+  emit('update:modelValue', {
     ...props.modelValue,
     [key]: value,
-    })
-    }
+  })
+}
 
-    const previewCoverImageSrc = computed(() => {
-    return props.coverImageUrl || sampleCoverImage
-    })
+const previewCoverImageSrc = computed(() => {
+  return props.coverImageUrl || sampleCoverImage
+})
 
-    const previewThemeClass = computed(() => {
-    if (props.modelValue.theme === 'warm') return 'bg-[#f7f2eb]'
-    if (props.modelValue.theme === 'neutral') return 'bg-stone-100'
-    if (props.modelValue.theme === 'dark-ink') return 'bg-stone-800 text-white'
-    return 'bg-white'
-    })
+const previewThemeClass = computed(() => {
+  if (props.modelValue.theme === 'warm') return 'bg-[#f7f2eb]'
+  if (props.modelValue.theme === 'neutral') return 'bg-stone-100'
+  if (props.modelValue.theme === 'dark-ink') return 'bg-stone-800 text-white'
+  return 'bg-white'
+})
 
-    const previewFontClass = computed(() => {
-    if (props.modelValue.font === 'serif') return 'font-serif'
-    if (props.modelValue.font === 'clean') return 'font-sans'
-    if (props.modelValue.font === 'bookish') return 'font-serif italic'
-    return 'font-serif'
-    })
+const previewFontClass = computed(() => {
+  if (props.modelValue.font === 'serif') return 'font-serif'
+  if (props.modelValue.font === 'clean') return 'font-sans'
+  if (props.modelValue.font === 'bookish') return 'font-serif italic'
+  return 'font-serif'
+})
 
-    const previewPageClass = computed(() => {
-    return props.modelValue.orientation === 'landscape-spread'
+const previewPageClass = computed(() => {
+  return props.modelValue.orientation === 'landscape-spread'
     ? 'w-full max-w-[42rem] h-[20rem]'
     : 'w-72'
-    })
+})
 
-    const previewStyleClass = computed(() => {
-    if (props.modelValue.layout === 'minimal') return 'border-stone-200 shadow-none'
-    if (props.modelValue.layout === 'elegant') return 'border-stone-300 shadow-md'
-    return 'border-stone-300 shadow-sm'
-    })
+const previewStyleClass = computed(() => {
+  if (props.modelValue.layout === 'minimal') return 'border-stone-200 shadow-none'
+  if (props.modelValue.layout === 'elegant') return 'border-[#d8cbbd] shadow-lg bg-[#fffdf9]'
+  return 'border-stone-300 shadow-sm'
+})
 
-    const previewInnerSpacingClass = computed(() => {
-    if (props.modelValue.layout === 'minimal') return 'p-5'
-    if (props.modelValue.layout === 'elegant') return 'p-6'
-    return 'p-4'
-    })
+const previewInnerSpacingClass = computed(() => {
+  if (props.modelValue.layout === 'minimal') return 'p-5'
+  if (props.modelValue.layout === 'elegant') return 'px-7 py-8'
+  return 'p-4'
+})
 
-    const previewTitleClass = computed(() => {
-    if (props.modelValue.layout === 'minimal') return 'text-[1.7rem] tracking-tight'
-    if (props.modelValue.layout === 'elegant') return 'text-[2rem]'
-    return 'text-2xl'
-    })
+const previewTitleClass = computed(() => {
+  if (props.modelValue.layout === 'minimal') return 'text-[1.7rem] tracking-tight'
+  if (props.modelValue.layout === 'elegant') return 'text-[2.15rem] leading-tight'
+  return 'text-2xl'
+})
 
-    const previewChapterBlockClass = computed(() => {
-    if (props.modelValue.layout === 'minimal') return 'mt-6 pt-3'
-    if (props.modelValue.layout === 'elegant') return 'mt-6 border-t border-stone-200 pt-5'
-    return 'mt-5 border-t border-stone-200 pt-4'
-    })
+const previewChapterBlockClass = computed(() => {
+  if (props.modelValue.layout === 'minimal') return 'mt-6 pt-3'
+  if (props.modelValue.layout === 'elegant') return 'mt-6 pt-5'
+  return 'mt-5 border-t border-stone-200 pt-4'
+})
 
-    const previewPrintFrameClass = computed(() => {
-    return props.modelValue.printReady ? 'px-6 py-6' : ''
-    })
+const previewPrintFrameClass = computed(() => {
+  return props.modelValue.printReady ? 'px-6 py-6' : ''
+})
 
-    const previewPrintBodyClass = computed(() => {
-    return props.modelValue.printReady ? 'leading-relaxed' : ''
-    })
+const previewPrintBodyClass = computed(() => {
+  return props.modelValue.printReady ? 'leading-relaxed' : ''
+})
 
-    const previewPrintContentWidthClass = computed(() => {
-    if (!props.modelValue.printReady) return ''
+const previewPrintContentWidthClass = computed(() => {
+  if (props.modelValue.layout === 'elegant') {
+    return 'max-w-[82%] mx-auto'
+  }
 
-    if (props.modelValue.orientation === 'landscape-spread') {
+  if (!props.modelValue.printReady) return ''
+
+  if (props.modelValue.orientation === 'landscape-spread') {
     return 'max-w-[95%]'
-    }
+  }
 
-    return 'max-w-[88%] mx-auto'
-    })
+  return 'max-w-[88%] mx-auto'
+})
 
-    const previewPrintChapterSpacingClass = computed(() => {
-    return props.modelValue.printReady ? 'mt-6 pt-5' : ''
-    })
+const previewPrintChapterSpacingClass = computed(() => {
+  return props.modelValue.printReady ? 'mt-6 pt-5' : ''
+})
 </script>
