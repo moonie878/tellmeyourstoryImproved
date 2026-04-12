@@ -27,6 +27,12 @@
 <p v-if="turnstileError" class="mt-2 text-sm text-red-600">
   {{ turnstileError }}
 </p>
+<label class="flex items-start gap-2 text-sm text-stone-600">
+  <input type="checkbox" v-model="emailOptIn" />
+  <span>
+    Send me story prompts and reminders so I don’t forget to capture these moments (optional)
+  </span>
+</label>
                 <button type="submit"
                         :disabled="loading"
                         class="w-full rounded-full bg-[#7C5C3B] hover:opacity-90 transition px-4 py-2 text-white font-semibold hover:opacity-90 disabled:opacity-60">
@@ -59,6 +65,7 @@ import { track } from '../lib/analytics'
     const password = ref('')
     const loading = ref(false)
     const errorMessage = ref('')
+    const emailOptIn = ref(false)
 
     const turnstileToken = ref('')
 const turnstileError = ref('')
@@ -80,6 +87,11 @@ const turnstileError = ref('')
     const { error } = await supabase.auth.signUp({
       email: email.value,
       password: password.value,
+      options: {
+    data: {
+      email_opt_in: emailOptIn.value,
+    },
+  },
     })
 
     if (error) {
