@@ -44,7 +44,7 @@
 
           <div class="mt-4 flex flex-wrap gap-3">
             <a
-              href="https://www.tiktok.com/@yourhandle"
+              href="https://www.tiktok.com/@tellmeyourstoryuk"
               target="_blank"
               rel="noopener noreferrer"
               class="rounded-full border border-stone-300 bg-white px-4 py-2 text-sm font-medium text-stone-900 transition hover:bg-stone-100"
@@ -53,7 +53,7 @@
             </a>
 
             <a
-              href="https://www.instagram.com/yourhandle"
+              href="https://www.instagram.com/tellemyourstory_uk/"
               target="_blank"
               rel="noopener noreferrer"
               class="rounded-full border border-stone-300 bg-white px-4 py-2 text-sm font-medium text-stone-900 transition hover:bg-stone-100"
