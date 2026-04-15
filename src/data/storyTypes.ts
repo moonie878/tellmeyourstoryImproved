@@ -44,6 +44,13 @@ export const STORY_TYPES = [
     shortLabel: 'Couple Story',
     label: 'Perfect gift',
   },
+  {
+    id: 'child_story',
+    title: "Your Child's Story",
+    description: 'Capture the moments, milestones, and memories of your child as they grow.',
+    projectTitle: "Your Child's Story",
+    label: 'New',
+},
 ]
 
 export function getStoryMeta(storyType: string) {

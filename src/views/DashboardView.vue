@@ -32,6 +32,12 @@
               >
                 Start Dad Story
               </button>
+              <button
+                @click="createStory('child_story')"
+                class="rounded-full bg-[#7C5C3B] px-5 py-3 text-sm font-medium text-white transition hover:opacity-90"
+              >
+                Start Child Story
+              </button>
             </div>
 
             <p
@@ -344,6 +350,7 @@ function formatStoryType(type: string) {
     grandad: "Grandad's Story",
     life: 'Life Story',
     couple: 'Couple Story',
+    child_story: "Your Child's Story",
   }
 
   return labels[type] || type
