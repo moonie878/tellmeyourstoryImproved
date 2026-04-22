@@ -60,6 +60,7 @@
     import TurnstileWidget from '../components/legal/TurnstileWidget.vue'
 import { verifyTurnstile } from '../lib/turnstile'
 import { track } from '../lib/analytics'
+import { getCurrentUtmData } from '../lib/utm'
 
     const email = ref('')
     const password = ref('')
@@ -69,6 +70,7 @@ import { track } from '../lib/analytics'
 
     const turnstileToken = ref('')
 const turnstileError = ref('')
+const utmData = getCurrentUtmData()
 
     async function handleRegister() {
   loading.value = true
@@ -101,8 +103,11 @@ const turnstileError = ref('')
       email.value = ''
       password.value = ''
       turnstileToken.value = ''
-      track('signup_completed', {
+
+
+track('signup_completed', {
   source: 'register_page',
+  ...utmData,
 })
     }
   } catch (err) {

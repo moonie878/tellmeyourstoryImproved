@@ -1,4 +1,5 @@
 import { posthog } from './posthog'
+import { getCurrentUtmData } from './utm'
 
 type AnalyticsEvent =
   | 'preview_opened'
@@ -33,16 +34,13 @@ type AnalyticsValue =
 type TrackProperties = Record<string, AnalyticsValue>
 
 export function track(event: AnalyticsEvent, data?: TrackProperties) {
-  const payload = data || {}
+  const utmData = getCurrentUtmData()
 
-  // Dev log (keep this — super useful)
-  if (import.meta.env.DEV) {
-    console.log('[Analytics]', event, payload)
+  const payload = {
+    ...(data || {}),
+    ...(utmData || {}),
   }
 
-  try {
-    posthog.capture(event, payload)
-  } catch (err) {
-    console.error('PostHog capture failed:', err)
-  }
+  console.log('[Analytics]', event, payload)
+  posthog.capture(event, payload)
 }

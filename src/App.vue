@@ -218,15 +218,16 @@ async function handleMobileLogout() {
 onMounted(() => {
   getUser()
 
-  supabase.auth.onAuthStateChange((_event, session) => {
-    const currentUser = session?.user || null
-    user.value = currentUser
+ supabase.auth.onAuthStateChange((_event, session) => {
+  user.value = session?.user || null
 
-    if (currentUser) {
-      identifyPostHogUser(currentUser)
-    } else {
-      posthog.reset()
-    }
-  })
+  if (session?.user) {
+    posthog.identify(session.user.id, {
+      email: session.user.email,
+    })
+  } else {
+    posthog.reset()
+  }
+})
 })
 </script>

@@ -3,6 +3,7 @@ import App from './App.vue'
 import router from './router'
 import './style.css'
 import { initPostHog } from './lib/posthog'
+import { getCurrentUtmData } from './lib/utm'
 
 window.addEventListener('error', (event) => {
   const target = event.target as HTMLElement | null
@@ -39,6 +40,16 @@ window.addEventListener('unhandledrejection', (event) => {
 })
 
 initPostHog()
+
+const utmData = getCurrentUtmData()
+
+if (utmData) {
+  posthog.capture('landing_with_utm', {
+    ...utmData,
+    landing_path: window.location.pathname,
+    landing_url: window.location.href,
+  })
+}
 
 createApp(App).use(router).mount('#app')
 

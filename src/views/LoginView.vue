@@ -62,6 +62,7 @@
     import TurnstileWidget from '../components/legal/TurnstileWidget.vue'
 import { verifyTurnstile } from '../lib/turnstile'
 import { track } from '../lib/analytics'
+import { posthog } from '../lib/posthog'
 
     const email = ref('')
     const password = ref('')
@@ -101,6 +102,16 @@ const turnstileError = ref('')
       track('login_completed', {
   source: 'login_page',
 })
+
+const {
+  data: { user },
+} = await supabase.auth.getUser()
+
+if (user) {
+  posthog.identify(user.id, {
+    email: user.email,
+  })
+}
     }
   } catch (err) {
     errorMessage.value = 'Something went wrong. Please try again.'
