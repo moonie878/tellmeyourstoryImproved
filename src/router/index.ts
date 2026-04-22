@@ -67,6 +67,21 @@ const routes = [
     name: 'example-story',
     component: () => import('../views/ExampleStoryView.vue'),
   },
+  {
+  path: '/questions-to-ask-your-parents',
+  name: 'questions-to-ask-parents',
+  component: () => import('../views/QuestionsToAskParentsView.vue'),
+},
+{
+  path: '/questions-to-ask-your-mum',
+  name: 'questions-to-ask-mum',
+  component: () => import('../views/QuestionsToAskMumView.vue'),
+},
+{
+  path: '/questions-to-ask-your-dad',
+  name: 'questions-to-ask-dad',
+  component: () => import('../views/QuestionsToAskDadView.vue'),
+},
 ]
 
 const router = createRouter({
