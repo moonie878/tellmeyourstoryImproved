@@ -2,7 +2,7 @@ import { createApp } from 'vue'
 import App from './App.vue'
 import router from './router'
 import './style.css'
-import { initPostHog } from './lib/posthog'
+import { initPostHog, posthog } from './lib/posthog'
 import { getCurrentUtmData } from './lib/utm'
 
 window.addEventListener('error', (event) => {
@@ -43,7 +43,7 @@ initPostHog()
 
 const utmData = getCurrentUtmData()
 
-if (utmData) {
+if (utmData) {  
   posthog.capture('landing_with_utm', {
     ...utmData,
     landing_path: window.location.pathname,
