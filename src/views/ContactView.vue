@@ -60,6 +60,14 @@
             >
               Instagram
             </a>
+              <a
+    href="https://www.facebook.com/profile.php?id=61563166074344"
+    target="_blank"
+    rel="noopener noreferrer"
+    class="rounded-full border border-stone-300 bg-white px-4 py-2 text-sm font-medium text-stone-900 transition hover:bg-stone-100"
+  >
+    Facebook
+  </a>
           </div>
         </div>
 

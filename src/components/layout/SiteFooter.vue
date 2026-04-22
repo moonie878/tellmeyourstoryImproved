@@ -38,6 +38,18 @@
   >
     Instagram
   </a>
+  <a
+    href="https://www.facebook.com/profile.php?id=61563166074344"
+    target="_blank"
+    rel="noopener noreferrer"
+    class="hover:text-stone-900"
+  >
+    Facebook
+  </a>
+
+
+
+ 
 </div>
       </div>
     </div>
