@@ -41,12 +41,7 @@
         Cover image
       </label>
 
-      <input
-        type="file"
-        accept="image/*"
-        @change="handleCoverImageUpload"
-        class="mt-3 block w-full text-sm text-stone-600"
-      />
+     
 
       <p v-if="coverImageStatus" class="mt-2 text-sm text-stone-500">
         {{ coverImageStatus }}
@@ -580,13 +575,13 @@ watch(isStoryComplete, (complete) => {
 watch(
   () => answeredProgress.value,
   (val) => {
-     console.log('answeredProgress:', val)
+    
     if (
       val >= 60 &&
       !hasImageExportAccess.value &&
       !hasShownMidwayUpgrade.value
     ) {
-        console.log('show midway banner')
+       
       showMidwayUpgrade.value = true
       hasShownMidwayUpgrade.value = true
     }

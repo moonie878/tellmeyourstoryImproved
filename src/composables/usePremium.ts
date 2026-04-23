@@ -1,10 +1,16 @@
-import { computed } from 'vue'
+import { computed, type Ref } from 'vue'
 
-export function usePremium(userAccess: any) {
+export interface UserAccessItem {
+  access_type: 'story' | 'export'
+  story_type?: string
+  variant?: 'text_only' | 'with_images'
+}
 
-  const hasStoryAccess = (storyType: string) => {
+export function usePremium(userAccess: Ref<UserAccessItem[]>) {
+
+  const hasStoryAccess = (storyType: string): boolean => {
     return userAccess.value.some(
-      (item: any) =>
+      (item) =>
         item.access_type === 'story' &&
         (item.story_type === storyType || item.story_type === 'all')
     )
@@ -12,7 +18,7 @@ export function usePremium(userAccess: any) {
 
   const hasAllStories = computed(() =>
     userAccess.value.some(
-      (item: any) =>
+      (item) =>
         item.access_type === 'story' &&
         item.story_type === 'all'
     )
@@ -20,7 +26,7 @@ export function usePremium(userAccess: any) {
 
   const hasImageExport = computed(() =>
     userAccess.value.some(
-      (item: any) =>
+      (item) =>
         item.access_type === 'export' &&
         item.variant === 'with_images'
     )
@@ -28,7 +34,7 @@ export function usePremium(userAccess: any) {
 
   const hasTextExport = computed(() =>
     userAccess.value.some(
-      (item: any) =>
+      (item) =>
         item.access_type === 'export' &&
         item.variant === 'text_only'
     )

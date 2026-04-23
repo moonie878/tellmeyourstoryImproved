@@ -376,12 +376,13 @@
               <li>✔ Ready to print, share, or gift</li>
             </ul>
 
-            <button
-              @click="trackPricingSingle"
-              class="mt-8 w-full rounded-full bg-[#7C5C3B] px-4 py-3 text-white transition hover:opacity-90"
-            >
-              Create my story
-            </button>
+            <router-link
+  to="/register"
+  @click="trackPricingSingle"
+  class="mt-8 block w-full rounded-full bg-[#7C5C3B] px-4 py-3 text-center text-white transition hover:opacity-90"
+>
+  Create my story
+</router-link>
           </div>
 
           <div class="flex h-full flex-col rounded-3xl border border-stone-200 bg-stone-50 p-6 sm:p-8">
@@ -394,12 +395,13 @@
               <li>✔ Export included</li>
             </ul>
 
-            <button
-              @click="trackPricingAll"
-              class="mt-8 w-full rounded-full bg-[#7C5C3B] px-4 py-3 text-white transition hover:opacity-90"
-            >
-              Create more stories
-            </button>
+            <router-link
+  to="/register"
+  @click="trackPricingAll"
+  class="mt-8 block w-full rounded-full bg-[#7C5C3B] px-4 py-3 text-center text-white transition hover:opacity-90"
+>
+  Create more stories
+</router-link>
           </div>
         </div>
       </div>

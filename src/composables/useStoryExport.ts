@@ -194,10 +194,13 @@ export function useStoryExport() {
     if (!trimmed) return 0
 
     const firstLetter = trimmed.charAt(0)
-    const rest = trimmed.slice(1).trimStart()
+    const rest = trimmed.slice(1)
 
+    // Measure drop cap letter width so the rest of the word sits flush against it
     doc.setFont(design.font.title, 'bold')
     doc.setFontSize(24)
+    const dropCapWidth = doc.getTextWidth(firstLetter)
+
     doc.setTextColor(
       design.theme.accent[0],
       design.theme.accent[1],
@@ -209,8 +212,11 @@ export function useStoryExport() {
     doc.setFontSize(design.layout.answerSize + 0.3)
     setTextColor(doc, design.theme.textPrimary)
 
-    const splitRest = doc.splitTextToSize(rest, width - 10)
-    doc.text(splitRest, x + 10, y)
+    // Start the rest of the text immediately after the drop cap letter
+    const textStartX = x + dropCapWidth + 1
+    const textWidth = width - dropCapWidth - 1
+    const splitRest = doc.splitTextToSize(rest, textWidth)
+    doc.text(splitRest, textStartX, y)
 
     return Math.max(12, splitRest.length * design.layout.lineHeight)
   }
@@ -523,22 +529,6 @@ export function useStoryExport() {
       return
     }
 
-    doc.setFont(design.font.body, 'normal')
-    doc.setFontSize(12)
-    setTextColor(doc, design.theme.textMuted)
-    doc.text('Tell Me Your Story', metrics.centerX, shouldShowCoverImage ? 150 : 52, {
-      align: 'center',
-    })
-
-    if (settings.layout === 'elegant') {
-      drawSmallOrnament(
-        doc,
-        metrics.centerX,
-        shouldShowCoverImage ? 162 : 64,
-        design.theme.accent
-      )
-    }
-
     doc.setFont(design.font.title, design.font.titleStyle)
     doc.setFontSize(design.layout.titleSize)
     setTextColor(doc, design.theme.textPrimary)
@@ -547,15 +537,15 @@ export function useStoryExport() {
       metrics.centerX,
       shouldShowCoverImage
         ? settings.layout === 'elegant'
-          ? 186
+          ? 178
           : settings.layout === 'minimal'
-            ? 168
-            : 175
+            ? 164
+            : 170
         : settings.layout === 'elegant'
-          ? 98
+          ? 88
           : settings.layout === 'minimal'
-            ? 105
-            : 86,
+            ? 96
+            : 80,
       {
         align: 'center',
         maxWidth: 145,
@@ -574,7 +564,7 @@ export function useStoryExport() {
     doc.setFont(design.font.body, 'normal')
     doc.setFontSize(design.layout.subtitleSize)
     setTextColor(doc, design.theme.textSecondary)
-    const subtitleY = shouldShowCoverImage ? 200 : 114
+    const subtitleY = shouldShowCoverImage ? 202 : 116
     doc.text(storySubtitle, metrics.centerX, subtitleY, {
       align: 'center',
       maxWidth: 130,
@@ -584,15 +574,20 @@ export function useStoryExport() {
       drawDoubleDivider(doc, metrics.centerX, subtitleY + 16, 34, design.theme.border)
     }
 
-    doc.setFontSize(10)
+    doc.setFontSize(9)
     setTextColor(doc, design.theme.textMuted)
-    doc.text('Created with love', metrics.centerX, 246, { align: 'center' })
+    doc.text('Created with love', metrics.centerX, subtitleY + 30, { align: 'center' })
+
+    // App branding — small, at the bottom
+    doc.setFont(design.font.body, 'normal')
+    doc.setFontSize(8)
+    setTextColor(doc, design.theme.textMuted)
+    doc.text('Tell Me Your Story', metrics.centerX, metrics.pageHeight - 22, { align: 'center' })
   }
 
   function renderDedicationPage(doc: jsPDF, settings: PdfSettings) {
     const design = getPdfDesign(settings)
     const metrics = getPageMetrics(settings)
-    const dedication = 'Created with love and care.'
 
     doc.addPage()
     applyPageBackground(doc, design.theme.secondaryBg, metrics.pageWidth, metrics.pageHeight)
@@ -601,32 +596,74 @@ export function useStoryExport() {
       drawPageBorder(doc, settings, metrics.pageWidth, metrics.pageHeight, design.theme.border)
     }
 
-    doc.setFont(design.font.body, design.font.accentStyle)
-    doc.setFontSize(settings.layout === 'elegant' ? 20 : 18)
-    setTextColor(doc, design.theme.textSecondary)
-
     if (settings.orientation === 'landscape-spread') {
-      doc.text(dedication, 215, 105, {
+      doc.setFont(design.font.body, 'normal')
+      doc.setFontSize(9)
+      setTextColor(doc, design.theme.textMuted)
+      doc.text('A NOTE BEFORE YOU BEGIN', 215, 88, { align: 'center' })
+
+      drawElegantDivider(doc, settings, 215, 98, 36, design)
+
+      doc.setFont(design.font.body, design.font.accentStyle)
+      doc.setFontSize(16)
+      setTextColor(doc, design.theme.textSecondary)
+      doc.text('Every life holds a story worth\ntelling. This is yours.', 215, 116, {
         align: 'center',
         maxWidth: 90,
       })
+
+      drawElegantDivider(doc, settings, 215, 148, 24, design)
+
+      doc.setFont(design.font.body, 'italic')
+      doc.setFontSize(9)
+      setTextColor(doc, design.theme.textMuted)
+      doc.text('Created with love and care.', 215, 160, { align: 'center' })
+
       setDrawColor(doc, design.theme.divider)
       doc.line(metrics.centerX, 18, metrics.centerX, metrics.pageHeight - 18)
       return
     }
 
+    // Portrait dedication page — full, balanced layout
+    doc.setFont(design.font.body, 'normal')
+    doc.setFontSize(9)
+    setTextColor(doc, design.theme.textMuted)
+    doc.text('A NOTE BEFORE YOU BEGIN', metrics.centerX, 98, { align: 'center' })
+
     if (settings.layout === 'elegant') {
-      drawElegantDivider(doc, settings, metrics.centerX, 116, 40, design)
+      drawSmallOrnament(doc, metrics.centerX, 110, design.theme.accent)
     }
 
-    doc.text(dedication, metrics.centerX, 140, {
+    drawElegantDivider(doc, settings, metrics.centerX, 122, 40, design)
+
+    doc.setFont(design.font.body, design.font.accentStyle)
+    doc.setFontSize(settings.layout === 'elegant' ? 19 : 17)
+    setTextColor(doc, design.theme.textSecondary)
+    doc.text('Every life holds a story\nworth telling. This is yours.', metrics.centerX, 148, {
       align: 'center',
-      maxWidth: 140,
+      maxWidth: 130,
     })
 
+    drawElegantDivider(doc, settings, metrics.centerX, 178, 32, design)
+
+    doc.setFont(design.font.body, 'italic')
+    doc.setFontSize(10)
+    setTextColor(doc, design.theme.textMuted)
+    doc.text(
+      'These pages hold the memories, moments, and stories\nthat make this life worth remembering.',
+      metrics.centerX,
+      196,
+      { align: 'center', maxWidth: 120 }
+    )
+
     if (settings.layout === 'elegant') {
-      drawElegantDivider(doc, settings, metrics.centerX, 166, 32, design)
+      drawDoubleDivider(doc, metrics.centerX, 220, 26, design.theme.border)
     }
+
+    doc.setFont(design.font.body, 'italic')
+    doc.setFontSize(9)
+    setTextColor(doc, design.theme.textMuted)
+    doc.text('Created with love and care.', metrics.centerX, 234, { align: 'center' })
   }
 
   function renderQuotePage(
@@ -883,7 +920,7 @@ export function useStoryExport() {
     const design = getPdfDesign(settings)
     const metrics = getPageMetrics(settings)
 
-    if (yState.y > 210) {
+    if (yState.y > 230) {
       doc.addPage()
       applyPageBackground(doc, design.theme.pageBg, metrics.pageWidth, metrics.pageHeight)
       if (settings.layout === 'elegant') {
@@ -1062,6 +1099,10 @@ export function useStoryExport() {
       setDrawColor(doc, design.theme.divider)
       doc.line(metrics.marginLeft, yState.y, metrics.pageWidth - metrics.marginRight, yState.y)
       yState.y += design.layout.sectionSpacing + 6
+    } else if (settings.layout === 'elegant' && yState.y < metrics.maxY - 20) {
+      // For elegant layout, add a subtle divider between sections that share a page
+      drawElegantDivider(doc, settings, metrics.centerX, yState.y, 40, design)
+      yState.y += design.layout.sectionSpacing + 12
     } else {
       yState.y += design.layout.sectionSpacing + 8
     }
@@ -1489,31 +1530,6 @@ export function useStoryExport() {
 
           doc.addPage()
           renderChapterHeading(doc, currentChapter, chapterIndex, activeSettings)
-
-          doc.addPage()
-          applyPageBackground(doc, design.theme.secondaryBg, metrics.pageWidth, metrics.pageHeight)
-          if (activeSettings.layout === 'elegant') {
-            drawPageBorder(doc, activeSettings, metrics.pageWidth, metrics.pageHeight, design.theme.border)
-          }
-
-          doc.setFont(design.font.body, 'italic')
-          doc.setFontSize(13)
-          setTextColor(doc, design.theme.textMuted)
-
-          if (activeSettings.layout === 'elegant') {
-            drawSmallOrnament(doc, metrics.centerX, metrics.pageHeight / 2 - 16, design.theme.accent)
-          }
-
-          doc.text(
-            'Take a moment to reflect on what comes next…',
-            metrics.centerX,
-            metrics.pageHeight / 2,
-            { align: 'center' }
-          )
-
-          if (activeSettings.layout === 'elegant') {
-            drawDoubleDivider(doc, metrics.centerX, metrics.pageHeight / 2 + 14, 24, design.theme.border)
-          }
 
           doc.addPage()
           applyPageBackground(doc, design.theme.pageBg, metrics.pageWidth, metrics.pageHeight)
