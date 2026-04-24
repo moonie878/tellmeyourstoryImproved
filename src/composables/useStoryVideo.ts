@@ -17,6 +17,7 @@ export type VideoSlide =
   | { type: 'title'; title: string; subtitle: string; coverImageUrl?: string }
   | { type: 'chapter'; chapter: string; intro: string; chapterIndex: number }
   | { type: 'answer'; question: string; answer: string; imageUrl?: string; chapter: string }
+  | { type: 'quote'; text: string; chapter: string }
   | { type: 'closing' }
 
 // Canvas dimensions — 1080p landscape
@@ -95,15 +96,24 @@ for (const section of sections) {
   }
 
   // Only include answered questions
-  if (section.answer?.trim()) {
+if (section.answer?.trim()) {
+  slides.push({
+    type: 'answer',
+    question: section.question,
+    answer: section.answer.trim(),
+    imageUrl: imageMap.get(section.id) ?? undefined,
+    chapter: section.chapter ?? '',
+  })
+
+  // Add a quote slide after highlighted answers
+  if (section.is_highlighted) {
     slides.push({
-      type: 'answer',
-      question: section.question,
-      answer: section.answer.trim(),
-      imageUrl: imageMap.get(section.id) ?? undefined,
+      type: 'quote',
+      text: section.answer.trim(),
       chapter: section.chapter ?? '',
     })
   }
+}
 }
 
   // Closing slide
@@ -310,7 +320,7 @@ async function drawSlide(
 
   if (slide.type === 'answer') {
     const hasImage = !!slide.imageUrl
-    const textX = hasImage ? pad : pad
+    const textX = pad
     const textW = hasImage ? W * 0.52 - pad : W - pad * 2
 
     // Chapter label top left
@@ -419,6 +429,54 @@ async function drawSlide(
     ctx.lineTo(W - pad, H - 60)
     ctx.stroke()
   }
+
+if (slide.type === 'quote') {
+  ctx.textAlign = 'center'
+
+  // Warm background
+  ctx.fillStyle = colors.pageBg
+  ctx.fillRect(0, 0, W, H)
+
+  // Subtle top and bottom rules
+  ctx.strokeStyle = colors.divider
+  ctx.lineWidth = 1
+  ctx.beginPath()
+  ctx.moveTo(pad, 60)
+  ctx.lineTo(W - pad, 60)
+  ctx.stroke()
+  ctx.beginPath()
+  ctx.moveTo(pad, H - 60)
+  ctx.lineTo(W - pad, H - 60)
+  ctx.stroke()
+
+  // Label
+  ctx.font = `300 18px Georgia, serif`
+  ctx.fillStyle = colors.textMuted
+  ctx.letterSpacing = '4px'
+  ctx.fillText('A MEMORY WORTH KEEPING', cx, H * 0.35)
+  ctx.letterSpacing = '0px'
+
+  drawOrnament(ctx, cx, H * 0.41, colors.accent)
+
+  // Quote text — truncate to first 200 chars if very long
+  const quoteText = slide.text.length > 200
+    ? slide.text.slice(0, 197) + '...'
+    : slide.text
+
+  ctx.font = `italic 42px Georgia, serif`
+  ctx.fillStyle = colors.textSecondary
+  const quoteLines = wrapText(ctx, `"${quoteText}"`, 900, 58)
+  const quoteStartY = H * 0.5 - ((quoteLines.length - 1) * 58) / 2
+  quoteLines.forEach((line, i) => {
+    ctx.fillText(line, cx, quoteStartY + i * 58)
+  })
+
+  drawOrnament(ctx, cx, H * 0.68, colors.accent)
+
+  ctx.font = `italic 20px Georgia, serif`
+  ctx.fillStyle = colors.textMuted
+  ctx.fillText('held onto with love', cx, H * 0.74)
+}
 
   if (slide.type === 'closing') {
     ctx.textAlign = 'center'
