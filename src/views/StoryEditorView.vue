@@ -148,6 +148,14 @@
         </button>
 
         <button
+  v-if="hasTier4Access"
+  @click="showVideoModal = true"
+  class="rounded-full border border-stone-300 px-4 py-2 text-sm hover:bg-stone-50"
+>
+  🎬 Create video
+</button>
+
+        <button
           @click="openPremiumPreview"
           class="w-full rounded-full border border-stone-900 px-5 py-3 text-sm font-medium text-stone-900 transition hover:bg-stone-100 sm:w-auto"
         >
@@ -347,7 +355,22 @@
       @save="savePdfDesign"
       @upgrade="upgradeAllImages"
     />
+
+<VideoExportModal
+  :open="showVideoModal"
+  :is-generating="videoGenerating"
+  :progress="videoProgress"
+  :progress-label="videoProgressLabel"
+  :error="videoError"
+  :answered-count="answeredSections"
+  @close="showVideoModal = false"
+  @export="handleVideoExport"
+/>
+
   </div>
+
+  
+
 </template>
 
 <script setup lang="ts">
@@ -376,6 +399,10 @@
     import PremiumPreviewModal from '../components/story/PremiumPreviewModal.vue'
     import PdfCustomizerModal from '../components/story/PdfCustomizerModal.vue'
     import StoryUpgradePanel from '../components/story/StoryUpgradePanel.vue'
+
+    import type { VideoOptions } from '../composables/useStoryVideo'
+    import VideoExportModal from '../components/story/VideoExportModal.vue'
+import { useStoryVideo } from '../composables/useStoryVideo'
 
     const route = useRoute()
     const router = useRouter()
@@ -417,6 +444,11 @@
     const answerTextarea = ref<HTMLTextAreaElement | null>(null)
     const saveStatus = ref('')
 
+    const showVideoModal = ref(false)
+const { isGenerating: videoGenerating, progress: videoProgress,
+        progressLabel: videoProgressLabel, error: videoError,
+        generateVideo } = useStoryVideo()
+
     const answeredProgress = computed(() => {
   if (!sections.value.length) return 0
 
@@ -437,6 +469,9 @@
     const currentSection = computed(() => {
     return sections.value[currentSectionIndex.value] || null
     })
+    const answeredSections = computed(() =>
+  sections.value.filter((s) => s.answer?.trim()).length
+)
 
         const { 
   currentPlan,
@@ -1124,6 +1159,13 @@ function upgradeFromPreviewModal() {
   })
 
   upgradeAllImages()
+}
+
+async function handleVideoExport(options: VideoOptions) {
+  await generateVideo(project.value!, sections.value, await getAllImagesForExport(), {
+    ...options,
+    musicTrack: null,
+  })
 }
 
 async function toggleCurrentHighlight() {
