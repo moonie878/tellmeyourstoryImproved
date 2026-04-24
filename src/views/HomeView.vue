@@ -175,7 +175,7 @@
             <div class="step-number text-[#7C5C3B]">02</div>
             <h3 class="step-title">Answer at your own pace</h3>
             <p class="step-desc">
-              60 guided questions across 10 chapters — from first memories to lasting values. Add photos alongside each answer. Everything saves automatically.
+              100 guided questions across 10 chapters — from first memories to lasting values. Add photos alongside each answer. Everything saves automatically.
             </p>
           </div>
 
@@ -311,7 +311,7 @@
             <p class="price-amount">£0</p>
             <ul class="price-features">
               <li class="yes">Start any story</li>
-              <li class="yes">All 60 questions</li>
+              <li class="yes">All 100 questions</li>
               <li class="yes">Autosave</li>
               <li class="no">No exports</li>
             </ul>
@@ -362,8 +362,7 @@
             <ul class="price-features">
               <li class="yes">All story types</li>
               <li class="yes">Photos in all exports</li>
-              <li class="yes">🎬 Video export</li>
-              <li class="yes">AI writing assist</li>
+              <li class="yes">🎬 Video export</li>             
             </ul>
             <router-link to="/register" @click="trackPricingAll" class="price-btn price-btn-premium">
               Get Full Collection
@@ -643,6 +642,8 @@ h1 {
   letter-spacing: -0.02em;
   color: #1C1917;
   max-width: 640px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 /* ── Format cards ───────────────────────── */

@@ -70,30 +70,41 @@ function buildSlides(
   let currentChapter = ''
   let chapterIndex = 0
 
-  for (const section of sections) {
-    // Chapter intro slide on chapter change
-    if (section.chapter && section.chapter !== currentChapter) {
-      currentChapter = section.chapter
-      chapterIndex++
-      slides.push({
-        type: 'chapter',
-        chapter: currentChapter,
-        intro: getChapterIntro(currentChapter),
-        chapterIndex,
-      })
-    }
+  // Pre-compute which chapters have at least one answered question
+const answeredChapters = new Set(
+  sections
+    .filter((s) => s.answer?.trim() && s.chapter)
+    .map((s) => s.chapter as string)
+)
 
-    // Only include answered questions
-    if (section.answer?.trim()) {
-      slides.push({
-        type: 'answer',
-        question: section.question,
-        answer: section.answer.trim(),
-        imageUrl: imageMap.get(section.id) ?? undefined,
-        chapter: section.chapter ?? '',
-      })
-    }
+for (const section of sections) {
+  // Only add chapter slide if this chapter has answered questions
+  if (
+    section.chapter &&
+    section.chapter !== currentChapter &&
+    answeredChapters.has(section.chapter)
+  ) {
+    currentChapter = section.chapter
+    chapterIndex++
+    slides.push({
+      type: 'chapter',
+      chapter: currentChapter,
+      intro: getChapterIntro(currentChapter),
+      chapterIndex,
+    })
   }
+
+  // Only include answered questions
+  if (section.answer?.trim()) {
+    slides.push({
+      type: 'answer',
+      question: section.question,
+      answer: section.answer.trim(),
+      imageUrl: imageMap.get(section.id) ?? undefined,
+      chapter: section.chapter ?? '',
+    })
+  }
+}
 
   // Closing slide
   slides.push({ type: 'closing' })
