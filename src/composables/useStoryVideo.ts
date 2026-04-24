@@ -494,14 +494,17 @@ export function useStoryVideo() {
         progressLabel.value = `Drawing slide ${s + 1} of ${slides.length}...`
 
         // Write N frames for this slide (one per second of duration)
-        const blob: Blob = await new Promise((resolve) => canvas.toBlob((b) => resolve(b!), 'image/png'))
-        const buf = await blob.arrayBuffer()
+       const blob: Blob = await new Promise((resolve) => canvas.toBlob((b) => resolve(b!), 'image/png'))
+const buf = await blob.arrayBuffer()
 
-        for (let f = 0; f < frameDuration * fps; f++) {
-          const name = `frame${String(frameIndex).padStart(5, '0')}.png`
-          await ffmpeg.writeFile(name, new Uint8Array(buf))
-          frameIndex++
-        }
+for (let f = 0; f < frameDuration * fps; f++) {
+  const name = `frame${String(frameIndex).padStart(5, '0')}.png`
+  // Copy the buffer each time — ffmpeg detaches it after first write
+  const copy = new Uint8Array(buf.byteLength)
+  copy.set(new Uint8Array(buf))
+  await ffmpeg.writeFile(name, copy)
+  frameIndex++
+}
       }
 
       progress.value = 38
@@ -540,11 +543,10 @@ export function useStoryVideo() {
       progress.value = 95
       progressLabel.value = 'Preparing download...'
 
-      const data = await ffmpeg.readFile('output.mp4')
-const uint8 = data instanceof Uint8Array ? data : new Uint8Array(data as unknown as ArrayBuffer)
-const copy = new Uint8Array(uint8.byteLength)
-copy.set(uint8)
-const blob = new Blob([copy], { type: 'video/mp4' })
+const rawData = await ffmpeg.readFile('output.mp4')
+const uint8Data = rawData instanceof Uint8Array ? rawData : new Uint8Array(rawData as unknown as ArrayBuffer)
+// Slice creates a genuine copy that isn't detached
+const blob = new Blob([uint8Data.slice()], { type: 'video/mp4' })
       const url = URL.createObjectURL(blob)
 
       // Trigger download
