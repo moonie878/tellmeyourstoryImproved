@@ -521,11 +521,11 @@ for (let f = 0; f < frameDuration * fps; f++) {
         const musicData = await fetchFile(options.musicFile)
         await ffmpeg.writeFile('music.mp3', musicData)
         ffmpegArgs.push('-i', 'music.mp3')
-        ffmpegArgs.push('-c:v', 'libx264')
-        ffmpegArgs.push('-c:a', 'aac')
-        ffmpegArgs.push('-shortest')
-        ffmpegArgs.push('-map', '0:v:0')
-        ffmpegArgs.push('-map', '1:a:0')
+       ffmpegArgs.push('-c:v', 'libx264')
+ffmpegArgs.push('-c:a', 'aac')
+ffmpegArgs.push('-filter_complex', '[1:a]aloop=loop=-1:size=2147483647,atrim=duration=' + String(slides.length * frameDuration) + '[aout]')
+ffmpegArgs.push('-map', '0:v:0')
+ffmpegArgs.push('-map', '[aout]')
       } else {
         ffmpegArgs.push('-c:v', 'libx264')
       }
