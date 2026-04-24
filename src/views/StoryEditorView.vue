@@ -477,6 +477,7 @@
   removeCurrentImage,
   handleCoverImageUpload, 
   clearCurrentImageState,
+   refreshCoverImageIfExpired,
 } = useStoryImages({
   projectId,
   project,
@@ -653,6 +654,11 @@ watch(
 
     project.value = projectData
     coverImageUrl.value = projectData.cover_image_url || ''
+
+    // Add this line immediately after:
+if (coverImageUrl.value) {
+  coverImageUrl.value = await refreshCoverImageIfExpired(coverImageUrl.value)
+}
 
     if (projectData.pdf_settings) {
     pdfSettings.value = {

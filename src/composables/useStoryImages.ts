@@ -13,6 +13,71 @@ type UseStoryImagesArgs = {
   coverImageStatus: Ref<string>
 }
 
+// Signed URLs last 7 days — refresh if expiring within 1 day
+const REFRESH_THRESHOLD_SECONDS = 60 * 60 * 24
+
+function extractStoragePath(signedUrl: string): string | null {
+  try {
+    const match = signedUrl.match(/\/object\/sign\/story-images\/(.+?)\?/)
+    return match ? match[1] : null
+  } catch {
+    return null
+  }
+}
+
+function isUrlExpiredOrExpiringSoon(signedUrl: string): boolean {
+  try {
+    const url = new URL(signedUrl)
+    const token = url.searchParams.get('token')
+    if (!token) return true
+
+    const payload = JSON.parse(atob(token.split('.')[1]))
+    const expiresAt: number = payload.exp
+    if (!expiresAt) return true
+
+    const secondsUntilExpiry = expiresAt - Math.floor(Date.now() / 1000)
+    return secondsUntilExpiry < REFRESH_THRESHOLD_SECONDS
+  } catch {
+    return true
+  }
+}
+
+async function refreshSignedUrl(
+  oldUrl: string,
+  projectId: string,
+  sectionId: string | null,
+  isCover: boolean
+): Promise<string | null> {
+  const storagePath = extractStoragePath(oldUrl)
+  if (!storagePath) return null
+
+  const { data, error } = await supabase.storage
+    .from('story-images')
+    .createSignedUrl(storagePath, 60 * 60 * 24 * 7)
+
+  if (error || !data?.signedUrl) {
+    console.error('Failed to refresh signed URL:', error?.message)
+    return null
+  }
+
+  const newUrl = data.signedUrl
+
+  if (isCover) {
+    await supabase
+      .from('story_projects')
+      .update({ cover_image_url: newUrl })
+      .eq('id', projectId)
+  } else if (sectionId) {
+    await supabase
+      .from('story_images')
+      .update({ image_url: newUrl })
+      .eq('project_id', projectId)
+      .eq('section_id', sectionId)
+  }
+
+  return newUrl
+}
+
 export function useStoryImages({
   projectId,
   project,
@@ -27,7 +92,6 @@ export function useStoryImages({
     if (currentImagePreview.value.startsWith('blob:')) {
       URL.revokeObjectURL(currentImagePreview.value)
     }
-
     currentImageUrl.value = ''
     currentImagePreview.value = ''
   }
@@ -36,7 +100,6 @@ export function useStoryImages({
     if (currentImagePreview.value && currentImagePreview.value.startsWith('blob:')) {
       URL.revokeObjectURL(currentImagePreview.value)
     }
-
     currentImageUrl.value = ''
     currentImagePreview.value = ''
     imageUploadStatus.value = ''
@@ -56,9 +119,7 @@ export function useStoryImages({
 
     const { error: uploadError } = await supabase.storage
       .from('story-images')
-      .upload(fileName, file, {
-        upsert: true,
-      })
+      .upload(fileName, file, { upsert: true })
 
     if (uploadError) {
       currentImagePreview.value = currentImageUrl.value || ''
@@ -94,9 +155,7 @@ export function useStoryImages({
           image_url: imageUrl,
         },
       ],
-      {
-        onConflict: 'project_id,section_id',
-      }
+      { onConflict: 'project_id,section_id' }
     )
 
     if (dbError) {
@@ -143,8 +202,15 @@ export function useStoryImages({
       return
     }
 
-    currentImageUrl.value = data.image_url || ''
-    currentImagePreview.value = data.image_url || ''
+    let imageUrl: string = data.image_url || ''
+
+    if (imageUrl && isUrlExpiredOrExpiringSoon(imageUrl)) {
+      const refreshed = await refreshSignedUrl(imageUrl, projectId, currentSection.value.id, false)
+      if (refreshed) imageUrl = refreshed
+    }
+
+    currentImageUrl.value = imageUrl
+    currentImagePreview.value = imageUrl
   }
 
   async function getAllImagesForExport(): Promise<StoryImage[]> {
@@ -167,7 +233,19 @@ export function useStoryImages({
       }
     }
 
-    return Array.from(latestBySection.values())
+    const images = Array.from(latestBySection.values())
+
+    const refreshed = await Promise.all(
+      images.map(async (img) => {
+        if (img.image_url && isUrlExpiredOrExpiringSoon(img.image_url)) {
+          const newUrl = await refreshSignedUrl(img.image_url, projectId, img.section_id, false)
+          if (newUrl) return { ...img, image_url: newUrl }
+        }
+        return img
+      })
+    )
+
+    return refreshed
   }
 
   async function loadImageAsBase64(url: string): Promise<string> {
@@ -187,8 +265,7 @@ export function useStoryImages({
         }
 
         ctx.drawImage(img, 0, 0)
-        const dataUrl = canvas.toDataURL('image/png')
-        resolve(dataUrl)
+        resolve(canvas.toDataURL('image/png'))
       }
 
       img.onerror = () => {
@@ -244,9 +321,7 @@ export function useStoryImages({
 
     const { error: uploadError } = await supabase.storage
       .from('story-images')
-      .upload(fileName, file, {
-        upsert: true,
-      })
+      .upload(fileName, file, { upsert: true })
 
     if (uploadError) {
       coverImageStatus.value = `Upload failed: ${uploadError.message}`
@@ -271,9 +346,7 @@ export function useStoryImages({
 
     const { error: updateError } = await supabase
       .from('story_projects')
-      .update({
-        cover_image_url: imageUrl,
-      })
+      .update({ cover_image_url: imageUrl })
       .eq('id', projectId)
 
     if (updateError) {
@@ -291,6 +364,12 @@ export function useStoryImages({
     }, 1500)
   }
 
+  async function refreshCoverImageIfExpired(url: string): Promise<string> {
+    if (!url || !isUrlExpiredOrExpiringSoon(url)) return url
+    const refreshed = await refreshSignedUrl(url, projectId, null, true)
+    return refreshed || url
+  }
+
   return {
     handleImageUpload,
     loadCurrentSectionImage,
@@ -300,5 +379,6 @@ export function useStoryImages({
     handleCoverImageUpload,
     clearCurrentImagePreview,
     clearCurrentImageState,
+    refreshCoverImageIfExpired,
   }
 }
