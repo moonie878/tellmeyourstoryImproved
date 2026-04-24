@@ -541,7 +541,10 @@ export function useStoryVideo() {
       progressLabel.value = 'Preparing download...'
 
       const data = await ffmpeg.readFile('output.mp4')
-      const blob = new Blob([data instanceof Uint8Array ? data.buffer as ArrayBuffer : data], { type: 'video/mp4' })
+const uint8 = data instanceof Uint8Array ? data : new Uint8Array(data as unknown as ArrayBuffer)
+const copy = new Uint8Array(uint8.byteLength)
+copy.set(uint8)
+const blob = new Blob([copy], { type: 'video/mp4' })
       const url = URL.createObjectURL(blob)
 
       // Trigger download
