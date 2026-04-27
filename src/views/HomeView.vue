@@ -175,8 +175,8 @@
             <div class="step-number text-[#7C5C3B]">02</div>
             <h3 class="step-title">Answer at your own pace</h3>
             <p class="step-desc">
-              100 guided questions across 10 chapters — from first memories to lasting values. Add photos alongside each answer. Everything saves automatically.
-            </p>
+  100 guided questions across 10 chapters — from first memories to lasting values. Answer as many or as few as feel right. Add photos alongside each answer. Everything saves automatically.
+</p>
           </div>
 
           <div class="step-card">

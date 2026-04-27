@@ -41,11 +41,11 @@
             </div>
 
             <p
-              v-if="isFirstTimeUser"
-              class="mt-5 inline-block rounded-full bg-stone-100 px-3 py-1 text-sm text-stone-700"
-            >
-              Your first keepsake can be started in under a minute
-            </p>
+  v-if="isFirstTimeUser"
+  class="mt-5 inline-block rounded-full bg-stone-100 px-3 py-1 text-sm text-stone-700"
+>
+  Your first keepsake can be started in under a minute — answer as many or as few questions as you like 💛
+</p>
           </div>
 
           <div class="grid gap-4 sm:grid-cols-2 md:grid-cols-1">
@@ -75,6 +75,9 @@
           <h2 class="mt-2 text-2xl font-bold text-stone-900">
             Choose the keepsake you want to create
           </h2>
+          <p class="mt-2 text-sm text-stone-500">
+  Answer as many or as few questions as feel right — there's no pressure to complete them all.
+</p>
         </div>
 
         <div class="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">

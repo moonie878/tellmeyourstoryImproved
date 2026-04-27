@@ -305,6 +305,11 @@
 
       <div class="order-1 lg:order-2">
         <div class="lg:sticky lg:top-6 lg:max-h-[calc(100vh-3rem)] lg:overflow-y-auto lg:pr-2">
+            <div class="mb-3 rounded-2xl border border-stone-200 bg-white px-4 py-3 text-center">
+      <p class="text-xs text-stone-400">
+        💛 Answer as many or as few questions as you like — every answer adds to your story. There's no pressure to complete them all.
+      </p>
+    </div>
           <StoryQuestionCard
             :section="currentSection"
             :current-index="currentSectionIndex"
