@@ -138,19 +138,65 @@ function ensureRecto(doc: jsPDF, currentPage: { n: number }, skipHeader: Set<num
 }
 
 // ─── Front matter: half title ─────────────────────────────────────
-function renderHalfTitle(doc: jsPDF, title: string, pageNum: { n: number }, skipHeader: Set<number>) {
+async function renderHalfTitle(
+  doc: jsPDF,
+  title: string,
+  pageNum: { n: number },
+  skipHeader: Set<number>,
+  coverImageUrl: string,
+  loadImageAsBase64: (url: string) => Promise<string>
+) {
   pageBg(doc)
   skipHeader.add(pageNum.n)
 
-  doc.setFont('times', 'bold')
-  doc.setFontSize(TITLE_SIZE - 4)
-  setTxt(doc, C_PRIMARY)
-  doc.text(title, PW / 2, PH / 2 - 10, { align: 'center' })
+  const cx = PW / 2
+
+  if (coverImageUrl) {
+    try {
+      const imgData = await loadImageAsBase64(coverImageUrl)
+      const img = new Image()
+      img.src = imgData
+      await new Promise((resolve, reject) => {
+        img.onload = resolve
+        img.onerror = reject
+      })
+      const maxW = 100
+      const maxH = 70
+      const ratio = Math.min(maxW / img.width, maxH / img.height)
+      const iw = img.width * ratio
+      const ih = img.height * ratio
+      const ix = (PW - iw) / 2
+      const iy = PH * 0.28
+
+      setDraw(doc, C_DIVIDER)
+      doc.setLineWidth(0.3)
+      doc.roundedRect(ix - 1.5, iy - 1.5, iw + 3, ih + 3, 2, 2)
+      doc.addImage(imgData, 'PNG', ix, iy, iw, ih)
+
+      ornament(doc, cx, iy + ih + 12)
+
+      doc.setFont('times', 'bold')
+      doc.setFontSize(TITLE_SIZE - 2)
+      setTxt(doc, C_PRIMARY)
+      doc.text(title, cx, iy + ih + 26, { align: 'center', maxWidth: 120 })
+    } catch {
+      renderHalfTitleText(doc, title, cx)
+    }
+  } else {
+    renderHalfTitleText(doc, title, cx)
+  }
 
   doc.setFont('times', 'normal')
   doc.setFontSize(8)
   setTxt(doc, C_MUTED)
-  doc.text('Tell Me Your Story', PW / 2, PH - 16, { align: 'center' })
+  doc.text('Tell Me Your Story', cx, PH - 16, { align: 'center' })
+}
+
+function renderHalfTitleText(doc: jsPDF, title: string, cx: number) {
+  doc.setFont('times', 'bold')
+  doc.setFontSize(TITLE_SIZE - 4)
+  setTxt(doc, C_PRIMARY)
+  doc.text(title, cx, PH / 2 - 10, { align: 'center' })
 }
 
 // ─── Front matter: blank verso ────────────────────────────────────
@@ -394,11 +440,13 @@ function renderQuotePage(
 
   ornament(doc, cx, PH * 0.40)
 
-  const truncated = quote.length > 200 ? quote.slice(0, 197) + '…' : quote
+  const shortened = quote.length > 200
+    ? quote.slice(0, 200).replace(/\s+\S*$/, '') + '…'
+    : quote
   doc.setFont('times', 'italic')
   doc.setFontSize(11)
   setTxt(doc, C_SECONDARY)
-  const qLines = splitText(doc, `"${truncated}"`, maxW)
+  const qLines = splitText(doc, `"${shortened}"`, maxW)
   const qStartY = PH * 0.50 - (qLines.length * 6.2) / 2
   qLines.forEach((ln, i) => {
     doc.text(ln, cx, qStartY + i * 6.2, { align: 'center' })
@@ -411,11 +459,10 @@ function renderQuotePage(
   setTxt(doc, C_MUTED)
   doc.text('held onto with love', cx, PH * 0.72, { align: 'center' })
 
-  // Ensure next content starts on recto
+  // Ensure next content starts on recto — but don't skip header on that page
   doc.addPage()
   pageNum.n++
   pageBg(doc)
-  skipHeader.add(pageNum.n)
 }
 
 // ─── Closing page ─────────────────────────────────────────────────
@@ -509,7 +556,6 @@ async function renderSection(
   }
 
   const aH = textHeight(aLines)
-  
 
   // Page break if needed
   if (y.val + qH + QUESTION_GAP + Math.min(aH, 30) > maxY) {
@@ -659,7 +705,7 @@ export function useStoryTrueBookExport() {
 
       // Page 1 — Half title (recto)
       pageBg(doc)
-      renderHalfTitle(doc, storyTitle, pageNum, skipHeader)
+      await renderHalfTitle(doc, storyTitle, pageNum, skipHeader, coverImageUrl, loadImageAsBase64)
 
       // Page 2 — Blank verso
       renderBlankVerso(doc, pageNum, skipHeader)
