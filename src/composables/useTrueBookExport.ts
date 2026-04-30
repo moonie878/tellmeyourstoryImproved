@@ -1,6 +1,10 @@
 import jsPDF from 'jspdf'
 import { ref } from 'vue'
 import type { StoryImage, StoryProject, StorySection } from '../types/story'
+import { EBGaramondRegular } from '../fonts/EBGaramond-Regular'
+import { EBGaramondItalic } from '../fonts/EBGaramond-Italic'
+import { EBGaramondBold } from '../fonts/EBGaramond-Bold'
+import { EBGaramondBoldItalic } from '../fonts/EBGaramond-BoldItalic'
 
 // ─── Page dimensions — 6x9 inch in mm (jsPDF uses mm by default) ───
 const PW = 152.4  // 6 inches
@@ -100,7 +104,7 @@ function drawRunningHeader(
 ) {
   if (skipHeader.has(pageNum)) return
 
-  doc.setFont('times', 'italic')
+  doc.setFont('EBGaramond', 'italic')
   doc.setFontSize(RUNNING_SIZE)
   setTxt(doc, C_MUTED)
 
@@ -113,7 +117,7 @@ function drawRunningHeader(
     doc.text(chapterName, x, RECTO_TOP - 4, { align: 'right' })
     line(doc, RECTO_INNER, RECTO_TOP - 2, PW - RECTO_OUTER, RECTO_TOP - 2)
 
-    doc.setFont('times', 'normal')
+    doc.setFont('EBGaramond', 'normal')
     doc.setFontSize(PAGE_NUM_SIZE)
     doc.text(String(pageNum), x, PH - RECTO_BOTTOM + 6, { align: 'right' })
   } else {
@@ -122,7 +126,7 @@ function drawRunningHeader(
     doc.text(bookTitle, x, VERSO_TOP - 4, { align: 'left' })
     line(doc, VERSO_OUTER, VERSO_TOP - 2, PW - VERSO_INNER, VERSO_TOP - 2)
 
-    doc.setFont('times', 'normal')
+    doc.setFont('EBGaramond', 'normal')
     doc.setFontSize(PAGE_NUM_SIZE)
     doc.text(String(pageNum), x, PH - VERSO_BOTTOM + 6, { align: 'left' })
   }
@@ -175,7 +179,7 @@ async function renderHalfTitle(
 
       ornament(doc, cx, iy + ih + 12)
 
-      doc.setFont('times', 'bold')
+      doc.setFont('EBGaramond', 'bold')
       doc.setFontSize(TITLE_SIZE - 2)
       setTxt(doc, C_PRIMARY)
       doc.text(title, cx, iy + ih + 26, { align: 'center', maxWidth: 120 })
@@ -186,14 +190,14 @@ async function renderHalfTitle(
     renderHalfTitleText(doc, title, cx)
   }
 
-  doc.setFont('times', 'normal')
+  doc.setFont('EBGaramond', 'normal')
   doc.setFontSize(8)
   setTxt(doc, C_MUTED)
   doc.text('Tell Me Your Story', cx, PH - 16, { align: 'center' })
 }
 
 function renderHalfTitleText(doc: jsPDF, title: string, cx: number) {
-  doc.setFont('times', 'bold')
+  doc.setFont('EBGaramond', 'bold')
   doc.setFontSize(TITLE_SIZE - 4)
   setTxt(doc, C_PRIMARY)
   doc.text(title, cx, PH / 2 - 10, { align: 'center' })
@@ -250,14 +254,14 @@ async function renderTitlePage(
 
       ornament(doc, cx, iy + ih + 12)
 
-      doc.setFont('times', 'bold')
+      doc.setFont('EBGaramond', 'bold')
       doc.setFontSize(TITLE_SIZE)
       setTxt(doc, C_PRIMARY)
       doc.text(title, cx, iy + ih + 26, { align: 'center', maxWidth: 120 })
 
       ornament(doc, cx, iy + ih + 36)
 
-      doc.setFont('times', 'italic')
+      doc.setFont('EBGaramond', 'italic')
       doc.setFontSize(SUBTITLE_SIZE)
       setTxt(doc, C_SECONDARY)
       doc.text(subtitle, cx, iy + ih + 48, { align: 'center', maxWidth: 110 })
@@ -270,7 +274,7 @@ async function renderTitlePage(
     renderTitlePageNoImage(doc, title, subtitle, cx)
   }
 
-  doc.setFont('times', 'normal')
+  doc.setFont('EBGaramond', 'normal')
   doc.setFontSize(8)
   setTxt(doc, C_MUTED)
   doc.text('Tell Me Your Story · tellmeyourstory.uk', cx, PH - 14, { align: 'center' })
@@ -279,14 +283,14 @@ async function renderTitlePage(
 function renderTitlePageNoImage(doc: jsPDF, title: string, subtitle: string, cx: number) {
   ornament(doc, cx, PH / 2 - 28)
 
-  doc.setFont('times', 'bold')
+  doc.setFont('EBGaramond', 'bold')
   doc.setFontSize(TITLE_SIZE)
   setTxt(doc, C_PRIMARY)
   doc.text(title, cx, PH / 2 - 14, { align: 'center', maxWidth: 120 })
 
   ornament(doc, cx, PH / 2 + 2)
 
-  doc.setFont('times', 'italic')
+  doc.setFont('EBGaramond', 'italic')
   doc.setFontSize(SUBTITLE_SIZE)
   setTxt(doc, C_SECONDARY)
   doc.text(subtitle, cx, PH / 2 + 16, { align: 'center', maxWidth: 110 })
@@ -302,7 +306,7 @@ function renderCopyrightPage(doc: jsPDF, title: string, pageNum: { n: number }, 
   const cx = PW / 2
   const year = new Date().getFullYear()
 
-  doc.setFont('times', 'italic')
+  doc.setFont('EBGaramond', 'italic')
   doc.setFontSize(12)
   setTxt(doc, C_SECONDARY)
   doc.text('Every life holds a story worth telling.', cx, PH / 2 - 20, { align: 'center' })
@@ -310,7 +314,7 @@ function renderCopyrightPage(doc: jsPDF, title: string, pageNum: { n: number }, 
 
   ornament(doc, cx, PH / 2)
 
-  doc.setFont('times', 'normal')
+  doc.setFont('EBGaramond', 'normal')
   doc.setFontSize(8)
   setTxt(doc, C_MUTED)
   doc.text(`${title}`, cx, PH / 2 + 14, { align: 'center' })
@@ -331,7 +335,7 @@ function renderTableOfContents(
   const w = PW - RECTO_INNER - RECTO_OUTER
   const cx = x + w / 2
 
-  doc.setFont('times', 'normal')
+  doc.setFont('EBGaramond', 'normal')
   doc.setFontSize(CHAPTER_NUM_SIZE)
   setTxt(doc, C_MUTED)
   doc.text('CONTENTS', cx, RECTO_TOP + 4, { align: 'center' })
@@ -344,7 +348,7 @@ function renderTableOfContents(
     const pg = chapterPages.get(chapter)
     if (!pg) continue
 
-    doc.setFont('times', 'normal')
+    doc.setFont('EBGaramond', 'normal')
     doc.setFontSize(9.5)
     setTxt(doc, C_PRIMARY)
     doc.text(chapter, x, y)
@@ -390,21 +394,21 @@ function renderChapterPage(
   ]
   const label = labels[chapterIndex] || `Chapter ${chapterIndex + 1}`
 
-  doc.setFont('times', 'normal')
+  doc.setFont('EBGaramond', 'normal')
   doc.setFontSize(CHAPTER_NUM_SIZE)
   setTxt(doc, C_MUTED)
   doc.text(label.toUpperCase(), cx, PH * 0.36, { align: 'center' })
 
   ornament(doc, cx, PH * 0.41)
 
-  doc.setFont('times', 'bold')
+  doc.setFont('EBGaramond', 'bold')
   doc.setFontSize(CHAPTER_SIZE)
   setTxt(doc, C_PRIMARY)
   doc.text(chapter, cx, PH * 0.50, { align: 'center', maxWidth: 110 })
 
   ornament(doc, cx, PH * 0.57)
 
-  doc.setFont('times', 'italic')
+  doc.setFont('EBGaramond', 'italic')
   doc.setFontSize(9)
   setTxt(doc, C_SECONDARY)
   const introLines = splitText(doc, intro, 110)
@@ -433,7 +437,7 @@ function renderQuotePage(
   const cx = PW / 2
   const maxW = 110
 
-  doc.setFont('times', 'normal')
+  doc.setFont('EBGaramond', 'normal')
   doc.setFontSize(7.5)
   setTxt(doc, C_MUTED)
   doc.text('A MEMORY WORTH KEEPING', cx, PH * 0.34, { align: 'center' })
@@ -443,7 +447,7 @@ function renderQuotePage(
   const shortened = quote.length > 200
     ? quote.slice(0, 200).replace(/\s+\S*$/, '') + '…'
     : quote
-  doc.setFont('times', 'italic')
+  doc.setFont('EBGaramond', 'italic')
   doc.setFontSize(11)
   setTxt(doc, C_SECONDARY)
   const qLines = splitText(doc, `"${shortened}"`, maxW)
@@ -454,7 +458,7 @@ function renderQuotePage(
 
   ornament(doc, cx, PH * 0.66)
 
-  doc.setFont('times', 'italic')
+  doc.setFont('EBGaramond', 'italic')
   doc.setFontSize(8)
   setTxt(doc, C_MUTED)
   doc.text('held onto with love', cx, PH * 0.72, { align: 'center' })
@@ -477,14 +481,14 @@ function renderClosingPage(doc: jsPDF, pageNum: { n: number }, skipHeader: Set<n
 
   ornament(doc, cx, PH * 0.40)
 
-  doc.setFont('times', 'italic')
+  doc.setFont('EBGaramond', 'italic')
   doc.setFontSize(14)
   setTxt(doc, C_SECONDARY)
   doc.text('A story worth keeping.', cx, PH * 0.48, { align: 'center' })
 
   ornament(doc, cx, PH * 0.55)
 
-  doc.setFont('times', 'normal')
+  doc.setFont('EBGaramond', 'normal')
   doc.setFontSize(8)
   setTxt(doc, C_MUTED)
   doc.text('Created with Tell Me Your Story', cx, PH * 0.63, { align: 'center' })
@@ -533,14 +537,14 @@ async function renderSection(
   const textW = imgData ? contentWidth(pageNum.n) - imgW - 6 : contentWidth(pageNum.n)
 
   // Question
-  doc.setFont('times', 'italic')
+  doc.setFont('EBGaramond', 'italic')
   doc.setFontSize(QUESTION_SIZE)
   setTxt(doc, C_SECONDARY)
   const qLines = splitText(doc, section.question, textW)
   const qH = textHeight(qLines)
 
   // Answer
-  doc.setFont('times', 'normal')
+  doc.setFont('EBGaramond', 'normal')
   doc.setFontSize(ANSWER_SIZE)
   setTxt(doc, C_PRIMARY)
 
@@ -570,7 +574,7 @@ async function renderSection(
   const textWFinal = imgData ? currentW - imgW - 6 : currentW
 
   // Draw question
-  doc.setFont('times', 'italic')
+  doc.setFont('EBGaramond', 'italic')
   doc.setFontSize(QUESTION_SIZE)
   setTxt(doc, C_SECONDARY)
   const qLinesFinal = splitText(doc, section.question, textWFinal)
@@ -587,13 +591,13 @@ async function renderSection(
       const firstLetter = answerText.charAt(0)
       const rest = answerText.slice(1)
 
-      doc.setFont('times', 'bold')
+      doc.setFont('EBGaramond', 'bold')
       doc.setFontSize(20)
       setTxt(doc, C_ACCENT)
       doc.text(firstLetter, currentX, y.val + 2)
       const dcW = doc.getTextWidth(firstLetter) + 1.5
 
-      doc.setFont('times', 'normal')
+      doc.setFont('EBGaramond', 'normal')
       doc.setFontSize(ANSWER_SIZE)
       setTxt(doc, C_PRIMARY)
       const restLines = splitText(doc, rest, textWFinal - dcW)
@@ -602,7 +606,7 @@ async function renderSection(
       })
       y.val += textHeight(restLines)
     } else {
-      doc.setFont('times', 'normal')
+      doc.setFont('EBGaramond', 'normal')
       doc.setFontSize(ANSWER_SIZE)
       setTxt(doc, C_PRIMARY)
       const aLinesFinal = splitText(doc, answerText, textWFinal)
@@ -675,6 +679,19 @@ export function useStoryTrueBookExport() {
 
     try {
       const doc = new jsPDF({ unit: 'mm', format: [PW, PH], orientation: 'portrait' })
+
+      // Register embedded fonts — required for Lulu print compatibility
+      doc.addFileToVFS('EBGaramond-Regular.ttf', EBGaramondRegular)
+      doc.addFont('EBGaramond-Regular.ttf', 'EBGaramond', 'normal')
+
+      doc.addFileToVFS('EBGaramond-Italic.ttf', EBGaramondItalic)
+      doc.addFont('EBGaramond-Italic.ttf', 'EBGaramond', 'italic')
+
+      doc.addFileToVFS('EBGaramond-Bold.ttf', EBGaramondBold)
+      doc.addFont('EBGaramond-Bold.ttf', 'EBGaramond', 'bold')
+
+      doc.addFileToVFS('EBGaramond-BoldItalic.ttf', EBGaramondBoldItalic)
+      doc.addFont('EBGaramond-BoldItalic.ttf', 'EBGaramond', 'bolditalic')
 
       const answered = sections.filter((s) => s.answer?.trim())
       if (answered.length === 0) {
