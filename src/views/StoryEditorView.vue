@@ -154,6 +154,13 @@
 >
   🎬 Create video
 </button>
+<button
+  v-if="hasTier4Access"
+  @click="showTrueBookModal = true"
+  class="rounded-full border border-stone-300 px-4 py-2 text-sm hover:bg-stone-50"
+>
+  📖 True Book PDF
+</button>
 
         <button
           @click="openPremiumPreview"
@@ -372,6 +379,16 @@
   @export="handleVideoExport"
 />
 
+<TrueBookExportModal
+  :open="showTrueBookModal"
+  :is-exporting="trueBookExporting"
+  :progress="trueBookProgress"
+  :progress-label="trueBookProgressLabel"
+  :error="trueBookError"
+  @close="showTrueBookModal = false"
+  @export="handleTrueBookExport"
+/>
+
   </div>
 
   
@@ -408,6 +425,8 @@
     import type { VideoOptions } from '../composables/useStoryVideo'
     import VideoExportModal from '../components/story/VideoExportModal.vue'
 import { useStoryVideo } from '../composables/useStoryVideo'
+import TrueBookExportModal from '../components/story/TrueBookExportModal.vue'
+import { useStoryTrueBookExport } from '../composables/useTrueBookExport'
 
     const route = useRoute()
     const router = useRouter()
@@ -495,6 +514,8 @@ const { isGenerating: videoGenerating, progress: videoProgress,
   isPaidUser
 )
 
+
+
     const {  
   upgradeSingleText,
   upgradeSingleImages,
@@ -538,6 +559,16 @@ const {
   currentSectionIndex,
   lastSavedAt
 )
+
+const {
+  isExporting: trueBookExporting,
+  progress: trueBookProgress,
+  progressLabel: trueBookProgressLabel,
+  error: trueBookError,
+  exportTrueBook,
+} = useStoryTrueBookExport()
+
+const showTrueBookModal = ref(false)
 
     
 
@@ -1178,6 +1209,16 @@ async function toggleCurrentHighlight() {
 
   currentSection.value.is_highlighted = !currentSection.value.is_highlighted
   await saveAnswer(currentSection.value)
+}
+
+async function handleTrueBookExport() {
+  await exportTrueBook(
+    project.value!,
+    sections.value,
+    getAllImagesForExport,
+    loadImageAsBase64,
+    coverImageUrl.value
+  )
 }
 
 </script>
