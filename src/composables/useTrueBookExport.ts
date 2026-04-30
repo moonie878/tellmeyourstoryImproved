@@ -277,20 +277,12 @@ function renderTableOfContents(
   doc: jsPDF,
   chapters: string[],
   chapterPages: Map<string, number>,
-  pageNum: { n: number },
-  skipHeader: Set<number>
+  _pageNum: { n: number },
+  _skipHeader: Set<number>
 ) {
-  // TOC always starts on recto
-  ensureRecto(doc, pageNum, skipHeader)
-  if (pageNum.n > 1) {
-    doc.addPage()
-    pageNum.n++
-  }
-  pageBg(doc)
-  skipHeader.add(pageNum.n)
-
+  // TOC is rendered by going back to the reserved TOC page — no page manipulation needed
   const x = RECTO_INNER
-  const w = contentWidth(pageNum.n)
+  const w = PW - RECTO_INNER - RECTO_OUTER
   const cx = x + w / 2
 
   doc.setFont('times', 'normal')
@@ -517,14 +509,14 @@ async function renderSection(
   }
 
   const aH = textHeight(aLines)
-  const blockH = qH + QUESTION_GAP + aH + (imgData ? Math.max(imgH, aH) : 0)
+  
 
   // Page break if needed
-  if (y.val + blockH > maxY) {
+  if (y.val + qH + QUESTION_GAP + Math.min(aH, 30) > maxY) {
     doc.addPage()
     pageNum.n++
     pageBg(doc)
-    y.val = contentX(pageNum.n) === RECTO_INNER ? RECTO_TOP : VERSO_TOP
+    y.val = isRecto(pageNum.n) ? RECTO_TOP : VERSO_TOP
   }
 
   const currentX = contentX(pageNum.n)
@@ -703,11 +695,13 @@ export function useStoryTrueBookExport() {
       let isFirstInChapter = false
       const usedQuotes = new Set<string>()
 
+      // y persists across all sections — only resets when a new page starts
+      const y = { val: RECTO_TOP }
+
       progress.value = 20
 
       for (let si = 0; si < answered.length; si++) {
         const section = answered[si]
-        // Track progress
 
         // New chapter?
         if (section.chapter && section.chapter !== currentChapter) {
@@ -736,11 +730,12 @@ export function useStoryTrueBookExport() {
           pageNum.n++
           pageBg(doc)
 
+          // Reset y for the new chapter content page
+          y.val = isRecto(pageNum.n) ? RECTO_TOP : VERSO_TOP
+
         } else {
           isFirstInChapter = false
         }
-
-        const y = { val: isRecto(pageNum.n) ? RECTO_TOP : VERSO_TOP }
 
         // Quote page before certain sections
         if (si > 0 && si % 6 === 0 && answered[si - 1]?.answer) {
@@ -752,7 +747,7 @@ export function useStoryTrueBookExport() {
           }
         }
 
-        // Also render quote page for highlighted sections
+        // Quote page for highlighted sections
         if (section.is_highlighted && section.answer && !usedQuotes.has(section.answer.trim())) {
           const quote = section.answer.trim()
           if (quote.length >= 40) {
@@ -772,6 +767,8 @@ export function useStoryTrueBookExport() {
           isFirstInChapter
         )
 
+        // After renderSection, if it added a new page, y is already updated inside renderSection
+        // but we need to make sure y reflects the current page top if pageNum changed
         progress.value = 20 + Math.round((si / answered.length) * 65)
         progressLabel.value = `Typesetting page ${pageNum.n}…`
       }
@@ -808,7 +805,8 @@ export function useStoryTrueBookExport() {
       progress.value = 93
       doc.setPage(tocPageNum)
       pageBg(doc)
-      renderTableOfContents(doc, answeredChapters, chapterPages, { n: tocPageNum }, skipHeader)
+      const tocPageRef = { n: tocPageNum }
+      renderTableOfContents(doc, answeredChapters, chapterPages, tocPageRef, skipHeader)
 
       // ── Save ───────────────────────────────────────────────────
       progressLabel.value = 'Saving your book…'
