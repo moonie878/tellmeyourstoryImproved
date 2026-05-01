@@ -207,24 +207,24 @@
 
         <div class="mt-10 grid grid-cols-2 gap-4 md:grid-cols-3 md:gap-5">
           <div class="gallery-item col-span-1">
-            <img src="/images/example-story-chapter.png" alt="Chapter page" class="gallery-img" />
+            <img src="/images/example/example-page-childhood.png" alt="Chapter page" class="gallery-img" />
             <p class="gallery-label">Chapter pages</p>
           </div>
           <div class="gallery-item col-span-1">
-            <img src="/images/example-story-quote.png" alt="Quote page" class="gallery-img" />
+            <img src="/images/example/example-page-cooking-quote.png" alt="Quote page" class="gallery-img" />
             <p class="gallery-label">Quote pages</p>
           </div>
           <div class="gallery-item col-span-2 md:col-span-1">
-            <img src="/images/example-story-cover.png" alt="Cover page" class="gallery-img" />
+            <img src="/images/example/example-page-cover.png" alt="Cover page" class="gallery-img" />
             <p class="gallery-label">Cover page</p>
           </div>
           <div class="gallery-item col-span-2">
-            <img src="/images/example-story-memory-page.png" alt="Story page" class="gallery-img" />
+            <img src="/images/example/example-page-world.png" alt="Story page with photo" class="gallery-img" />
             <p class="gallery-label">Story pages with photos</p>
           </div>
           <div class="gallery-item col-span-2 md:col-span-1">
-            <img src="/images/example-story-closing.png" alt="Closing page" class="gallery-img" />
-            <p class="gallery-label">Closing page</p>
+            <img src="/images/example/example-page-dreams.png" alt="Memories page" class="gallery-img" />
+            <p class="gallery-label">Memory pages</p>
           </div>
         </div>
 
@@ -249,11 +249,13 @@
       <div class="relative mx-auto max-w-3xl text-center">
         <div class="why-ornament">— ◦ ○ ◦ —</div>
         <blockquote class="why-quote">
-          The questions we mean to ask, the memories we assume we'll always remember, the moments that feel ordinary now —
-          <em>these are the ones we miss most later.</em>
+          "It smelled of cooking, washing drying near the fire, and sometimes something sweet baking in the oven."
+          <em class="block mt-4 text-lg not-italic text-[#C4A882]">
+            — From a real Tell Me Your Story keepsake
+          </em>
         </blockquote>
         <p class="why-sub mt-6">
-          Tell Me Your Story helps you preserve them before they fade.
+          This is what it feels like to capture a memory properly. Start preserving the ones that matter most.
         </p>
         <div class="mt-10">
           <router-link to="/register" @click="trackStart" class="btn-primary">
