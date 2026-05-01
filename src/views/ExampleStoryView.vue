@@ -1,32 +1,30 @@
 <template>
-  <main class="bg-[#f7f5f2] text-stone-900">
-    <!-- HERO -->
-    <section class="px-6 py-20 md:py-24">
-      <div class="mx-auto max-w-5xl text-center">
-        <p class="text-sm font-medium uppercase tracking-[0.25em] text-stone-500">
-          Example story
-        </p>
+  <main class="bg-[#F5F0E8] text-[#1C1917]">
 
-        <h1 class="mt-4 text-4xl font-bold leading-tight md:text-6xl">
-          See how a story becomes a keepsake
+    <!-- ═══════════════════════════════════════ -->
+    <!-- HERO                                    -->
+    <!-- ═══════════════════════════════════════ -->
+    <section class="px-5 py-20 sm:px-8 sm:py-24">
+      <div class="mx-auto max-w-4xl text-center">
+        <p class="eyebrow">Example keepsake</p>
+        <h1 class="mt-4 font-display text-4xl font-bold leading-tight tracking-[-0.02em] sm:text-5xl md:text-6xl">
+          A real story.<br />
+          <em class="italic text-[#7C5C3B]">A real keepsake.</em>
         </h1>
-
-        <p class="mx-auto mt-6 max-w-3xl text-lg leading-8 text-stone-600">
-          This example shows how guided answers, personal photos, and thoughtful design
-          come together in a finished book you can keep, print, and share.
+        <p class="mx-auto mt-6 max-w-2xl text-lg leading-8 text-[#5C534E]">
+          This is a real keepsake created with Tell Me Your Story — real questions,
+          real answers, real memories. This is what your family could have.
         </p>
-
         <div class="mt-8 flex flex-wrap justify-center gap-4">
           <router-link
             to="/register"
-            class="rounded-full bg-[#7C5C3B] px-6 py-3 text-sm font-semibold text-white transition hover:opacity-90"
+            class="btn-primary"
           >
-            Create your own story
+            Start your own story — it's free
           </router-link>
-
           <router-link
             to="/"
-            class="rounded-full border border-stone-300 bg-white px-6 py-3 text-sm font-semibold text-stone-900 transition hover:bg-stone-100"
+            class="btn-secondary"
           >
             Back to home
           </router-link>
@@ -34,214 +32,246 @@
       </div>
     </section>
 
-    <!-- STORY INTRO -->
-    <section class="border-t border-stone-200 bg-white px-6 py-16">
-      <div class="mx-auto grid max-w-6xl items-center gap-10 md:grid-cols-[1.1fr_0.9fr]">
-        <div>
-          <p class="text-sm font-medium uppercase tracking-[0.25em] text-stone-500">
-            Featured keepsake
-          </p>
-
-          <h2 class="mt-4 text-3xl font-bold md:text-4xl">
-            Mum’s Story
-          </h2>
-
-          <p class="mt-5 max-w-2xl text-lg leading-8 text-stone-600">
-            A warm, personal example of how everyday memories, childhood moments,
-            family stories, and meaningful reflections can be turned into something
-            beautiful enough to keep for years.
-          </p>
-
-          <div class="mt-8 grid gap-4 sm:grid-cols-3">
-            <div class="rounded-2xl border border-stone-200 bg-stone-50 p-4">
-              <p class="text-sm font-semibold text-stone-900">Guided answers</p>
-              <p class="mt-2 text-sm text-stone-600">
-                Thoughtful prompts help shape the story naturally.
-              </p>
-            </div>
-
-            <div class="rounded-2xl border border-stone-200 bg-stone-50 p-4">
-              <p class="text-sm font-semibold text-stone-900">Personal photos</p>
-              <p class="mt-2 text-sm text-stone-600">
-                Images make the final keepsake feel even more personal.
-              </p>
-            </div>
-
-            <div class="rounded-2xl border border-stone-200 bg-stone-50 p-4">
-              <p class="text-sm font-semibold text-stone-900">Finished layout</p>
-              <p class="mt-2 text-sm text-stone-600">
-                Beautiful pages designed to feel like a real book.
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div class="flex justify-center md:justify-end">
-          <img
-            src="/images/example-story-hero-cover.png"
-            alt="Example story book preview"
-            class="w-full max-w-md rounded-[2rem] shadow-lg"
-          />
-        </div>
-      </div>
-    </section>
-
-    <!-- PAGE PREVIEW GALLERY -->
-    <section class="px-6 py-20">
+    <!-- ═══════════════════════════════════════ -->
+    <!-- QUOTES — the emotional hook             -->
+    <!-- ═══════════════════════════════════════ -->
+    <section class="bg-[#2C2420] px-5 py-16 sm:px-8 sm:py-20">
       <div class="mx-auto max-w-6xl">
-        <div class="max-w-2xl">
-          <p class="text-sm font-medium uppercase tracking-[0.25em] text-stone-500">
-            Inside the story
-          </p>
-
-          <h2 class="mt-4 text-3xl font-bold md:text-4xl">
-            A look inside the finished keepsake
-          </h2>
-
-          <p class="mt-4 text-lg text-stone-600">
-            From elegant chapter openers and highlighted quotes to personal memories
-            and image-led pages.
-          </p>
-        </div>
-
-        <div class="mt-12 grid gap-6 md:grid-cols-2">
-          <div class="rounded-[2rem] border border-stone-200 bg-white p-4 shadow-sm">
-            <img
-              src="/images/example-story-cover.png"
-              alt="Example story cover page"
-              class="w-full rounded-[1.5rem]"
-            />
-            <p class="mt-4 text-sm font-semibold text-stone-900">Cover page</p>
-            <p class="mt-1 text-sm text-stone-600">
-              A polished opening page that makes the story feel gift-worthy from the start.
-            </p>
-          </div>
-
-          <div class="rounded-[2rem] border border-stone-200 bg-white p-4 shadow-sm">
-            <img
-              src="/images/example-story-chapter.png"
-              alt="Example chapter page"
-              class="w-full rounded-[1.5rem]"
-            />
-            <p class="mt-4 text-sm font-semibold text-stone-900">Chapter opener</p>
-            <p class="mt-1 text-sm text-stone-600">
-              Gentle chapter pages create rhythm and help the story feel structured.
-            </p>
-          </div>
-
-          <div class="rounded-[2rem] border border-stone-200 bg-white p-4 shadow-sm">
-            <img
-              src="/images/example-story-quote.png"
-              alt="Example quote page"
-              class="w-full rounded-[1.5rem]"
-            />
-            <p class="mt-4 text-sm font-semibold text-stone-900">Quote highlights</p>
-            <p class="mt-1 text-sm text-stone-600">
-              Meaningful moments are pulled out and turned into elegant highlight pages.
-            </p>
-          </div>
-
-          <div class="rounded-[2rem] border border-stone-200 bg-white p-4 shadow-sm">
-            <img
-              src="/images/example-story-memory-page.png"
-              alt="Example story memory page"
-              class="w-full rounded-[1.5rem]"
-            />
-            <p class="mt-4 text-sm font-semibold text-stone-900">Memory page</p>
-            <p class="mt-1 text-sm text-stone-600">
-              Guided answers and personal images come together to create a story worth keeping.
-            </p>
-          </div>
-
-          <div class="rounded-[2rem] border border-stone-200 bg-white p-4 shadow-sm md:col-span-2">
-            <img
-              src="/images/example-story-closing.png"
-              alt="Example closing page"
-              class="mx-auto w-full max-w-2xl rounded-[1.5rem]"
-            />
-            <p class="mt-4 text-sm font-semibold text-stone-900">Closing page</p>
-            <p class="mt-1 text-sm text-stone-600">
-              A gentle ending that makes the whole book feel complete and worth holding onto.
-            </p>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- OPTIONAL SPREAD SECTION -->
-    <section class="border-t border-stone-200 bg-white px-6 py-20">
-      <div class="mx-auto max-w-6xl">
-        <div class="max-w-2xl">
-          <p class="text-sm font-medium uppercase tracking-[0.25em] text-stone-500">
-            Also available
-          </p>
-
-          <h2 class="mt-4 text-3xl font-bold md:text-4xl">
-            Open spread layout
-          </h2>
-
-          <p class="mt-4 text-lg text-stone-600">
-            Stories can also be exported in a wider open-spread format for a more editorial book feel.
-          </p>
-        </div>
-
-        <div class="mt-12 grid gap-6">
-          <div class="rounded-[2rem] border border-stone-200 bg-stone-50 p-4 shadow-sm">
-            <img
-              src="/images/example-story-spread-quote.png"
-              alt="Example spread quote page"
-              class="w-full rounded-[1.5rem]"
-            />
-          </div>
-
-          <div class="rounded-[2rem] border border-stone-200 bg-stone-50 p-4 shadow-sm">
-            <img
-              src="/images/example-story-spread-memory.png"
-              alt="Example spread memory page"
-              class="w-full rounded-[1.5rem]"
-            />
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- REASSURANCE -->
-    <section class="border-t border-stone-200 bg-[#f7f5f2] px-6 py-20">
-      <div class="mx-auto max-w-4xl text-center">
-        <p class="text-sm font-medium uppercase tracking-[0.25em] text-stone-500">
-          Your story, your pace
-        </p>
-
-        <h2 class="mt-4 text-3xl font-bold md:text-4xl">
-          You don’t need to do it all at once
+        <p class="eyebrow text-[#9C7C5C] text-center">From the keepsake</p>
+        <h2 class="mt-3 font-display text-center text-2xl font-bold text-[#E8DDD0] sm:text-3xl">
+          Her words, in her own voice
         </h2>
 
-        <p class="mt-6 text-lg leading-8 text-stone-600">
-          Start with one memory, one answer, or one photo. Save as you go, come back anytime,
-          and slowly build something meaningful over time.
+        <div class="mt-10 grid gap-5 md:grid-cols-3">
+          <div class="quote-card">
+            <div class="ornament">— ◦ —</div>
+            <blockquote class="quote-text">
+              "It smelled of cooking, washing drying near the fire, and sometimes something sweet baking in the oven."
+            </blockquote>
+            <p class="quote-label">On her childhood home</p>
+          </div>
+
+          <div class="quote-card quote-card-featured">
+            <div class="ornament text-[#C4A882]">— ◦ —</div>
+            <blockquote class="quote-text text-[#E8DDD0]">
+              "I was born into a world that felt much slower than today. People had less, but they seemed to make more of what they did have."
+            </blockquote>
+            <p class="quote-label text-[#9C7C5C]">On the world she was born into</p>
+          </div>
+
+          <div class="quote-card">
+            <div class="ornament">— ◦ —</div>
+            <blockquote class="quote-text">
+              "What I really longed for was warmth, love, and a sense of belonging."
+            </blockquote>
+            <p class="quote-label">On her childhood dreams</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════ -->
+    <!-- GALLERY — real page screenshots        -->
+    <!-- ═══════════════════════════════════════ -->
+    <section class="bg-white px-5 py-16 sm:px-8 sm:py-20">
+      <div class="mx-auto max-w-6xl">
+        <p class="eyebrow">Inside the keepsake</p>
+        <h2 class="section-title mt-3">
+          Pages from the finished book
+        </h2>
+        <p class="mt-4 max-w-2xl text-base leading-7 text-[#5C534E]">
+          Every page is designed to feel like a real book — beautiful layouts,
+          elegant typography, and personal photos woven throughout.
+        </p>
+
+        <!-- Row 1 — cover + dedication -->
+        <div class="mt-10 grid gap-5 sm:grid-cols-2">
+          <div class="page-card">
+            <img
+              src="/images/example/example-page-cover.png"
+              alt="Keepsake cover page"
+              class="page-img"
+            />
+            <div class="page-caption">
+              <p class="page-caption-title">Cover page</p>
+              <p class="page-caption-desc">A polished opening with the cover photo, title, and subtitle.</p>
+            </div>
+          </div>
+
+          <div class="page-card">
+            <img
+              src="/images/example/example-page-dedication.png"
+              alt="Dedication page"
+              class="page-img"
+            />
+            <div class="page-caption">
+              <p class="page-caption-title">Dedication page</p>
+              <p class="page-caption-desc">"Every life holds a story worth telling. This is yours."</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Row 2 — two answer pages -->
+        <div class="mt-5 grid gap-5 sm:grid-cols-2">
+          <div class="page-card">
+            <img
+              src="/images/example/example-page-world.png"
+              alt="Story answer page with photo"
+              class="page-img"
+            />
+            <div class="page-caption">
+              <p class="page-caption-title">Story page with photo</p>
+              <p class="page-caption-desc">Answers flow naturally alongside personal photos.</p>
+            </div>
+          </div>
+
+          <div class="page-card">
+            <img
+              src="/images/example/example-page-people.png"
+              alt="Story page about family"
+              class="page-img"
+            />
+            <div class="page-caption">
+              <p class="page-caption-title">Family memories</p>
+              <p class="page-caption-desc">Drop caps and thoughtful layout make every page feel considered.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Row 3 — quote page + chapter page -->
+        <div class="mt-5 grid gap-5 sm:grid-cols-2">
+          <div class="page-card">
+            <img
+              src="/images/example/example-page-cooking-quote.png"
+              alt="Quote highlight page"
+              class="page-img"
+            />
+            <div class="page-caption">
+              <p class="page-caption-title">Quote highlight page</p>
+              <p class="page-caption-desc">Special memories become beautiful standalone pages.</p>
+            </div>
+          </div>
+
+          <div class="page-card">
+            <img
+              src="/images/example/example-page-childhood.png"
+              alt="Chapter opener page"
+              class="page-img"
+            />
+            <div class="page-caption">
+              <p class="page-caption-title">Chapter opener</p>
+              <p class="page-caption-desc">Each chapter begins with its own elegant page.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Row 4 — full width dreams page -->
+        <div class="mt-5">
+          <div class="page-card">
+            <img
+              src="/images/example/example-page-dreams.png"
+              alt="Story page about childhood dreams"
+              class="page-img"
+            />
+            <div class="page-caption">
+              <p class="page-caption-title">Childhood dreams</p>
+              <p class="page-caption-desc">Photos sit alongside answers to bring each memory to life.</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════ -->
+    <!-- PDF EMBED — the full keepsake          -->
+    <!-- ═══════════════════════════════════════ -->
+    <section class="bg-[#F5F0E8] px-5 py-16 sm:px-8 sm:py-20">
+      <div class="mx-auto max-w-5xl">
+        <p class="eyebrow text-center">Read the full keepsake</p>
+        <h2 class="section-title mt-3 mx-auto text-center">
+          Browse every page
+        </h2>
+        <p class="mx-auto mt-4 max-w-xl text-center text-base leading-7 text-[#5C534E]">
+          This is the complete keepsake — every question answered, every photo placed,
+          every memory preserved. Scroll through it below.
+        </p>
+
+        <div class="mt-10 overflow-hidden rounded-3xl border border-[#E8DDD0] shadow-xl">
+          <iframe
+            src="/example-story.pdf"
+            width="100%"
+            height="900"
+            class="block bg-[#F5F0E8]"
+            title="Example keepsake PDF"
+          ></iframe>
+        </div>
+
+        <p class="mt-4 text-center text-xs text-[#A8A29E]">
+          Can't see the PDF?
+          <a
+            href="/example-story.pdf"
+            target="_blank"
+            class="text-[#7C5C3B] underline hover:opacity-80"
+          >
+            Open it in a new tab
+          </a>
         </p>
       </div>
     </section>
 
-    <!-- FINAL CTA -->
-    <section class="border-t border-stone-200 bg-stone-900 px-6 py-20 text-white">
+    <!-- ═══════════════════════════════════════ -->
+    <!-- REASSURANCE                            -->
+    <!-- ═══════════════════════════════════════ -->
+    <section class="bg-white px-5 py-16 sm:px-8 sm:py-20">
+      <div class="mx-auto max-w-4xl">
+        <div class="grid gap-8 md:grid-cols-3">
+          <div class="reassurance-card">
+            <span class="reassurance-icon">💛</span>
+            <p class="reassurance-title">Answer at your own pace</p>
+            <p class="reassurance-desc">
+              You don't need to answer all 100 questions. Start with one memory and build from there.
+            </p>
+          </div>
+          <div class="reassurance-card">
+            <span class="reassurance-icon">📸</span>
+            <p class="reassurance-title">Add your own photos</p>
+            <p class="reassurance-desc">
+              Upload personal photos alongside any answer to make the keepsake truly yours.
+            </p>
+          </div>
+          <div class="reassurance-card">
+            <span class="reassurance-icon">🎬</span>
+            <p class="reassurance-title">Also exports as video</p>
+            <p class="reassurance-desc">
+              Premium stories can also be exported as a beautiful video with music — perfect for sharing.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════ -->
+    <!-- FINAL CTA                              -->
+    <!-- ═══════════════════════════════════════ -->
+    <section class="bg-[#1C1917] px-5 py-20 sm:px-8 sm:py-28">
       <div class="mx-auto max-w-3xl text-center">
-        <h2 class="text-3xl font-bold md:text-4xl">
-          Ready to create one of your own?
+        <div class="ornament-light">— ◦ ○ ◦ —</div>
+        <h2 class="mt-5 font-display text-3xl font-bold text-white sm:text-4xl md:text-5xl">
+          Now imagine this for someone you love.
         </h2>
-
-        <p class="mt-4 text-lg text-stone-300">
-          Start with guided questions and turn memories into something your family can treasure.
+        <p class="mx-auto mt-5 max-w-xl text-base leading-8 text-[#A8A29E] sm:text-lg">
+          Free to start. Answer as many questions as you like.
+          The keepsake will be there when you're ready.
         </p>
-
-        <router-link
-          to="/register"
-          class="mt-8 inline-block rounded-full bg-white px-6 py-3 text-sm font-semibold text-stone-900 transition hover:bg-stone-100"
-        >
-          Get started free
-        </router-link>
+        <div class="mt-10 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
+          <router-link to="/register" class="btn-primary-light">
+            Start your story — it's free
+          </router-link>
+        </div>
       </div>
     </section>
+
   </main>
 </template>
 
@@ -249,8 +279,176 @@
 import { useSeo } from '../composables/useSeo'
 
 useSeo({
-  title: 'Example Story | Tell Me Your Story',
+  title: 'Example Keepsake | Tell Me Your Story',
   description:
-    'See how guided answers, personal photos, and thoughtful design come together in a finished keepsake book.',
+    'See a real keepsake created with Tell Me Your Story — real questions, real answers, real memories. This is what your family could have.',
 })
 </script>
+
+<style scoped>
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap');
+
+main { font-family: 'DM Sans', sans-serif; }
+.font-display, h1, h2 { font-family: 'Playfair Display', Georgia, serif; }
+
+.eyebrow {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: #8C847E;
+}
+
+.section-title {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: clamp(1.8rem, 3vw, 2.4rem);
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  color: #1C1917;
+  max-width: 560px;
+}
+
+/* Buttons */
+.btn-primary {
+  display: inline-block;
+  background: #7C5C3B;
+  color: white;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 14px 28px;
+  border-radius: 100px;
+  text-decoration: none;
+  transition: opacity 0.2s;
+}
+.btn-primary:hover { opacity: 0.88; }
+
+.btn-primary-light {
+  display: inline-block;
+  background: white;
+  color: #1C1917;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 14px 28px;
+  border-radius: 100px;
+  text-decoration: none;
+  transition: opacity 0.2s;
+}
+.btn-primary-light:hover { opacity: 0.9; }
+
+.btn-secondary {
+  display: inline-block;
+  background: white;
+  color: #1C1917;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 14px 28px;
+  border-radius: 100px;
+  border: 1px solid #D6CFC8;
+  text-decoration: none;
+  transition: background 0.2s;
+}
+.btn-secondary:hover { background: #F0EBE3; }
+
+/* Quote cards */
+.quote-card {
+  background: #2C2420;
+  border: 1px solid #3C3430;
+  border-radius: 20px;
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.quote-card-featured {
+  background: #3C2C20;
+  border-color: #5C4030;
+}
+
+.ornament {
+  font-size: 13px;
+  letter-spacing: 0.15em;
+  color: #5C534E;
+}
+
+.ornament-light {
+  font-size: 14px;
+  letter-spacing: 0.1em;
+  color: #5C534E;
+}
+
+.quote-text {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 1.05rem;
+  font-style: italic;
+  line-height: 1.65;
+  color: #C4B8AC;
+  flex: 1;
+}
+
+.quote-label {
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: #6C6460;
+}
+
+/* Page cards */
+.page-card {
+  background: white;
+  border: 1px solid #E8E0D8;
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+.page-img {
+  width: 100%;
+  display: block;
+}
+
+.page-caption {
+  padding: 16px 20px;
+  border-top: 1px solid #F0EBE3;
+}
+
+.page-caption-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1C1917;
+}
+
+.page-caption-desc {
+  margin-top: 4px;
+  font-size: 12px;
+  color: #8C847E;
+  line-height: 1.5;
+}
+
+/* Reassurance cards */
+.reassurance-card {
+  padding: 24px;
+  background: #F5F0E8;
+  border: 1px solid #E8DDD0;
+  border-radius: 20px;
+  text-align: center;
+}
+
+.reassurance-icon {
+  font-size: 28px;
+}
+
+.reassurance-title {
+  margin-top: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #1C1917;
+}
+
+.reassurance-desc {
+  margin-top: 8px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: #5C534E;
+}
+</style>
