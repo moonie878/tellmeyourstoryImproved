@@ -479,93 +479,97 @@ export function useStoryVideo() {
       canvas.height = H
       const ctx = canvas.getContext('2d')!
 
-      const fps = 1
+      const fps = 25  // render at 25fps for smooth transitions
       const frameDuration = options.slideDuration
 
-      // Transition frame counts (at 1fps these are whole seconds)
-      const transitionFrames = options.transition === 'cut' ? 0
+      // Transition duration in seconds
+      const transitionSecs = options.transition === 'cut' ? 0
         : options.transition === 'fade' ? 1
         : 2 // slow-fade
+      const transitionFrameCount = transitionSecs * fps
 
       progressLabel.value = 'Drawing slides...'
 
       let frameIndex = 0
 
-      // We need to keep the previous slide's canvas data for cross-fade
-      const offCanvas = document.createElement('canvas')
-      offCanvas.width = W
-      offCanvas.height = H
-      const offCtx = offCanvas.getContext('2d')!
-
-      for (let s = 0; s < slides.length; s++) {
-        const slide = slides[s]
-
-        await drawSlide(ctx, slide, options.theme)
-
-        progress.value = Math.round((s / slides.length) * 35)
-        progressLabel.value = `Drawing slide ${s + 1} of ${slides.length}...`
-
-        // Capture this slide as a buffer
-        const blob: Blob = await new Promise((resolve) => canvas.toBlob((b) => resolve(b!), 'image/png'))
-        const buf = await blob.arrayBuffer()
-
-        // Write the main slide frames
-        const mainFrames = frameDuration * fps
-        for (let f = 0; f < mainFrames; f++) {
-          const name = `frame${String(frameIndex).padStart(5, '0')}.png`
+      // Helper — write N identical frames from a buffer
+      async function writeFrames(buf: ArrayBuffer, count: number) {
+        for (let f = 0; f < count; f++) {
           const copy = new Uint8Array(buf.byteLength)
           copy.set(new Uint8Array(buf))
-          await ffmpeg.writeFile(name, copy)
+          await ffmpeg.writeFile(`frame${String(frameIndex).padStart(5, '0')}.png`, copy)
           frameIndex++
         }
+      }
 
-        // Write cross-fade transition frames to the NEXT slide
-        if (transitionFrames > 0 && s < slides.length - 1) {
-          // Save current slide to offscreen canvas
-          offCtx.drawImage(canvas, 0, 0)
+      // Helper — capture current canvas as ArrayBuffer
+      async function captureCanvas(): Promise<ArrayBuffer> {
+        const blob: Blob = await new Promise((resolve) => canvas.toBlob((b) => resolve(b!), 'image/png'))
+        return blob.arrayBuffer()
+      }
 
-          // Draw next slide onto main canvas
-          const nextSlide = slides[s + 1]
-          await drawSlide(ctx, nextSlide, options.theme)
+      // Pre-render all slides as image buffers
+      progressLabel.value = 'Rendering slides...'
+      const slideBuffers: ArrayBuffer[] = []
+      for (let s = 0; s < slides.length; s++) {
+        await drawSlide(ctx, slides[s], options.theme)
+        progress.value = Math.round((s / slides.length) * 30)
+        progressLabel.value = `Rendering slide ${s + 1} of ${slides.length}...`
+        slideBuffers.push(await captureCanvas())
+      }
 
-          // Generate blend frames
-          for (let t = 1; t <= transitionFrames; t++) {
-            const alpha = t / (transitionFrames + 1)
+      // Write frames with transitions between slides
+      progressLabel.value = 'Writing frames...'
+      for (let s = 0; s < slideBuffers.length; s++) {
+        const buf = slideBuffers[s]
 
-            // Blend: draw previous slide fully, then overlay next slide with alpha
-            offCtx.drawImage(canvas, 0, 0) // next slide on offscreen temporarily
+        // How many static frames for this slide
+        // Subtract half the transition from each side (except first and last)
+        const isFirst = s === 0
+        const isLast = s === slideBuffers.length - 1
+        const leadIn  = isFirst ? 0 : Math.floor(transitionFrameCount / 2)
+        const leadOut = isLast  ? 0 : Math.floor(transitionFrameCount / 2)
+        const staticFrames = (frameDuration * fps) - leadIn - leadOut
 
-            // Draw prev slide on main canvas
-            const prevImg = new Image()
-            const prevBlob: Blob = await new Promise((resolve) => offCanvas.toBlob((b) => resolve(b!), 'image/png'))
-            prevImg.src = URL.createObjectURL(prevBlob)
-            await new Promise((r) => { prevImg.onload = r })
+        // Write static frames
+        await writeFrames(buf, Math.max(1, staticFrames))
+
+        progress.value = 30 + Math.round((s / slideBuffers.length) * 10)
+
+        // Write cross-fade transition to next slide
+        if (transitionFrameCount > 0 && s < slideBuffers.length - 1) {
+          const nextBuf = slideBuffers[s + 1]
+
+          // Load current slide as Image for blending
+          const currBlob = new Blob([buf], { type: 'image/png' })
+          const currImg = new Image()
+          currImg.src = URL.createObjectURL(currBlob)
+          await new Promise((r) => { currImg.onload = r })
+
+          const nextBlob = new Blob([nextBuf], { type: 'image/png' })
+          const nextImg = new Image()
+          nextImg.src = URL.createObjectURL(nextBlob)
+          await new Promise((r) => { nextImg.onload = r })
+
+          for (let t = 0; t < transitionFrameCount; t++) {
+            const alpha = t / (transitionFrameCount - 1) // 0 → 1
 
             ctx.clearRect(0, 0, W, H)
             ctx.globalAlpha = 1
-            ctx.drawImage(prevImg, 0, 0)
-
-            // Draw next slide on top with increasing alpha
+            ctx.drawImage(currImg, 0, 0)
             ctx.globalAlpha = alpha
-            ctx.drawImage(offCanvas, 0, 0)
+            ctx.drawImage(nextImg, 0, 0)
             ctx.globalAlpha = 1
 
-            URL.revokeObjectURL(prevImg.src)
-
-            const blendBlob: Blob = await new Promise((resolve) => canvas.toBlob((b) => resolve(b!), 'image/png'))
-            const blendBuf = await blendBlob.arrayBuffer()
-            const blendCopy = new Uint8Array(blendBuf.byteLength)
-            blendCopy.set(new Uint8Array(blendBuf))
-
-            const name = `frame${String(frameIndex).padStart(5, '0')}.png`
-            await ffmpeg.writeFile(name, blendCopy)
+            const blendBuf = await captureCanvas()
+            const copy = new Uint8Array(blendBuf.byteLength)
+            copy.set(new Uint8Array(blendBuf))
+            await ffmpeg.writeFile(`frame${String(frameIndex).padStart(5, '0')}.png`, copy)
             frameIndex++
           }
 
-          // Restore the next slide onto main canvas for the next iteration
-          await drawSlide(ctx, nextSlide, options.theme)
-          // Copy it to offscreen so it becomes the "previous" on next iteration
-          offCtx.drawImage(canvas, 0, 0)
+          URL.revokeObjectURL(currImg.src)
+          URL.revokeObjectURL(nextImg.src)
         }
       }
 
@@ -608,7 +612,7 @@ export function useStoryVideo() {
       progress.value = 95
       progressLabel.value = 'Preparing download...'
 
-     const rawData = await ffmpeg.readFile('output.mp4')
+      const rawData = await ffmpeg.readFile('output.mp4')
 const uint8Data = rawData instanceof Uint8Array ? rawData : new Uint8Array(rawData as unknown as ArrayBuffer)
 const safeData = new Uint8Array(uint8Data.byteLength)
 safeData.set(uint8Data)
