@@ -123,7 +123,7 @@
           <div class="format-card format-card-dark">
             <div class="format-card-inner">
               <div class="format-icon">🎬</div>
-              <h3 class="format-title text-white">Story Video</h3>
+              <h3 class="format-title format-card-dark">Story Video</h3>
               <p class="format-desc text-stone-300">
                 A cinematic video of their story — title slide, chapters, answers, and photos — with music of your choice. Play it at birthdays, Christmas, or any moment that matters.
               </p>
@@ -1019,5 +1019,9 @@ h1 {
   background: linear-gradient(160deg, #2C2420 0%, #1C1917 100%);
   position: relative;
   overflow: hidden;
+}
+
+.format-card-dark .format-title {
+  color: white;
 }
 </style>
