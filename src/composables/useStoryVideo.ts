@@ -5,10 +5,12 @@ import { getChapterIntro } from '../utils/pdfDesign'
 
 export type VideoTheme = PdfTheme
 export type VideoSlideDuration = 3 | 5 | 8
+export type VideoTransition = 'cut' | 'fade' | 'slow-fade'
 
 export type VideoOptions = {
   theme: VideoTheme
   slideDuration: VideoSlideDuration
+  transition: VideoTransition
   musicFile: File | null
   musicTrack?: 'gentle-piano' | 'warm-strings' | 'soft-acoustic' | null
 }
@@ -17,7 +19,6 @@ export type VideoSlide =
   | { type: 'title'; title: string; subtitle: string; coverImageUrl?: string }
   | { type: 'chapter'; chapter: string; intro: string; chapterIndex: number }
   | { type: 'answer'; question: string; answer: string; imageUrl?: string; chapter: string }
-  | { type: 'quote'; text: string; chapter: string }
   | { type: 'closing' }
 
 // Canvas dimensions — 1080p landscape
@@ -71,50 +72,30 @@ function buildSlides(
   let currentChapter = ''
   let chapterIndex = 0
 
-  // Pre-compute which chapters have at least one answered question
-const answeredChapters = new Set(
-  sections
-    .filter((s) => s.answer?.trim() && s.chapter)
-    .map((s) => s.chapter as string)
-)
+  for (const section of sections) {
+    // Chapter intro slide on chapter change
+    if (section.chapter && section.chapter !== currentChapter) {
+      currentChapter = section.chapter
+      chapterIndex++
+      slides.push({
+        type: 'chapter',
+        chapter: currentChapter,
+        intro: getChapterIntro(currentChapter),
+        chapterIndex,
+      })
+    }
 
-for (const section of sections) {
-  // Only add chapter slide if this chapter has answered questions
-  if (
-    section.chapter &&
-    section.chapter !== currentChapter &&
-    answeredChapters.has(section.chapter)
-  ) {
-    currentChapter = section.chapter
-    chapterIndex++
-    slides.push({
-      type: 'chapter',
-      chapter: currentChapter,
-      intro: getChapterIntro(currentChapter),
-      chapterIndex,
-    })
+    // Only include answered questions
+    if (section.answer?.trim()) {
+      slides.push({
+        type: 'answer',
+        question: section.question,
+        answer: section.answer.trim(),
+        imageUrl: imageMap.get(section.id) ?? undefined,
+        chapter: section.chapter ?? '',
+      })
+    }
   }
-
-  // Only include answered questions
-if (section.answer?.trim()) {
-  slides.push({
-    type: 'answer',
-    question: section.question,
-    answer: section.answer.trim(),
-    imageUrl: imageMap.get(section.id) ?? undefined,
-    chapter: section.chapter ?? '',
-  })
-
-  // Add a quote slide after highlighted answers
-  if (section.is_highlighted) {
-    slides.push({
-      type: 'quote',
-      text: section.answer.trim(),
-      chapter: section.chapter ?? '',
-    })
-  }
-}
-}
 
   // Closing slide
   slides.push({ type: 'closing' })
@@ -320,7 +301,7 @@ async function drawSlide(
 
   if (slide.type === 'answer') {
     const hasImage = !!slide.imageUrl
-    const textX = pad
+    const textX = hasImage ? pad : pad
     const textW = hasImage ? W * 0.52 - pad : W - pad * 2
 
     // Chapter label top left
@@ -430,54 +411,6 @@ async function drawSlide(
     ctx.stroke()
   }
 
-if (slide.type === 'quote') {
-  ctx.textAlign = 'center'
-
-  // Warm background
-  ctx.fillStyle = colors.pageBg
-  ctx.fillRect(0, 0, W, H)
-
-  // Subtle top and bottom rules
-  ctx.strokeStyle = colors.divider
-  ctx.lineWidth = 1
-  ctx.beginPath()
-  ctx.moveTo(pad, 60)
-  ctx.lineTo(W - pad, 60)
-  ctx.stroke()
-  ctx.beginPath()
-  ctx.moveTo(pad, H - 60)
-  ctx.lineTo(W - pad, H - 60)
-  ctx.stroke()
-
-  // Label
-  ctx.font = `300 18px Georgia, serif`
-  ctx.fillStyle = colors.textMuted
-  ctx.letterSpacing = '4px'
-  ctx.fillText('A MEMORY WORTH KEEPING', cx, H * 0.35)
-  ctx.letterSpacing = '0px'
-
-  drawOrnament(ctx, cx, H * 0.41, colors.accent)
-
-  // Quote text — truncate to first 200 chars if very long
-  const quoteText = slide.text.length > 200
-    ? slide.text.slice(0, 197) + '...'
-    : slide.text
-
-  ctx.font = `italic 42px Georgia, serif`
-  ctx.fillStyle = colors.textSecondary
-  const quoteLines = wrapText(ctx, `"${quoteText}"`, 900, 58)
-  const quoteStartY = H * 0.5 - ((quoteLines.length - 1) * 58) / 2
-  quoteLines.forEach((line, i) => {
-    ctx.fillText(line, cx, quoteStartY + i * 58)
-  })
-
-  drawOrnament(ctx, cx, H * 0.68, colors.accent)
-
-  ctx.font = `italic 20px Georgia, serif`
-  ctx.fillStyle = colors.textMuted
-  ctx.fillText('held onto with love', cx, H * 0.74)
-}
-
   if (slide.type === 'closing') {
     ctx.textAlign = 'center'
 
@@ -549,10 +482,20 @@ export function useStoryVideo() {
       const fps = 1
       const frameDuration = options.slideDuration
 
+      // Transition frame counts (at 1fps these are whole seconds)
+      const transitionFrames = options.transition === 'cut' ? 0
+        : options.transition === 'fade' ? 1
+        : 2 // slow-fade
+
       progressLabel.value = 'Drawing slides...'
 
       let frameIndex = 0
-     
+
+      // We need to keep the previous slide's canvas data for cross-fade
+      const offCanvas = document.createElement('canvas')
+      offCanvas.width = W
+      offCanvas.height = H
+      const offCtx = offCanvas.getContext('2d')!
 
       for (let s = 0; s < slides.length; s++) {
         const slide = slides[s]
@@ -562,18 +505,68 @@ export function useStoryVideo() {
         progress.value = Math.round((s / slides.length) * 35)
         progressLabel.value = `Drawing slide ${s + 1} of ${slides.length}...`
 
-        // Write N frames for this slide (one per second of duration)
-       const blob: Blob = await new Promise((resolve) => canvas.toBlob((b) => resolve(b!), 'image/png'))
-const buf = await blob.arrayBuffer()
+        // Capture this slide as a buffer
+        const blob: Blob = await new Promise((resolve) => canvas.toBlob((b) => resolve(b!), 'image/png'))
+        const buf = await blob.arrayBuffer()
 
-for (let f = 0; f < frameDuration * fps; f++) {
-  const name = `frame${String(frameIndex).padStart(5, '0')}.png`
-  // Copy the buffer each time — ffmpeg detaches it after first write
-  const copy = new Uint8Array(buf.byteLength)
-  copy.set(new Uint8Array(buf))
-  await ffmpeg.writeFile(name, copy)
-  frameIndex++
-}
+        // Write the main slide frames
+        const mainFrames = frameDuration * fps
+        for (let f = 0; f < mainFrames; f++) {
+          const name = `frame${String(frameIndex).padStart(5, '0')}.png`
+          const copy = new Uint8Array(buf.byteLength)
+          copy.set(new Uint8Array(buf))
+          await ffmpeg.writeFile(name, copy)
+          frameIndex++
+        }
+
+        // Write cross-fade transition frames to the NEXT slide
+        if (transitionFrames > 0 && s < slides.length - 1) {
+          // Save current slide to offscreen canvas
+          offCtx.drawImage(canvas, 0, 0)
+
+          // Draw next slide onto main canvas
+          const nextSlide = slides[s + 1]
+          await drawSlide(ctx, nextSlide, options.theme)
+
+          // Generate blend frames
+          for (let t = 1; t <= transitionFrames; t++) {
+            const alpha = t / (transitionFrames + 1)
+
+            // Blend: draw previous slide fully, then overlay next slide with alpha
+            offCtx.drawImage(canvas, 0, 0) // next slide on offscreen temporarily
+
+            // Draw prev slide on main canvas
+            const prevImg = new Image()
+            const prevBlob: Blob = await new Promise((resolve) => offCanvas.toBlob((b) => resolve(b!), 'image/png'))
+            prevImg.src = URL.createObjectURL(prevBlob)
+            await new Promise((r) => { prevImg.onload = r })
+
+            ctx.clearRect(0, 0, W, H)
+            ctx.globalAlpha = 1
+            ctx.drawImage(prevImg, 0, 0)
+
+            // Draw next slide on top with increasing alpha
+            ctx.globalAlpha = alpha
+            ctx.drawImage(offCanvas, 0, 0)
+            ctx.globalAlpha = 1
+
+            URL.revokeObjectURL(prevImg.src)
+
+            const blendBlob: Blob = await new Promise((resolve) => canvas.toBlob((b) => resolve(b!), 'image/png'))
+            const blendBuf = await blendBlob.arrayBuffer()
+            const blendCopy = new Uint8Array(blendBuf.byteLength)
+            blendCopy.set(new Uint8Array(blendBuf))
+
+            const name = `frame${String(frameIndex).padStart(5, '0')}.png`
+            await ffmpeg.writeFile(name, blendCopy)
+            frameIndex++
+          }
+
+          // Restore the next slide onto main canvas for the next iteration
+          await drawSlide(ctx, nextSlide, options.theme)
+          // Copy it to offscreen so it becomes the "previous" on next iteration
+          offCtx.drawImage(canvas, 0, 0)
+        }
       }
 
       progress.value = 38
@@ -589,12 +582,15 @@ for (let f = 0; f < frameDuration * fps; f++) {
       if (options.musicFile) {
         const musicData = await fetchFile(options.musicFile)
         await ffmpeg.writeFile('music.mp3', musicData)
+        const transitionSecs = options.transition === 'cut' ? 0
+          : options.transition === 'fade' ? 1 : 2
+        const totalDuration = slides.length * frameDuration + (slides.length - 1) * transitionSecs
         ffmpegArgs.push('-i', 'music.mp3')
-       ffmpegArgs.push('-c:v', 'libx264')
-ffmpegArgs.push('-c:a', 'aac')
-ffmpegArgs.push('-filter_complex', '[1:a]aloop=loop=-1:size=2147483647,atrim=duration=' + String(slides.length * frameDuration) + '[aout]')
-ffmpegArgs.push('-map', '0:v:0')
-ffmpegArgs.push('-map', '[aout]')
+        ffmpegArgs.push('-c:v', 'libx264')
+        ffmpegArgs.push('-c:a', 'aac')
+        ffmpegArgs.push('-filter_complex', `[1:a]aloop=loop=-1:size=2147483647,atrim=duration=${totalDuration}[aout]`)
+        ffmpegArgs.push('-map', '0:v:0')
+        ffmpegArgs.push('-map', '[aout]')
       } else {
         ffmpegArgs.push('-c:v', 'libx264')
       }
@@ -612,10 +608,11 @@ ffmpegArgs.push('-map', '[aout]')
       progress.value = 95
       progressLabel.value = 'Preparing download...'
 
-const rawData = await ffmpeg.readFile('output.mp4')
+     const rawData = await ffmpeg.readFile('output.mp4')
 const uint8Data = rawData instanceof Uint8Array ? rawData : new Uint8Array(rawData as unknown as ArrayBuffer)
-// Slice creates a genuine copy that isn't detached
-const blob = new Blob([uint8Data.slice()], { type: 'video/mp4' })
+const safeData = new Uint8Array(uint8Data.byteLength)
+safeData.set(uint8Data)
+const blob = new Blob([safeData], { type: 'video/mp4' })
       const url = URL.createObjectURL(blob)
 
       // Trigger download

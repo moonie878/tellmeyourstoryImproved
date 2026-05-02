@@ -66,6 +66,50 @@
               </div>
             </div>
 
+            <!-- Transition style -->
+            <div>
+              <label class="block text-sm font-medium text-stone-700">Slide transition</label>
+              <p class="mt-0.5 text-xs text-stone-500">How slides move from one to the next.</p>
+              <div class="mt-3 grid grid-cols-3 gap-2">
+                <button
+                  v-for="t in transitions"
+                  :key="t.value"
+                  @click="selectedTransition = t.value"
+                  class="rounded-2xl border p-3 text-center transition"
+                  :class="selectedTransition === t.value
+                    ? 'border-stone-900 bg-stone-900 text-white'
+                    : 'border-stone-200 bg-white text-stone-700 hover:border-stone-400'"
+                >
+                  <!-- Mini transition preview -->
+                  <div class="mx-auto mb-2 flex h-8 w-14 overflow-hidden rounded-lg border border-current opacity-60">
+                    <div
+                      v-if="t.value === 'cut'"
+                      class="flex w-full"
+                    >
+                      <div class="h-full w-1/2 bg-stone-300"></div>
+                      <div class="h-full w-1/2 bg-stone-600"></div>
+                    </div>
+                    <div
+                      v-else-if="t.value === 'fade'"
+                      class="relative w-full"
+                    >
+                      <div class="absolute inset-0 bg-stone-300"></div>
+                      <div class="absolute inset-0 bg-gradient-to-r from-transparent via-stone-500 to-stone-600"></div>
+                    </div>
+                    <div
+                      v-else-if="t.value === 'slow-fade'"
+                      class="relative w-full"
+                    >
+                      <div class="absolute inset-0 bg-stone-300"></div>
+                      <div class="absolute inset-0 bg-gradient-to-r from-transparent via-stone-400 to-stone-600" style="opacity: 0.7"></div>
+                    </div>
+                  </div>
+                  <p class="text-xs font-medium">{{ t.label }}</p>
+                  <p class="mt-0.5 text-[10px] opacity-60">{{ t.hint }}</p>
+                </button>
+              </div>
+            </div>
+
             <!-- Music -->
             <div>
               <label class="block text-sm font-medium text-stone-700">Music</label>
@@ -119,8 +163,8 @@
               ></div>
             </div>
             <p class="mt-2 text-xs text-stone-400">
-              Please keep this window open while the video is being created.
-            </p>
+  This takes a few minutes — please keep this window open. It's worth the wait 💛
+</p>
           </div>
 
           <!-- Error -->
@@ -156,7 +200,7 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import type { VideoTheme, VideoSlideDuration } from '../../composables/useStoryVideo'
+import type { VideoTheme, VideoSlideDuration, VideoTransition } from '../../composables/useStoryVideo'
 
 const props = defineProps<{
   open: boolean
@@ -172,12 +216,14 @@ const emit = defineEmits<{
   (e: 'export', options: {
     theme: VideoTheme
     slideDuration: VideoSlideDuration
+    transition: VideoTransition
     musicFile: File | null
   }): void
 }>()
 
 const selectedTheme = ref<VideoTheme>('warm')
 const selectedDuration = ref<VideoSlideDuration>(5)
+const selectedTransition = ref<VideoTransition>('fade')
 const musicFile = ref<File | null>(null)
 
 const themes = [
@@ -192,6 +238,12 @@ const durations = [
   { value: 8 as VideoSlideDuration, label: '8s', hint: 'Relaxed' },
 ]
 
+const transitions = [
+  { value: 'cut' as VideoTransition, label: 'Cut', hint: 'Instant' },
+  { value: 'fade' as VideoTransition, label: 'Fade', hint: '1 second' },
+  { value: 'slow-fade' as VideoTransition, label: 'Slow fade', hint: '2 seconds' },
+]
+
 const estimatedDuration = computed(() => {
   // Rough estimate: answered questions + chapter slides + title + closing
   const totalSlides = props.answeredCount + 4
@@ -203,8 +255,10 @@ const estimatedDuration = computed(() => {
 
 const estimatedExportTime = computed(() => {
   const totalSlides = props.answeredCount + 4
-  const secs = totalSlides * 3
-  return secs < 60 ? `${secs}s` : `${Math.ceil(secs / 60)}m`
+  // ~10 seconds per slide is more realistic accounting for
+  // canvas drawing, PNG encoding, and ffmpeg processing
+  const secs = totalSlides * 10
+  return secs < 60 ? `~${secs}s` : `~${Math.ceil(secs / 60)}m`
 })
 
 function onMusicUpload(event: Event) {
@@ -216,6 +270,7 @@ function handleExport() {
   emit('export', {
     theme: selectedTheme.value,
     slideDuration: selectedDuration.value,
+    transition: selectedTransition.value,
     musicFile: musicFile.value,
   })
 }
