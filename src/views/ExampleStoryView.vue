@@ -93,7 +93,7 @@
             class="w-full block"
           >
             <source
-              src="https://jeyybcdnmezivjuvmmcu.supabase.co/storage/v1/object/sign/assets/example-story.mp4?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV8xMGNmMDllMS1hZmNiLTQ4N2QtYWMzNy1jOTQwMjA5ZGZiN2IiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJhc3NldHMvZXhhbXBsZS1zdG9yeS5tcDQiLCJpYXQiOjE3Nzc2ODIwODYsImV4cCI6MTgwOTIxODA4Nn0.JpLWoVF1c5rJ52ESVIy16xQCBqc19Zafvbvyb55pjtg"
+              src="https://jeyybcdnmezivjuvmmcu.supabase.co/storage/v1/object/public/assets/example-story.mp4"
               type="video/mp4"
             />
             Your browser does not support video playback.
