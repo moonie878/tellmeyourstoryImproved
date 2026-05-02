@@ -71,6 +71,56 @@
     </section>
 
     <!-- ═══════════════════════════════════════ -->
+    <!-- VIDEO — see it come to life            -->
+    <!-- ═══════════════════════════════════════ -->
+    <section class="bg-[#F5F0E8] px-5 py-16 sm:px-8 sm:py-20">
+      <div class="mx-auto max-w-5xl">
+        <p class="eyebrow text-center">Also exports as video</p>
+        <h2 class="section-title mt-3 mx-auto text-center">
+          See the story come to life
+        </h2>
+        <p class="mx-auto mt-4 max-w-xl text-center text-base leading-7 text-[#5C534E]">
+          Every story can also be exported as a beautiful video — answers, photos, and music
+          all woven together. Perfect for sharing with family or playing at a special moment.
+        </p>
+
+        <div class="mt-10 overflow-hidden rounded-3xl border border-[#E8DDD0] shadow-xl bg-[#1C1917]">
+          <video
+            controls
+            playsinline
+            preload="metadata"
+            poster="/images/example/example-page-cover.png"
+            class="w-full block"
+          >
+            <source
+              src="https://jeyybcdnmezivjuvmmcu.supabase.co/storage/v1/object/sign/assets/example-story.mp4?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV8xMGNmMDllMS1hZmNiLTQ4N2QtYWMzNy1jOTQwMjA5ZGZiN2IiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJhc3NldHMvZXhhbXBsZS1zdG9yeS5tcDQiLCJpYXQiOjE3Nzc2ODIwODYsImV4cCI6MTgwOTIxODA4Nn0.JpLWoVF1c5rJ52ESVIy16xQCBqc19Zafvbvyb55pjtg"
+              type="video/mp4"
+            />
+            Your browser does not support video playback.
+          </video>
+        </div>
+
+        <div class="mt-5 grid grid-cols-3 gap-4 text-center">
+          <div class="rounded-2xl border border-[#E8DDD0] bg-white px-4 py-4">
+            <p class="text-lg font-bold text-[#1C1917]">🎬</p>
+            <p class="mt-1 text-xs font-medium text-[#1C1917]">Exported as MP4</p>
+            <p class="mt-1 text-xs text-[#8C847E]">Downloads to your device</p>
+          </div>
+          <div class="rounded-2xl border border-[#E8DDD0] bg-white px-4 py-4">
+            <p class="text-lg font-bold text-[#1C1917]">🎵</p>
+            <p class="mt-1 text-xs font-medium text-[#1C1917]">Add your own music</p>
+            <p class="mt-1 text-xs text-[#8C847E]">Any MP3 you choose</p>
+          </div>
+          <div class="rounded-2xl border border-[#E8DDD0] bg-white px-4 py-4">
+            <p class="text-lg font-bold text-[#1C1917]">✦</p>
+            <p class="mt-1 text-xs font-medium text-[#1C1917]">Premium feature</p>
+            <p class="mt-1 text-xs text-[#8C847E]">Included in Full Collection</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════ -->
     <!-- GALLERY — real page screenshots        -->
     <!-- ═══════════════════════════════════════ -->
     <section class="bg-white px-5 py-16 sm:px-8 sm:py-20">
