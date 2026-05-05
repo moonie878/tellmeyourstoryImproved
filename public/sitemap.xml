@@ -21,6 +21,11 @@
     <changefreq>monthly</changefreq>
   </url>
   <url>
+  <loc>https://tellmeyourstory.uk/blog/how-to-record-your-parents-life-story</loc>
+  <priority>0.9</priority>
+  <changefreq>monthly</changefreq>
+</url>
+  <url>
     <loc>https://tellmeyourstory.uk/questions-to-ask-grandma</loc>
     <priority>0.8</priority>
     <changefreq>monthly</changefreq>

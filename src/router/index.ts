@@ -53,6 +53,11 @@ const routes = [
     component: () => import('../views/CookieView.vue'),
   },
   {
+  path: '/blog/how-to-record-your-parents-life-story',
+  name: 'blog-how-to-record',
+  component: () => import('../views/BlogHowToRecordView.vue'),
+},
+  {
     path: '/terms',
     name: 'terms',
     component: () => import('../views/TermsView.vue'),
