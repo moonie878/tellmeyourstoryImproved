@@ -420,6 +420,64 @@ useSeo({
   title: 'Tell Me Your Story | Turn memories into a keepsake book or video',
   description:
     'Answer guided questions about someone you love, add photos, and create a beautiful keepsake book or video. Capture your parent\'s story before those memories are lost.',
+  schema: {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'WebSite',
+        name: 'Tell Me Your Story',
+        url: 'https://tellmeyourstory.uk',
+        description: 'A guided app to capture a loved one\'s life story and turn it into a beautiful keepsake book or video.',
+        publisher: {
+          '@type': 'Organization',
+          name: 'Tell Me Your Story',
+          url: 'https://tellmeyourstory.uk',
+          logo: {
+            '@type': 'ImageObject',
+            url: 'https://tellmeyourstory.uk/logo/logo-full-new.png',
+          },
+        },
+      },
+      {
+        '@type': 'SoftwareApplication',
+        name: 'Tell Me Your Story',
+        url: 'https://tellmeyourstory.uk',
+        applicationCategory: 'LifestyleApplication',
+        operatingSystem: 'Web',
+        description: 'Answer guided questions about someone you love, add photos, and create a beautiful keepsake book or video your family can treasure for generations.',
+        offers: [
+          {
+            '@type': 'Offer',
+            name: 'Free',
+            price: '0',
+            priceCurrency: 'GBP',
+            description: 'Start any story, answer all 100 questions, autosave included.',
+          },
+          {
+            '@type': 'Offer',
+            name: 'Single Story',
+            price: '3.99',
+            priceCurrency: 'GBP',
+            description: 'Everything in Free plus PDF keepsake export with elegant layouts and themes.',
+          },
+          {
+            '@type': 'Offer',
+            name: 'Story + Photos',
+            price: '5.99',
+            priceCurrency: 'GBP',
+            description: 'Everything in Single Story plus photos in your PDF and cover image.',
+          },
+          {
+            '@type': 'Offer',
+            name: 'Full Collection',
+            price: '11.99',
+            priceCurrency: 'GBP',
+            description: 'All story types, photos in all exports, and video export included.',
+          },
+        ],
+      },
+    ],
+  },
 })
 
 const storyTypes = [

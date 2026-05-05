@@ -151,6 +151,88 @@ import { useSeo } from '../composables/useSeo'
 useSeo({
   title: '100 Questions to Ask Your Parents Before It\'s Too Late | Tell Me Your Story',
   description: 'The questions most families never think to ask — until it\'s too late. 100 meaningful questions to ask your parents or grandparents, across 10 chapters of their life. Free to start capturing their story today.',
+  schema: {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'Article',
+        headline: '100 Questions to Ask Your Parents Before It\'s Too Late',
+        description: 'The questions most families never think to ask — until it\'s too late. 100 meaningful questions to ask your parents or grandparents, across 10 chapters of their life.',
+        author: {
+          '@type': 'Person',
+          name: 'Mark',
+          url: 'https://tellmeyourstory.uk',
+        },
+        publisher: {
+          '@type': 'Organization',
+          name: 'Tell Me Your Story',
+          url: 'https://tellmeyourstory.uk',
+          logo: {
+            '@type': 'ImageObject',
+            url: 'https://tellmeyourstory.uk/logo/logo-full-new.png',
+          },
+        },
+        datePublished: '2026-04-14',
+        dateModified: '2026-05-05',
+        url: 'https://tellmeyourstory.uk/blog/questions-to-ask-your-parents',
+        mainEntityOfPage: {
+          '@type': 'WebPage',
+          '@id': 'https://tellmeyourstory.uk/blog/questions-to-ask-your-parents',
+        },
+        image: {
+          '@type': 'ImageObject',
+          url: 'https://tellmeyourstory.uk/og-image.jpg',
+          width: 1200,
+          height: 630,
+        },
+      },
+      {
+        '@type': 'FAQPage',
+        mainEntity: [
+          {
+            '@type': 'Question',
+            name: 'What are good questions to ask your parents?',
+            acceptedAnswer: {
+              '@type': 'Answer',
+              text: 'Good questions to ask your parents include asking about their earliest memories, what their childhood home was like, how they met, what they sacrificed for the family, and what they most want you to remember about them. The best questions are open-ended and invite storytelling rather than yes/no answers.',
+            },
+          },
+          {
+            '@type': 'Question',
+            name: 'What questions should I ask my parents before they die?',
+            acceptedAnswer: {
+              '@type': 'Answer',
+              text: 'The most important questions to ask your parents before they die are about their life story, values, and memories: What is your earliest memory? What was the hardest thing you ever went through? What do you most want to be remembered for? What do you wish you had said to someone? What advice would you give your younger self?',
+            },
+          },
+          {
+            '@type': 'Question',
+            name: 'How do I get my parents to open up and share their stories?',
+            acceptedAnswer: {
+              '@type': 'Answer',
+              text: 'Start with just one question — not a formal interview. Ask during a relaxed moment like a car journey, a walk, or over a meal. Use open-ended questions, let there be silence, and follow tangents. The best memories often surface unexpectedly. Writing down or recording their answers gives them a sense that their story matters.',
+            },
+          },
+          {
+            '@type': 'Question',
+            name: 'What questions can I ask my elderly parents about their life?',
+            acceptedAnswer: {
+              '@type': 'Answer',
+              text: 'Great questions to ask elderly parents include: What was the world like when you were young? What was your first job? Who was the most important person in your life? What are you most proud of? What do you wish you had done differently? What do you want your grandchildren to know about you?',
+            },
+          },
+          {
+            '@type': 'Question',
+            name: 'Is there an app to help capture my parents\' life story?',
+            acceptedAnswer: {
+              '@type': 'Answer',
+              text: 'Yes — Tell Me Your Story (tellmeyourstory.uk) is a guided app built specifically for this. It walks your parent through 100+ questions across their whole life, saves every answer automatically, and turns their story into a beautifully designed keepsake book or video. It\'s free to start.',
+            },
+          },
+        ],
+      },
+    ],
+  },
 })
 
 const chapters = [
@@ -200,26 +282,26 @@ const chapters = [
       'Did you have a part-time job — and what was it like?',
       'What was the most rebellious thing you ever did?',
       'Who did you look up to when you were young?',
-      'What did you worry about?',
-      'What were you most proud of as a teenager?',
-      'Was there a moment that changed the direction of your life?',
+      'What was the most important friendship of your teenage years?',
+      'What did the future look like from where you were standing?',
+      'What do you wish someone had told you back then?',
     ],
   },
   {
     number: 'Chapter Four',
-    title: 'Early Adulthood',
+    title: 'Young Adulthood',
     start: 31,
     questions: [
-      'How did you find your way after school — did you know what you wanted?',
-      'What was your first job?',
-      'Where did you live when you first left home?',
-      'What was the hardest thing about becoming an adult?',
-      'Did you travel — and where did you go?',
-      'What mistakes did you make that you learned the most from?',
-      'Was there something you almost did but didn\'t?',
-      'What were you most passionate about in your twenties?',
-      'Who were the most important friendships of your early adult life?',
-      'What did you believe about the world then that you don\'t believe now?',
+      'What did you do after school or education ended?',
+      'Where did you live and what was that like?',
+      'What were your ambitions at that age?',
+      'What was the biggest decision you made in your twenties?',
+      'Was there a moment that changed the direction of your life?',
+      'What were you like back then — would I recognise you?',
+      'What did you worry about most?',
+      'Who were the people that shaped who you became?',
+      'What did freedom feel like for the first time?',
+      'What is a memory from that time you return to often?',
     ],
   },
   {
@@ -227,7 +309,7 @@ const chapters = [
     title: 'Love and Relationships',
     start: 41,
     questions: [
-      'How did you meet the person you chose to spend your life with?',
+      'How did you meet the person you built your life with?',
       'What did you think of them when you first met?',
       'When did you know they were the one?',
       'What was your favourite memory of falling in love?',

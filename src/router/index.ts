@@ -67,25 +67,31 @@ const routes = [
     name: 'example-story',
     component: () => import('../views/ExampleStoryView.vue'),
   },
+
+  // ── Blog ──────────────────────────────────────────────────────────────────
   {
-  path: '/questions-to-ask-your-parents',
-  name: 'questions-to-ask-parents',
-  component: () => import('../views/QuestionsToAskParentsView.vue'),
-},
-{
-  path: '/questions-to-ask-your-mum',
-  name: 'questions-to-ask-mum',
-  component: () => import('../views/QuestionsToAskMumView.vue'),
-},
-{
-  path: '/blog/questions-to-ask-your-parents',
-  component: () => import('../views/BlogQuestionsView.vue'),
-},
-{
-  path: '/questions-to-ask-your-dad',
-  name: 'questions-to-ask-dad',
-  component: () => import('../views/QuestionsToAskDadView.vue'),
-},
+    path: '/blog/questions-to-ask-your-parents',
+    name: 'blog-questions-to-ask-parents',
+    component: () => import('../views/BlogQuestionsView.vue'),
+  },
+
+  // ── Redirects — old bare routes point to canonical blog URLs ─────────────
+  {
+    path: '/questions-to-ask-your-parents',
+    redirect: '/blog/questions-to-ask-your-parents',
+  },
+
+  // ── SEO landing pages ─────────────────────────────────────────────────────
+  {
+    path: '/questions-to-ask-your-mum',
+    name: 'questions-to-ask-mum',
+    component: () => import('../views/QuestionsToAskMumView.vue'),
+  },
+  {
+    path: '/questions-to-ask-your-dad',
+    name: 'questions-to-ask-dad',
+    component: () => import('../views/QuestionsToAskDadView.vue'),
+  },
 ]
 
 const router = createRouter({
