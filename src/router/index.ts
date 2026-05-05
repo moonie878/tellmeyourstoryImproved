@@ -37,6 +37,16 @@ const routes = [
     name: 'privacy',
     component: () => import('../views/PrivacyView.vue'),
   },
+  { 
+    path: '/questions-to-ask-your-grandma',
+    name: 'questions-to-ask-grandma',
+    component: () => import('../views/QuestionsToAskGrandmaView.vue'), 
+  },
+  { 
+  path: '/questions-to-ask-your-grandparents',
+   name: 'questions-to-ask-grandparents',
+    component: () => import('../views/QuestionsToAskGrandparentsView.vue'), 
+  },
   {
     path: '/cookies',
     name: 'cookies',
