@@ -36,6 +36,11 @@
     <changefreq>monthly</changefreq>
   </url>
   <url>
+  <loc>https://tellmeyourstory.uk/blog/what-to-do-when-a-parent-wont-open-up</loc>
+  <priority>0.9</priority>
+  <changefreq>monthly</changefreq>
+</url>
+  <url>
     <loc>https://tellmeyourstory.uk/example</loc>
     <priority>0.7</priority>
     <changefreq>monthly</changefreq>

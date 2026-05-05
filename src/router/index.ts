@@ -68,6 +68,11 @@ const routes = [
     component: ForgotPasswordView,
   },
   {
+  path: '/blog/what-to-do-when-a-parent-wont-open-up',
+  name: 'blog-wont-open-up',
+  component: () => import('../views/BlogWontOpenUpView.vue'),
+},
+  {
     path: '/reset-password',
     name: 'reset-password',
     component: ResetPasswordView,
