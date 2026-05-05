@@ -78,6 +78,10 @@ const routes = [
   component: () => import('../views/QuestionsToAskMumView.vue'),
 },
 {
+  path: '/blog/questions-to-ask-your-parents',
+  component: () => import('../views/BlogQuestionsView.vue'),
+},
+{
   path: '/questions-to-ask-your-dad',
   name: 'questions-to-ask-dad',
   component: () => import('../views/QuestionsToAskDadView.vue'),

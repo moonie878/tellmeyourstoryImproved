@@ -187,7 +187,12 @@
             </p>
           </div>
         </div>
-
+<router-link
+  to="/blog/questions-to-ask-your-parents"
+  class="text-sm text-[#7C5C3B] hover:underline"
+>
+  Read: 100 questions to ask your parents before it's too late →
+</router-link>
       </div>
     </section>
 
