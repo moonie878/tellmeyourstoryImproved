@@ -16,6 +16,16 @@
     <changefreq>monthly</changefreq>
   </url>
   <url>
+    <loc>https://tellmeyourstory.uk/questions-to-ask-grandparents</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://tellmeyourstory.uk/questions-to-ask-grandma</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
     <loc>https://tellmeyourstory.uk/questions-to-ask-your-dad</loc>
     <priority>0.8</priority>
     <changefreq>monthly</changefreq>
