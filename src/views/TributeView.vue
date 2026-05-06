@@ -377,16 +377,21 @@
             </button>
 
             <!-- Paid download -->
-            <button
-              @click="handlePurchase"
-              class="btn-purchase"
-            >
-              <span class="btn-icon">⬇</span>
-              <div>
-                <p class="btn-main-label">Download full video — £9.99</p>
-                <p class="btn-sub-label">No watermark · Full HD · Keep forever</p>
-              </div>
-            </button>
+            <!-- Paid download — free for tier 4 -->
+<button
+  @click="isTier4 ? handleTier4Download() : handlePurchase()"
+  class="btn-purchase"
+>
+  <span class="btn-icon">⬇</span>
+  <div>
+    <p class="btn-main-label">
+      {{ isTier4 ? 'Download full video — free for you' : 'Download full video — £9.99' }}
+    </p>
+    <p class="btn-sub-label">
+      {{ isTier4 ? 'Included in your Full Collection plan ✦' : 'No watermark · Full HD · Keep forever' }}
+    </p>
+  </div>
+</button>
           </div>
 
           <div class="trust-row">
@@ -479,6 +484,7 @@ import { ref, computed, watch, nextTick, onMounted } from 'vue'
 import { useTributeVideo, MUSIC_TRACKS } from '../composables/useTributeVideo'
 import TributePaymentModal from '../components/tribute/TributePaymentModal.vue'
 import type { TributeMusicTrack, TributeTransition, TributeSlideDuration, TributeOptions } from '../composables/useTributeVideo'
+import { supabase } from '../lib/supabase'
 
 // ── State ─────────────────────────────────────────────────────────────────────
 
@@ -489,6 +495,7 @@ const turnstileRef  = ref<HTMLElement | null>(null)
 const turnstileToken = ref('')
 const turnstileError = ref(false)
 const showPaymentModal = ref(false)
+const isTier4 = ref(false)
 
 // ── Audio preview ─────────────────────────────────────────────────────────────
 const playingTrack  = ref<TributeMusicTrack | null>(null)
@@ -627,7 +634,7 @@ const estimatedLength = computed(() => {
 
 // ── Turnstile ─────────────────────────────────────────────────────────────────
 
-onMounted(() => {
+onMounted(async() => {
     const params = new URLSearchParams(window.location.search)
   if (params.get('payment') === 'success') {
     // Payment confirmed — but we can't regenerate without the form data
@@ -642,6 +649,27 @@ onMounted(() => {
   script.defer = true
   document.head.appendChild(script)
    }
+
+ // Check if logged in user has tier 4 access
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return
+
+  const { data } = await supabase
+    .from('user_access')
+    .select('*')
+    .eq('user_id', user.id)
+
+  if (!data) return
+
+  const hasAllStories = data.some(
+    (item) => item.access_type === 'story' && item.story_type === 'all'
+  )
+  const hasImageExport = data.some(
+    (item) => item.access_type === 'export' && item.variant === 'with_images'
+  )
+
+  isTier4.value = hasAllStories && hasImageExport
+
 })
 watch(currentStep, async (step) => {
   if (step !== 3) return
@@ -663,6 +691,7 @@ watch(currentStep, async (step) => {
       setTimeout(renderWidget, 500) 
     }
   }
+  
   renderWidget()
 })
 
@@ -756,6 +785,15 @@ function handlePurchase() {
     return
   }
   showPaymentModal.value = true
+}
+
+async function handleTier4Download() {
+  if (!turnstileToken.value) {
+    turnstileError.value = true
+    return
+  }
+  // Skip payment entirely — generate clean video directly
+  await generateTribute(buildOptions(false))
 }
 
 async function handlePaid() {
