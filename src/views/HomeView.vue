@@ -298,7 +298,7 @@
     <!-- ═══════════════════════════════════════ -->
     <!-- PRICING                                -->
     <!-- ═══════════════════════════════════════ -->
-  <PricingTable @track="trackPricing" />
+ <PricingTable id="pricing" @track="trackPricing" />
 
     <!-- ═══════════════════════════════════════ -->
     <!-- FINAL CTA                              -->

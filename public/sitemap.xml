@@ -46,6 +46,11 @@
     <changefreq>monthly</changefreq>
   </url>
   <url>
+  <loc>https://tellmeyourstory.uk/pricing</loc>
+  <priority>0.8</priority>
+  <changefreq>monthly</changefreq>
+</url>
+  <url>
     <loc>https://tellmeyourstory.uk/contact</loc>
     <priority>0.4</priority>
     <changefreq>yearly</changefreq>

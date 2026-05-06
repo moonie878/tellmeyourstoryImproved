@@ -37,26 +37,11 @@ const routes = [
     name: 'privacy',
     component: () => import('../views/PrivacyView.vue'),
   },
-  { 
-    path: '/questions-to-ask-your-grandma',
-    name: 'questions-to-ask-grandma',
-    component: () => import('../views/QuestionsToAskGrandmaView.vue'), 
-  },
-  { 
-  path: '/questions-to-ask-your-grandparents',
-   name: 'questions-to-ask-grandparents',
-    component: () => import('../views/QuestionsToAskGrandparentsView.vue'), 
-  },
   {
     path: '/cookies',
     name: 'cookies',
     component: () => import('../views/CookieView.vue'),
   },
-  {
-  path: '/blog/how-to-record-your-parents-life-story',
-  name: 'blog-how-to-record',
-  component: () => import('../views/BlogHowToRecordView.vue'),
-},
   {
     path: '/terms',
     name: 'terms',
@@ -67,11 +52,6 @@ const routes = [
     name: 'forgot-password',
     component: ForgotPasswordView,
   },
-  {
-  path: '/blog/what-to-do-when-a-parent-wont-open-up',
-  name: 'blog-wont-open-up',
-  component: () => import('../views/BlogWontOpenUpView.vue'),
-},
   {
     path: '/reset-password',
     name: 'reset-password',
@@ -88,24 +68,40 @@ const routes = [
     component: () => import('../views/ExampleStoryView.vue'),
   },
 
+  // ── Standalone pricing page ───────────────────────────────────────────────
+  {
+    path: '/pricing',
+    name: 'pricing',
+    component: () => import('../views/PricingView.vue'),
+  },
+
   // ── Blog ──────────────────────────────────────────────────────────────────
   {
     path: '/blog/questions-to-ask-your-parents',
     name: 'blog-questions-to-ask-parents',
     component: () => import('../views/BlogQuestionsView.vue'),
   },
+  {
+    path: '/blog/how-to-record-your-parents-life-story',
+    name: 'blog-how-to-record',
+    component: () => import('../views/BlogHowToRecordView.vue'),
+  },
+  {
+    path: '/blog/what-to-do-when-a-parent-wont-open-up',
+    name: 'blog-wont-open-up',
+    component: () => import('../views/BlogWontOpenUpView.vue'),
+  },
 
-  // ── Redirects — old bare routes point to canonical blog URLs ─────────────
+  // ── Redirects ─────────────────────────────────────────────────────────────
   {
     path: '/questions-to-ask-your-parents',
     redirect: '/blog/questions-to-ask-your-parents',
   },
-  { path: '/price', redirect: '/#pricing' },
-{ path: '/plan', redirect: '/#pricing' },
-{ path: '/plans', redirect: '/#pricing' },
-{ path: '/pricing', redirect: '/#pricing' },
-{ path: '/subscriptions', redirect: '/#pricing' },
-{ path: '/billing', redirect: '/#pricing' },
+  { path: '/price', redirect: '/pricing' },
+  { path: '/plan', redirect: '/pricing' },
+  { path: '/plans', redirect: '/pricing' },
+  { path: '/subscriptions', redirect: '/pricing' },
+  { path: '/billing', redirect: '/pricing' },
 
   // ── SEO landing pages ─────────────────────────────────────────────────────
   {
@@ -118,6 +114,16 @@ const routes = [
     name: 'questions-to-ask-dad',
     component: () => import('../views/QuestionsToAskDadView.vue'),
   },
+  {
+    path: '/questions-to-ask-your-grandma',
+    name: 'questions-to-ask-grandma',
+    component: () => import('../views/QuestionsToAskGrandmaView.vue'),
+  },
+  {
+    path: '/questions-to-ask-your-grandparents',
+    name: 'questions-to-ask-grandparents',
+    component: () => import('../views/QuestionsToAskGrandparentsView.vue'),
+  },
 ]
 
 const router = createRouter({
@@ -129,11 +135,15 @@ const router = createRouter({
     }
 
     if (to.hash) {
-      return {
-        el: to.hash,
-        behavior: 'smooth',
-        top: 100,
-      }
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          resolve({
+            el: to.hash,
+            behavior: 'smooth',
+            top: 80,
+          })
+        }, 500)
+      })
     }
 
     return { top: 0 }
