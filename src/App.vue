@@ -38,6 +38,11 @@
               Example story
             </router-link>
 
+            <router-link to="/pricing" class="text-stone-600 transition hover:text-stone-900"           
+            >
+  Pricing
+</router-link>
+
             <a href="/#pricing" class="text-stone-600 transition hover:text-stone-900">
               Pricing
             </a>
