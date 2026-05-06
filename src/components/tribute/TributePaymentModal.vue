@@ -106,8 +106,14 @@ async function handleCheckout() {
 
   try {
     // Create Stripe Checkout session via your Vercel serverless function
-   const serverUrl = import.meta.env.VITE_SERVER_URL || 'http://localhost:3000'
-const response = await fetch(`${serverUrl}/create-tribute-checkout`, {
+  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL
+if (!apiBaseUrl) {
+  error.value = 'Checkout is not configured yet.'
+  isLoading.value = false
+  return
+}
+
+const response = await fetch(`${apiBaseUrl}/create-tribute-checkout`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
