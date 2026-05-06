@@ -100,6 +100,12 @@ const routes = [
     path: '/questions-to-ask-your-parents',
     redirect: '/blog/questions-to-ask-your-parents',
   },
+  { path: '/price', redirect: '/#pricing' },
+{ path: '/plan', redirect: '/#pricing' },
+{ path: '/plans', redirect: '/#pricing' },
+{ path: '/pricing', redirect: '/#pricing' },
+{ path: '/subscriptions', redirect: '/#pricing' },
+{ path: '/billing', redirect: '/#pricing' },
 
   // ── SEO landing pages ─────────────────────────────────────────────────────
   {
