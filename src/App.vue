@@ -20,7 +20,9 @@
             <router-link to="/dashboard" class="text-stone-600 transition hover:text-stone-900">
               Dashboard
             </router-link>
-
+<router-link to="/tribute">
+  Tribute Video
+</router-link>
             <router-link to="/contact" class="text-stone-600 transition hover:text-stone-900">
               Contact
             </router-link>
@@ -43,9 +45,7 @@
   Pricing
 </router-link>
 
-            <a href="/#pricing" class="text-stone-600 transition hover:text-stone-900">
-              Pricing
-            </a>
+            
 
             <router-link to="/contact" class="text-stone-600 transition hover:text-stone-900">
               Contact
@@ -111,7 +111,11 @@
             >
               Dashboard
             </router-link>
-
+<router-link to="/tribute"
+class="rounded-2xl px-4 py-3 text-stone-700 transition hover:bg-stone-100"
+              @click="mobileMenuOpen = false">
+  Tribute Video
+</router-link>
             <router-link
               to="/contact"
               class="rounded-2xl px-4 py-3 text-stone-700 transition hover:bg-stone-100"

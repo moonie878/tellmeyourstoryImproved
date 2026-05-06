@@ -144,6 +144,13 @@ app.post(
           console.log('Access granted')
         }
       }
+      // Tribute video payment — no user account needed
+const product = session.metadata?.product
+if (product === 'tribute-video') {
+  console.log('Tribute video payment received for:', session.metadata?.subject_name)
+  // No database update needed — payment confirmation is handled client-side
+  // via the Stripe success URL redirect
+}
     }
 
     res.json({ received: true })
@@ -178,6 +185,44 @@ app.post('/verify-turnstile', express.json(), async (req, res) => {
   }
 })
 
+app.post('/create-tribute-checkout', async (req, res) => {
+  try {
+    const { name, successUrl, cancelUrl } = req.body
+
+    if (!name || !successUrl || !cancelUrl) {
+      return res.status(400).json({ error: 'Missing required fields' })
+    }
+
+    const session = await stripe.checkout.sessions.create({
+      mode: 'payment',
+      payment_method_types: ['card'],
+      line_items: [
+        {
+          price_data: {
+            currency: 'gbp',
+            product_data: {
+              name: `Tribute Video — ${name}`,
+              description: 'Full HD memorial tribute video. No watermark. Yours to keep forever.',
+            },
+            unit_amount: 999, // £9.99
+          },
+          quantity: 1,
+        },
+      ],
+      success_url: `${successUrl}&session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: cancelUrl,
+      metadata: {
+        product: 'tribute-video',
+        subject_name: name,
+      },
+    })
+
+    res.json({ url: session.url })
+  } catch (error) {
+    console.error('Tribute checkout error:', error)
+    res.status(500).json({ error: 'Failed to create checkout session' })
+  }
+})
 
 app.post('/create-checkout-session', async (req, res) => {
   try {

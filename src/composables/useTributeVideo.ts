@@ -1,0 +1,624 @@
+import { ref } from 'vue'
+
+// ─── Types ────────────────────────────────────────────────────────────────────
+
+export type TributeTransition = 'fade' | 'slow-fade' | 'cut'
+export type TributeSlideDuration = 3 | 5 | 8
+
+export interface TributeOptions {
+  photos: string[]           // base64 data URLs
+  name: string
+  birthYear?: string
+  deathYear?: string
+  tribute: string            // short tribute text (max 200 words)
+  musicTrack: TributeMusicTrack
+  musicFile: File | null     // custom MP3 upload
+  transition: TributeTransition
+  slideDuration: TributeSlideDuration
+  watermark: boolean         // true = preview, false = paid full export
+}
+
+export type TributeMusicTrack =
+  | 'gentle-piano'
+  | 'warm-strings'
+  | 'soft-acoustic'
+  | 'peaceful-melody'
+  | 'silent'
+  | 'custom'
+
+export const MUSIC_TRACKS: Record<TributeMusicTrack, { label: string; description: string; emoji: string }> = {
+  'gentle-piano':   { label: 'Gentle Piano',    description: 'Soft and peaceful',     emoji: '🎹' },
+  'warm-strings':   { label: 'Warm Strings',    description: 'Tender and warm',       emoji: '🎻' },
+  'soft-acoustic':  { label: 'Soft Acoustic',   description: 'Simple and heartfelt',  emoji: '🎸' },
+  'peaceful-melody':{ label: 'Peaceful Melody', description: 'Calm and reflective',   emoji: '🎵' },
+  'silent':         { label: 'No Music',         description: 'Silence only',          emoji: '🔇' },
+  'custom':         { label: 'Upload your own', description: 'Your chosen music',     emoji: '📁' },
+}
+
+// ─── Canvas dimensions ───────────────────────────────────────────────────────
+
+const W = 1920
+const H = 1080
+
+// ─── Colours ─────────────────────────────────────────────────────────────────
+
+const CREAM   = '#F8F4EF'
+const DARK    = '#1C1917'
+const ACCENT  = '#947449'
+const MUTED   = '#8C847E'
+
+// ─── Helper — load image ─────────────────────────────────────────────────────
+
+async function loadImageFromUrl(url: string): Promise<HTMLImageElement | null> {
+  return new Promise((resolve) => {
+    const img = new Image()
+    img.onload = () => resolve(img)
+    img.onerror = () => resolve(null)
+    img.src = url
+  })
+}
+
+// ─── Helper — cover-fit image onto canvas ────────────────────────────────────
+
+function drawCoverImage(
+  ctx: CanvasRenderingContext2D,
+  img: HTMLImageElement,
+  x: number, y: number, w: number, h: number,
+  opacity = 1
+) {
+  const scale = Math.max(w / img.width, h / img.height)
+  const dw = img.width * scale
+  const dh = img.height * scale
+  ctx.save()
+  ctx.globalAlpha = opacity
+  ctx.drawImage(img, x + (w - dw) / 2, y + (h - dh) / 2, dw, dh)
+  ctx.restore()
+}
+
+// ─── Helper — rounded rect clip ──────────────────────────────────────────────
+
+
+
+// ─── Helper — wrap text ───────────────────────────────────────────────────────
+
+function wrapText(ctx: CanvasRenderingContext2D, text: string, maxW: number): string[] {
+  const words = text.split(' ')
+  const lines: string[] = []
+  let current = ''
+  for (const word of words) {
+    const test = current ? `${current} ${word}` : word
+    if (ctx.measureText(test).width > maxW && current) {
+      lines.push(current)
+      current = word
+    } else {
+      current = test
+    }
+  }
+  if (current) lines.push(current)
+  return lines
+}
+
+// ─── Helper — ornament ───────────────────────────────────────────────────────
+
+function drawOrnament(ctx: CanvasRenderingContext2D, cx: number, y: number) {
+  ctx.save()
+  ctx.strokeStyle = ACCENT
+  ctx.lineWidth = 1.5
+  ctx.globalAlpha = 0.5
+  ctx.beginPath(); ctx.moveTo(cx - 28, y); ctx.lineTo(cx - 8, y); ctx.stroke()
+  ctx.beginPath(); ctx.moveTo(cx + 8, y); ctx.lineTo(cx + 28, y); ctx.stroke()
+  ctx.fillStyle = ACCENT
+  ctx.beginPath(); ctx.arc(cx, y, 3, 0, Math.PI * 2); ctx.fill()
+  ctx.globalAlpha = 0.3
+  ctx.beginPath(); ctx.arc(cx - 5, y, 1.5, 0, Math.PI * 2); ctx.fill()
+  ctx.beginPath(); ctx.arc(cx + 5, y, 1.5, 0, Math.PI * 2); ctx.fill()
+  ctx.restore()
+}
+
+// ─── Slide renderers ──────────────────────────────────────────────────────────
+
+async function drawTitleSlide(
+  ctx: CanvasRenderingContext2D,
+  options: TributeOptions,
+  photoImg: HTMLImageElement | null
+) {
+  const cx = W / 2
+
+  // Background — dark with cream overlay
+  ctx.fillStyle = DARK
+  ctx.fillRect(0, 0, W, H)
+
+  // Full-bleed photo behind with overlay
+  if (photoImg) {
+    ctx.save()
+    drawCoverImage(ctx, photoImg, 0, 0, W, H, 0.35)
+    ctx.restore()
+  }
+
+  // Dark gradient overlay for readability
+  const grad = ctx.createLinearGradient(0, 0, 0, H)
+  grad.addColorStop(0, 'rgba(28,25,23,0.7)')
+  grad.addColorStop(0.5, 'rgba(28,25,23,0.4)')
+  grad.addColorStop(1, 'rgba(28,25,23,0.85)')
+  ctx.fillStyle = grad
+  ctx.fillRect(0, 0, W, H)
+
+  // Name
+  ctx.textAlign = 'center'
+  ctx.font = `bold 88px Georgia, serif`
+  ctx.fillStyle = '#F5F0E8'
+  ctx.fillText(options.name, cx, H * 0.44)
+
+  // Dates if provided
+  if (options.birthYear || options.deathYear) {
+    ctx.font = `300 28px Georgia, serif`
+    ctx.fillStyle = '#C4B8AC'
+    const dates = [options.birthYear, options.deathYear].filter(Boolean).join(' — ')
+    ctx.fillText(dates, cx, H * 0.52)
+  }
+
+  drawOrnament(ctx, cx, H * 0.58)
+
+  // Tagline
+  ctx.font = `italic 22px Georgia, serif`
+  ctx.fillStyle = MUTED
+  ctx.fillText('A life remembered with love', cx, H * 0.65)
+
+  // Watermark
+  if (options.watermark) {
+    drawWatermark(ctx)
+  }
+}
+
+async function drawPhotoSlide(
+  ctx: CanvasRenderingContext2D,
+  img: HTMLImageElement,
+  options: TributeOptions,
+  slideIndex: number,
+  totalPhotos: number
+) {
+  
+
+  // Cream background
+  ctx.fillStyle = CREAM
+  ctx.fillRect(0, 0, W, H)
+
+  // Main photo — large, centred with elegant frame
+  const photoW = W * 0.62
+  const photoH = H * 0.72
+  const photoX = (W - photoW) / 2
+  const photoY = (H - photoH) / 2 - 20
+
+  // Subtle shadow
+  ctx.save()
+  ctx.shadowColor = 'rgba(0,0,0,0.15)'
+  ctx.shadowBlur = 40
+  ctx.shadowOffsetY = 8
+  ctx.fillStyle = '#fff'
+  ctx.fillRect(photoX - 6, photoY - 6, photoW + 12, photoH + 12)
+  ctx.restore()
+
+  // Photo clipped
+  ctx.save()
+  ctx.beginPath()
+  ctx.rect(photoX, photoY, photoW, photoH)
+  ctx.clip()
+  drawCoverImage(ctx, img, photoX, photoY, photoW, photoH)
+  ctx.restore()
+
+  // Photo border
+  ctx.strokeStyle = '#E8DDD0'
+  ctx.lineWidth = 1.5
+  ctx.strokeRect(photoX, photoY, photoW, photoH)
+
+  // Name watermark bottom left
+  ctx.font = `italic 18px Georgia, serif`
+  ctx.fillStyle = MUTED
+  ctx.textAlign = 'left'
+  ctx.fillText(options.name, photoX + 12, photoY + photoH + 28)
+
+  // Slide counter bottom right
+  ctx.textAlign = 'right'
+  ctx.font = `300 14px Georgia, serif`
+  ctx.fillStyle = '#C4B8AC'
+  ctx.fillText(`${slideIndex} / ${totalPhotos}`, photoX + photoW, photoY + photoH + 28)
+
+  // Subtle top rule
+  ctx.strokeStyle = '#E8DDD0'
+  ctx.lineWidth = 0.5
+  ctx.beginPath()
+  ctx.moveTo(60, 36)
+  ctx.lineTo(W - 60, 36)
+  ctx.stroke()
+
+  if (options.watermark) drawWatermark(ctx)
+}
+
+async function drawTributeTextSlide(
+  ctx: CanvasRenderingContext2D,
+  options: TributeOptions,
+  photoImg: HTMLImageElement | null
+) {
+  const cx = W / 2
+
+  // Dark background
+  ctx.fillStyle = DARK
+  ctx.fillRect(0, 0, W, H)
+
+  // Blurred photo backdrop
+  if (photoImg) {
+    ctx.save()
+    drawCoverImage(ctx, photoImg, 0, 0, W, H, 0.2)
+    ctx.restore()
+  }
+
+  // Overlay
+  ctx.fillStyle = 'rgba(28,25,23,0.75)'
+  ctx.fillRect(0, 0, W, H)
+
+  // Ornament top
+  drawOrnament(ctx, cx, H * 0.28)
+
+  // Tribute text
+  ctx.textAlign = 'center'
+  ctx.font = `italic 34px Georgia, serif`
+  ctx.fillStyle = '#E8DDD0'
+
+  const maxW = 900
+  const lines = wrapText(ctx, `"${options.tribute}"`, maxW)
+  const lineH = 52
+  const totalTextH = lines.length * lineH
+  const startY = H / 2 - totalTextH / 2
+
+  lines.forEach((line, i) => {
+    ctx.fillText(line, cx, startY + i * lineH)
+  })
+
+  // Ornament bottom
+  drawOrnament(ctx, cx, H * 0.72)
+
+  // Name attribution
+  ctx.font = `300 20px Georgia, serif`
+  ctx.fillStyle = MUTED
+  ctx.fillText(`— ${options.name}`, cx, H * 0.78)
+
+  if (options.watermark) drawWatermark(ctx)
+}
+
+async function drawClosingSlide(
+  ctx: CanvasRenderingContext2D,
+  options: TributeOptions,
+  photoImg: HTMLImageElement | null
+) {
+  const cx = W / 2
+
+  ctx.fillStyle = DARK
+  ctx.fillRect(0, 0, W, H)
+
+  if (photoImg) {
+    ctx.save()
+    drawCoverImage(ctx, photoImg, 0, 0, W, H, 0.25)
+    ctx.restore()
+  }
+
+  ctx.fillStyle = 'rgba(28,25,23,0.8)'
+  ctx.fillRect(0, 0, W, H)
+
+  ctx.textAlign = 'center'
+
+  drawOrnament(ctx, cx, H * 0.36)
+
+  ctx.font = `italic 52px Georgia, serif`
+  ctx.fillStyle = '#F5F0E8'
+  ctx.fillText(options.name, cx, H * 0.46)
+
+  if (options.birthYear || options.deathYear) {
+    const dates = [options.birthYear, options.deathYear].filter(Boolean).join(' — ')
+    ctx.font = `300 22px Georgia, serif`
+    ctx.fillStyle = '#C4B8AC'
+    ctx.fillText(dates, cx, H * 0.54)
+  }
+
+  drawOrnament(ctx, cx, H * 0.61)
+
+  ctx.font = `300 18px Georgia, serif`
+  ctx.fillStyle = MUTED
+  ctx.fillText('Forever in our hearts', cx, H * 0.68)
+
+  ctx.font = `300 14px Georgia, serif`
+  ctx.fillStyle = '#5C534E'
+  ctx.fillText('Created with Tell Me Your Story · tellmeyourstory.uk', cx, H - 32)
+
+  if (options.watermark) drawWatermark(ctx)
+}
+
+function drawWatermark(ctx: CanvasRenderingContext2D) {
+  ctx.save()
+  ctx.globalAlpha = 0.4
+  ctx.font = `bold 28px Georgia, serif`
+  ctx.fillStyle = '#ffffff'
+  ctx.textAlign = 'center'
+  ctx.translate(W / 2, H / 2)
+  ctx.rotate(-Math.PI / 12)
+  ctx.fillText('PREVIEW — tellmeyourstory.uk', 0, 0)
+  ctx.restore()
+}
+
+// ─── Main composable ──────────────────────────────────────────────────────────
+
+export function useTributeVideo() {
+  const isGenerating  = ref(false)
+  const progress      = ref(0)
+  const progressLabel = ref('')
+  const error         = ref('')
+
+  async function generateTribute(options: TributeOptions): Promise<void> {
+    isGenerating.value  = true
+    progress.value      = 0
+    progressLabel.value = 'Setting up…'
+    error.value         = ''
+
+    try {
+      const { FFmpeg } = await import('@ffmpeg/ffmpeg')
+      const { fetchFile, toBlobURL } = await import('@ffmpeg/util')
+
+      const ffmpeg = new FFmpeg()
+
+      progressLabel.value = 'Loading video engine…'
+
+      const baseURL = 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/esm'
+      await ffmpeg.load({
+        coreURL: await toBlobURL(`${baseURL}/ffmpeg-core.js`, 'text/javascript'),
+        wasmURL: await toBlobURL(`${baseURL}/ffmpeg-core.wasm`, 'application/wasm'),
+      })
+
+      ffmpeg.on('progress', ({ progress: p }) => {
+        progress.value = Math.round(60 + p * 35)
+        progressLabel.value = `Encoding tribute… ${progress.value}%`
+      })
+
+      // ── Set up canvas ─────────────────────────────────────────────────────
+      const canvas = document.createElement('canvas')
+      canvas.width = W
+      canvas.height = H
+      const ctx = canvas.getContext('2d')!
+
+      // ── Pre-load all photos ───────────────────────────────────────────────
+      progressLabel.value = 'Loading photos…'
+      progress.value = 5
+
+      const photoImages: (HTMLImageElement | null)[] = []
+      for (const photoUrl of options.photos) {
+        photoImages.push(await loadImageFromUrl(photoUrl))
+      }
+
+      // ── Build slide list ──────────────────────────────────────────────────
+      type TributeSlide =
+        | { type: 'title' }
+        | { type: 'photo'; photoIndex: number }
+        | { type: 'tribute-text' }
+        | { type: 'closing' }
+
+      const slides: TributeSlide[] = []
+
+      // Title slide
+      slides.push({ type: 'title' })
+
+      // Photo slides — interleave tribute text roughly in middle
+      const halfPhotos = Math.floor(options.photos.length / 2)
+      for (let i = 0; i < options.photos.length; i++) {
+        slides.push({ type: 'photo', photoIndex: i })
+        // Insert tribute text after half the photos (if tribute text exists)
+        if (i === halfPhotos - 1 && options.tribute.trim()) {
+          slides.push({ type: 'tribute-text' })
+        }
+      }
+
+      // Closing slide
+      slides.push({ type: 'closing' })
+
+      // ── Render all slides ─────────────────────────────────────────────────
+      progressLabel.value = 'Rendering slides…'
+
+      const fps = 25
+      const frameDuration = options.slideDuration
+      const transitionSecs = options.transition === 'cut' ? 0
+        : options.transition === 'fade' ? 1
+        : 2
+      const transitionFrameCount = transitionSecs * fps
+
+      const slideBuffers: ArrayBuffer[] = []
+
+      for (let s = 0; s < slides.length; s++) {
+        const slide = slides[s]
+        const firstPhoto = photoImages[0]
+
+        progress.value = 5 + Math.round((s / slides.length) * 45)
+        progressLabel.value = `Rendering slide ${s + 1} of ${slides.length}…`
+
+        if (slide.type === 'title') {
+          await drawTitleSlide(ctx, options, firstPhoto)
+        } else if (slide.type === 'photo') {
+          const img = photoImages[slide.photoIndex]
+          if (img) {
+            await drawPhotoSlide(
+              ctx, img, options,
+              slide.photoIndex + 1,
+              options.photos.length
+            )
+          }
+        } else if (slide.type === 'tribute-text') {
+          await drawTributeTextSlide(ctx, options, firstPhoto)
+        } else if (slide.type === 'closing') {
+          await drawClosingSlide(ctx, options, firstPhoto)
+        }
+
+        const blob: Blob = await new Promise((r) => canvas.toBlob((b) => r(b!), 'image/png'))
+        slideBuffers.push(await blob.arrayBuffer())
+      }
+
+      // ── Write frames with transitions ─────────────────────────────────────
+      progressLabel.value = 'Writing frames…'
+      progress.value = 52
+
+      let frameIndex = 0
+
+      async function writeFrames(buf: ArrayBuffer, count: number) {
+        for (let f = 0; f < count; f++) {
+          const copy = new Uint8Array(buf.byteLength)
+          copy.set(new Uint8Array(buf))
+          await ffmpeg.writeFile(`frame${String(frameIndex).padStart(5, '0')}.png`, copy)
+          frameIndex++
+        }
+      }
+
+      async function captureBlend(
+        currImg: HTMLImageElement,
+        nextImg: HTMLImageElement,
+        alpha: number
+      ): Promise<ArrayBuffer> {
+        ctx.clearRect(0, 0, W, H)
+        ctx.globalAlpha = 1
+        ctx.drawImage(currImg, 0, 0)
+        ctx.globalAlpha = alpha
+        ctx.drawImage(nextImg, 0, 0)
+        ctx.globalAlpha = 1
+        const blob: Blob = await new Promise((r) => canvas.toBlob((b) => r(b!), 'image/png'))
+        return blob.arrayBuffer()
+      }
+
+      for (let s = 0; s < slideBuffers.length; s++) {
+        const buf = slideBuffers[s]
+        const isFirst = s === 0
+        const isLast = s === slideBuffers.length - 1
+        const leadIn  = isFirst ? 0 : Math.floor(transitionFrameCount / 2)
+        const leadOut = isLast  ? 0 : Math.floor(transitionFrameCount / 2)
+        const staticFrames = Math.max(1, frameDuration * fps - leadIn - leadOut)
+
+        await writeFrames(buf, staticFrames)
+
+        if (transitionFrameCount > 0 && !isLast) {
+          const currBlob = new Blob([slideBuffers[s]], { type: 'image/png' })
+          const nextBlob = new Blob([slideBuffers[s + 1]], { type: 'image/png' })
+
+          const currImg = new Image()
+          currImg.src = URL.createObjectURL(currBlob)
+          await new Promise((r) => { currImg.onload = r })
+
+          const nextImg = new Image()
+          nextImg.src = URL.createObjectURL(nextBlob)
+          await new Promise((r) => { nextImg.onload = r })
+
+          for (let t = 0; t < transitionFrameCount; t++) {
+            const alpha = t / (transitionFrameCount - 1)
+            const blendBuf = await captureBlend(currImg, nextImg, alpha)
+            const copy = new Uint8Array(blendBuf.byteLength)
+            copy.set(new Uint8Array(blendBuf))
+            await ffmpeg.writeFile(`frame${String(frameIndex).padStart(5, '0')}.png`, copy)
+            frameIndex++
+          }
+
+          URL.revokeObjectURL(currImg.src)
+          URL.revokeObjectURL(nextImg.src)
+        }
+      }
+
+      // ── Build ffmpeg command ──────────────────────────────────────────────
+      progress.value = 58
+      progressLabel.value = 'Assembling tribute video…'
+
+      const totalDuration = slides.length * frameDuration
+        + (slides.length - 1) * transitionSecs
+
+      const ffmpegArgs: string[] = [
+        '-framerate', String(fps),
+        '-i', 'frame%05d.png',
+      ]
+
+      // Music
+      const hasMusicFile = options.musicFile && options.transition !== 'cut'
+      if (hasMusicFile && options.musicFile) {
+        const musicData = await fetchFile(options.musicFile)
+        await ffmpeg.writeFile('music.mp3', musicData)
+        ffmpegArgs.push('-i', 'music.mp3')
+        ffmpegArgs.push('-c:v', 'libx264')
+        ffmpegArgs.push('-c:a', 'aac')
+        ffmpegArgs.push('-filter_complex',
+          `[1:a]aloop=loop=-1:size=2147483647,atrim=duration=${totalDuration}[aout]`)
+        ffmpegArgs.push('-map', '0:v:0')
+        ffmpegArgs.push('-map', '[aout]')
+      } else {
+        ffmpegArgs.push('-c:v', 'libx264')
+      }
+
+      ffmpegArgs.push(
+        '-pix_fmt', 'yuv420p',
+        '-vf', `scale=${W}:${H}`,
+        '-r', '25',
+        '-preset', 'fast',
+        'output.mp4'
+      )
+
+      await ffmpeg.exec(ffmpegArgs)
+
+      // ── Download ──────────────────────────────────────────────────────────
+      progress.value = 96
+      progressLabel.value = 'Preparing your tribute…'
+
+      const rawData = await ffmpeg.readFile('output.mp4')
+      const uint8Data = rawData instanceof Uint8Array
+        ? rawData
+        : new Uint8Array(rawData as unknown as ArrayBuffer)
+      const safeData = new Uint8Array(uint8Data.byteLength)
+      safeData.set(uint8Data)
+      const blob = new Blob([safeData], { type: 'video/mp4' })
+      const url = URL.createObjectURL(blob)
+
+      const filename = options.watermark
+        ? `${options.name.replace(/\s+/g, '-')}-tribute-preview.mp4`
+        : `${options.name.replace(/\s+/g, '-')}-tribute.mp4`
+
+      const a = document.createElement('a')
+      a.href = url
+      a.download = filename
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      setTimeout(() => URL.revokeObjectURL(url), 10000)
+
+      // Cleanup
+      for (let i = 0; i < frameIndex; i++) {
+        await ffmpeg.deleteFile(`frame${String(i).padStart(5, '0')}.png`).catch(() => null)
+      }
+      await ffmpeg.deleteFile('output.mp4').catch(() => null)
+      if (hasMusicFile) await ffmpeg.deleteFile('music.mp3').catch(() => null)
+
+      progress.value = 100
+      progressLabel.value = options.watermark
+        ? 'Preview ready! Upgrade to remove watermark.'
+        : 'Your tribute is downloading.'
+
+      setTimeout(() => {
+        progress.value = 0
+        progressLabel.value = ''
+      }, 5000)
+
+    } catch (err) {
+      console.error('Tribute generation error:', err)
+      error.value = err instanceof Error
+        ? err.message
+        : 'Something went wrong. Please try again.'
+    } finally {
+      isGenerating.value = false
+    }
+  }
+
+  return {
+    isGenerating,
+    progress,
+    progressLabel,
+    error,
+    generateTribute,
+    MUSIC_TRACKS,
+  }
+}
