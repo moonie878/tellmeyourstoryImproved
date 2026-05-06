@@ -298,92 +298,7 @@
     <!-- ═══════════════════════════════════════ -->
     <!-- PRICING                                -->
     <!-- ═══════════════════════════════════════ -->
-    <section id="pricing" class="bg-[#F5F0E8] px-5 py-16 sm:px-8 sm:py-20">
-      <div class="mx-auto max-w-6xl">
-
-        <div class="section-label text-center">Pricing</div>
-        <h2 class="section-title mt-3 text-center">
-          Start free, upgrade when you're ready
-        </h2>
-        <p class="mx-auto mt-4 max-w-2xl text-center text-base leading-[1.8] text-[#5C534E]">
-          Begin writing for free with no time limit. Unlock the finished keepsake — book, video, or both — when you're ready to export.
-        </p>
-
-        <div class="mt-12 grid gap-5 md:grid-cols-4 md:gap-4">
-
-          <!-- Free -->
-          <div class="price-card">
-            <p class="price-tier">Free</p>
-            <p class="price-desc">Start capturing memories</p>
-            <p class="price-amount">£0</p>
-            <ul class="price-features">
-              <li class="yes">Start any story</li>
-              <li class="yes">All 100 questions</li>
-              <li class="yes">Autosave</li>
-              <li class="no">No exports</li>
-            </ul>
-            <router-link to="/register" @click="trackPricingFree" class="price-btn price-btn-outline">
-              Start free
-            </router-link>
-          </div>
-
-          <!-- Single Story -->
-          <div class="price-card price-card-featured">
-            <div class="price-popular">Most popular</div>
-            <p class="price-tier text-white">Single Story</p>
-            <p class="price-desc text-stone-300">One beautiful keepsake</p>
-            <p class="price-amount text-white">£3.99</p>
-            <ul class="price-features text-stone-300">
-              <li class="yes-dark">Everything in Free</li>
-              <li class="yes-dark">PDF keepsake export</li>
-              <li class="yes-dark">Elegant layouts &amp; themes</li>
-              <li class="no-dark">No photos in export</li>
-            </ul>
-            <router-link to="/register" @click="trackPricingSingle" class="price-btn price-btn-white">
-              Get Single Story
-            </router-link>
-          </div>
-
-          <!-- Single + Images -->
-          <div class="price-card">
-            <p class="price-tier">Story + Photos</p>
-            <p class="price-desc">With images in your keepsake</p>
-            <p class="price-amount">£5.99</p>
-            <ul class="price-features">
-              <li class="yes">Everything in Single</li>
-              <li class="yes">Photos in your PDF</li>
-              <li class="yes">Cover image</li>
-              <li class="no">One story only</li>
-            </ul>
-            <router-link to="/register" @click="trackPricingSingle" class="price-btn price-btn-outline">
-              Get Story + Photos
-            </router-link>
-          </div>
-
-          <!-- Premium — All Stories + Video -->
-          <div class="price-card price-card-premium">
-            <div class="price-premium-badge">✦ Premium</div>
-            <p class="price-tier">Full Collection</p>
-            <p class="price-desc">Every story, every format</p>
-            <p class="price-amount">£11.99</p>
-            <ul class="price-features">
-              <li class="yes">All story types</li>
-              <li class="yes">Photos in all exports</li>
-              <li class="yes">🎬 Video export</li>             
-            </ul>
-            <router-link to="/register" @click="trackPricingAll" class="price-btn price-btn-premium">
-              Get Full Collection
-            </router-link>
-          </div>
-
-        </div>
-
-        <p class="mt-6 text-center text-xs text-[#8C847E]">
-          One-time payment. No subscription. No renewal.
-        </p>
-
-      </div>
-    </section>
+  <PricingTable @track="trackPricing" />
 
     <!-- ═══════════════════════════════════════ -->
     <!-- FINAL CTA                              -->
@@ -415,6 +330,7 @@
 <script setup lang="ts">
 import { track } from '../lib/analytics'
 import { useSeo } from '../composables/useSeo'
+import PricingTable from '../components/pricing/PricingTable.vue'
 
 useSeo({
   title: 'Tell Me Your Story | Turn memories into a keepsake book or video',
@@ -497,17 +413,10 @@ function trackExampleStory() {
   track('example_story_clicked', { source: 'homepage' })
 }
 
-function trackPricingFree() {
-  track('upgrade_clicked', { source: 'home_pricing_free', plan: 'free' })
+function trackPricing(plan: string) {
+  track('upgrade_clicked', { source: 'home_pricing', plan })
 }
 
-function trackPricingSingle() {
-  track('upgrade_clicked', { source: 'home_pricing_single', plan: 'single' })
-}
-
-function trackPricingAll() {
-  track('upgrade_clicked', { source: 'home_pricing_all', plan: 'all' })
-}
 </script>
 
 <style scoped>
