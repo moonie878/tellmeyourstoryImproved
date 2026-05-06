@@ -43,6 +43,11 @@ const routes = [
     component: () => import('../views/CookieView.vue'),
   },
   {
+  path: '/tribute',
+  component: () => import('../views/TributeView.vue'),
+  meta: { public: true }
+},
+  {
     path: '/terms',
     name: 'terms',
     component: () => import('../views/TermsView.vue'),
