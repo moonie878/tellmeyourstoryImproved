@@ -457,7 +457,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch, nextTick } from 'vue'
 import { useTributeVideo, MUSIC_TRACKS } from '../composables/useTributeVideo'
 import TributePaymentModal from '../components/tribute/TributePaymentModal.vue'
 import type { TributeMusicTrack, TributeTransition, TributeSlideDuration, TributeOptions } from '../composables/useTributeVideo'
@@ -542,13 +542,21 @@ onMounted(() => {
     alert('Payment successful! You can now generate and download your tribute.')
   }
   // Load Cloudflare Turnstile
+   if (!document.querySelector('script[src*="turnstile"]')) {
   const script = document.createElement('script')
   script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js'
   script.async = true
   script.defer = true
   document.head.appendChild(script)
+   }
+})
+watch(currentStep, async (step) => {
+  if (step !== 3) return
 
-  script.onload = () => {
+  // Wait for the DOM to update before trying to render
+  await nextTick()
+
+  const renderWidget = () => {  
     if (window.turnstile && turnstileRef.value) {
       window.turnstile.render(turnstileRef.value, {
         sitekey: import.meta.env.VITE_TURNSTILE_SITE_KEY,
@@ -557,8 +565,12 @@ onMounted(() => {
           turnstileError.value = false
         },
       })
+    }else{
+       // Script not loaded yet — retry in 500ms
+      setTimeout(renderWidget, 500) 
     }
   }
+  renderWidget()
 })
 
 // ── Navigation ────────────────────────────────────────────────────────────────
