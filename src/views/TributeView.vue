@@ -199,18 +199,36 @@
           <!-- Music tracks -->
           <div class="field-group">
             <label class="field-label">Background music</label>
+            <p class="field-hint">Click a track to select it. Hit the play button to preview.</p>
             <div class="option-grid">
-              <button
+              <div
                 v-for="(track, key) in MUSIC_TRACKS"
                 :key="key"
-                @click="form.musicTrack = key as TributeMusicTrack"
                 class="option-card"
                 :class="form.musicTrack === key ? 'option-active' : 'option-idle'"
+                @click="selectTrack(key as TributeMusicTrack)"
               >
-                <span class="option-emoji">{{ track.emoji }}</span>
+                <div class="option-top">
+                  <span class="option-emoji">{{ track.emoji }}</span>
+                  <!-- Preview button for playable tracks -->
+                  <button
+                    v-if="key !== 'silent' && key !== 'custom'"
+                    @click.stop="togglePreview(key as TributeMusicTrack)"
+                    class="preview-btn"
+                    :class="playingTrack === key ? 'preview-btn-playing' : ''"
+                    :title="playingTrack === key ? 'Stop preview' : 'Preview track'"
+                  >
+                    <span v-if="playingTrack === key">■</span>
+                    <span v-else>▶</span>
+                  </button>
+                </div>
                 <p class="option-label">{{ track.label }}</p>
                 <p class="option-desc">{{ track.description }}</p>
-              </button>
+                <!-- Playing indicator -->
+                <div v-if="playingTrack === key" class="playing-bar">
+                  <span></span><span></span><span></span><span></span>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -457,7 +475,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch, nextTick } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useTributeVideo, MUSIC_TRACKS } from '../composables/useTributeVideo'
 import TributePaymentModal from '../components/tribute/TributePaymentModal.vue'
 import type { TributeMusicTrack, TributeTransition, TributeSlideDuration, TributeOptions } from '../composables/useTributeVideo'
@@ -471,6 +489,81 @@ const turnstileRef  = ref<HTMLElement | null>(null)
 const turnstileToken = ref('')
 const turnstileError = ref(false)
 const showPaymentModal = ref(false)
+
+// ── Audio preview ─────────────────────────────────────────────────────────────
+const playingTrack  = ref<TributeMusicTrack | null>(null)
+let previewAudio: HTMLAudioElement | null = null
+let previewTimeout: ReturnType<typeof setTimeout> | null = null
+
+function selectTrack(key: TributeMusicTrack) {
+  form.value.musicTrack = key
+  // Stop preview if switching away
+  if (playingTrack.value && playingTrack.value !== key) {
+    stopPreview()
+  }
+}
+
+function togglePreview(key: TributeMusicTrack) {
+  if (playingTrack.value === key) {
+    stopPreview()
+    return
+  }
+
+  stopPreview()
+  playingTrack.value = key
+
+  previewAudio = new Audio(`/audio/${key}.mp3`)
+  previewAudio.volume = 0.6
+
+  // Fade in
+  previewAudio.volume = 0
+  previewAudio.play().catch(() => {
+    playingTrack.value = null
+  })
+
+  // Ramp volume up
+  let vol = 0
+  const fadeIn = setInterval(() => {
+    vol = Math.min(vol + 0.1, 0.7)
+    if (previewAudio) previewAudio.volume = vol
+    if (vol >= 0.7) clearInterval(fadeIn)
+  }, 80)
+
+  // Stop after 12 seconds with fade out
+  previewTimeout = setTimeout(() => {
+    fadeOutAndStop()
+  }, 12000)
+}
+
+function fadeOutAndStop() {
+  if (!previewAudio) return
+  const audio = previewAudio
+  let vol = audio.volume
+
+  const fadeOut = setInterval(() => {
+    vol = Math.max(vol - 0.08, 0)
+    audio.volume = vol
+    if (vol <= 0) {
+      clearInterval(fadeOut)
+      audio.pause()
+      audio.src = ''
+      playingTrack.value = null
+    }
+  }, 80)
+}
+
+function stopPreview() {
+  if (previewTimeout) {
+    clearTimeout(previewTimeout)
+    previewTimeout = null
+  }
+  if (previewAudio) {
+    previewAudio.pause()
+    previewAudio.src = ''
+    previewAudio = null
+  }
+  playingTrack.value = null
+}
 
 const form = ref({
   name:          '',
@@ -535,28 +628,14 @@ const estimatedLength = computed(() => {
 // ── Turnstile ─────────────────────────────────────────────────────────────────
 
 onMounted(() => {
-    const params = new URLSearchParams(window.location.search)
-  if (params.get('payment') === 'success') {
-    // Payment confirmed — but we can't regenerate without the form data
-    // Show a success message instead
-    alert('Payment successful! You can now generate and download your tribute.')
-  }
   // Load Cloudflare Turnstile
-   if (!document.querySelector('script[src*="turnstile"]')) {
   const script = document.createElement('script')
   script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js'
   script.async = true
   script.defer = true
   document.head.appendChild(script)
-   }
-})
-watch(currentStep, async (step) => {
-  if (step !== 3) return
 
-  // Wait for the DOM to update before trying to render
-  await nextTick()
-
-  const renderWidget = () => {  
+  script.onload = () => {
     if (window.turnstile && turnstileRef.value) {
       window.turnstile.render(turnstileRef.value, {
         sitekey: import.meta.env.VITE_TURNSTILE_SITE_KEY,
@@ -565,17 +644,14 @@ watch(currentStep, async (step) => {
           turnstileError.value = false
         },
       })
-    }else{
-       // Script not loaded yet — retry in 500ms
-      setTimeout(renderWidget, 500) 
     }
   }
-  renderWidget()
 })
 
 // ── Navigation ────────────────────────────────────────────────────────────────
 
 function nextStep() {
+  stopPreview()
   if (currentStep.value < steps.length - 1) {
     currentStep.value++
     window.scrollTo({ top: 0, behavior: 'smooth' })
@@ -1038,7 +1114,86 @@ async function handlePaid() {
 
 .option-idle:hover { border-color: #A8A29E; }
 
-.option-emoji { font-size: 20px; display: block; margin-bottom: 6px; }
+.option-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.preview-btn {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 1.5px solid #E7E5E4;
+  background: white;
+  font-size: 9px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #7C5C3B;
+  transition: all 0.15s;
+  flex-shrink: 0;
+}
+
+.preview-btn:hover {
+  background: #F5F0E8;
+  border-color: #7C5C3B;
+}
+
+.preview-btn-playing {
+  background: #7C5C3B;
+  border-color: #7C5C3B;
+  color: white;
+}
+
+.option-active .preview-btn {
+  border-color: rgba(255,255,255,0.3);
+  color: white;
+  background: rgba(255,255,255,0.15);
+}
+
+.option-active .preview-btn:hover {
+  background: rgba(255,255,255,0.25);
+}
+
+.option-active .preview-btn-playing {
+  background: rgba(255,255,255,0.3);
+}
+
+/* Animated playing bars */
+.playing-bar {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 14px;
+  margin-top: 6px;
+  justify-content: center;
+}
+
+.playing-bar span {
+  display: block;
+  width: 3px;
+  border-radius: 2px;
+  background: currentColor;
+  opacity: 0.6;
+  animation: bar-bounce 0.8s ease-in-out infinite;
+}
+
+.playing-bar span:nth-child(1) { height: 6px;  animation-delay: 0s; }
+.playing-bar span:nth-child(2) { height: 12px; animation-delay: 0.15s; }
+.playing-bar span:nth-child(3) { height: 8px;  animation-delay: 0.3s; }
+.playing-bar span:nth-child(4) { height: 10px; animation-delay: 0.45s; }
+
+.option-active .playing-bar span { background: white; opacity: 0.8; }
+
+@keyframes bar-bounce {
+  0%, 100% { transform: scaleY(0.4); }
+  50%       { transform: scaleY(1); }
+}
+
+.option-emoji { font-size: 20px; }
 .option-label { font-size: 12px; font-weight: 600; color: #1C1917; margin: 0 0 2px; }
 .option-active .option-label { color: white; }
 .option-desc { font-size: 10px; color: #78716C; margin: 0; }
