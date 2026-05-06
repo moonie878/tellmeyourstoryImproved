@@ -198,14 +198,7 @@ app.post('/create-tribute-checkout', async (req, res) => {
       payment_method_types: ['card'],
       line_items: [
         {
-          price_data: {
-            currency: 'gbp',
-            product_data: {
-              name: `Tribute Video — ${name}`,
-              description: 'Full HD memorial tribute video. No watermark. Yours to keep forever.',
-            },
-            unit_amount: 999, // £9.99
-          },
+          price: 'price_1TUCM6R13CJL70CC423pQvkK',
           quantity: 1,
         },
       ],
