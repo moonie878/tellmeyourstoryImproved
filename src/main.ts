@@ -61,6 +61,13 @@ if (utmData) {
   } catch {
     // intentionally swallowed — this is just a wake-up ping
   }
+  // Wake up Render server on app load
+const serverUrl = import.meta.env.VITE_SERVER_URL
+if (serverUrl) {
+  fetch(`${serverUrl}/health`).catch(() => {
+    // Silent fail — just warming up
+  })
+}
 })()
 
 createApp(App).use(router).mount('#app')
