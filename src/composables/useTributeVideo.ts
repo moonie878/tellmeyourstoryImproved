@@ -177,7 +177,7 @@ async function drawPhotoSlide(
   slideIndex: number,
   totalPhotos: number
 ) {
-  
+ 
 
   // Cream background
   ctx.fillStyle = CREAM
@@ -530,15 +530,40 @@ export function useTributeVideo() {
       const totalDuration = slides.length * frameDuration
         + (slides.length - 1) * transitionSecs
 
+      // ── Resolve music source ──────────────────────────────────────────────
+      progressLabel.value = 'Loading music…'
+
+      let resolvedMusicFile: File | null = options.musicFile
+
+      // If a curated track is selected, fetch it from public/audio/
+      if (
+        options.musicTrack !== 'custom' &&
+        options.musicTrack !== 'silent' &&
+        !options.musicFile
+      ) {
+        try {
+          const response = await fetch(`/audio/${options.musicTrack}.mp3`)
+          if (response.ok) {
+            const blob = await response.blob()
+            resolvedMusicFile = new File([blob], `${options.musicTrack}.mp3`, { type: 'audio/mp3' })
+          } else {
+            console.warn(`Could not load track /audio/${options.musicTrack}.mp3 — continuing without music`)
+          }
+        } catch {
+          console.warn('Music fetch failed — continuing without music')
+        }
+      }
+
+      const hasMusicFile = resolvedMusicFile !== null && options.musicTrack !== 'silent'
+
       const ffmpegArgs: string[] = [
         '-framerate', String(fps),
         '-i', 'frame%05d.png',
       ]
 
       // Music
-      const hasMusicFile = options.musicFile && options.transition !== 'cut'
-      if (hasMusicFile && options.musicFile) {
-        const musicData = await fetchFile(options.musicFile)
+      if (hasMusicFile && resolvedMusicFile) {
+        const musicData = await fetchFile(resolvedMusicFile)
         await ffmpeg.writeFile('music.mp3', musicData)
         ffmpegArgs.push('-i', 'music.mp3')
         ffmpegArgs.push('-c:v', 'libx264')
