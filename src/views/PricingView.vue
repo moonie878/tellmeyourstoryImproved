@@ -28,7 +28,6 @@
               <tr class="border-b border-[#E8DDD0]">
                 <th class="w-[28%] px-6 py-6 text-left text-xs font-medium uppercase tracking-[0.15em] text-[#8C847E]">What you get</th>
 
-                <!-- Free -->
                 <th class="w-[14%] px-4 py-6 text-center">
                   <p class="text-base font-semibold text-[#1C1917]">Free</p>
                   <p class="mt-1 text-2xl font-bold text-[#1C1917]">£0</p>
@@ -39,7 +38,6 @@
                   </router-link>
                 </th>
 
-                <!-- Keepsake Book -->
                 <th class="w-[14%] px-4 py-6 text-center">
                   <p class="text-base font-semibold text-[#1C1917]">Keepsake Book</p>
                   <p class="mt-1 text-2xl font-bold text-[#1C1917]">£3.99</p>
@@ -50,7 +48,6 @@
                   </router-link>
                 </th>
 
-                <!-- Book + Photos — featured -->
                 <th class="w-[14%] bg-[#1C1917] px-4 py-6 text-center">
                   <p class="text-[10px] font-medium uppercase tracking-[0.15em] text-[#9C7C5C]">Most popular</p>
                   <p class="mt-1 text-base font-semibold text-white">Book + Photos</p>
@@ -62,7 +59,6 @@
                   </router-link>
                 </th>
 
-                <!-- All Stories -->
                 <th class="w-[14%] px-4 py-6 text-center">
                   <p class="text-base font-semibold text-[#1C1917]">All Stories</p>
                   <p class="mt-1 text-2xl font-bold text-[#1C1917]">£11.99</p>
@@ -73,7 +69,6 @@
                   </router-link>
                 </th>
 
-                <!-- Premium Keepsake -->
                 <th class="w-[16%] px-4 py-6 text-center">
                   <p class="text-[10px] font-medium uppercase tracking-[0.15em] text-[#7C5C3B]">✦ Premium</p>
                   <p class="text-base font-semibold text-[#1C1917]">Premium Keepsake</p>
@@ -87,7 +82,6 @@
               </tr>
             </thead>
             <tbody>
-              <!-- Writing -->
               <tr class="bg-[#FAF7F4]">
                 <td colspan="6" class="px-6 py-2 text-[10px] font-medium uppercase tracking-[0.15em] text-[#8C847E]">Writing &amp; saving</td>
               </tr>
@@ -100,7 +94,6 @@
                 <td class="px-4 py-3 text-center"><span :class="row.premium ? 'check' : 'cross'">{{ row.premium ? '✓' : '—' }}</span></td>
               </tr>
 
-              <!-- Keepsake Book -->
               <tr class="bg-[#FAF7F4]">
                 <td colspan="6" class="px-6 py-2 text-[10px] font-medium uppercase tracking-[0.15em] text-[#8C847E]">Keepsake book (PDF)</td>
               </tr>
@@ -113,7 +106,6 @@
                 <td class="px-4 py-3 text-center"><span :class="row.premium ? 'check' : 'cross'">{{ row.premium ? '✓' : '—' }}</span></td>
               </tr>
 
-              <!-- Extras -->
               <tr class="bg-[#FAF7F4]">
                 <td colspan="6" class="px-6 py-2 text-[10px] font-medium uppercase tracking-[0.15em] text-[#8C847E]">Story types &amp; extras</td>
               </tr>
@@ -184,6 +176,75 @@
       </div>
     </section>
 
+    <!-- ── Tribute Video callout ──────────────────────────────────────── -->
+    <section class="px-5 pb-8 sm:px-8">
+      <div class="mx-auto max-w-6xl">
+        <div class="overflow-hidden rounded-3xl border border-[#E8DDD0] bg-white">
+          <div class="grid md:grid-cols-2">
+
+            <!-- Left — info -->
+            <div class="p-8 sm:p-10">
+              <p class="eyebrow">Also available</p>
+              <h2 class="mt-3 font-display text-2xl font-bold text-[#1C1917] sm:text-3xl">
+                Tribute Video Creator
+              </h2>
+              <p class="mt-3 text-sm leading-7 text-[#5C534E]">
+                Create a beautiful memorial video for someone you've lost.
+                Upload photos, choose music, and generate a full HD MP4 —
+                no account needed.
+              </p>
+
+              <ul class="mt-5 space-y-2">
+                <li v-for="f in tributeFeatures" :key="f" class="flex items-start gap-2 text-sm text-[#3C3530]">
+                  <span class="mt-0.5 flex-shrink-0 text-[#7C5C3B]">✓</span>
+                  {{ f }}
+                </li>
+              </ul>
+
+              <div class="mt-6 flex flex-wrap items-center gap-4">
+                <router-link
+                  to="/tribute"
+                  class="rounded-full bg-[#1C1917] px-6 py-3 text-sm font-semibold text-white transition hover:opacity-90"
+                >
+                  Create a tribute video
+                </router-link>
+                <div>
+                  <p class="text-2xl font-bold text-[#1C1917]">£9.99</p>
+                  <p class="text-xs text-[#8C847E]">Preview free · Pay to download</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right — dark how it works -->
+            <div class="bg-[#1C1917] p-8 sm:p-10">
+              <p class="text-[10px] font-medium uppercase tracking-[0.2em] text-[#9C7C5C]">
+                How it works
+              </p>
+              <div class="mt-5 space-y-5">
+                <div v-for="step in tributeSteps" :key="step.title" class="flex items-start gap-4">
+                  <div class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-[#2C2420] text-sm">
+                    {{ step.icon }}
+                  </div>
+                  <div>
+                    <p class="text-sm font-semibold text-[#E8DDD0]">{{ step.title }}</p>
+                    <p class="mt-0.5 text-xs leading-5 text-[#6C6460]">{{ step.desc }}</p>
+                  </div>
+                </div>
+              </div>
+              <div class="mt-8 border-t border-[#2C2420] pt-6">
+                <p class="text-xs text-[#5C534E]">
+                  No account required. Preview with watermark for free —
+                  pay £9.99 to download the full HD version.
+                  Included free with Premium Keepsake.
+                </p>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- FAQ -->
     <section class="px-5 py-16 sm:px-8 sm:py-20">
       <div class="mx-auto max-w-2xl">
@@ -248,6 +309,7 @@ const extrasRows = [
   { label: 'Number of stories', free: false, book: '1 story', photos: '1 story', all: 'Unlimited', premium: 'Unlimited' },
   { label: 'All story types unlocked', free: false, book: false, photos: false, all: true, premium: true },
   { label: 'Video export (MP4)', free: false, book: false, photos: false, all: false, premium: true },
+  { label: 'Tribute video creator', free: false, book: false, photos: false, all: false, premium: true },
 ]
 
 const mobilePlans = [
@@ -318,8 +380,25 @@ const mobilePlans = [
       'Premium layouts & styling',
       'Portrait & Open Spread formats',
       'Video export (MP4)',
+      'Tribute video creator (free)',
     ],
   },
+]
+
+const tributeFeatures = [
+  'Up to 30 photos in any order',
+  'Choose from curated music or upload your own',
+  'Fade, slow-fade or cut transitions',
+  'Personal tribute text as a quote slide',
+  'Full HD 1920×1080 MP4 download',
+  'No account needed',
+]
+
+const tributeSteps = [
+  { icon: '📸', title: 'Upload their photos', desc: 'Add up to 30 photos and arrange them in any order you like.' },
+  { icon: '🎵', title: 'Choose music', desc: 'Pick a curated gentle track or upload a song that was meaningful to them.' },
+  { icon: '👁', title: 'Preview free', desc: 'Generate a watermarked preview instantly to see how it looks.' },
+  { icon: '⬇', title: 'Download for £9.99', desc: 'Pay once to download the full HD clean version — yours to keep forever.' },
 ]
 
 const faqs = [
@@ -345,7 +424,11 @@ const faqs = [
   },
   {
     q: 'What does Premium Keepsake include that others don\'t?',
-    a: 'Premium Keepsake (£17.99) is the most complete tier — it includes everything, plus premium layouts and styling, Portrait and Open Spread book formats, photos in all exports, and video export as an MP4.',
+    a: 'Premium Keepsake (£17.99) is the most complete tier — it includes everything, plus premium layouts and styling, Portrait and Open Spread book formats, photos in all exports, video export as an MP4, and the Tribute Video Creator free.',
+  },
+  {
+    q: 'What is the Tribute Video Creator?',
+    a: 'The Tribute Video Creator is a separate tool for creating memorial videos for someone you\'ve lost. Upload up to 30 photos, choose music, and generate a full HD MP4. It\'s free to preview and £9.99 to download — no account needed. It\'s included free with Premium Keepsake.',
   },
 ]
 </script>
