@@ -230,30 +230,34 @@
           <p v-if="error" class="error-text">{{ error }}</p>
 
           <!-- Payment pending state -->
-          <div v-if="showingPaymentPending && !isGenerating" class="payment-pending-card">
+<div v-if="showingPaymentPending && !isGenerating" class="payment-pending-card">
   <div class="payment-pending-icon">💳</div>
-  <h3 class="payment-pending-title">Complete your payment</h3>
+  <h3 class="payment-pending-title">Waiting for payment…</h3>
   <p class="payment-pending-desc">
-    Your payment page is open in another tab. Once you've completed
-    payment, come back here and click the button below.
+    Complete your payment in the other tab. Your tribute will start
+    generating automatically as soon as payment is confirmed —
+    you don't need to do anything else.
   </p>
 
   <div v-if="isVerifying" class="verifying-row">
     <div class="spinner"></div>
-    <span>Verifying your payment…</span>
+    <span>Payment confirmed — generating your tribute…</span>
   </div>
 
   <button
-    v-if="!isVerifying"
-    @click="handlePaid"
+    @click="reopenPayment"
     class="btn-primary"
     style="margin-top: 16px;"
   >
-    ✓ I've paid — generate my tribute
+    ← Reopen payment tab
   </button>
 
-  <button @click="reopenPayment" class="btn-back-link" style="margin-top: 12px; display: block;">
-    ← Reopen payment tab
+  <button
+    @click="showingPaymentPending = false"
+    class="btn-back-link"
+    style="margin-top: 12px; display: block;"
+  >
+    Cancel — start over
   </button>
 </div>
 
@@ -322,7 +326,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, nextTick, onMounted } from 'vue'
+import { ref, computed, watch, nextTick, onMounted, onUnmounted } from 'vue'
 import { useTributeVideo, MUSIC_TRACKS } from '../composables/useTributeVideo'
 import TributePaymentModal from '../components/tribute/TributePaymentModal.vue'
 import type { TributeMusicTrack, TributeTransition, TributeSlideDuration, TributeOptions } from '../composables/useTributeVideo'
@@ -341,7 +345,7 @@ const showingPaymentPending = ref(false)
 const lastPaymentUrl        = ref('')
 const isTier4               = ref(false)
 const isVerifying = ref(false)
-const verifiedSessionId = ref('')
+
 
 // ── Audio preview ─────────────────────────────────────────────────────────────
 const playingTrack = ref<TributeMusicTrack | null>(null)
@@ -450,12 +454,22 @@ onMounted(async () => {
   if (params.get('payment') === 'success') {
     const sessionId = params.get('session_id')
     if (sessionId) {
-      verifiedSessionId.value = sessionId
-      currentStep.value = 3
-      showingPaymentPending.value = true
-      window.history.replaceState({}, '', '/tribute')
+        // Write session ID to localStorage so the original tab picks it up
+      localStorage.setItem('tribute_payment_session', sessionId)
+      // Close this tab — the original tab will handle the rest
+      window.close()
+      // If window.close() is blocked, show a message
+      document.body.innerHTML = `
+        <div style="font-family:sans-serif;text-align:center;padding:60px 24px;">
+          <h2>Payment complete! 💛</h2>
+          <p>You can close this tab and return to your tribute.</p>
+        </div>
+      `
     }
+    return
   }
+
+  window.addEventListener('storage', onStorageChange)
 
   const { data: { user } } = await supabase.auth.getUser()
   if (user) {
@@ -466,6 +480,10 @@ onMounted(async () => {
       isTier4.value = hasAllStories && hasImageExport
     }
   }
+})
+
+onUnmounted(() => {
+  window.removeEventListener('storage', onStorageChange)
 })
 
 // ── Turnstile ─────────────────────────────────────────────────────────────────
@@ -491,6 +509,15 @@ function nextStep() {
   if (currentStep.value < steps.length - 1) {
     currentStep.value++
     window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+}
+
+function onStorageChange(event: StorageEvent) {
+  if (event.key === 'tribute_payment_session' && event.newValue) {
+    const sessionId = event.newValue
+    localStorage.removeItem('tribute_payment_session')
+    // Verify and generate automatically — no user action needed
+    verifyAndGenerate(sessionId)
   }
 }
 
@@ -570,30 +597,6 @@ function onPaymentOpened(url: string) {
 
 function reopenPayment() {
   if (lastPaymentUrl.value) window.open(lastPaymentUrl.value, '_blank')
-}
-
-async function handlePaid() {
-  showPaymentModal.value = false
-
-  // If we have a verified session ID from the URL, verify it first
-  if (verifiedSessionId.value) {
-    await verifyAndGenerate(verifiedSessionId.value)
-    return
-  }
-
-  // Otherwise ask them to enter the session ID or check manually
-  // Prompt for session ID as a simple anti-fraud measure
-  const sessionId = prompt(
-    'Please paste the payment confirmation ID from your Stripe receipt email, or the URL you were redirected to after payment:'
-  )
-
-  if (!sessionId) return
-
-  // Extract session ID if they pasted a full URL
-  const match = sessionId.match(/cs_[a-zA-Z0-9_]+/)
-  const extracted = match ? match[0] : sessionId.trim()
-
-  await verifyAndGenerate(extracted)
 }
 
 async function verifyAndGenerate(sessionId: string) {
