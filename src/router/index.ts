@@ -42,6 +42,10 @@ const routes = [
     name: 'cookies',
     component: () => import('../views/CookieView.vue'),
   },
+  { path: '/blog/how-to-make-a-memorial-tribute-video', 
+    name: 'blog-tribute-video',
+    component: () => import('../views/BlogTributeVideoView.vue') 
+  },
   {
   path: '/tribute',
   component: () => import('../views/TributeView.vue'),

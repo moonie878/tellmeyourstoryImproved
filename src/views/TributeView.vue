@@ -341,6 +341,83 @@ import TributePaymentModal from '../components/tribute/TributePaymentModal.vue'
 import type { TributeMusicTrack, TributeTransition, TributeSlideDuration, TributeOptions } from '../composables/useTributeVideo'
 import { supabase } from '../lib/supabase'
 import { track } from '../lib/analytics'
+import { useSeo } from '../composables/useSeo'
+
+
+useSeo({
+  title: 'Create a Memorial Tribute Video | Tell Me Your Story',
+  description: 'Create a beautiful memorial tribute video in minutes. Upload photos, add music, and honour a loved one\'s life. Free to preview — £9.99 to download.',
+  schema: {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'WebPage',
+        name: 'Memorial Tribute Video Creator',
+        description: 'Create a beautiful memorial tribute video with photos and music. Free to preview, £9.99 to download.',
+        url: 'https://tellmeyourstory.uk/tribute',
+        publisher: {
+          '@type': 'Organization',
+          name: 'Tell Me Your Story',
+          url: 'https://tellmeyourstory.uk',
+        },
+      },
+      {
+        '@type': 'Product',
+        name: 'Memorial Tribute Video',
+        description: 'A beautiful memorial video created from your photos and music. Upload up to 30 photos, choose music, and download a full HD MP4.',
+        url: 'https://tellmeyourstory.uk/tribute',
+        brand: {
+          '@type': 'Brand',
+          name: 'Tell Me Your Story',
+        },
+        offers: {
+          '@type': 'Offer',
+          price: '9.99',
+          priceCurrency: 'GBP',
+          availability: 'https://schema.org/InStock',
+          description: 'Full HD tribute video download. Free watermarked preview available.',
+        },
+      },
+      {
+        '@type': 'FAQPage',
+        mainEntity: [
+          {
+            '@type': 'Question',
+            name: 'How do I create a memorial tribute video?',
+            acceptedAnswer: {
+              '@type': 'Answer',
+              text: 'Upload up to 30 photos, add a tribute message, choose background music, and preview your video for free. Download the full HD version without watermark for £9.99.',
+            },
+          },
+          {
+            '@type': 'Question',
+            name: 'How much does a tribute video cost?',
+            acceptedAnswer: {
+              '@type': 'Answer',
+              text: 'Previewing your tribute video is completely free. Downloading the full HD version without a watermark costs £9.99 — a one-time payment with no account required.',
+            },
+          },
+          {
+            '@type': 'Question',
+            name: 'Can I use my own music in a tribute video?',
+            acceptedAnswer: {
+              '@type': 'Answer',
+              text: 'Yes — you can upload your own MP3 file, or choose from a selection of gentle, curated music tracks included in the app.',
+            },
+          },
+          {
+            '@type': 'Question',
+            name: 'How long does it take to create a tribute video?',
+            acceptedAnswer: {
+              '@type': 'Answer',
+              text: 'Most tribute videos are created in under 5 minutes. Upload your photos, add a message and music, and your video is ready to preview instantly.',
+            },
+          },
+        ],
+      },
+    ],
+  },
+})
 
 
 // ── State ─────────────────────────────────────────────────────────────────────

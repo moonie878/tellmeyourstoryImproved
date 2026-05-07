@@ -45,9 +45,19 @@
     <priority>0.7</priority>
     <changefreq>monthly</changefreq>
   </url>
+   <url>
+    <loc>https://tellmeyourstory.uk/blog/how-to-make-a-memorial-tribute-video</loc>
+    <priority>0.9</priority>
+    <changefreq>monthly</changefreq>
+  </url>
   <url>
   <loc>https://tellmeyourstory.uk/pricing</loc>
   <priority>0.8</priority>
+  <changefreq>monthly</changefreq>
+</url>
+<url>
+  <loc>https://tellmeyourstory.uk/tribute</loc>
+  <priority>0.9</priority>
   <changefreq>monthly</changefreq>
 </url>
   <url>
