@@ -364,6 +364,10 @@ let previewTimeout: ReturnType<typeof setTimeout> | null = null
 
 function selectTrack(key: TributeMusicTrack) {
   form.value.musicTrack = key
+  // Clear custom music file if switching to a curated track
+  if (key !== 'custom') {
+    form.value.musicFile = null
+  }
   if (playingTrack.value && playingTrack.value !== key) stopPreview()
 }
 
