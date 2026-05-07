@@ -86,8 +86,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: 'close'): void
-  (e: 'paid'): void
-  (e: 'save-state'): void
+  (e: 'payment-opened', url: string): void
 }>()
 
 const isLoading = ref(false)
@@ -117,24 +116,19 @@ async function handleCheckout() {
       }),
     })
 
-    if (!response.ok) {
-      throw new Error('Failed to create checkout session')
-    }
+    if (!response.ok) throw new Error('Failed to create checkout session')
 
     const { url } = await response.json()
-
     if (!url) throw new Error('No checkout URL returned')
 
-    // Save form state before leaving the page
-    emit('save-state')
-
-    // Redirect to Stripe Checkout
+    // Open Stripe in a new tab — keeps all form state intact
     window.open(url, '_blank')
 
+    // Tell the parent to show the "waiting for payment" state
+    emit('payment-opened', url)
+
   } catch (err) {
-    error.value = err instanceof Error
-      ? err.message
-      : 'Something went wrong. Please try again.'
+    error.value = err instanceof Error ? err.message : 'Something went wrong. Please try again.'
     isLoading.value = false
   }
 }
