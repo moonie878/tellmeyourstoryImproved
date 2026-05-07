@@ -217,6 +217,32 @@ app.post('/create-tribute-checkout', async (req, res) => {
   }
 })
 
+app.post('/verify-tribute-payment', async (req, res) => {
+  try {
+    const { sessionId } = req.body
+
+    if (!sessionId) {
+      return res.status(400).json({ verified: false, error: 'Missing session ID' })
+    }
+
+    const session = await stripe.checkout.sessions.retrieve(sessionId)
+
+    // Check payment is complete and it's a tribute video
+    if (
+      session.payment_status === 'paid' &&
+      session.metadata?.product === 'tribute-video'
+    ) {
+      return res.json({ verified: true })
+    }
+
+    return res.json({ verified: false })
+
+  } catch (error) {
+    console.error('Payment verification error:', error)
+    return res.status(500).json({ verified: false, error: 'Verification failed' })
+  }
+})
+
 app.post('/create-checkout-session', async (req, res) => {
   try {
     const { priceId, userId, storyType, projectId, purchaseType } = req.body

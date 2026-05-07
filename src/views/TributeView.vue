@@ -231,20 +231,31 @@
 
           <!-- Payment pending state -->
           <div v-if="showingPaymentPending && !isGenerating" class="payment-pending-card">
-            <div class="payment-pending-icon">💳</div>
-            <h3 class="payment-pending-title">Complete your payment</h3>
-            <p class="payment-pending-desc">
-              Your payment page is open in another tab. Once you've completed
-              payment, come back here and click the button below to generate
-              your tribute.
-            </p>
-            <button @click="handlePaid" class="btn-primary" style="margin-top: 16px;">
-              ✓ I've paid — generate my tribute
-            </button>
-            <button @click="reopenPayment" class="btn-back-link" style="margin-top: 12px; display: block;">
-              ← Reopen payment tab
-            </button>
-          </div>
+  <div class="payment-pending-icon">💳</div>
+  <h3 class="payment-pending-title">Complete your payment</h3>
+  <p class="payment-pending-desc">
+    Your payment page is open in another tab. Once you've completed
+    payment, come back here and click the button below.
+  </p>
+
+  <div v-if="isVerifying" class="verifying-row">
+    <div class="spinner"></div>
+    <span>Verifying your payment…</span>
+  </div>
+
+  <button
+    v-if="!isVerifying"
+    @click="handlePaid"
+    class="btn-primary"
+    style="margin-top: 16px;"
+  >
+    ✓ I've paid — generate my tribute
+  </button>
+
+  <button @click="reopenPayment" class="btn-back-link" style="margin-top: 12px; display: block;">
+    ← Reopen payment tab
+  </button>
+</div>
 
           <!-- Normal action buttons -->
           <div v-if="!isGenerating && !showingPaymentPending" class="export-buttons">
@@ -329,6 +340,8 @@ const showPaymentModal      = ref(false)
 const showingPaymentPending = ref(false)
 const lastPaymentUrl        = ref('')
 const isTier4               = ref(false)
+const isVerifying = ref(false)
+const verifiedSessionId = ref('')
 
 // ── Audio preview ─────────────────────────────────────────────────────────────
 const playingTrack = ref<TributeMusicTrack | null>(null)
@@ -431,6 +444,17 @@ onMounted(async () => {
     script.async = true
     script.defer = true
     document.head.appendChild(script)
+  }
+
+  const params = new URLSearchParams(window.location.search)
+  if (params.get('payment') === 'success') {
+    const sessionId = params.get('session_id')
+    if (sessionId) {
+      verifiedSessionId.value = sessionId
+      currentStep.value = 3
+      showingPaymentPending.value = true
+      window.history.replaceState({}, '', '/tribute')
+    }
   }
 
   const { data: { user } } = await supabase.auth.getUser()
@@ -549,9 +573,56 @@ function reopenPayment() {
 }
 
 async function handlePaid() {
-  showPaymentModal.value   = false
-  showingPaymentPending.value = false
-  await generateTribute(buildOptions(false))
+  showPaymentModal.value = false
+
+  // If we have a verified session ID from the URL, verify it first
+  if (verifiedSessionId.value) {
+    await verifyAndGenerate(verifiedSessionId.value)
+    return
+  }
+
+  // Otherwise ask them to enter the session ID or check manually
+  // Prompt for session ID as a simple anti-fraud measure
+  const sessionId = prompt(
+    'Please paste the payment confirmation ID from your Stripe receipt email, or the URL you were redirected to after payment:'
+  )
+
+  if (!sessionId) return
+
+  // Extract session ID if they pasted a full URL
+  const match = sessionId.match(/cs_[a-zA-Z0-9_]+/)
+  const extracted = match ? match[0] : sessionId.trim()
+
+  await verifyAndGenerate(extracted)
+}
+
+async function verifyAndGenerate(sessionId: string) {
+  isVerifying.value = true
+  error.value = ''
+
+  try {
+    const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/verify-tribute-payment`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ sessionId }),
+    })
+
+    const { verified } = await response.json()
+
+    if (!verified) {
+      error.value = 'Payment could not be verified. Please check your payment was completed and try again.'
+      isVerifying.value = false
+      return
+    }
+
+    isVerifying.value = false
+    showingPaymentPending.value = false
+    await generateTribute(buildOptions(false))
+
+  } catch {
+    error.value = 'Could not verify payment. Please try again.'
+    isVerifying.value = false
+  }
 }
 
 async function handleTier4Download() {
@@ -756,4 +827,27 @@ async function handleTier4Download() {
 .upsell-btn { display: inline-block; background: #7C5C3B; color: white; font-size: 13px; font-weight: 500; padding: 11px 22px; border-radius: 100px; text-decoration: none; transition: opacity 0.2s; }
 .upsell-btn:hover { opacity: 0.88; }
 .hidden { display: none; }
+
+.verifying-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 16px;
+  font-size: 14px;
+  color: #5C534E;
+}
+
+.spinner {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid #E8DDD0;
+  border-top-color: #7C5C3B;
+  animation: spin 0.8s linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
 </style>
