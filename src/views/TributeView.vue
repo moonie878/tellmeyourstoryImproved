@@ -340,6 +340,7 @@ import { useTributeVideo, MUSIC_TRACKS } from '../composables/useTributeVideo'
 import TributePaymentModal from '../components/tribute/TributePaymentModal.vue'
 import type { TributeMusicTrack, TributeTransition, TributeSlideDuration, TributeOptions } from '../composables/useTributeVideo'
 import { supabase } from '../lib/supabase'
+import { track } from '../lib/analytics'
 
 
 // ── State ─────────────────────────────────────────────────────────────────────
@@ -406,6 +407,9 @@ function stopPreview() {
 
 async function handleFreeDownload() {
   if (!turnstileToken.value) { turnstileError.value = true; return }
+  track('tribute_tier4_download', {
+    photoCount: form.value.photos.length,
+  })
   await generateTribute(buildOptions(false))
 }
 
@@ -528,6 +532,13 @@ function nextStep() {
   if (currentStep.value < steps.length - 1) {
     currentStep.value++
     window.scrollTo({ top: 0, behavior: 'smooth' })
+
+     // Track step progression
+    track('tribute_step_reached', {
+      step: currentStep.value,
+      stepName: steps[currentStep.value].label,
+    })
+
   }
 }
 
@@ -599,11 +610,21 @@ function buildOptions(watermark: boolean): TributeOptions {
 // ── Payment flow ──────────────────────────────────────────────────────────────
 async function handlePreview() {
   if (!turnstileToken.value) { turnstileError.value = true; return }
+  track('tribute_preview_started', {
+    photoCount: form.value.photos.length,
+    musicTrack: form.value.musicTrack,
+    transition: form.value.transition,
+    slideDuration: form.value.slideDuration,
+  })
   await generateTribute(buildOptions(true))
 }
 
 function handlePurchase() {
   if (!turnstileToken.value) { turnstileError.value = true; return }
+   track('tribute_purchase_clicked', {
+    photoCount: form.value.photos.length,
+    musicTrack: form.value.musicTrack,
+  })
   showPaymentModal.value = true
 }
 
@@ -612,6 +633,7 @@ function onPaymentOpened(url: string) {
   lastPaymentUrl.value = url
   showPaymentModal.value = false
   showingPaymentPending.value = true
+   track('tribute_payment_opened')
 }
 
 function reopenPayment() {
@@ -632,10 +654,16 @@ async function verifyAndGenerate(sessionId: string) {
     const { verified } = await response.json()
 
     if (!verified) {
+        track('tribute_payment_verification_failed')
       error.value = 'Payment could not be verified. Please check your payment was completed and try again.'
       isVerifying.value = false
       return
     }
+     track('tribute_payment_success', {
+      photoCount: form.value.photos.length,
+      musicTrack: form.value.musicTrack,
+      transition: form.value.transition,
+    })
 
      hasPaid.value = true
     isVerifying.value = false

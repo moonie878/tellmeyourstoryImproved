@@ -21,6 +21,15 @@ type AnalyticsEvent =
   | 'example_story_clicked'
   | 'login_completed'
   | 'signup_completed'
+  // Tribute video
+  | 'tribute_step_reached'
+  | 'tribute_preview_started'
+  | 'tribute_purchase_clicked'
+  | 'tribute_payment_opened'
+  | 'tribute_payment_success'
+  | 'tribute_payment_verification_failed'
+  | 'tribute_payment_error'
+  | 'tribute_tier4_download'
 
 type AnalyticsValue =
   | string
