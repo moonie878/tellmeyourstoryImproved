@@ -151,7 +151,7 @@ class="rounded-2xl px-4 py-3 text-stone-700 transition hover:bg-stone-100"
             </router-link>
             <router-link 
               to="/pricing"
-              class="text-stone-700 transition hover:bg-stone-900"
+              class="rounded-2xl px-4 py-3 text-stone-700 transition hover:bg-stone-100"
               @click="mobileMenuOpen = false"
             >
               Pricing
