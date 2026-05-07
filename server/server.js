@@ -198,7 +198,7 @@ app.post('/create-tribute-checkout', async (req, res) => {
       payment_method_types: ['card'],
       line_items: [
         {
-          price: 'price_1TUCM6R13CJL70CC423pQvkK',
+          price: 'price_1TUMGBR13CJL70CCqFP5L2tE',
           quantity: 1,
         },
       ],
