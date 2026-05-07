@@ -129,7 +129,7 @@ async function handleCheckout() {
     emit('save-state')
 
     // Redirect to Stripe Checkout
-    window.location.href = url
+    window.open(url, '_blank')
 
   } catch (err) {
     error.value = err instanceof Error
