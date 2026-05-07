@@ -470,11 +470,12 @@
 
     <!-- ── Payment modal ─────────────────────────────────────────────────── -->
     <TributePaymentModal
-      :open="showPaymentModal"
-      :name="form.name"
-      @close="showPaymentModal = false"
-      @paid="handlePaid"
-    />
+  :open="showPaymentModal"
+  :name="form.name"
+  @close="showPaymentModal = false"
+  @paid="handlePaid"
+  @save-state="saveFormState"
+/>
 
   </main>
 </template>
@@ -507,6 +508,43 @@ function selectTrack(key: TributeMusicTrack) {
   // Stop preview if switching away
   if (playingTrack.value && playingTrack.value !== key) {
     stopPreview()
+  }
+}
+
+// Save all form data before Stripe redirect
+function saveFormState() {
+  const state = {
+    name: form.value.name,
+    birthYear: form.value.birthYear,
+    deathYear: form.value.deathYear,
+    tribute: form.value.tribute,
+    photos: form.value.photos,
+    musicTrack: form.value.musicTrack,
+    slideDuration: form.value.slideDuration,
+    transition: form.value.transition,
+    step: currentStep.value,
+  }
+  sessionStorage.setItem('tribute_form', JSON.stringify(state))
+}
+
+// Restore form data after Stripe redirect
+function restoreFormState() {
+  try {
+    const saved = sessionStorage.getItem('tribute_form')
+    if (!saved) return
+    const state = JSON.parse(saved)
+    form.value.name = state.name || ''
+    form.value.birthYear = state.birthYear || ''
+    form.value.deathYear = state.deathYear || ''
+    form.value.tribute = state.tribute || ''
+    form.value.photos = state.photos || []
+    form.value.musicTrack = state.musicTrack || 'gentle-piano'
+    form.value.slideDuration = state.slideDuration || 5
+    form.value.transition = state.transition || 'fade'
+    currentStep.value = state.step || 0
+    sessionStorage.removeItem('tribute_form')
+  } catch {
+    // silently fail
   }
 }
 
@@ -635,11 +673,17 @@ const estimatedLength = computed(() => {
 // ── Turnstile ─────────────────────────────────────────────────────────────────
 
 onMounted(async() => {
+    restoreFormState()
     const params = new URLSearchParams(window.location.search)
   if (params.get('payment') === 'success') {
-    // Payment confirmed — but we can't regenerate without the form data
-    // Show a success message instead
-    alert('Payment successful! You can now generate and download your tribute.')
+     // State is restored — go straight to step 3 and generate
+    currentStep.value = 3
+    // Small delay to let everything render
+    setTimeout(() => {
+      generateTribute(buildOptions(false))
+    }, 500)
+    // Clean URL
+    window.history.replaceState({}, '', '/tribute')
   }
   // Load Cloudflare Turnstile
    if (!document.querySelector('script[src*="turnstile"]')) {

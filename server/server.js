@@ -187,30 +187,30 @@ app.post('/verify-turnstile', express.json(), async (req, res) => {
 
 app.post('/create-tribute-checkout', async (req, res) => {
   try {
-    const { name } = req.body
+    const { name, successUrl, cancelUrl } = req.body
 
-    if (!name) {
-      return res.status(400).json({ error: 'Missing name' })
+    if (!name || !successUrl || !cancelUrl) {
+      return res.status(400).json({ error: 'Missing required fields' })
     }
 
     const session = await stripe.checkout.sessions.create({
       mode: 'payment',
       payment_method_types: ['card'],
-      ui_mode: 'embedded',
       line_items: [
         {
           price: 'price_1TUCM6R13CJL70CC423pQvkK',
           quantity: 1,
         },
       ],
-       return_url: `${FRONTEND_URL}/tribute?payment=success`,
+      success_url: `${successUrl}&session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: cancelUrl,
       metadata: {
         product: 'tribute-video',
         subject_name: name,
       },
     })
 
-    res.json({ clientSecret: session.client_secret })
+    res.json({ url: session.url })
   } catch (error) {
     console.error('Tribute checkout error:', error)
     res.status(500).json({ error: 'Failed to create checkout session' })

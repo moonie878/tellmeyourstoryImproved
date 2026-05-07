@@ -16,16 +16,44 @@
             <button @click="$emit('close')" class="close-btn">✕</button>
           </div>
 
-          <!-- Loading state -->
-          <div v-if="isLoading" class="loading-section">
-            <div class="spinner"></div>
-            <p>Loading secure checkout…</p>
+          <div class="modal-body">
+            <div class="included-card">
+              <p class="included-title">What you get</p>
+              <ul class="included-list">
+                <li v-for="item in included" :key="item">
+                  <span class="check">✦</span> {{ item }}
+                </li>
+              </ul>
+            </div>
+
+            <div class="price-row">
+              <span class="price-label">Tribute video — full HD</span>
+              <span class="price-amount">£9.99</span>
+            </div>
+
+            <p v-if="error" class="error-text">{{ error }}</p>
+
+            <div v-if="isLoading" class="loading-row">
+              <div class="spinner"></div>
+              <span>Connecting to payment…</span>
+            </div>
           </div>
 
-          <!-- Stripe embedded checkout mounts here -->
-          <div ref="stripeContainer" class="stripe-container"></div>
-
-          <p v-if="error" class="error-text">{{ error }}</p>
+          <div class="modal-footer">
+            <button
+              @click="handleCheckout"
+              :disabled="isLoading"
+              class="pay-btn"
+            >
+              <span v-if="isLoading">Opening checkout…</span>
+              <span v-else>Pay £9.99 — download tribute</span>
+            </button>
+            <div class="security-row">
+              <span>🔒 Secured by Stripe</span>
+              <span>·</span>
+              <span>Instant access after payment</span>
+            </div>
+          </div>
 
         </div>
       </div>
@@ -34,7 +62,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { ref } from 'vue'
 
 const props = defineProps<{
   open: boolean
@@ -44,192 +72,49 @@ const props = defineProps<{
 const emit = defineEmits<{
   (e: 'close'): void
   (e: 'paid'): void
+  (e: 'save-state'): void
 }>()
 
 const isLoading = ref(false)
 const error = ref('')
-const stripeContainer = ref<HTMLElement | null>(null)
-let stripeCheckout: any = null
-
 const apiBaseUrl = import.meta.env.VITE_API_BASE_URL
 
-watch(() => props.open, async (isOpen) => {
-  if (!isOpen) {
-    // Clean up when modal closes
-    if (stripeCheckout) {
-      stripeCheckout.destroy()
-      stripeCheckout = null
-    }
-    return
-  }
+const included = [
+  'Full HD 1920×1080 MP4 video',
+  'No watermark',
+  'All photos, music and transitions',
+  'Download immediately after payment',
+  'Keep and share forever',
+]
 
+async function handleCheckout() {
   isLoading.value = true
   error.value = ''
 
   try {
-    // Load Stripe.js
-    const stripe = await loadStripe()
-
-    // Get client secret from your server
     const response = await fetch(`${apiBaseUrl}/create-tribute-checkout`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name: props.name }),
+      body: JSON.stringify({
+        name: props.name,
+        successUrl: `${window.location.origin}/tribute?payment=success`,
+        cancelUrl: `${window.location.origin}/tribute?payment=cancelled`,
+      }),
     })
 
     if (!response.ok) throw new Error('Failed to create checkout session')
 
-    const { clientSecret } = await response.json()
+    const { url } = await response.json()
+    if (!url) throw new Error('No checkout URL returned')
 
-    isLoading.value = false
+    // Save form state to sessionStorage before redirecting
+    emit('save-state')
 
-    // Mount embedded checkout
-    stripeCheckout = await stripe.initEmbeddedCheckout({
-      clientSecret,
-      onComplete: () => {
-        // Payment successful — close modal and trigger download
-        if (stripeCheckout) {
-          stripeCheckout.destroy()
-          stripeCheckout = null
-        }
-        emit('paid')
-      },
-    })
-
-    if (stripeContainer.value) {
-      stripeCheckout.mount(stripeContainer.value)
-    }
+    window.location.href = url
 
   } catch (err) {
     error.value = err instanceof Error ? err.message : 'Something went wrong.'
     isLoading.value = false
   }
-})
-
-async function loadStripe() {
-  if ((window as any).Stripe) {
-    return (window as any).Stripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY)
-  }
-
-  return new Promise((resolve, reject) => {
-    const script = document.createElement('script')
-    script.src = 'https://js.stripe.com/v3/'
-    script.onload = () => resolve((window as any).Stripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY))
-    script.onerror = () => reject(new Error('Failed to load Stripe'))
-    document.head.appendChild(script)
-  })
 }
 </script>
-
-<style scoped>
-.modal-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 50;
-  background: rgba(0,0,0,0.6);
-  backdrop-filter: blur(4px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
-}
-
-.modal-box {
-  background: white;
-  border-radius: 28px;
-  width: 100%;
-  max-width: 520px;
-  max-height: 90vh;
-  overflow-y: auto;
-  box-shadow: 0 24px 64px rgba(0,0,0,0.2);
-}
-
-.modal-header {
-  padding: 28px 28px 20px;
-  border-bottom: 1px solid #F0EBE3;
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 16px;
-}
-
-.modal-eyebrow {
-  font-size: 11px;
-  font-weight: 500;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: #9C7C5C;
-  margin: 0 0 6px;
-}
-
-.modal-title {
-  font-size: 1.4rem;
-  font-weight: 700;
-  color: #1C1917;
-  margin: 0 0 6px;
-}
-
-.modal-sub {
-  font-size: 13px;
-  color: #78716C;
-  margin: 0;
-}
-
-.close-btn {
-  background: none;
-  border: none;
-  color: #A8A29E;
-  font-size: 16px;
-  cursor: pointer;
-  padding: 4px;
-  border-radius: 50%;
-  width: 28px;
-  height: 28px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.close-btn:hover { background: #F5F0E8; color: #1C1917; }
-
-.loading-section {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 32px 28px;
-  font-size: 14px;
-  color: #78716C;
-}
-
-.spinner {
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  border: 2px solid #F0EBE3;
-  border-top-color: #7C5C3B;
-  animation: spin 0.8s linear infinite;
-  flex-shrink: 0;
-}
-
-@keyframes spin { to { transform: rotate(360deg); } }
-
-.stripe-container {
-  padding: 0 28px 28px;
-}
-
-.error-text {
-  font-size: 13px;
-  color: #DC2626;
-  background: #FEF2F2;
-  border: 1px solid #FECACA;
-  border-radius: 10px;
-  padding: 10px 14px;
-  margin: 0 28px 20px;
-}
-
-.modal-fade-enter-active,
-.modal-fade-leave-active { transition: opacity 0.2s ease; }
-.modal-fade-enter-from,
-.modal-fade-leave-to { opacity: 0; }
-</style>
