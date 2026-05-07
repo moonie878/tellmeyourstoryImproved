@@ -121,15 +121,13 @@ async function handleCheckout() {
     const { url } = await response.json()
     if (!url) throw new Error('No checkout URL returned')
 
-    // Open Stripe in a new tab — keeps all form state intact
     window.open(url, '_blank')
-
-    // Tell the parent to show the "waiting for payment" state
     emit('payment-opened', url)
 
   } catch (err) {
     error.value = err instanceof Error ? err.message : 'Something went wrong. Please try again.'
-    isLoading.value = false
+  } finally {
+    isLoading.value = false  // ← always reset regardless of outcome
   }
 }
 </script>

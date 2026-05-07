@@ -271,13 +271,22 @@
               </div>
             </button>
 
-            <button @click="isTier4 ? handleTier4Download() : handlePurchase()" class="btn-purchase">
-              <span class="btn-icon">⬇</span>
-              <div>
-                <p class="btn-main-label">{{ isTier4 ? 'Download full video — free for you' : 'Download full video — £9.99' }}</p>
-                <p class="btn-sub-label">{{ isTier4 ? 'Included in your Full Collection plan ✦' : 'No watermark · Full HD · Keep forever' }}</p>
-              </div>
-            </button>
+            <button
+  @click="(isTier4 || hasPaid) ? handleFreeDownload() : handlePurchase()"
+  class="btn-purchase"
+>
+  <span class="btn-icon">⬇</span>
+  <div>
+    <p class="btn-main-label">
+      {{ isTier4 || hasPaid ? 'Download full video' : 'Download full video — £9.99' }}
+    </p>
+    <p class="btn-sub-label">
+      {{ isTier4 ? 'Included in your Full Collection plan ✦'
+        : hasPaid ? 'Already purchased — re-generate free ✦'
+        : 'No watermark · Full HD · Keep forever' }}
+    </p>
+  </div>
+</button>
           </div>
 
           <div v-if="!showingPaymentPending" class="trust-row">
@@ -345,6 +354,7 @@ const showingPaymentPending = ref(false)
 const lastPaymentUrl        = ref('')
 const isTier4               = ref(false)
 const isVerifying = ref(false)
+const hasPaid = ref(false)
 
 
 // ── Audio preview ─────────────────────────────────────────────────────────────
@@ -388,6 +398,11 @@ function stopPreview() {
   if (previewTimeout) { clearTimeout(previewTimeout); previewTimeout = null }
   if (previewAudio) { previewAudio.pause(); previewAudio.src = ''; previewAudio = null }
   playingTrack.value = null
+}
+
+async function handleFreeDownload() {
+  if (!turnstileToken.value) { turnstileError.value = true; return }
+  await generateTribute(buildOptions(false))
 }
 
 // ── Form ──────────────────────────────────────────────────────────────────────
@@ -618,6 +633,7 @@ async function verifyAndGenerate(sessionId: string) {
       return
     }
 
+     hasPaid.value = true
     isVerifying.value = false
     showingPaymentPending.value = false
     await generateTribute(buildOptions(false))
@@ -626,11 +642,6 @@ async function verifyAndGenerate(sessionId: string) {
     error.value = 'Could not verify payment. Please try again.'
     isVerifying.value = false
   }
-}
-
-async function handleTier4Download() {
-  if (!turnstileToken.value) { turnstileError.value = true; return }
-  await generateTribute(buildOptions(false))
 }
 </script>
 
