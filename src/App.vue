@@ -142,12 +142,20 @@ class="rounded-2xl px-4 py-3 text-stone-700 transition hover:bg-stone-100"
             >
               Example story
             </router-link>
-
-            <router-link to="/pricing" class="text-stone-700 transition hover:bg-stone-900"
-            @click="mobileMenuOpen = false"
+            <router-link 
+              to="/tribute"
+              class="rounded-2xl px-4 py-3 text-stone-700 transition hover:bg-stone-100"
+              @click="mobileMenuOpen = false"
+              >
+                Tribute Video
+            </router-link>
+            <router-link 
+              to="/pricing"
+              class="text-stone-700 transition hover:bg-stone-900"
+              @click="mobileMenuOpen = false"
             >
-  Pricing
-</router-link>
+              Pricing
+            </router-link>
 
             <router-link
               to="/contact"
