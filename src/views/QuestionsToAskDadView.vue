@@ -143,6 +143,9 @@
         <!-- Back -->
         <div class="mt-10 border-t border-stone-100 pt-8">
           <router-link to="/" class="text-sm text-[#7C5C3B] hover:underline">← Back to Tell Me Your Story</router-link>
+                <router-link to="/tribute" class="text-[#7C5C3B] hover:underline">
+  → Create a free memorial tribute video
+</router-link>
         </div>
 
       </div>
