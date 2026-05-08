@@ -42,6 +42,21 @@ const routes = [
     name: 'cookies',
     component: () => import('../views/CookieView.vue'),
   },
+  { 
+    path: '/blog/free-memorial-slideshow-maker',
+     name: 'blog-free-memorial-slideshow',
+      component: () => import('../views/BlogFreeMemorialSlideshowView.vue') 
+    },
+{ 
+  path: '/blog/funeral-slideshow-ideas',
+   name: 'blog-funeral-slideshow-ideas',
+    component: () => import('../views/BlogFuneralSlideshowIdeasView.vue') 
+  },
+{ 
+  path: '/blog/celebration-of-life-video',
+   name: 'blog-celebration-of-life-video',
+    component: () => import('../views/BlogCelebrationOfLifeVideoView.vue') 
+  },
   { path: '/blog/how-to-make-a-memorial-tribute-video', 
     name: 'blog-tribute-video',
     component: () => import('../views/BlogTributeVideoView.vue') 
