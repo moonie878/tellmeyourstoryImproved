@@ -259,7 +259,7 @@ useSeo({
 </script>
 
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap');
+
 main { font-family: 'DM Sans', sans-serif; }
 .font-display { font-family: 'Playfair Display', Georgia, serif; }
 .eyebrow { font-size: 11px; font-weight: 500; letter-spacing: 0.22em; text-transform: uppercase; color: #8C847E; }

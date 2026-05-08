@@ -176,6 +176,7 @@
                   :src="story.cover_image_url"
                   alt="Story cover"
                   class="h-full max-h-[180px] w-auto rounded-xl object-cover shadow-sm"
+                  loading="lazy"
                 />
                 <div
                   v-else

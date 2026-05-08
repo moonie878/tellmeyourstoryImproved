@@ -63,6 +63,7 @@
                 src="/images/example-story-hero-cover.png"
                 alt="Tell Me Your Story keepsake preview"
                 class="hero-img"
+                loading="eager"
               />
               <!-- Floating badge -->
               <div class="hero-badge">
@@ -115,6 +116,7 @@
                 src="/images/example-story-memory-page.png"
                 alt="Keepsake book preview"
                 class="format-preview-img"
+                loading="lazy"
               />
             </div>
           </div>
@@ -212,23 +214,23 @@
 
         <div class="mt-10 grid grid-cols-2 gap-4 md:grid-cols-3 md:gap-5">
           <div class="gallery-item col-span-1">
-            <img src="/images/example/example-page-childhood.png" alt="Chapter page" class="gallery-img" />
+            <img src="/images/example/example-page-childhood.png" alt="Chapter page" class="gallery-img" loading="lazy" />
             <p class="gallery-label">Chapter pages</p>
           </div>
           <div class="gallery-item col-span-1">
-            <img src="/images/example/example-page-cooking-quote.png" alt="Quote page" class="gallery-img" />
+            <img src="/images/example/example-page-cooking-quote.png" alt="Quote page" class="gallery-img" loading="lazy" />
             <p class="gallery-label">Quote pages</p>
           </div>
           <div class="gallery-item col-span-2 md:col-span-1">
-            <img src="/images/example/example-page-cover.png" alt="Cover page" class="gallery-img" />
+            <img src="/images/example/example-page-cover.png" alt="Cover page" class="gallery-img" loading="lazy"/>
             <p class="gallery-label">Cover page</p>
           </div>
           <div class="gallery-item col-span-2">
-            <img src="/images/example/example-page-world.png" alt="Story page with photo" class="gallery-img" />
+            <img src="/images/example/example-page-world.png" alt="Story page with photo" class="gallery-img" loading="lazy" />
             <p class="gallery-label">Story pages with photos</p>
           </div>
           <div class="gallery-item col-span-2 md:col-span-1">
-            <img src="/images/example/example-page-dreams.png" alt="Memories page" class="gallery-img" />
+            <img src="/images/example/example-page-dreams.png" alt="Memories page" class="gallery-img" loading="lazy" />
             <p class="gallery-label">Memory pages</p>
           </div>
         </div>
@@ -421,7 +423,7 @@ function trackPricing(plan: string) {
 
 <style scoped>
 /* ── Fonts ─────────────────────────────── */
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap');
+
 
 .home {
   font-family: 'DM Sans', sans-serif;

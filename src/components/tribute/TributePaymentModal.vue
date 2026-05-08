@@ -133,7 +133,7 @@ async function handleCheckout() {
 </script>
 
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@400;500&display=swap');
+
 
 .modal-overlay {
   position: fixed;

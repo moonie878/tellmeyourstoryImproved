@@ -159,7 +159,7 @@ const features = [
 </script>
 
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&display=swap');
+
 .font-display { font-family: 'Playfair Display', Georgia, serif; }
 h3 { font-family: 'Playfair Display', Georgia, serif; }
 

@@ -97,7 +97,7 @@
 
           <div v-if="form.photos.length > 0" class="photo-grid">
             <div v-for="(photo, i) in form.photos" :key="i" class="photo-thumb" :class="{ 'photo-thumb-first': i === 0 }">
-              <img :src="photo" :alt="`Photo ${i + 1}`" class="photo-img" />
+              <img :src="photo" :alt="`Photo ${i + 1}`" class="photo-img" loading="lazy" />
               <div class="photo-overlay">
                 <button v-if="i > 0" @click="movePhoto(i, -1)" class="photo-btn">←</button>
                 <button @click="removePhoto(i)" class="photo-btn photo-btn-remove">✕</button>
@@ -755,7 +755,7 @@ async function verifyAndGenerate(sessionId: string) {
 </script>
 
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap');
+
 
 .tribute-page { font-family: 'DM Sans', sans-serif; background: #F5F0E8; min-height: 100vh; }
 

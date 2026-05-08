@@ -141,6 +141,7 @@
               src="/images/example/example-page-cover.png"
               alt="Keepsake cover page"
               class="page-img"
+              loading="lazy"
             />
             <div class="page-caption">
               <p class="page-caption-title">Cover page</p>
@@ -153,6 +154,7 @@
               src="/images/example/example-page-dedication.png"
               alt="Dedication page"
               class="page-img"
+              loading="lazy"
             />
             <div class="page-caption">
               <p class="page-caption-title">Dedication page</p>
@@ -168,6 +170,7 @@
               src="/images/example/example-page-world.png"
               alt="Story answer page with photo"
               class="page-img"
+              loading="lazy"
             />
             <div class="page-caption">
               <p class="page-caption-title">Story page with photo</p>
@@ -180,6 +183,7 @@
               src="/images/example/example-page-people.png"
               alt="Story page about family"
               class="page-img"
+              loading="lazy"
             />
             <div class="page-caption">
               <p class="page-caption-title">Family memories</p>
@@ -195,6 +199,7 @@
               src="/images/example/example-page-cooking-quote.png"
               alt="Quote highlight page"
               class="page-img"
+              loading="lazy"
             />
             <div class="page-caption">
               <p class="page-caption-title">Quote highlight page</p>
@@ -207,6 +212,7 @@
               src="/images/example/example-page-childhood.png"
               alt="Chapter opener page"
               class="page-img"
+              loading="lazy"
             />
             <div class="page-caption">
               <p class="page-caption-title">Chapter opener</p>
@@ -222,6 +228,7 @@
               src="/images/example/example-page-dreams.png"
               alt="Story page about childhood dreams"
               class="page-img"
+              loading="lazy"
             />
             <div class="page-caption">
               <p class="page-caption-title">Childhood dreams</p>
@@ -336,7 +343,7 @@ useSeo({
 </script>
 
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap');
+
 
 main { font-family: 'DM Sans', sans-serif; }
 .font-display, h1, h2 { font-family: 'Playfair Display', Georgia, serif; }

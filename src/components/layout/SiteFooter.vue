@@ -8,6 +8,7 @@
               src="/logo/logo-full.png"
               alt="Tell Me Your Story"
               class="h-20 max-w-[180px] object-contain transition hover:opacity-90"
+              loading="lazy"
             />
           </div>
           <p class="mt-3 max-w-md text-sm leading-6 text-stone-600">

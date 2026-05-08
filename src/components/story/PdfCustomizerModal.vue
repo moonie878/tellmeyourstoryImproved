@@ -521,7 +521,7 @@ const previewPrintChapterSpacingClass = computed(() => {
 </script>
 
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&display=swap');
+
 
 .font-display { font-family: 'Playfair Display', Georgia, serif; }
 

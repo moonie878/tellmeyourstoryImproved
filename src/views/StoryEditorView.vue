@@ -60,6 +60,7 @@
             alt="Cover image"
             class="max-h-full max-w-full object-contain"
             @error="coverImageStatus = 'Cover image needs refreshing. Please upload it again.'"
+            loading="lazy"
           />
         </div>
       </div>
