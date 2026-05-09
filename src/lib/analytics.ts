@@ -30,6 +30,7 @@ type AnalyticsEvent =
   | 'tribute_payment_verification_failed'
   | 'tribute_payment_error'
   | 'tribute_tier4_download'
+   | 'print_book_ordered'
 
 type AnalyticsValue =
   | string
