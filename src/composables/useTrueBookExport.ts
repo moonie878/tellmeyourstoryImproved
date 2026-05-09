@@ -6,22 +6,24 @@ import { EBGaramondItalic } from '../fonts/EBGaramond-Italic'
 import { EBGaramondBold } from '../fonts/EBGaramond-Bold'
 import { EBGaramondBoldItalic } from '../fonts/EBGaramond-BoldItalic'
 
-// ─── Page dimensions — 6x9 inch in mm (jsPDF uses mm by default) ───
-const PW = 152.4  // 6 inches
-const PH = 228.6  // 9 inches
+// ─── Bleed ────────────────────────────────────────────────────────────
+// Blurb requires 3mm bleed on all sides for print
+const BLEED = 3
 
-// ─── Margins ──────────────────────────────────────────────────────────
-// Recto (odd/right pages): wider inner (left) margin for binding
-const RECTO_INNER  = 22   // binding side
-const RECTO_OUTER  = 16   // outside edge
-const RECTO_TOP    = 20
-const RECTO_BOTTOM = 18
+// ─── Page dimensions — 6x9 inch + bleed ──────────────────────────────
+const PW = 152.4 + BLEED * 2  // 158.4mm
+const PH = 228.6 + BLEED * 2  // 234.6mm
 
-// Verso (even/left pages): wider inner (right) margin for binding — mirrored
-const VERSO_INNER  = 22   // binding side (right on even pages)
-const VERSO_OUTER  = 16   // outside edge (left on even pages)
-const VERSO_TOP    = 20
-const VERSO_BOTTOM = 18
+// ─── Margins (offset inward from bleed edge) ──────────────────────────
+const RECTO_INNER  = BLEED + 22
+const RECTO_OUTER  = BLEED + 16
+const RECTO_TOP    = BLEED + 20
+const RECTO_BOTTOM = BLEED + 18
+
+const VERSO_INNER  = BLEED + 22
+const VERSO_OUTER  = BLEED + 16
+const VERSO_TOP    = BLEED + 20
+const VERSO_BOTTOM = BLEED + 18
 
 // ─── Typography ───────────────────────────────────────────────────────
 const TITLE_SIZE       = 22
@@ -43,6 +45,10 @@ const C_SECONDARY = [92, 84, 78]    as const
 const C_MUTED     = [140, 132, 126] as const
 const C_ACCENT    = [148, 116, 74]  as const
 const C_DIVIDER   = [221, 214, 206] as const
+
+// ─── Image compression quality for print ──────────────────────────────
+// JPEG at 85% gives excellent print quality at ~5-10x smaller file size
+const IMG_QUALITY = 0.85
 
 // ─── Helpers ──────────────────────────────────────────────────────────
 function isRecto(pageNum: number) { return pageNum % 2 !== 0 }
@@ -94,6 +100,35 @@ function textHeight(lines: string[]): number {
   return lines.length * LINE_HEIGHT
 }
 
+// ─── Compress image to JPEG for print ────────────────────────────────
+// Converts any image data URL to JPEG at print quality
+// Returns [compressedDataUrl, 'JPEG']
+async function compressImage(
+  imgData: string,
+  targetWidth: number,
+  targetHeight: number
+): Promise<string> {
+  return new Promise((resolve) => {
+    const canvas = document.createElement('canvas')
+    const img = new Image()
+    img.onload = () => {
+      // Scale to target dimensions — ensures 300 DPI equivalent
+      const scale = Math.min(
+        (targetWidth * 11.811) / img.width,   // convert mm to ~300dpi px
+        (targetHeight * 11.811) / img.height,
+        1                                       // never upscale
+      )
+      canvas.width  = Math.round(img.width  * scale)
+      canvas.height = Math.round(img.height * scale)
+      const ctx = canvas.getContext('2d')!
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
+      resolve(canvas.toDataURL('image/jpeg', IMG_QUALITY))
+    }
+    img.onerror = () => resolve(imgData) // fallback to original
+    img.src = imgData
+  })
+}
+
 // ─── Running header ───────────────────────────────────────────────────
 function drawRunningHeader(
   doc: jsPDF,
@@ -112,7 +147,6 @@ function drawRunningHeader(
   doc.setLineWidth(0.2)
 
   if (isRecto(pageNum)) {
-    // Right page — chapter name right-aligned, page number outside right
     const x = PW - RECTO_OUTER
     doc.text(chapterName, x, RECTO_TOP - 4, { align: 'right' })
     line(doc, RECTO_INNER, RECTO_TOP - 2, PW - RECTO_OUTER, RECTO_TOP - 2)
@@ -121,7 +155,6 @@ function drawRunningHeader(
     doc.setFontSize(PAGE_NUM_SIZE)
     doc.text(String(pageNum), x, PH - RECTO_BOTTOM + 6, { align: 'right' })
   } else {
-    // Left page — book title left-aligned, page number outside left
     const x = VERSO_OUTER
     doc.text(bookTitle, x, VERSO_TOP - 4, { align: 'left' })
     line(doc, VERSO_OUTER, VERSO_TOP - 2, PW - VERSO_INNER, VERSO_TOP - 2)
@@ -157,9 +190,9 @@ async function renderHalfTitle(
 
   if (coverImageUrl) {
     try {
-      const imgData = await loadImageAsBase64(coverImageUrl)
+      const rawImgData = await loadImageAsBase64(coverImageUrl)
       const img = new Image()
-      img.src = imgData
+      img.src = rawImgData
       await new Promise((resolve, reject) => {
         img.onload = resolve
         img.onerror = reject
@@ -172,10 +205,12 @@ async function renderHalfTitle(
       const ix = (PW - iw) / 2
       const iy = PH * 0.28
 
+      const imgData = await compressImage(rawImgData, iw, ih)
+
       setDraw(doc, C_DIVIDER)
       doc.setLineWidth(0.3)
       doc.roundedRect(ix - 1.5, iy - 1.5, iw + 3, ih + 3, 2, 2)
-      doc.addImage(imgData, 'PNG', ix, iy, iw, ih)
+      doc.addImage(imgData, 'JPEG', ix, iy, iw, ih)
 
       ornament(doc, cx, iy + ih + 12)
 
@@ -193,7 +228,7 @@ async function renderHalfTitle(
   doc.setFont('EBGaramond', 'normal')
   doc.setFontSize(8)
   setTxt(doc, C_MUTED)
-  doc.text('Tell Me Your Story', cx, PH - 16, { align: 'center' })
+  doc.text('Tell Me Your Story', cx, PH - BLEED - 16, { align: 'center' })
 }
 
 function renderHalfTitleText(doc: jsPDF, title: string, cx: number) {
@@ -228,12 +263,11 @@ async function renderTitlePage(
 
   const cx = PW / 2
 
-  // Cover image — top portion of page
   if (coverImageUrl) {
     try {
-      const imgData = await loadImageAsBase64(coverImageUrl)
+      const rawImgData = await loadImageAsBase64(coverImageUrl)
       const img = new Image()
-      img.src = imgData
+      img.src = rawImgData
       await new Promise((resolve, reject) => {
         img.onload = resolve
         img.onerror = reject
@@ -245,12 +279,14 @@ async function renderTitlePage(
       const iw = img.width * ratio
       const ih = img.height * ratio
       const ix = (PW - iw) / 2
-      const iy = 28
+      const iy = BLEED + 28
+
+      const imgData = await compressImage(rawImgData, iw, ih)
 
       setDraw(doc, C_DIVIDER)
       doc.setLineWidth(0.3)
       doc.roundedRect(ix - 1.5, iy - 1.5, iw + 3, ih + 3, 2, 2)
-      doc.addImage(imgData, 'PNG', ix, iy, iw, ih)
+      doc.addImage(imgData, 'JPEG', ix, iy, iw, ih)
 
       ornament(doc, cx, iy + ih + 12)
 
@@ -267,7 +303,6 @@ async function renderTitlePage(
       doc.text(subtitle, cx, iy + ih + 48, { align: 'center', maxWidth: 110 })
 
     } catch {
-      // fallback — no image
       renderTitlePageNoImage(doc, title, subtitle, cx)
     }
   } else {
@@ -277,7 +312,7 @@ async function renderTitlePage(
   doc.setFont('EBGaramond', 'normal')
   doc.setFontSize(8)
   setTxt(doc, C_MUTED)
-  doc.text('Tell Me Your Story · tellmeyourstory.uk', cx, PH - 14, { align: 'center' })
+  doc.text('Tell Me Your Story · tellmeyourstory.uk', cx, PH - BLEED - 14, { align: 'center' })
 }
 
 function renderTitlePageNoImage(doc: jsPDF, title: string, subtitle: string, cx: number) {
@@ -330,7 +365,6 @@ function renderTableOfContents(
   _pageNum: { n: number },
   _skipHeader: Set<number>
 ) {
-  // TOC is rendered by going back to the reserved TOC page — no page manipulation needed
   const x = RECTO_INNER
   const w = PW - RECTO_INNER - RECTO_OUTER
   const cx = x + w / 2
@@ -353,7 +387,6 @@ function renderTableOfContents(
     setTxt(doc, C_PRIMARY)
     doc.text(chapter, x, y)
 
-    // Dotted leader
     setTxt(doc, C_MUTED)
     doc.setFontSize(8)
     const chW = doc.getTextWidth(chapter)
@@ -416,10 +449,9 @@ function renderChapterPage(
     doc.text(ln, cx, PH * 0.63 + i * 5.5, { align: 'center' })
   })
 
-  // Bottom rule
   setDraw(doc, C_DIVIDER)
   doc.setLineWidth(0.2)
-  line(doc, PW * 0.25, PH - 20, PW * 0.75, PH - 20)
+  line(doc, PW * 0.25, PH - BLEED - 20, PW * 0.75, PH - BLEED - 20)
 }
 
 // ─── Quote page ───────────────────────────────────────────────────
@@ -463,7 +495,6 @@ function renderQuotePage(
   setTxt(doc, C_MUTED)
   doc.text('held onto with love', cx, PH * 0.72, { align: 'center' })
 
-  // Ensure next content starts on recto — but don't skip header on that page
   doc.addPage()
   pageNum.n++
   pageBg(doc)
@@ -507,43 +538,41 @@ async function renderSection(
 ): Promise<void> {
   const maxY = PH - RECTO_BOTTOM - 10
 
-  // Load image if available
   let imgData: string | null = null
   let imgW = 0
   let imgH = 0
 
   if (imageUrl) {
     try {
-      imgData = await loadImageAsBase64(imageUrl)
+      const rawImgData = await loadImageAsBase64(imageUrl)
       const img = new Image()
-      img.src = imgData
+      img.src = rawImgData
       await new Promise((resolve, reject) => {
         img.onload = resolve
         img.onerror = reject
       })
 
-      // Scale image to fit right column
       const maxIW = contentWidth(pageNum.n) * 0.45
       const maxIH = 55
       const ratio = Math.min(maxIW / img.width, maxIH / img.height)
       imgW = img.width * ratio
       imgH = img.height * ratio
+
+      // Compress image to JPEG at print quality
+      imgData = await compressImage(rawImgData, imgW, imgH)
     } catch {
       imgData = null
     }
   }
 
-  // Calculate text width — narrower if image
   const textW = imgData ? contentWidth(pageNum.n) - imgW - 6 : contentWidth(pageNum.n)
 
-  // Question
   doc.setFont('EBGaramond', 'italic')
   doc.setFontSize(QUESTION_SIZE)
   setTxt(doc, C_SECONDARY)
   const qLines = splitText(doc, section.question, textW)
   const qH = textHeight(qLines)
 
-  // Answer
   doc.setFont('EBGaramond', 'normal')
   doc.setFontSize(ANSWER_SIZE)
   setTxt(doc, C_PRIMARY)
@@ -552,7 +581,6 @@ async function renderSection(
   let aLines: string[] = []
 
   if (isFirstInChapter && answerText) {
-    // Drop cap — first letter separate
     const rest = answerText.slice(1)
     aLines = splitText(doc, rest, textW - 6)
   } else {
@@ -561,7 +589,6 @@ async function renderSection(
 
   const aH = textHeight(aLines)
 
-  // Page break if needed
   if (y.val + qH + QUESTION_GAP + Math.min(aH, 30) > maxY) {
     doc.addPage()
     pageNum.n++
@@ -573,7 +600,6 @@ async function renderSection(
   const currentW = contentWidth(pageNum.n)
   const textWFinal = imgData ? currentW - imgW - 6 : currentW
 
-  // Draw question
   doc.setFont('EBGaramond', 'italic')
   doc.setFontSize(QUESTION_SIZE)
   setTxt(doc, C_SECONDARY)
@@ -584,10 +610,8 @@ async function renderSection(
 
   y.val += textHeight(qLinesFinal) + QUESTION_GAP
 
-  // Draw answer
   if (answerText) {
     if (isFirstInChapter) {
-      // Drop cap
       const firstLetter = answerText.charAt(0)
       const rest = answerText.slice(1)
 
@@ -617,7 +641,6 @@ async function renderSection(
     }
   }
 
-  // Draw image to the right if available
   if (imgData) {
     const imgX = currentX + textWFinal + 4
     const imgY = y.val - aH - QUESTION_GAP - textHeight(qLinesFinal)
@@ -625,7 +648,7 @@ async function renderSection(
     setDraw(doc, C_DIVIDER)
     doc.setLineWidth(0.25)
     doc.roundedRect(imgX - 1, imgY - 1, imgW + 2, imgH + 2, 2, 2)
-    doc.addImage(imgData, 'PNG', imgX, imgY, imgW, imgH)
+    doc.addImage(imgData, 'JPEG', imgX, imgY, imgW, imgH)
 
     if (y.val < imgY + imgH + 4) {
       y.val = imgY + imgH + 4
@@ -650,21 +673,210 @@ const CHAPTER_INTROS: Record<string, string> = {
 }
 
 const STORY_SUBTITLES: Record<string, string> = {
-  mum:    'A life told through memories, moments, and love',
-  dad:    'A life told through memories, lessons, and love',
+  mum:     'A life told through memories, moments, and love',
+  dad:     'A life told through memories, lessons, and love',
   grandma: 'A collection of memories, traditions, and family stories',
   grandad: 'A collection of stories, life lessons, and legacy',
-  life:   'A life remembered through stories, moments, and reflection',
-  couple: 'A story of love, life, and the years built together',
+  life:    'A life remembered through stories, moments, and reflection',
+  couple:  'A story of love, life, and the years built together',
 }
 
-// ─── Main export function ─────────────────────────────────────────
-export function useStoryTrueBookExport() {
-  const isExporting = ref(false)
-  const progress   = ref(0)
-  const progressLabel = ref('')
-  const error      = ref('')
+// ─── Core PDF builder (shared by save and blob exports) ───────────
+async function buildTrueBookDoc(
+  project: StoryProject,
+  sections: StorySection[],
+  getAllImagesForExport: () => Promise<StoryImage[]>,
+  loadImageAsBase64: (url: string) => Promise<string>,
+  coverImageUrl: string,
+  onProgress: (pct: number, label: string) => void
+): Promise<jsPDF> {
+  const doc = new jsPDF({ unit: 'mm', format: [PW, PH], orientation: 'portrait' })
 
+  // PDF metadata — required by Blurb and good practice generally
+  doc.setProperties({
+    title: project.title || 'My Story',
+    subject: 'Life Story Keepsake Book',
+    author: 'Tell Me Your Story',
+    creator: 'tellmeyourstory.uk',
+    keywords: 'life story, keepsake, memoir, family history',
+  })
+
+  // Register embedded fonts
+  doc.addFileToVFS('EBGaramond-Regular.ttf', EBGaramondRegular)
+  doc.addFont('EBGaramond-Regular.ttf', 'EBGaramond', 'normal')
+
+  doc.addFileToVFS('EBGaramond-Italic.ttf', EBGaramondItalic)
+  doc.addFont('EBGaramond-Italic.ttf', 'EBGaramond', 'italic')
+
+  doc.addFileToVFS('EBGaramond-Bold.ttf', EBGaramondBold)
+  doc.addFont('EBGaramond-Bold.ttf', 'EBGaramond', 'bold')
+
+  doc.addFileToVFS('EBGaramond-BoldItalic.ttf', EBGaramondBoldItalic)
+  doc.addFont('EBGaramond-BoldItalic.ttf', 'EBGaramond', 'bolditalic')
+
+  const answered = sections.filter((s) => s.answer?.trim())
+  if (answered.length === 0) {
+    throw new Error('Please answer at least one question before exporting.')
+  }
+
+  onProgress(5, 'Loading photos…')
+  const images = await getAllImagesForExport()
+  const imageMap = new Map(images.map((img) => [img.section_id, img.image_url]))
+
+  const storyTitle    = project.title || 'My Story'
+  const storySubtitle = STORY_SUBTITLES[project.story_type || ''] || 'A story told through memories, moments, and love'
+
+  const answeredChapters = [...new Set(
+    answered.filter((s) => s.chapter).map((s) => s.chapter as string)
+  )]
+
+  onProgress(10, 'Building front matter…')
+
+  const skipHeader = new Set<number>()
+  const pageNum = { n: 1 }
+
+  // Page 1 — Half title (recto)
+  pageBg(doc)
+  await renderHalfTitle(doc, storyTitle, pageNum, skipHeader, coverImageUrl, loadImageAsBase64)
+
+  // Page 2 — Blank verso (correct book convention)
+  renderBlankVerso(doc, pageNum, skipHeader)
+
+  // Page 3 — Full title page (recto)
+  await renderTitlePage(doc, storyTitle, storySubtitle, coverImageUrl, loadImageAsBase64, pageNum, skipHeader)
+
+  // Page 4 — Copyright/dedication (verso)
+  renderCopyrightPage(doc, storyTitle, pageNum, skipHeader)
+
+  // Page 5 — TOC placeholder (recto)
+  doc.addPage()
+  pageNum.n++
+  pageBg(doc)
+  skipHeader.add(pageNum.n)
+  const tocPageNum = pageNum.n
+
+  // Page 6 — blank verso after TOC
+  doc.addPage()
+  pageNum.n++
+  pageBg(doc)
+  skipHeader.add(pageNum.n)
+
+  // ── Chapter pages ──────────────────────────────────────────────────
+  const chapterPages = new Map<string, number>()
+  let currentChapter = ''
+  let chapterIndex = -1
+  let isFirstInChapter = false
+  const usedQuotes = new Set<string>()
+
+  const y = { val: RECTO_TOP }
+
+  onProgress(20, 'Typesetting chapters…')
+
+  for (let si = 0; si < answered.length; si++) {
+    const section = answered[si]
+
+    if (section.chapter && section.chapter !== currentChapter) {
+      currentChapter = section.chapter
+      chapterIndex++
+      isFirstInChapter = true
+
+      ensureRecto(doc, pageNum, skipHeader)
+      doc.addPage()
+      pageNum.n++
+      pageBg(doc)
+
+      chapterPages.set(currentChapter, pageNum.n)
+      renderChapterPage(
+        doc,
+        currentChapter,
+        chapterIndex,
+        CHAPTER_INTROS[currentChapter] || 'A new chapter in this story.',
+        pageNum,
+        skipHeader
+      )
+
+      doc.addPage()
+      pageNum.n++
+      pageBg(doc)
+
+      y.val = isRecto(pageNum.n) ? RECTO_TOP : VERSO_TOP
+
+    } else {
+      isFirstInChapter = false
+    }
+
+    if (si > 0 && si % 6 === 0 && answered[si - 1]?.answer) {
+      const quote = answered[si - 1].answer!.trim()
+      if (quote.length >= 40 && !usedQuotes.has(quote)) {
+        usedQuotes.add(quote)
+        renderQuotePage(doc, quote, pageNum, skipHeader)
+        y.val = isRecto(pageNum.n) ? RECTO_TOP : VERSO_TOP
+      }
+    }
+
+    if (section.is_highlighted && section.answer && !usedQuotes.has(section.answer.trim())) {
+      const quote = section.answer.trim()
+      if (quote.length >= 40) {
+        usedQuotes.add(quote)
+        renderQuotePage(doc, quote, pageNum, skipHeader)
+        y.val = isRecto(pageNum.n) ? RECTO_TOP : VERSO_TOP
+      }
+    }
+
+    await renderSection(
+      doc,
+      section,
+      imageMap.get(section.id),
+      loadImageAsBase64,
+      pageNum,
+      y,
+      isFirstInChapter
+    )
+
+    onProgress(20 + Math.round((si / answered.length) * 65), `Typesetting page ${pageNum.n}…`)
+  }
+
+  // ── Closing page ───────────────────────────────────────────────────
+  onProgress(87, 'Adding closing pages…')
+  renderClosingPage(doc, pageNum, skipHeader)
+
+  // ── Running headers ────────────────────────────────────────────────
+  onProgress(88, 'Adding running headers…')
+
+  const pageChapterMap = new Map<number, string>()
+  let lastChapter = storyTitle
+  for (let pg = 1; pg <= pageNum.n; pg++) {
+    for (const [ch, chPg] of chapterPages.entries()) {
+      if (chPg <= pg) lastChapter = ch
+    }
+    pageChapterMap.set(pg, lastChapter)
+  }
+
+  const totalPages = doc.getNumberOfPages()
+  for (let pg = 1; pg <= totalPages; pg++) {
+    doc.setPage(pg)
+    const chName = pageChapterMap.get(pg) || storyTitle
+    drawRunningHeader(doc, pg, storyTitle, chName, skipHeader)
+  }
+
+  // ── TOC ────────────────────────────────────────────────────────────
+  onProgress(93, 'Building table of contents…')
+  doc.setPage(tocPageNum)
+  pageBg(doc)
+  const tocPageRef = { n: tocPageNum }
+  renderTableOfContents(doc, answeredChapters, chapterPages, tocPageRef, skipHeader)
+
+  return doc
+}
+
+// ─── Main export composable ───────────────────────────────────────
+export function useStoryTrueBookExport() {
+  const isExporting   = ref(false)
+  const progress      = ref(0)
+  const progressLabel = ref('')
+  const error         = ref('')
+
+  // ── Save to browser download ───────────────────────────────────
   async function exportTrueBook(
     project: StoryProject,
     sections: StorySection[],
@@ -678,204 +890,18 @@ export function useStoryTrueBookExport() {
     error.value         = ''
 
     try {
-      const doc = new jsPDF({ unit: 'mm', format: [PW, PH], orientation: 'portrait' })
-
-      // Register embedded fonts — required for Lulu print compatibility
-      doc.addFileToVFS('EBGaramond-Regular.ttf', EBGaramondRegular)
-      doc.addFont('EBGaramond-Regular.ttf', 'EBGaramond', 'normal')
-
-      doc.addFileToVFS('EBGaramond-Italic.ttf', EBGaramondItalic)
-      doc.addFont('EBGaramond-Italic.ttf', 'EBGaramond', 'italic')
-
-      doc.addFileToVFS('EBGaramond-Bold.ttf', EBGaramondBold)
-      doc.addFont('EBGaramond-Bold.ttf', 'EBGaramond', 'bold')
-
-      doc.addFileToVFS('EBGaramond-BoldItalic.ttf', EBGaramondBoldItalic)
-      doc.addFont('EBGaramond-BoldItalic.ttf', 'EBGaramond', 'bolditalic')
-
-      const answered = sections.filter((s) => s.answer?.trim())
-      if (answered.length === 0) {
-        error.value = 'Please answer at least one question before exporting.'
-        return
-      }
-
-      // Load images
-      progressLabel.value = 'Loading photos…'
-      progress.value = 5
-      const images = await getAllImagesForExport()
-      const imageMap = new Map(images.map((img) => [img.section_id, img.image_url]))
-
-      const storyTitle    = project.title || 'My Story'
-      const storySubtitle = STORY_SUBTITLES[project.story_type || ''] || 'A story told through memories, moments, and love'
-
-      // Get unique answered chapters
-      const answeredChapters = [...new Set(
-        answered.filter((s) => s.chapter).map((s) => s.chapter as string)
-      )]
-
-      // ── Front matter ───────────────────────────────────────────
-      progressLabel.value = 'Building front matter…'
-      progress.value = 10
-
-      const skipHeader = new Set<number>()
-      const pageNum = { n: 1 }
-
-      // Page 1 — Half title (recto)
-      pageBg(doc)
-      await renderHalfTitle(doc, storyTitle, pageNum, skipHeader, coverImageUrl, loadImageAsBase64)
-
-      // Page 2 — Blank verso
-      renderBlankVerso(doc, pageNum, skipHeader)
-
-      // Page 3 — Full title page (recto)
-      await renderTitlePage(doc, storyTitle, storySubtitle, coverImageUrl, loadImageAsBase64, pageNum, skipHeader)
-
-      // Page 4 — Copyright/dedication (verso)
-      renderCopyrightPage(doc, storyTitle, pageNum, skipHeader)
-
-      // ── First pass: collect chapter page numbers ───────────────
-      // We'll render TOC after chapters so we know page numbers
-      // For now, reserve pages 5–6 for TOC (we'll inject it last using doc.insertPage equivalent)
-      // Instead we track chapter start pages during render
-
-      // Page 5 — TOC placeholder (recto) — we add a blank here and fill after
-      doc.addPage()
-      pageNum.n++
-      pageBg(doc)
-      skipHeader.add(pageNum.n) // skip header on TOC page
-      const tocPageNum = pageNum.n
-
-      // Page 6 — blank verso after TOC
-      doc.addPage()
-      pageNum.n++
-      pageBg(doc)
-      skipHeader.add(pageNum.n)
-
-      // ── Chapter pages ──────────────────────────────────────────
-      const chapterPages = new Map<string, number>()
-      let currentChapter = ''
-      let chapterIndex = -1
-      let isFirstInChapter = false
-      const usedQuotes = new Set<string>()
-
-      // y persists across all sections — only resets when a new page starts
-      const y = { val: RECTO_TOP }
-
-      progress.value = 20
-
-      for (let si = 0; si < answered.length; si++) {
-        const section = answered[si]
-
-        // New chapter?
-        if (section.chapter && section.chapter !== currentChapter) {
-          currentChapter = section.chapter
-          chapterIndex++
-          isFirstInChapter = true
-
-          // Chapter always starts on recto
-          ensureRecto(doc, pageNum, skipHeader)
-          doc.addPage()
-          pageNum.n++
-          pageBg(doc)
-
-          chapterPages.set(currentChapter, pageNum.n)
-          renderChapterPage(
-            doc,
-            currentChapter,
-            chapterIndex,
-            CHAPTER_INTROS[currentChapter] || 'A new chapter in this story.',
-            pageNum,
-            skipHeader
-          )
-
-          // First content page of chapter (verso after chapter heading)
-          doc.addPage()
-          pageNum.n++
-          pageBg(doc)
-
-          // Reset y for the new chapter content page
-          y.val = isRecto(pageNum.n) ? RECTO_TOP : VERSO_TOP
-
-        } else {
-          isFirstInChapter = false
+      const doc = await buildTrueBookDoc(
+        project, sections, getAllImagesForExport, loadImageAsBase64, coverImageUrl,
+        (pct, label) => {
+          progress.value = pct
+          progressLabel.value = label
         }
+      )
 
-        // Quote page before certain sections
-        if (si > 0 && si % 6 === 0 && answered[si - 1]?.answer) {
-          const quote = answered[si - 1].answer!.trim()
-          if (quote.length >= 40 && !usedQuotes.has(quote)) {
-            usedQuotes.add(quote)
-            renderQuotePage(doc, quote, pageNum, skipHeader)
-            y.val = isRecto(pageNum.n) ? RECTO_TOP : VERSO_TOP
-          }
-        }
-
-        // Quote page for highlighted sections
-        if (section.is_highlighted && section.answer && !usedQuotes.has(section.answer.trim())) {
-          const quote = section.answer.trim()
-          if (quote.length >= 40) {
-            usedQuotes.add(quote)
-            renderQuotePage(doc, quote, pageNum, skipHeader)
-            y.val = isRecto(pageNum.n) ? RECTO_TOP : VERSO_TOP
-          }
-        }
-
-        await renderSection(
-          doc,
-          section,
-          imageMap.get(section.id),
-          loadImageAsBase64,
-          pageNum,
-          y,
-          isFirstInChapter
-        )
-
-        // After renderSection, if it added a new page, y is already updated inside renderSection
-        // but we need to make sure y reflects the current page top if pageNum changed
-        progress.value = 20 + Math.round((si / answered.length) * 65)
-        progressLabel.value = `Typesetting page ${pageNum.n}…`
-      }
-
-      // ── Closing page ───────────────────────────────────────────
-      progressLabel.value = 'Adding closing pages…'
-      renderClosingPage(doc, pageNum, skipHeader)
-
-      // ── Running headers on all pages ───────────────────────────
-      progressLabel.value = 'Adding running headers…'
-      progress.value = 88
-
-      // Build a page→chapter map for headers
-      const pageChapterMap = new Map<number, string>()
-      let lastChapter = storyTitle
-      for (let pg = 1; pg <= pageNum.n; pg++) {
-        for (const [ch, chPg] of chapterPages.entries()) {
-          if (chPg <= pg) lastChapter = ch
-        }
-        pageChapterMap.set(pg, lastChapter)
-      }
-
-      // jsPDF doesn't support going back to previous pages natively
-      // so we draw headers by saving current state and using internal page switching
-      const totalPages = doc.getNumberOfPages()
-      for (let pg = 1; pg <= totalPages; pg++) {
-        doc.setPage(pg)
-        const chName = pageChapterMap.get(pg) || storyTitle
-        drawRunningHeader(doc, pg, storyTitle, chName, skipHeader)
-      }
-
-      // ── TOC — go back to TOC page and render it ────────────────
-      progressLabel.value = 'Building table of contents…'
-      progress.value = 93
-      doc.setPage(tocPageNum)
-      pageBg(doc)
-      const tocPageRef = { n: tocPageNum }
-      renderTableOfContents(doc, answeredChapters, chapterPages, tocPageRef, skipHeader)
-
-      // ── Save ───────────────────────────────────────────────────
       progressLabel.value = 'Saving your book…'
       progress.value = 97
 
-      const filename = `${storyTitle.toLowerCase().replace(/[^a-z0-9]/g, '-')}-true-book.pdf`
+      const filename = `${(project.title || 'my-story').toLowerCase().replace(/[^a-z0-9]/g, '-')}-true-book.pdf`
       doc.save(filename)
 
       progress.value = 100
@@ -898,11 +924,55 @@ export function useStoryTrueBookExport() {
     }
   }
 
+  // ── Export as Blob — for Blurb/Lulu print API integration ─────
+  async function exportTrueBookAsBlob(
+    project: StoryProject,
+    sections: StorySection[],
+    getAllImagesForExport: () => Promise<StoryImage[]>,
+    loadImageAsBase64: (url: string) => Promise<string>,
+    coverImageUrl: string
+  ): Promise<Blob> {
+    isExporting.value   = true
+    progress.value      = 0
+    progressLabel.value = 'Preparing your book for print…'
+    error.value         = ''
+
+    try {
+      const doc = await buildTrueBookDoc(
+        project, sections, getAllImagesForExport, loadImageAsBase64, coverImageUrl,
+        (pct, label) => {
+          progress.value = pct
+          progressLabel.value = label
+        }
+      )
+
+      progressLabel.value = 'Preparing for print…'
+      progress.value = 98
+
+      const blob = doc.output('blob')
+
+      progress.value = 100
+      progressLabel.value = 'Ready for print!'
+
+      return blob
+
+    } catch (err) {
+      console.error('True book blob export error:', err)
+      error.value = err instanceof Error
+        ? err.message
+        : 'Something went wrong preparing your book for print. Please try again.'
+      throw err
+    } finally {
+      isExporting.value = false
+    }
+  }
+
   return {
     isExporting,
     progress,
     progressLabel,
     error,
     exportTrueBook,
+    exportTrueBookAsBlob,
   }
 }
