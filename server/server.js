@@ -407,7 +407,7 @@ app.post('/lulu-validate-interior', async (req, res) => {
     const token = await getLuluAccessToken()
 
     // Step 1 — submit validation job
-    const submitResponse = await fetch(`${LULU_API_URL}/print-jobs/interior-validation/`, {
+    const submitResponse = await fetch(`${LULU_API_URL}/interior-validation/`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,
