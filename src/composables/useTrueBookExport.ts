@@ -5,6 +5,8 @@ import { EBGaramondRegular } from '../fonts/EBGaramond-Regular'
 import { EBGaramondItalic } from '../fonts/EBGaramond-Italic'
 import { EBGaramondBold } from '../fonts/EBGaramond-Bold'
 import { EBGaramondBoldItalic } from '../fonts/EBGaramond-BoldItalic'
+import QRCode from 'qrcode'
+import { supabase } from '../lib/supabase'
 
 // ─── Bleed ────────────────────────────────────────────────────────────
 // Blurb requires 3mm bleed on all sides for print
@@ -90,6 +92,33 @@ function ornament(doc: jsPDF, cx: number, y: number) {
 function pageBg(doc: jsPDF) {
   setFill(doc, C_PAGE_BG)
   doc.rect(0, 0, PW, PH, 'F')
+}
+
+// ─── Generate QR code as base64 image ────────────────────────────
+async function generateQRDataUrl(url: string): Promise<string> {
+  return QRCode.toDataURL(url, {
+    width: 120,
+    margin: 1,
+    color: { dark: '#1C1917', light: '#F8F4EF' },
+  })
+}
+
+// ─── Fetch voice recordings that have show_qr enabled ────────────
+async function fetchVoiceRecordings(projectId: string): Promise<Map<string, string>> {
+  // Returns Map<section_id, listen_url>
+  const { data } = await supabase
+    .from('voice_recordings')
+    .select('id, section_id, show_qr')
+    .eq('project_id', projectId)
+    .eq('show_qr', true)
+
+  const map = new Map<string, string>()
+  if (data) {
+    for (const rec of data) {
+      map.set(rec.section_id, `https://tellmeyourstory.uk/listen/${rec.id}`)
+    }
+  }
+  return map
 }
 
 function splitText(doc: jsPDF, text: string, width: number): string[] {
@@ -534,7 +563,8 @@ async function renderSection(
   loadImageAsBase64: (url: string) => Promise<string>,
   pageNum: { n: number },
   y: { val: number },
-  isFirstInChapter: boolean
+  isFirstInChapter: boolean,
+  qrUrl?: string
 ): Promise<void> {
   const maxY = PH - RECTO_BOTTOM - 10
 
@@ -655,6 +685,39 @@ async function renderSection(
     }
   }
 
+  // ── QR code — only if this section has a voice recording ─────────
+  if (qrUrl) {
+    try {
+      const QR_SIZE   = 18  // mm
+      const qrDataUrl = await generateQRDataUrl(qrUrl)
+      const currentX  = contentX(pageNum.n)
+      const currentW  = contentWidth(pageNum.n)
+
+      // Position QR at right edge of content area
+      const qrX = currentX + currentW - QR_SIZE
+      const qrY = y.val
+
+      // Check if QR fits on this page — if not, let it overflow naturally
+      doc.addImage(qrDataUrl, 'PNG', qrX, qrY, QR_SIZE, QR_SIZE)
+
+      // Caption below QR
+      doc.setFont('EBGaramond', 'normal')
+      doc.setFontSize(6)
+      setTxt(doc, C_MUTED)
+      doc.text('Scan to hear', qrX + QR_SIZE / 2, qrY + QR_SIZE + 3, { align: 'center' })
+      doc.text('this memory', qrX + QR_SIZE / 2, qrY + QR_SIZE + 6.5, { align: 'center' })
+
+      // Small mic icon hint
+      doc.setFontSize(7)
+      setTxt(doc, C_ACCENT)
+      doc.text('🎙️', qrX + QR_SIZE / 2 - 2, qrY + QR_SIZE + 10.5)
+
+      y.val = Math.max(y.val, qrY + QR_SIZE + 14)
+    } catch (err) {
+      console.error('QR render error:', err)
+    }
+  }
+
   y.val += SECTION_GAP
 }
 
@@ -720,8 +783,11 @@ async function buildTrueBookDoc(
   }
 
   onProgress(5, 'Loading photos…')
-  const images = await getAllImagesForExport()
-  const imageMap = new Map(images.map((img) => [img.section_id, img.image_url]))
+const images = await getAllImagesForExport()
+const imageMap = new Map(images.map((img) => [img.section_id, img.image_url]))
+
+// Load voice recordings with QR enabled
+const voiceMap = await fetchVoiceRecordings(project.id)
 
   const storyTitle    = project.title || 'My Story'
   const storySubtitle = STORY_SUBTITLES[project.story_type || ''] || 'A story told through memories, moments, and love'
@@ -824,14 +890,15 @@ async function buildTrueBookDoc(
     }
 
     await renderSection(
-      doc,
-      section,
-      imageMap.get(section.id),
-      loadImageAsBase64,
-      pageNum,
-      y,
-      isFirstInChapter
-    )
+  doc,
+  section,
+  imageMap.get(section.id),
+  loadImageAsBase64,
+  pageNum,
+  y,
+  isFirstInChapter,
+  voiceMap.get(section.id)
+)
 
     onProgress(20 + Math.round((si / answered.length) * 65), `Typesetting page ${pageNum.n}…`)
   }
