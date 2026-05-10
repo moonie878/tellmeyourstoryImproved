@@ -477,7 +477,7 @@ app.post('/lulu-validate-cover', async (req, res) => {
     const validationId = submitData.id
 
     // Wait 8 seconds then poll
-    await new Promise(resolve => setTimeout(resolve, 8000))
+    await new Promise(resolve => setTimeout(resolve, 15000))
 
     const resultResponse = await fetch(
       `${LULU_API_URL}/validate-cover/${validationId}/`,
