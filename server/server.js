@@ -402,6 +402,33 @@ app.post('/lulu-test-job', async (req, res) => {
   }
 })
 
+app.post('/lulu-validate-interior', async (req, res) => {
+  try {
+    const token = await getLuluAccessToken()
+
+    // Submit for validation
+    const response = await fetch(`${LULU_API_URL}/print-jobs/interior-validation/`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        source_url: 'https://jeyybcdnmezivjuvmmcu.supabase.co/storage/v1/object/public/story-exports/print-orders/1b595e55-7fe9-429c-ab0e-0e761e3d718c/0411757e-8df2-40d0-904d-f8432f148237-interior-1778379201693.pdf',
+        pod_package_id: '0600X0900.FC.STD.PB.060UW444.MXX',
+      }),
+    })
+
+    const text = await response.text()
+    console.log('Validation response:', response.status, text)
+    res.status(response.status).send(text)
+
+  } catch (err) {
+    console.error('Validation error:', err.message)
+    res.status(500).json({ error: err.message })
+  }
+})
+
 app.post('/lulu-print-job-cancel/:id', async (req, res) => {
   try {
     const token = await getLuluAccessToken()
