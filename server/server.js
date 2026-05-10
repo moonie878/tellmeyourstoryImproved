@@ -448,6 +448,33 @@ app.post('/lulu-validate-interior', async (req, res) => {
   }
 })
 
+app.post('/lulu-cover-dimensions', async (req, res) => {
+  try {
+    const token = await getLuluAccessToken()
+
+    const response = await fetch(`${LULU_API_URL}/print-jobs/cover-dimensions/`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        pod_package_id: '0600X0900.FC.STD.PB.060UW444.MXX',
+        interior_page_count: 28,
+        unit: 'mm',
+      }),
+    })
+
+    const text = await response.text()
+    console.log('Cover dimensions:', response.status, text)
+    res.status(response.status).send(text)
+
+  } catch (err) {
+    console.error('Cover dimensions error:', err.message)
+    res.status(500).json({ error: err.message })
+  }
+})
+
 app.post('/lulu-validate-cover', async (req, res) => {
   try {
     const token = await getLuluAccessToken()
