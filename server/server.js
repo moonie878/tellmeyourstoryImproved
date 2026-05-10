@@ -406,26 +406,28 @@ async function verifyTurnstileToken(token, remoteIp) {
 }
 
 async function getLuluAccessToken() {
-  console.log('KEY:', process.env.LULU_CLIENT_KEY ? 'present' : 'MISSING')
-  console.log('SECRET:', process.env.LULU_CLIENT_SECRET ? 'present' : 'MISSING')
-  const credentials = Buffer.from(
-    `${process.env.LULU_CLIENT_KEY}:${process.env.LULU_CLIENT_SECRET}`
-  ).toString('base64')
- 
-  const response = await fetch(LULU_AUTH_URL, {
-    method: 'POST',
-    headers: {
-      'Content-Type':  'application/x-www-form-urlencoded',
-      'Authorization': `Basic ${credentials}`,
-    },
-    body: 'grant_type=client_credentials',
-  })
- 
+  const response = await fetch(
+    'https://api.lulu.com/auth/realms/glasstree/protocol/openid-connect/token',
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: new URLSearchParams({
+        grant_type: 'client_credentials',
+        client_id: process.env.LULU_CLIENT_KEY,
+        client_secret: process.env.LULU_CLIENT_SECRET,
+      }).toString(),
+    }
+  )
+
+  const text = await response.text()
+  console.log('Lulu auth response:', response.status, text.slice(0, 200))
+
   if (!response.ok) {
-    const text = await response.text()
-    throw new Error(`Lulu auth failed: ${response.status} ${text}`)
+    throw new Error(`Lulu auth failed: ${response.status} ${text.slice(0, 200)}`)
   }
- 
-  const data = await response.json()
+
+  const data = JSON.parse(text)
   return data.access_token
 }
