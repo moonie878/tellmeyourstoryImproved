@@ -406,8 +406,8 @@ app.post('/lulu-validate-interior', async (req, res) => {
   try {
     const token = await getLuluAccessToken()
 
-    // Submit for validation
-    const response = await fetch(`${LULU_API_URL}/print-jobs/interior-validation/`, {
+    // Step 1 — submit validation job
+    const submitResponse = await fetch(`${LULU_API_URL}/print-jobs/interior-validation/`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -419,9 +419,29 @@ app.post('/lulu-validate-interior', async (req, res) => {
       }),
     })
 
-    const text = await response.text()
-    console.log('Validation response:', response.status, text)
-    res.status(response.status).send(text)
+    const submitText = await submitResponse.text()
+    console.log('Validation submit:', submitResponse.status, submitText)
+
+    if (!submitResponse.ok) {
+      return res.status(submitResponse.status).send(submitText)
+    }
+
+    const submitData = JSON.parse(submitText)
+    const validationId = submitData.id
+
+    // Step 2 — wait 5 seconds then poll for result
+    await new Promise(resolve => setTimeout(resolve, 5000))
+
+    const resultResponse = await fetch(
+      `${LULU_API_URL}/print-jobs/interior-validation/${validationId}/`,
+      {
+        headers: { 'Authorization': `Bearer ${token}` },
+      }
+    )
+
+    const resultText = await resultResponse.text()
+    console.log('Validation result:', resultResponse.status, resultText)
+    res.status(resultResponse.status).send(resultText)
 
   } catch (err) {
     console.error('Validation error:', err.message)
