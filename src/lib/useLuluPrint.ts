@@ -48,7 +48,7 @@ export interface PrintOrderResult {
 const BACKEND_URL = import.meta.env.VITE_API_BASE_URL as string
 
 // 6x9 full colour perfect bind softcover
-const LULU_POD_PACKAGE_ID = '0600X0900FCSTDPB060UW444MXX'
+const LULU_POD_PACKAGE_ID = '0600X0900.FC.STD.PB.060UW444.MXX'
 
 // ─── Upload PDF blob to Supabase storage ──────────────────────────────────────
 
