@@ -396,6 +396,11 @@ app.post('/create-checkout-session', async (req, res) => {
   }
 })
 
+app.use((err, req, res, next) => {
+  console.error('Express error:', err.message)
+  res.status(500).json({ error: err.message })
+})
+
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
 })
