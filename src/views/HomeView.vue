@@ -5,11 +5,7 @@
     <!-- HERO                                    -->
     <!-- ═══════════════════════════════════════ -->
     <section class="hero relative overflow-hidden px-5 pb-0 pt-20 sm:px-8 sm:pt-28 md:pt-32">
-
-      <!-- Subtle grain texture overlay -->
       <div class="grain"></div>
-
-      <!-- Decorative background circle -->
       <div class="hero-circle"></div>
 
       <div class="relative mx-auto max-w-6xl">
@@ -28,23 +24,14 @@
             </h1>
 
             <p class="mx-auto mt-6 max-w-lg text-base leading-[1.8] text-[#5C534E] sm:text-lg md:mx-0">
-              Answer guided questions about someone you love, add meaningful photos, and create a beautiful story — as a keepsake book or a video — that your family can treasure for generations.
+              Answer guided questions about someone you love — by typing or speaking. Add photos, capture their voice, and create a beautiful keepsake book with QR codes that let family hear their stories aloud.
             </p>
 
             <div class="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center md:justify-start">
-              <router-link
-                to="/register"
-                @click="trackStart"
-                class="btn-primary"
-              >
+              <router-link to="/register" @click="trackStart" class="btn-primary">
                 Start your story — it's free
               </router-link>
-
-              <router-link
-                to="/example"
-                @click="trackExampleStory"
-                class="btn-secondary"
-              >
+              <router-link to="/example" @click="trackExampleStory" class="btn-secondary">
                 See an example
               </router-link>
             </div>
@@ -52,11 +39,11 @@
             <div class="mt-6 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs text-[#8C847E] md:justify-start">
               <span class="flex items-center gap-1.5"><span class="check">✓</span> No subscription</span>
               <span class="flex items-center gap-1.5"><span class="check">✓</span> Free to start</span>
-              <span class="flex items-center gap-1.5"><span class="check">✓</span> Download when ready</span>
+              <span class="flex items-center gap-1.5"><span class="check">✓</span> Voice answers supported</span>
             </div>
           </div>
 
-          <!-- Right — hero image floated up -->
+          <!-- Right — hero image -->
           <div class="hero-image-wrap flex justify-center md:justify-end">
             <div class="hero-image-frame">
               <img
@@ -65,18 +52,86 @@
                 class="hero-img"
                 loading="eager"
               />
-              <!-- Floating badge -->
+              <!-- Floating badge — updated to voice -->
               <div class="hero-badge">
-                <span class="hero-badge-icon">🎬</span>
+                <span class="hero-badge-icon">🎙️</span>
                 <div>
-                  <p class="hero-badge-title">Also exports as video</p>
-                  <p class="hero-badge-sub">With music & photos</p>
+                  <p class="hero-badge-title">Speak your answers</p>
+                  <p class="hero-badge-sub">Voice saved in the book</p>
                 </div>
               </div>
             </div>
           </div>
 
         </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════ -->
+    <!-- NEW FEATURES — voice, QR, print        -->
+    <!-- ═══════════════════════════════════════ -->
+    <section class="bg-[#1C1917] px-5 py-16 sm:px-8 sm:py-20">
+      <div class="mx-auto max-w-6xl">
+
+        <div class="section-label text-center text-[#9C7C5C]">What makes us different</div>
+        <h2 class="section-title mt-3 text-center text-white" style="margin-left:auto;margin-right:auto;">
+          Features no other memory app has
+        </h2>
+
+        <div class="mt-12 grid gap-5 md:grid-cols-3 md:gap-6">
+
+          <!-- Feature 1 — Voice to text -->
+          <div class="feature-card">
+            <div class="feature-icon-wrap feature-icon-voice">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-white" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 1a4 4 0 0 1 4 4v6a4 4 0 0 1-8 0V5a4 4 0 0 1 4-4zm0 2a2 2 0 0 0-2 2v6a2 2 0 0 0 4 0V5a2 2 0 0 0-2-2zm-1 14.93V20H9v2h6v-2h-2v-2.07A8 8 0 0 0 20 11h-2a6 6 0 0 1-12 0H4a8 8 0 0 0 7 7.93z"/>
+              </svg>
+            </div>
+            <h3 class="feature-title">Speak your answers</h3>
+            <p class="feature-desc">
+              Tap the microphone on any question and speak naturally. Your words appear as you talk — no typing needed. Perfect for elderly parents who find typing difficult.
+            </p>
+            <div class="feature-tag">Live transcription • Works in Chrome & Safari</div>
+          </div>
+
+          <!-- Feature 2 — QR code in book -->
+          <div class="feature-card feature-card-accent">
+            <div class="feature-icon-wrap feature-icon-qr">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-white" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M3 11V3h8v8H3zm2-2h4V5H5v4zm8-6h8v8h-8V3zm2 2v4h4V5h-4zM3 21v-8h8v8H3zm2-2h4v-4H5v4zm13 2h-2v-2h2v2zm-4-4h2v2h-2v-2zm4-2h2v2h-2v-2zm-2-2h2v2h-2v-2zm2 4h-2v-2h2v2zm-4 0v2h-2v-2h2zm-2-4h2v2h-2v-2z"/>
+              </svg>
+            </div>
+            <h3 class="feature-title">Hear their voice in the book</h3>
+            <p class="feature-desc">
+              Voice recordings are saved alongside written answers. A QR code is printed in your keepsake book next to each memory — family scan it to hear their loved one's voice, years from now.
+            </p>
+            <div class="feature-tag feature-tag-accent">The only memory book that speaks</div>
+          </div>
+
+          <!-- Feature 3 — Printed book -->
+          <div class="feature-card">
+            <div class="feature-icon-wrap feature-icon-print">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-white" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M18 3H6a1 1 0 0 0-1 1v4H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h1v2a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2h1a2 2 0 0 0 2-2V10a2 2 0 0 0-2-2h-1V4a1 1 0 0 0-1-1zm-1 16H7v-4h10v4zm0-11H7V5h10v3zm3 6h-1v-2a1 1 0 0 0-1-1H6a1 1 0 0 0-1 1v2H4v-6h16v6z"/>
+              </svg>
+            </div>
+            <h3 class="feature-title">Order a printed hardback</h3>
+            <p class="feature-desc">
+              Turn any completed story into a beautifully printed 6×9 softcover book — professionally printed and shipped directly to your door. From £34.98 including UK delivery.
+            </p>
+            <div class="feature-tag">Printed by Lulu Press • Ships in 10–14 days</div>
+          </div>
+
+        </div>
+
+        <!-- Listen demo link -->
+        <div class="mt-10 rounded-2xl border border-[#2C2420] bg-[#2C2420] px-6 py-5 text-center">
+          <p class="text-sm text-stone-400">
+            🎙️ <span class="text-white font-medium">Imagine scanning a QR code at Christmas</span> and hearing your grandmother's voice describing the home she grew up in.
+            That's what Tell Me Your Story makes possible.
+          </p>
+        </div>
+
       </div>
     </section>
 
@@ -88,27 +143,27 @@
 
         <div class="section-label text-center">What you create</div>
         <h2 class="section-title mt-3 text-center">
-          Two beautiful ways to keep a story
+          Three beautiful ways to keep a story
         </h2>
         <p class="mx-auto mt-4 max-w-2xl text-center text-base leading-[1.8] text-[#5C534E] sm:text-lg">
-          Every story you capture can be turned into a keepsake book, a shareable video, or both. Something to hold, something to play, something to pass down.
+          Every story you capture can become a digital keepsake book, a shareable video, or a professionally printed hardback — with QR codes that bring their voice to life.
         </p>
 
-        <div class="mt-12 grid gap-5 md:grid-cols-2 md:gap-6">
+        <div class="mt-12 grid gap-5 md:grid-cols-3 md:gap-6">
 
           <!-- Format 1 — Keepsake Book -->
           <div class="format-card">
             <div class="format-card-inner">
               <div class="format-icon">📖</div>
-              <h3 class="format-title">Keepsake Book</h3>
+              <h3 class="format-title">Digital Keepsake Book</h3>
               <p class="format-desc">
-                A beautifully typeset PDF with chapters, quote pages, photos, and elegant layouts — ready to print, share digitally, or gift.
+                A beautifully typeset PDF with chapters, quote pages, photos, QR voice codes, and elegant layouts — ready to download, share, or print at home.
               </p>
               <ul class="format-list">
                 <li>Chapters, drop caps &amp; quote pages</li>
-                <li>Three design themes to choose from</li>
-                <li>Print-ready or digital</li>
-                <li>Cover image included</li>
+                <li>Voice recording QR codes</li>
+                <li>Three design themes</li>
+                <li>Instant PDF download</li>
               </ul>
             </div>
             <div class="format-preview bg-[#F5F0E8]">
@@ -121,7 +176,37 @@
             </div>
           </div>
 
-          <!-- Format 2 — Video -->
+          <!-- Format 2 — Printed Book -->
+          <div class="format-card format-card-print">
+            <div class="format-card-inner">
+              <div class="format-icon">📚</div>
+              <h3 class="format-title" style="color:#1C1917;">Printed Keepsake Book</h3>
+              <p class="format-desc">
+                A professionally printed 6×9 softcover book — the same beautiful design as the digital version, physically printed and shipped to your door.
+              </p>
+              <ul class="format-list">
+                <li>Professional print quality</li>
+                <li>QR codes printed in the book</li>
+                <li>Shipped UK-wide</li>
+                <li>From £34.98 inc. delivery</li>
+              </ul>
+              <div class="new-badge">Now available</div>
+            </div>
+            <div class="format-preview bg-[#F0E8DC] flex items-center justify-center p-8">
+              <div class="text-center">
+                <div class="mx-auto flex h-20 w-16 items-center justify-center rounded-lg bg-[#1C1917] shadow-lg">
+                  <div class="text-center px-2">
+                    <p class="text-[7px] text-[#9C7C5C] uppercase tracking-widest">Tell Me Your Story</p>
+                    <p class="mt-1 text-[9px] font-bold text-white leading-tight">Mum's Story</p>
+                  </div>
+                </div>
+                <p class="mt-3 text-xs text-[#7C5C3B] font-medium">Printed & shipped</p>
+                <p class="text-xs text-[#9C7C5C]">10–14 days</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Format 3 — Video -->
           <div class="format-card format-card-dark">
             <div class="format-card-inner">
               <div class="format-icon">🎬</div>
@@ -160,9 +245,7 @@
       <div class="mx-auto max-w-6xl">
 
         <div class="section-label">How it works</div>
-        <h2 class="section-title mt-3">
-          Simple to start, beautiful to finish
-        </h2>
+        <h2 class="section-title mt-3">Simple to start, beautiful to finish</h2>
 
         <div class="mt-12 grid gap-5 md:grid-cols-3 md:gap-6">
           <div class="step-card">
@@ -175,26 +258,27 @@
 
           <div class="step-card step-card-accent">
             <div class="step-number text-[#7C5C3B]">02</div>
-            <h3 class="step-title">Answer at your own pace</h3>
+            <h3 class="step-title">Answer by typing or speaking</h3>
             <p class="step-desc">
-  100 guided questions across 10 chapters — from first memories to lasting values. Answer as many or as few as feel right. Add photos alongside each answer. Everything saves automatically.
-</p>
+              100 guided questions across 10 chapters. Type your answers or tap the microphone and speak — your voice is recorded and saved alongside the text. Add photos to bring each memory to life.
+            </p>
           </div>
 
           <div class="step-card">
             <div class="step-number">03</div>
-            <h3 class="step-title">Export as book or video</h3>
+            <h3 class="step-title">Export, print, or share</h3>
             <p class="step-desc">
-              Choose your format, theme, and style. Download a beautifully designed PDF book or a shareable video with music — ready in minutes.
+              Download a beautifully designed PDF, order a professionally printed book, or export a video with music — ready in minutes, kept forever.
             </p>
           </div>
         </div>
-<router-link
-  to="/blog/questions-to-ask-your-parents"
-  class="text-sm text-[#7C5C3B] hover:underline"
->
-  Read: 100 questions to ask your parents before it's too late →
-</router-link>
+
+        <router-link
+          to="/blog/questions-to-ask-your-parents"
+          class="mt-8 inline-block text-sm text-[#7C5C3B] hover:underline"
+        >
+          Read: 100 questions to ask your parents before it's too late →
+        </router-link>
       </div>
     </section>
 
@@ -205,9 +289,7 @@
       <div class="mx-auto max-w-6xl">
 
         <div class="section-label">The finished result</div>
-        <h2 class="section-title mt-3">
-          From answers to something beautiful
-        </h2>
+        <h2 class="section-title mt-3">From answers to something beautiful</h2>
         <p class="mt-4 max-w-2xl text-base leading-[1.8] text-[#5C534E] sm:text-lg">
           Chapters, quote pages, elegant typography, and personal images all come together to create a keepsake that feels genuinely finished.
         </p>
@@ -236,11 +318,7 @@
         </div>
 
         <div class="mt-8 text-center">
-          <router-link
-            to="/example"
-            @click="trackExampleStory"
-            class="btn-secondary"
-          >
+          <router-link to="/example" @click="trackExampleStory" class="btn-secondary">
             Explore a full example story
           </router-link>
         </div>
@@ -279,9 +357,7 @@
       <div class="mx-auto max-w-6xl">
 
         <div class="section-label">Story types</div>
-        <h2 class="section-title mt-3">
-          Made for the people who matter most
-        </h2>
+        <h2 class="section-title mt-3">Made for the people who matter most</h2>
 
         <div class="mt-10 grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-4 lg:grid-cols-6">
           <div v-for="type in storyTypes" :key="type.id" class="story-type-chip">
@@ -293,14 +369,13 @@
         <p class="mt-8 text-sm text-[#8C847E]">
           Each story type has its own set of guided questions — thoughtfully written for that person and their life.
         </p>
-
       </div>
     </section>
 
     <!-- ═══════════════════════════════════════ -->
     <!-- PRICING                                -->
     <!-- ═══════════════════════════════════════ -->
- <PricingTable id="pricing" @track="trackPricing" />
+    <PricingTable id="pricing" @track="trackPricing" />
 
     <!-- ═══════════════════════════════════════ -->
     <!-- FINAL CTA                              -->
@@ -313,7 +388,7 @@
           Their story deserves to be kept.
         </h2>
         <p class="mx-auto mt-5 max-w-xl text-base leading-[1.8] text-stone-300 sm:text-lg">
-          Start free, answer at your own pace, and turn meaningful memories into something your family can hold onto forever.
+          Start free, speak or type your answers, and turn meaningful memories into a book your family can hold — and hear — forever.
         </p>
         <div class="mt-10 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
           <router-link to="/register" @click="trackStart" class="btn-primary-light">
@@ -335,9 +410,9 @@ import { useSeo } from '../composables/useSeo'
 import PricingTable from '../components/pricing/PricingTable.vue'
 
 useSeo({
-  title: 'Tell Me Your Story | Turn memories into a keepsake book or video',
+  title: 'Tell Me Your Story | Voice-recorded life story keepsake books',
   description:
-    'Answer guided questions about someone you love, add photos, and create a beautiful keepsake book or video. Capture your parent\'s story before those memories are lost.',
+    'Answer guided questions about someone you love — by typing or speaking. Voice recordings are saved with QR codes in your printed keepsake book, so family can hear their stories forever.',
   schema: {
     '@context': 'https://schema.org',
     '@graph': [
@@ -345,7 +420,7 @@ useSeo({
         '@type': 'WebSite',
         name: 'Tell Me Your Story',
         url: 'https://tellmeyourstory.uk',
-        description: 'A guided app to capture a loved one\'s life story and turn it into a beautiful keepsake book or video.',
+        description: 'A guided app to capture a loved one\'s life story — by voice or text — and turn it into a beautiful keepsake book with QR codes that play their voice recordings.',
         publisher: {
           '@type': 'Organization',
           name: 'Tell Me Your Story',
@@ -362,36 +437,13 @@ useSeo({
         url: 'https://tellmeyourstory.uk',
         applicationCategory: 'LifestyleApplication',
         operatingSystem: 'Web',
-        description: 'Answer guided questions about someone you love, add photos, and create a beautiful keepsake book or video your family can treasure for generations.',
+        description: 'Capture a loved one\'s life story by typing or speaking. Voice recordings are saved with QR codes in printed keepsake books — family scan to hear their voice years from now.',
         offers: [
-          {
-            '@type': 'Offer',
-            name: 'Free',
-            price: '0',
-            priceCurrency: 'GBP',
-            description: 'Start any story, answer all 100 questions, autosave included.',
-          },
-          {
-            '@type': 'Offer',
-            name: 'Single Story',
-            price: '3.99',
-            priceCurrency: 'GBP',
-            description: 'Everything in Free plus PDF keepsake export with elegant layouts and themes.',
-          },
-          {
-            '@type': 'Offer',
-            name: 'Story + Photos',
-            price: '5.99',
-            priceCurrency: 'GBP',
-            description: 'Everything in Single Story plus photos in your PDF and cover image.',
-          },
-          {
-            '@type': 'Offer',
-            name: 'Full Collection',
-            price: '11.99',
-            priceCurrency: 'GBP',
-            description: 'All story types, photos in all exports, and video export included.',
-          },
+          { '@type': 'Offer', name: 'Free', price: '0', priceCurrency: 'GBP', description: 'Start any story, answer all 100 questions, voice recording included.' },
+          { '@type': 'Offer', name: 'Single Story', price: '3.99', priceCurrency: 'GBP' },
+          { '@type': 'Offer', name: 'Story + Photos', price: '5.99', priceCurrency: 'GBP' },
+          { '@type': 'Offer', name: 'Full Collection', price: '11.99', priceCurrency: 'GBP' },
+          { '@type': 'Offer', name: 'Printed Book', price: '34.98', priceCurrency: 'GBP', description: 'Professionally printed 6x9 softcover with QR voice codes, shipped UK-wide.' },
         ],
       },
     ],
@@ -407,595 +459,131 @@ const storyTypes = [
   { id: 'couple', emoji: '💞', label: 'Couple Story' },
 ]
 
-function trackStart() {
-  track('upgrade_clicked', { source: 'homepage' })
-}
-
-function trackExampleStory() {
-  track('example_story_clicked', { source: 'homepage' })
-}
-
-function trackPricing(plan: string) {
-  track('upgrade_clicked', { source: 'home_pricing', plan })
-}
-
+function trackStart() { track('upgrade_clicked', { source: 'homepage' }) }
+function trackExampleStory() { track('example_story_clicked', { source: 'homepage' }) }
+function trackPricing(plan: string) { track('upgrade_clicked', { source: 'home_pricing', plan }) }
 </script>
 
 <style scoped>
-/* ── Fonts ─────────────────────────────── */
+.home { font-family: 'DM Sans', sans-serif; }
+.font-display { font-family: 'Playfair Display', Georgia, serif; }
 
-
-.home {
-  font-family: 'DM Sans', sans-serif;
-}
-
-.font-display {
-  font-family: 'Playfair Display', Georgia, serif;
-}
-
-/* ── Grain texture ──────────────────────── */
 .grain {
-  position: absolute;
-  inset: 0;
+  position: absolute; inset: 0;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
-  pointer-events: none;
-  z-index: 0;
+  pointer-events: none; z-index: 0;
 }
 
-/* ── Hero ───────────────────────────────── */
-.hero {
-  background: linear-gradient(160deg, #F5F0E8 0%, #EDE5D8 100%);
-  position: relative;
-}
+.hero { background: linear-gradient(160deg, #F5F0E8 0%, #EDE5D8 100%); position: relative; }
+.hero-circle { position: absolute; top: -120px; right: -180px; width: 600px; height: 600px; border-radius: 50%; background: radial-gradient(circle, #E8DDD0 0%, transparent 70%); pointer-events: none; }
+.hero-text { position: relative; z-index: 1; }
 
-.hero-circle {
-  position: absolute;
-  top: -120px;
-  right: -180px;
-  width: 600px;
-  height: 600px;
-  border-radius: 50%;
-  background: radial-gradient(circle, #E8DDD0 0%, transparent 70%);
-  pointer-events: none;
-}
+.eyebrow { display: inline-flex; align-items: center; gap: 8px; font-size: 11px; font-weight: 500; letter-spacing: 0.22em; text-transform: uppercase; color: #8C847E; }
+.eyebrow-dot { width: 6px; height: 6px; border-radius: 50%; background: #7C5C3B; flex-shrink: 0; }
+h1 { font-family: 'Playfair Display', Georgia, serif; }
+.check { color: #7C5C3B; font-weight: 600; }
 
-.hero-text {
-  position: relative;
-  z-index: 1;
-}
+.hero-image-wrap { position: relative; z-index: 1; }
+.hero-image-frame { position: relative; display: inline-block; }
+.hero-img { width: 100%; max-width: 440px; border-radius: 24px; box-shadow: 0 32px 80px rgba(0,0,0,0.14), 0 8px 24px rgba(0,0,0,0.08); }
+.hero-badge { position: absolute; bottom: 24px; left: -20px; display: flex; align-items: center; gap: 10px; background: white; border-radius: 16px; padding: 10px 16px; box-shadow: 0 8px 32px rgba(0,0,0,0.12); font-size: 13px; max-width: 200px; }
+.hero-badge-icon { font-size: 22px; flex-shrink: 0; }
+.hero-badge-title { font-weight: 600; color: #1C1917; line-height: 1.3; }
+.hero-badge-sub { font-size: 11px; color: #8C847E; margin-top: 1px; }
 
-.eyebrow {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 11px;
-  font-weight: 500;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: #8C847E;
-}
-
-.eyebrow-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: #7C5C3B;
-  flex-shrink: 0;
-}
-
-h1 {
-  font-family: 'Playfair Display', Georgia, serif;
-}
-
-.check {
-  color: #7C5C3B;
-  font-weight: 600;
-}
-
-/* Hero image */
-.hero-image-wrap {
-  position: relative;
-  z-index: 1;
-}
-
-.hero-image-frame {
-  position: relative;
-  display: inline-block;
-}
-
-.hero-img {
-  width: 100%;
-  max-width: 440px;
-  border-radius: 24px;
-  box-shadow: 0 32px 80px rgba(0,0,0,0.14), 0 8px 24px rgba(0,0,0,0.08);
-}
-
-.hero-badge {
-  position: absolute;
-  bottom: 24px;
-  left: -20px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  background: white;
-  border-radius: 16px;
-  padding: 10px 16px;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.12);
-  font-size: 13px;
-  max-width: 200px;
-}
-
-.hero-badge-icon {
-  font-size: 22px;
-  flex-shrink: 0;
-}
-
-.hero-badge-title {
-  font-weight: 600;
-  color: #1C1917;
-  line-height: 1.3;
-}
-
-.hero-badge-sub {
-  font-size: 11px;
-  color: #8C847E;
-  margin-top: 1px;
-}
-
-/* ── Buttons ────────────────────────────── */
-.btn-primary {
-  display: inline-block;
-  background: #7C5C3B;
-  color: white;
-  font-size: 14px;
-  font-weight: 500;
-  padding: 14px 28px;
-  border-radius: 100px;
-  text-decoration: none;
-  transition: opacity 0.2s;
-  white-space: nowrap;
-}
-
+.btn-primary { display: inline-block; background: #7C5C3B; color: white; font-size: 14px; font-weight: 500; padding: 14px 28px; border-radius: 100px; text-decoration: none; transition: opacity 0.2s; white-space: nowrap; }
 .btn-primary:hover { opacity: 0.88; }
-
-.btn-primary-light {
-  display: inline-block;
-  background: white;
-  color: #1C1917;
-  font-size: 14px;
-  font-weight: 600;
-  padding: 14px 28px;
-  border-radius: 100px;
-  text-decoration: none;
-  transition: opacity 0.2s;
-}
-
+.btn-primary-light { display: inline-block; background: white; color: #1C1917; font-size: 14px; font-weight: 600; padding: 14px 28px; border-radius: 100px; text-decoration: none; transition: opacity 0.2s; }
 .btn-primary-light:hover { opacity: 0.9; }
-
-.btn-secondary {
-  display: inline-block;
-  background: white;
-  color: #1C1917;
-  font-size: 14px;
-  font-weight: 500;
-  padding: 14px 28px;
-  border-radius: 100px;
-  border: 1px solid #D6CFC8;
-  text-decoration: none;
-  transition: background 0.2s;
-}
-
+.btn-secondary { display: inline-block; background: white; color: #1C1917; font-size: 14px; font-weight: 500; padding: 14px 28px; border-radius: 100px; border: 1px solid #D6CFC8; text-decoration: none; transition: background 0.2s; }
 .btn-secondary:hover { background: #F0EBE3; }
-
-.btn-ghost {
-  display: inline-block;
-  color: #A89880;
-  font-size: 14px;
-  font-weight: 500;
-  padding: 14px 20px;
-  border-radius: 100px;
-  text-decoration: none;
-  border: 1px solid rgba(255,255,255,0.2);
-  transition: color 0.2s;
-}
-
+.btn-ghost { display: inline-block; color: #A89880; font-size: 14px; font-weight: 500; padding: 14px 20px; border-radius: 100px; text-decoration: none; border: 1px solid rgba(255,255,255,0.2); transition: color 0.2s; }
 .btn-ghost:hover { color: white; }
 
-/* ── Section labels ─────────────────────── */
-.section-label {
-  font-size: 11px;
-  font-weight: 500;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: #8C847E;
-}
+.section-label { font-size: 11px; font-weight: 500; letter-spacing: 0.22em; text-transform: uppercase; color: #8C847E; }
+.section-title { font-family: 'Playfair Display', Georgia, serif; font-size: clamp(1.8rem, 3vw, 2.6rem); font-weight: 700; line-height: 1.15; letter-spacing: -0.02em; color: #1C1917; max-width: 640px; margin-left: auto; margin-right: auto; }
 
-.section-title {
-  font-family: 'Playfair Display', Georgia, serif;
-  font-size: clamp(1.8rem, 3vw, 2.6rem);
-  font-weight: 700;
-  line-height: 1.15;
-  letter-spacing: -0.02em;
-  color: #1C1917;
-  max-width: 640px;
-  margin-left: auto;
-  margin-right: auto;
-}
+/* ── New feature cards ───────────────────── */
+.feature-card { background: #2C2420; border: 1px solid #3C3430; border-radius: 24px; padding: 28px 28px 32px; }
+.feature-card-accent { background: #1C1917; border-color: #7C5C3B; }
+.feature-icon-wrap { width: 52px; height: 52px; border-radius: 16px; display: flex; align-items: center; justify-content: center; }
+.feature-icon-voice { background: #7C5C3B; }
+.feature-icon-qr { background: #9C7C5C; }
+.feature-icon-print { background: #5C4030; }
+.feature-title { margin-top: 16px; font-family: 'Playfair Display', Georgia, serif; font-size: 1.2rem; font-weight: 700; color: white; }
+.feature-desc { margin-top: 10px; font-size: 14px; line-height: 1.75; color: #A8A29E; }
+.feature-tag { margin-top: 16px; display: inline-block; font-size: 11px; color: #7C5C3B; border: 1px solid #3C3430; border-radius: 100px; padding: 4px 12px; }
+.feature-tag-accent { color: #C4A882; border-color: #7C5C3B; background: rgba(124,92,59,0.1); }
 
 /* ── Format cards ───────────────────────── */
-.format-card {
-  border-radius: 24px;
-  border: 1px solid #E8E0D8;
-  background: white;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-}
+.format-card { border-radius: 24px; border: 1px solid #E8E0D8; background: white; overflow: hidden; display: flex; flex-direction: column; }
+.format-card-dark { background: #1C1917; border-color: #2C2420; }
+.format-card-print { background: #FAF7F4; border-color: #D6CFC8; }
+.format-card-inner { padding: 32px 32px 24px; flex-shrink: 0; }
+.format-icon { font-size: 28px; }
+.format-title { margin-top: 12px; font-family: 'Playfair Display', Georgia, serif; font-size: 1.4rem; font-weight: 700; color: #1C1917; }
+.format-desc { margin-top: 10px; font-size: 14px; line-height: 1.7; color: #5C534E; }
+.format-list { margin-top: 16px; list-style: none; padding: 0; font-size: 13px; color: #8C847E; }
+.format-list li { padding: 4px 0; padding-left: 18px; position: relative; }
+.format-list li::before { content: '✦'; position: absolute; left: 0; font-size: 8px; color: #7C5C3B; top: 7px; }
+.format-preview { flex: 1; min-height: 200px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+.format-preview-img { width: 100%; height: 100%; object-fit: cover; object-position: top; }
 
-.format-card-dark {
-  background: #1C1917;
-  border-color: #2C2420;
-}
+.new-badge { margin-top: 14px; display: inline-block; background: #7C5C3B; color: white; font-size: 11px; font-weight: 500; letter-spacing: 0.1em; padding: 4px 12px; border-radius: 100px; }
 
-.format-card-inner {
-  padding: 32px 32px 24px;
-  flex-shrink: 0;
-}
-
-.format-icon {
-  font-size: 28px;
-}
-
-.format-title {
-  margin-top: 12px;
-  font-family: 'Playfair Display', Georgia, serif;
-  font-size: 1.6rem;
-  font-weight: 700;
-  color: #1C1917;
-}
-
-.format-desc {
-  margin-top: 10px;
-  font-size: 14px;
-  line-height: 1.7;
-  color: #5C534E;
-}
-
-.format-list {
-  margin-top: 16px;
- 
-  list-style: none;
-  padding: 0;
-  font-size: 13px;
-  color: #8C847E;
-}
-
-.format-list li {
-  padding: 4px 0;
-  padding-left: 18px;
-  position: relative;
-}
-
-.format-list li::before {
-  content: '✦';
-  position: absolute;
-  left: 0;
-  font-size: 8px;
-  color: #7C5C3B;
-  top: 7px;
-}
-
-.format-preview {
-  flex: 1;
-  min-height: 200px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-}
-
-.format-preview-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: top;
-}
-
-.new-badge {
-  margin-top: 14px;
-  display: inline-block;
-  background: #7C5C3B;
-  color: white;
-  font-size: 11px;
-  font-weight: 500;
-  letter-spacing: 0.1em;
-  padding: 4px 12px;
-  border-radius: 100px;
-}
-
-/* Video preview mockup */
-.video-preview-mockup {
-  width: 100%;
-  min-height: 200px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 32px;
-  position: relative;
-}
-
-.video-slide-label {
-  font-size: 10px;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: #8C847E;
-}
-
-.video-slide-name {
-  font-family: 'Playfair Display', Georgia, serif;
-  font-size: 1.8rem;
-  font-weight: 700;
-  color: white;
-  text-align: center;
-}
-
-.video-slide-sub {
-  font-size: 12px;
-  color: #8C847E;
-  font-style: italic;
-  text-align: center;
-}
-
-.video-play-icon {
-  margin-top: 16px;
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  border: 1.5px solid #5C534E;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 14px;
-  color: #8C847E;
-}
+.video-preview-mockup { width: 100%; min-height: 200px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; padding: 32px; position: relative; }
+.video-slide-label { font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: #8C847E; }
+.video-slide-name { font-family: 'Playfair Display', Georgia, serif; font-size: 1.8rem; font-weight: 700; color: white; text-align: center; }
+.video-slide-sub { font-size: 12px; color: #8C847E; font-style: italic; text-align: center; }
+.video-play-icon { margin-top: 16px; width: 44px; height: 44px; border-radius: 50%; border: 1.5px solid #5C534E; display: flex; align-items: center; justify-content: center; font-size: 14px; color: #8C847E; }
 
 /* ── Step cards ─────────────────────────── */
-.step-card {
-  background: white;
-  border: 1px solid #E8E0D8;
-  border-radius: 24px;
-  padding: 28px 28px 32px;
-}
-
-.step-card-accent {
-  background: #F5F0E8;
-  border-color: #D6CFC8;
-}
-
-.step-number {
-  font-family: 'Playfair Display', Georgia, serif;
-  font-size: 2rem;
-  font-weight: 700;
-  color: #D6CFC8;
-  line-height: 1;
-}
-
-.step-title {
-  margin-top: 14px;
-  font-size: 1.05rem;
-  font-weight: 600;
-  color: #1C1917;
-}
-
-.step-desc {
-  margin-top: 8px;
-  font-size: 14px;
-  line-height: 1.7;
-  color: #5C534E;
-}
+.step-card { background: white; border: 1px solid #E8E0D8; border-radius: 24px; padding: 28px 28px 32px; }
+.step-card-accent { background: #F5F0E8; border-color: #D6CFC8; }
+.step-number { font-family: 'Playfair Display', Georgia, serif; font-size: 2rem; font-weight: 700; color: #D6CFC8; line-height: 1; }
+.step-title { margin-top: 14px; font-size: 1.05rem; font-weight: 600; color: #1C1917; }
+.step-desc { margin-top: 8px; font-size: 14px; line-height: 1.7; color: #5C534E; }
 
 /* ── Gallery ────────────────────────────── */
-.gallery-item {
-  border-radius: 16px;
-  overflow: hidden;
-  border: 1px solid #E8E0D8;
-  background: #F5F0E8;
-}
-
-.gallery-img {
-  width: 100%;
-  display: block;
-}
-
-.gallery-label {
-  padding: 8px 14px;
-  font-size: 12px;
-  color: #8C847E;
-}
+.gallery-item { border-radius: 16px; overflow: hidden; border: 1px solid #E8E0D8; background: #F5F0E8; }
+.gallery-img { width: 100%; display: block; }
+.gallery-label { padding: 8px 14px; font-size: 12px; color: #8C847E; }
 
 /* ── Why section ────────────────────────── */
-.why-section {
-  background: linear-gradient(160deg, #2C2420 0%, #1C1917 100%);
-  position: relative;
-  overflow: hidden;
-}
-
-.why-ornament {
-  font-size: 14px;
-  letter-spacing: 0.1em;
-  color: #5C534E;
-}
-
-.why-quote {
-  margin-top: 20px;
-  font-family: 'Playfair Display', Georgia, serif;
-  font-size: clamp(1.3rem, 2.5vw, 2rem);
-  font-weight: 400;
-  line-height: 1.5;
-  color: #E8E0D8;
-  font-style: normal;
-}
-
-.why-quote em {
-  font-style: italic;
-  color: #C4A882;
-}
-
-.why-sub {
-  font-size: 16px;
-  color: #8C847E;
-}
+.why-section { background: linear-gradient(160deg, #2C2420 0%, #1C1917 100%); position: relative; overflow: hidden; }
+.why-ornament { font-size: 14px; letter-spacing: 0.1em; color: #5C534E; }
+.why-quote { margin-top: 20px; font-family: 'Playfair Display', Georgia, serif; font-size: clamp(1.3rem, 2.5vw, 2rem); font-weight: 400; line-height: 1.5; color: #E8E0D8; font-style: normal; }
+.why-quote em { font-style: italic; color: #C4A882; }
+.why-sub { font-size: 16px; color: #8C847E; }
 
 /* ── Story type chips ───────────────────── */
-.story-type-chip {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  background: #F5F0E8;
-  border: 1px solid #E8E0D8;
-  border-radius: 16px;
-  padding: 20px 12px;
-  text-align: center;
-  transition: border-color 0.2s, background 0.2s;
-}
-
-.story-type-chip:hover {
-  border-color: #7C5C3B;
-  background: #F0E8DC;
-}
-
-.story-type-emoji {
-  font-size: 24px;
-}
-
-.story-type-label {
-  font-size: 12px;
-  font-weight: 500;
-  color: #5C534E;
-  line-height: 1.3;
-}
+.story-type-chip { display: flex; flex-direction: column; align-items: center; gap: 8px; background: #F5F0E8; border: 1px solid #E8E0D8; border-radius: 16px; padding: 20px 12px; text-align: center; transition: border-color 0.2s, background 0.2s; }
+.story-type-chip:hover { border-color: #7C5C3B; background: #F0E8DC; }
+.story-type-emoji { font-size: 24px; }
+.story-type-label { font-size: 12px; font-weight: 500; color: #5C534E; line-height: 1.3; }
 
 /* ── Pricing ────────────────────────────── */
-.price-card {
-  background: white;
-  border: 1px solid #E8E0D8;
-  border-radius: 24px;
-  padding: 28px 24px 32px;
-  display: flex;
-  flex-direction: column;
-}
-
-.price-card-featured {
-  background: #1C1917;
-  border-color: #1C1917;
-}
-
-.price-card-premium {
-  background: #F5F0E8;
-  border-color: #D6CFC8;
-  position: relative;
-}
-
-.price-popular {
-  font-size: 10px;
-  font-weight: 500;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  color: #C4A882;
-  margin-bottom: 10px;
-}
-
-.price-premium-badge {
-  font-size: 11px;
-  font-weight: 500;
-  letter-spacing: 0.1em;
-  color: #7C5C3B;
-  margin-bottom: 10px;
-}
-
-.price-tier {
-  font-family: 'Playfair Display', Georgia, serif;
-  font-size: 1.2rem;
-  font-weight: 700;
-  color: #1C1917;
-}
-
-.price-desc {
-  margin-top: 4px;
-  font-size: 13px;
-  color: #8C847E;
-}
-
-.price-amount {
-  margin-top: 16px;
-  font-family: 'Playfair Display', Georgia, serif;
-  font-size: 2.2rem;
-  font-weight: 700;
-  color: #1C1917;
-  line-height: 1;
-}
-
-.price-features {
-  margin-top: 20px;
-  flex: 1;
-  list-style: none;
-  padding: 0;
-  font-size: 13px;
-}
-
-.price-features li {
-  padding: 5px 0;
-  padding-left: 20px;
-  position: relative;
-  color: #5C534E;
-}
-
+.price-card { background: white; border: 1px solid #E8E0D8; border-radius: 24px; padding: 28px 24px 32px; display: flex; flex-direction: column; }
+.price-card-featured { background: #1C1917; border-color: #1C1917; }
+.price-card-premium { background: #F5F0E8; border-color: #D6CFC8; position: relative; }
+.price-popular { font-size: 10px; font-weight: 500; letter-spacing: 0.15em; text-transform: uppercase; color: #C4A882; margin-bottom: 10px; }
+.price-premium-badge { font-size: 11px; font-weight: 500; letter-spacing: 0.1em; color: #7C5C3B; margin-bottom: 10px; }
+.price-tier { font-family: 'Playfair Display', Georgia, serif; font-size: 1.2rem; font-weight: 700; color: #1C1917; }
+.price-desc { margin-top: 4px; font-size: 13px; color: #8C847E; }
+.price-amount { margin-top: 16px; font-family: 'Playfair Display', Georgia, serif; font-size: 2.2rem; font-weight: 700; color: #1C1917; line-height: 1; }
+.price-features { margin-top: 20px; flex: 1; list-style: none; padding: 0; font-size: 13px; }
+.price-features li { padding: 5px 0; padding-left: 20px; position: relative; color: #5C534E; }
 .price-features li.yes::before { content: '✓'; position: absolute; left: 0; color: #7C5C3B; font-weight: 600; }
 .price-features li.no::before  { content: '✗'; position: absolute; left: 0; color: #D6CFC8; }
 .price-features li.yes-dark::before { content: '✓'; position: absolute; left: 0; color: #C4A882; font-weight: 600; }
 .price-features li.no-dark::before  { content: '✗'; position: absolute; left: 0; color: #5C534E; }
-
-.price-btn {
-  display: block;
-  margin-top: 24px;
-  padding: 12px 20px;
-  border-radius: 100px;
-  font-size: 13px;
-  font-weight: 500;
-  text-align: center;
-  text-decoration: none;
-  transition: opacity 0.2s;
-}
-
+.price-btn { display: block; margin-top: 24px; padding: 12px 20px; border-radius: 100px; font-size: 13px; font-weight: 500; text-align: center; text-decoration: none; transition: opacity 0.2s; }
 .price-btn:hover { opacity: 0.85; }
-
-.price-btn-outline {
-  border: 1px solid #D6CFC8;
-  color: #1C1917;
-  background: transparent;
-}
-
-.price-btn-white {
-  background: white;
-  color: #1C1917;
-}
-
-.price-btn-premium {
-  background: #7C5C3B;
-  color: white;
-}
+.price-btn-outline { border: 1px solid #D6CFC8; color: #1C1917; background: transparent; }
+.price-btn-white { background: white; color: #1C1917; }
+.price-btn-premium { background: #7C5C3B; color: white; }
 
 /* ── Final CTA ──────────────────────────── */
-.final-cta {
-  background: linear-gradient(160deg, #2C2420 0%, #1C1917 100%);
-  position: relative;
-  overflow: hidden;
-}
-
-.format-card-dark .format-title {
-  color: white;
-}
+.final-cta { background: linear-gradient(160deg, #2C2420 0%, #1C1917 100%); position: relative; overflow: hidden; }
+.format-card-dark .format-title { color: white; }
 </style>

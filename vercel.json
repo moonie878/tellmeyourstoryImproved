@@ -18,6 +18,9 @@
     {
       "source": "/((?!assets/).*)",
       "destination": "/index.html"
-    }
+    },
+    
+      { "source": "/listen/:id", "destination": "/index.html" }
+    
   ]
 }
