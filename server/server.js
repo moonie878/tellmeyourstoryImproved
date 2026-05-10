@@ -301,7 +301,7 @@ app.post('/lulu-print-job', async (req, res) => {
  
   } catch (err) {
     console.error('Lulu print job error:', err.message)
-    res.status(500).json({ error: 'Failed to create print job' })
+    res.status(500).json({ error: err.message })
   }
 })
  
@@ -406,6 +406,8 @@ async function verifyTurnstileToken(token, remoteIp) {
 }
 
 async function getLuluAccessToken() {
+  console.log('KEY:', process.env.LULU_CLIENT_KEY ? 'present' : 'MISSING')
+  console.log('SECRET:', process.env.LULU_CLIENT_SECRET ? 'present' : 'MISSING')
   const credentials = Buffer.from(
     `${process.env.LULU_CLIENT_KEY}:${process.env.LULU_CLIENT_SECRET}`
   ).toString('base64')
