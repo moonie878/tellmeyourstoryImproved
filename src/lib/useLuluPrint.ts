@@ -96,7 +96,7 @@ export async function getLuluShippingCost(
         phone_number: shippingAddress.phone_number,
         email:        shippingAddress.email,
       },
-      shipping_level: 'MAIL',
+      shipping_level: 'GROUND',
     }),
   })
 
@@ -185,7 +185,7 @@ export function useLuluPrint() {
             phone_number: shippingAddress.phone_number,
             email:        shippingAddress.email,
           },
-          shipping_level: 'MAIL',
+          shipping_level: 'GROUND',
         }),
       })
 
