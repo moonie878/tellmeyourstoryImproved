@@ -211,7 +211,7 @@ app.post('/create-print-checkout', async (req, res) => {
               name: `Keepsake Printed Book — ${storyTitle}`,
               description: '6×9 softcover, printed and shipped by Lulu Press. Delivered in 10-14 days.',
             },
-            unit_amount: 2999,
+            unit_amount: 2499,
           },
           quantity,
         },

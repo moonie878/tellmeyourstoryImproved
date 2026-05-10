@@ -181,9 +181,11 @@
                     :disabled="generatingPrintId === story.id"
                     class="rounded-full border border-[#7C5C3B] bg-white px-4 py-3 text-sm font-medium text-[#7C5C3B] transition hover:bg-[#F5F0E8] disabled:opacity-50"
                   >
-                    {{ generatingPrintId === story.id ? 'Preparing…' : '📖 Order Printed Book' }}
+                   {{ generatingPrintId === story.id ? 'Preparing…' : '📖 Order Printed Book — £29.98' }}
                   </button>
-
+                  <p v-if="hasPrintAccess()" class="text-xs text-stone-500 mt-1">
+  Printed & shipped to your door — £24.99 + £4.99 UK shipping
+</p>
                   <button
                     @click.stop="deleteStory(story.id)"
                     :disabled="deletingStoryId === story.id"
