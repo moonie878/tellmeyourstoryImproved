@@ -204,7 +204,7 @@
               Order your printed book
             </router-link>
             <div>
-              <p class="text-2xl font-bold text-[#1C1917]">£34.98</p>
+              <p class="text-2xl font-bold text-[#1C1917]">£29.98</p>
               <p class="text-xs text-[#8C847E]">Includes UK shipping</p>
             </div>
           </div>
