@@ -250,11 +250,11 @@ app.post('/verify-tribute-payment', async (req, res) => {
   }
 })
 
-app.post('/lulu-shipping-cost', async (req, res) => {
+app.post('/lulu-print-job', async (req, res) => {
   try {
     const token = await getLuluAccessToken()
- 
-    const response = await fetch(`${LULU_API_URL}/print-job-cost-calculations/`, {
+
+    const response = await fetch(`${LULU_API_URL}/print-jobs/`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -262,13 +262,28 @@ app.post('/lulu-shipping-cost', async (req, res) => {
       },
       body: JSON.stringify(req.body),
     })
- 
-    const data = await response.json()
+
+    const text = await response.text()
+    console.log('Lulu print job raw response:', response.status, text.slice(0, 500))
+
+    let data
+    try {
+      data = JSON.parse(text)
+    } catch {
+      throw new Error(`Lulu returned non-JSON: ${text.slice(0, 200)}`)
+    }
+
+    if (!response.ok) {
+      console.error('Lulu print job rejected:', JSON.stringify(data))
+    } else {
+      console.log('Lulu print job created:', data.id)
+    }
+
     res.status(response.status).json(data)
- 
+
   } catch (err) {
-    console.error('Lulu shipping cost error:', err.message)
-    res.status(500).json({ error: 'Failed to calculate shipping cost' })
+    console.error('Lulu print job error:', err.message)
+    res.status(500).json({ error: err.message })
   }
 })
  
