@@ -324,7 +324,7 @@ app.post('/lulu-print-job', async (req, res) => {
       production_delay: body.production_delay || 120,
       shipping_address: body.shipping_address,
       shipping_level:   body.shipping_level,
-      line_items: body.line_items.map((item: any) => ({
+      line_items: body.line_items.map((item) => ({
         title:    item.title,
         quantity: item.quantity,
         printable_normalization: {
