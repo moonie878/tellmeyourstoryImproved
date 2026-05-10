@@ -287,38 +287,9 @@ app.post('/lulu-print-job', async (req, res) => {
   }
 })
  
-// ─── Create print job ─────────────────────────────────────────────────────────
- 
-app.post('/lulu-print-job', async (req, res) => {
-  try {
-    const token = await getLuluAccessToken()
- 
-    const response = await fetch(`${LULU_API_URL}/print-jobs/`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type':  'application/json',
-      },
-      body: JSON.stringify(req.body),
-    })
- 
-    const data = await response.json()
 
-      res.status(response.status).json(data)
  
-    if (!response.ok) {
-      console.error('Lulu print job error:', JSON.stringify(data))
-    } else {
-      console.log('Lulu print job created:', data.id)
-    }
- 
-    res.status(response.status).json(data)
- 
-  } catch (err) {
-    console.error('Lulu print job error:', err.message)
-    res.status(500).json({ error: err.message })
-  }
-})
+
  
 // ─── Get print job status ─────────────────────────────────────────────────────
  
