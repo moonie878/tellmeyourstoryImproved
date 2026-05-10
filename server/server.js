@@ -346,6 +346,62 @@ app.get('/lulu-print-job-status/:id', async (req, res) => {
  
 // ─── Cancel print job ─────────────────────────────────────────────────────────
  
+app.post('/lulu-test-job', async (req, res) => {
+  try {
+    const token = await getLuluAccessToken()
+
+    // Test with Lulu's own sample PDF
+    const testPayload = {
+      contact_email: 'mark@tellmeyourstory.uk',
+      external_id: 'test-001',
+      line_items: [
+        {
+          title: 'Test Book',
+          interior: {
+            source_url: 'https://jeyybcdnmezivjuvmmcu.supabase.co/storage/v1/object/public/story-exports/print-orders/1b595e55-7fe9-429c-ab0e-0e761e3d718c/0411757e-8df2-40d0-904d-f8432f148237-interior-1778379201693.pdf'
+          },
+          cover: {
+            source_url: 'https://jeyybcdnmezivjuvmmcu.supabase.co/storage/v1/object/public/story-exports/print-orders/1b595e55-7fe9-429c-ab0e-0e761e3d718c/0411757e-8df2-40d0-904d-f8432f148237-interior-1778379201693.pdf'
+          },
+          pod_package_id: '0600X0900.FC.STD.PB.060UW444.MXX',
+          page_count: 28,
+          quantity: 1,
+        },
+      ],
+      production_delay: 120,
+      shipping_address: {
+        name: 'Mark Griffiths',
+        street1: '38 Botley Gardens',
+        street2: '',
+        city: 'Southampton',
+        state_code: '',
+        postcode: 'SO19 0SW',
+        country_code: 'GB',
+        phone_number: '07720617444',
+        email: 'mark@tellmeyourstory.uk',
+      },
+      shipping_level: 'GROUND',
+    }
+
+    const response = await fetch(`${LULU_API_URL}/print-jobs/`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(testPayload),
+    })
+
+    const text = await response.text()
+    console.log('Test job response:', response.status, text.slice(0, 1000))
+    res.status(response.status).send(text)
+
+  } catch (err) {
+    console.error('Test job error:', err.message)
+    res.status(500).json({ error: err.message })
+  }
+})
+
 app.post('/lulu-print-job-cancel/:id', async (req, res) => {
   try {
     const token = await getLuluAccessToken()
