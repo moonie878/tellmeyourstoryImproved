@@ -316,13 +316,32 @@ app.post('/lulu-print-job', async (req, res) => {
   try {
     const token = await getLuluAccessToken()
 
+    // Transform to Lulu's expected format
+    const body = req.body
+    const transformedBody = {
+      contact_email:    body.contact_email,
+      external_id:      body.external_id,
+      production_delay: body.production_delay || 120,
+      shipping_address: body.shipping_address,
+      shipping_level:   body.shipping_level,
+      line_items: body.line_items.map((item: any) => ({
+        title:    item.title,
+        quantity: item.quantity,
+        printable_normalization: {
+          cover:    { source_url: item.cover.source_url },
+          interior: { source_url: item.interior.source_url },
+          pod_package_id: item.pod_package_id,
+        },
+      })),
+    }
+
     const response = await fetch(`${LULU_API_URL}/print-jobs/`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,
         'Content-Type':  'application/json',
       },
-      body: JSON.stringify(req.body),
+      body: JSON.stringify(transformedBody),
     })
 
     const text = await response.text()
