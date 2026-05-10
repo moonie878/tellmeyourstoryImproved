@@ -288,6 +288,8 @@ app.post('/lulu-print-job', async (req, res) => {
     })
  
     const data = await response.json()
+
+      res.status(response.status).json(data)
  
     if (!response.ok) {
       console.error('Lulu print job error:', JSON.stringify(data))
