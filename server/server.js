@@ -281,6 +281,37 @@ app.post('/lulu-shipping-cost', async (req, res) => {
   }
 })
 
+app.post('/lulu-shipping-options', async (req, res) => {
+  try {
+    const token = await getLuluAccessToken()
+
+    const response = await fetch(`${LULU_API_URL}/shipping-options/`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(req.body),
+    })
+
+    const text = await response.text()
+    console.log('Shipping options response:', response.status, text.slice(0, 500))
+
+    let data
+    try {
+      data = JSON.parse(text)
+    } catch {
+      throw new Error(`Shipping options non-JSON: ${text.slice(0, 200)}`)
+    }
+
+    res.status(response.status).json(data)
+
+  } catch (err) {
+    console.error('Shipping options error:', err.message)
+    res.status(500).json({ error: err.message })
+  }
+})
+
 app.post('/lulu-print-job', async (req, res) => {
   try {
     const token = await getLuluAccessToken()
