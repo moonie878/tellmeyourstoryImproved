@@ -104,6 +104,7 @@
             class="overflow-hidden rounded-[2rem] border border-stone-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-md"
           >
             <div class="grid gap-0 sm:grid-cols-[140px_1fr]">
+
               <!-- Thumbnail -->
               <div class="flex min-h-[160px] items-center justify-center bg-stone-100 p-4">
                 <img
@@ -140,7 +141,7 @@
                     <span class="font-medium text-stone-900">{{ story.progress }}%</span>
                   </div>
                   <div class="mt-2 h-2 w-full rounded-full bg-stone-200">
-                    <div class="h-2 rounded-full bg-[#7C5C3B] transition-all" :style="{ width: `${story.progress}%` }"></div>
+                    <div class="h-2 rounded-full bg-[#7C5C3B] transition-all" :style="{ width: `${story.progress}%` }" />
                   </div>
                 </div>
 
@@ -157,15 +158,15 @@
                   </p>
                 </div>
 
-              <p class="mt-4 text-sm leading-6 text-stone-600">
-  {{ hasStoryAccess(story.story_type)
-    ? `Keep building this story whenever you're ready, then turn it into a finished keepsake.`
-    : `Keep writing for free, then upgrade when you're ready to create the finished keepsake.` }}
-</p>
-                <!-- ── Action buttons ──────────────────────────────────── -->
+                <p class="mt-4 text-sm leading-6 text-stone-600">
+                  {{ hasStoryAccess(story.story_type)
+                    ? `Keep building this story whenever you're ready, then turn it into a finished keepsake.`
+                    : `Keep writing for free, then upgrade when you're ready to create the finished keepsake.` }}
+                </p>
+
+                <!-- Action buttons -->
                 <div class="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
 
-                  <!-- Continue / Edit -->
                   <button
                     @click="openStory(story.id)"
                     class="rounded-full bg-[#7C5C3B] px-4 py-3 text-sm font-medium text-white transition hover:opacity-90"
@@ -173,13 +174,7 @@
                     {{ hasStoryAccess(story.story_type) ? 'Continue' : 'Edit Draft' }}
                   </button>
 
-                  <!-- ── ORDER PRINTED BOOK button ──────────────────────
-                       Shows only when user has Premium Keepsake access.
-                       Triggers generateAndOrder() which:
-                         1. Builds interior PDF blob via exportTrueBookAsBlob()
-                         2. Builds cover PDF blob via generateCoverPDF()
-                         3. Opens PrintOrderModal with both blobs ready
-                  ────────────────────────────────────────────────────── -->
+                  <!-- Order Printed Book — shows for users with print access -->
                   <button
                     v-if="hasPrintAccess()"
                     @click="startPrintOrder(story)"
@@ -189,7 +184,6 @@
                     {{ generatingPrintId === story.id ? 'Preparing…' : '📖 Order Printed Book' }}
                   </button>
 
-                  <!-- Delete -->
                   <button
                     @click.stop="deleteStory(story.id)"
                     :disabled="deletingStoryId === story.id"
@@ -199,7 +193,6 @@
                   </button>
                 </div>
 
-                <!-- Generating indicator -->
                 <p v-if="generatingPrintId === story.id" class="mt-2 text-xs text-stone-500">
                   Building your book for print — this takes about 30 seconds…
                 </p>
@@ -226,10 +219,7 @@
       </section>
     </div>
 
-    <!-- ── PrintOrderModal ──────────────────────────────────────────────────────
-         Shown after PDFs are generated and ready.
-         Collects shipping address, calculates shipping cost, places Lulu order.
-    ─────────────────────────────────────────────────────────────────────────── -->
+    <!-- Print Order Modal -->
     <PrintOrderModal
       v-if="printModalOpen && printModalData"
       :interior-pdf-blob="printModalData.interiorBlob"
@@ -248,22 +238,24 @@
 </template>
 
 <script setup lang="ts">
-import { supabase } from '../lib/supabase'
-import { useRouter } from 'vue-router'
 import { ref, onMounted, nextTick } from 'vue'
+import { useRouter } from 'vue-router'
+import { supabase } from '../lib/supabase'
 import { track } from '../lib/analytics'
 import { STORY_TYPES } from '../data/storyTypes'
 import { useStoryTrueBookExport } from '../composables/useTrueBookExport'
 import { generateCoverPDF } from '../lib/generateCoverPDF'
 import PrintOrderModal from '../components/print/PrintOrderModal.vue'
 
-const stories          = ref<any[]>([])
-const userAccess       = ref<any[]>([])
-const isFirstTimeUser  = ref(false)
-const deletingStoryId  = ref<string | null>(null)
+// ─── State ────────────────────────────────────────────────────────────────────
+
+const stories           = ref<any[]>([])
+const userAccess        = ref<any[]>([])
+const isFirstTimeUser   = ref(false)
+const deletingStoryId   = ref<string | null>(null)
 const generatingPrintId = ref<string | null>(null)
-const printModalOpen   = ref(false)
-const printModalData   = ref<{
+const printModalOpen    = ref(false)
+const printModalData    = ref<{
   interiorBlob: Blob
   coverBlob: Blob
   pageCount: number
@@ -274,15 +266,17 @@ const printModalData   = ref<{
   stripePaymentId: string
 } | null>(null)
 
-const router = useRouter()
+const router     = useRouter()
 const storyTypes = STORY_TYPES
 const { exportTrueBookAsBlob } = useStoryTrueBookExport()
 
-// ── Story helpers ─────────────────────────────────────────────────────────────
+const API_BASE = import.meta.env.VITE_API_BASE_URL as string
+const POD_PACKAGE_ID = '0600X0900.FC.STD.PB.060UW444.MXX'
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function getStoryTitle(type: string) {
-  const story = STORY_TYPES.find((s) => s.id === type)
-  return story?.projectTitle || 'New Story'
+  return STORY_TYPES.find(s => s.id === type)?.projectTitle || 'New Story'
 }
 
 function formatStoryType(type: string) {
@@ -298,18 +292,18 @@ function formatDate(value: string) {
   return new Date(value).toLocaleDateString()
 }
 
-// ── Access helpers ────────────────────────────────────────────────────────────
+// ─── Access helpers ───────────────────────────────────────────────────────────
 
 function hasStoryAccess(storyType: string) {
   return userAccess.value.some(
-    (item) => item.access_type === 'story' &&
+    item => item.access_type === 'story' &&
       (item.story_type === storyType || item.story_type === 'all')
   )
 }
 
 function hasExportAccess() {
   return userAccess.value.some(
-    (item) => item.access_type === 'export' &&
+    item => item.access_type === 'export' &&
       (item.variant === 'text_only' || item.variant === 'with_images')
   )
 }
@@ -320,30 +314,41 @@ function canExportStory(storyType: string) {
 
 function hasAllStoriesAccess() {
   return userAccess.value.some(
-    (item) => item.access_type === 'story' && item.story_type === 'all'
+    item => item.access_type === 'story' && item.story_type === 'all'
   )
 }
 
-// ── Print access — Premium Keepsake tier only ─────────────────────────────────
 function hasPrintAccess() {
   return userAccess.value.some(
-    (item) =>
-      item.access_type === 'print' ||
+    item => item.access_type === 'print' ||
       item.variant === 'premium' ||
-      item.variant === 'with_images'  // anyone with photo export gets print too
+      item.variant === 'with_images'
   )
 }
 
-// ── Print order flow ──────────────────────────────────────────────────────────
+// ─── Image helpers ────────────────────────────────────────────────────────────
 
-// Replace startPrintOrder with this
+async function loadImageAsBase64(url: string): Promise<string> {
+  const response = await fetch(url)
+  const blob     = await response.blob()
+  return new Promise((resolve, reject) => {
+    const reader   = new FileReader()
+    reader.onload  = () => resolve(reader.result as string)
+    reader.onerror = reject
+    reader.readAsDataURL(blob)
+  })
+}
+
+// ─── Print order flow ─────────────────────────────────────────────────────────
+
+// Step 1 — redirect to Stripe checkout
 async function startPrintOrder(story: any) {
   generatingPrintId.value = story.id
   try {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return
 
-    const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/create-print-checkout`, {
+    const response = await fetch(`${API_BASE}/create-print-checkout`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -365,13 +370,14 @@ async function startPrintOrder(story: any) {
   }
 }
 
-// Add this new function
+// Step 2 — generate PDFs and open modal (called after Stripe payment success)
 async function openPrintModal(story: any, sessionId: string) {
   generatingPrintId.value = story.id
   try {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return
 
+    // Fetch sections and answers
     const { data: sections } = await supabase
       .from('story_sections')
       .select('*')
@@ -391,45 +397,40 @@ async function openPrintModal(story: any, sessionId: string) {
     const storyTitle = story.title || 'My Story'
     const subtitle   = 'A life told through memories, moments, and love'
 
-    async function loadImageAsBase64(url: string): Promise<string> {
-      const response = await fetch(url)
-      const blob     = await response.blob()
-      return new Promise((resolve, reject) => {
-        const reader  = new FileReader()
-        reader.onload = () => resolve(reader.result as string)
-        reader.onerror = reject
-        reader.readAsDataURL(blob)
-      })
-    }
-
     async function getAllImagesForExport() {
       const { data } = await supabase.from('story_images').select('*').eq('project_id', story.id)
       return data || []
     }
 
+    // Generate interior PDF — returns blob + real page count
     const { blob: interiorBlob, pageCount: actualPageCount } = await exportTrueBookAsBlob(
       story, mergedSections, getAllImagesForExport, loadImageAsBase64, story.cover_image_url || ''
     )
 
-    const dimsResponse = await fetch(`${import.meta.env.VITE_API_BASE_URL}/lulu-cover-dimensions`, {
+    console.log('Actual page count:', actualPageCount)
+
+    // Get exact cover dimensions from Lulu for this page count
+    const dimsResponse = await fetch(`${API_BASE}/lulu-cover-dimensions`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        pod_package_id:      '0600X0900.FC.STD.PB.060UW444.MXX',
+        pod_package_id:      POD_PACKAGE_ID,
         interior_page_count: actualPageCount,
         unit:                'mm',
       }),
     })
     const dims = await dimsResponse.json()
+    console.log('Cover dims from Lulu:', dims.width, dims.height)
 
+    // Generate cover PDF using Lulu's exact dimensions
     const coverBlob = await generateCoverPDF({
-      title:          storyTitle,
+      title:         storyTitle,
       subtitle,
-      pageCount:      actualPageCount,
-      coverImageUrl:  story.cover_image_url || '',
+      pageCount:     actualPageCount,
+      coverImageUrl: story.cover_image_url || '',
       loadImageAsBase64,
-      luluWidth:      parseFloat(dims.width),
-      luluHeight:     parseFloat(dims.height),
+      luluWidth:     parseFloat(dims.width),
+      luluHeight:    parseFloat(dims.height),
     })
 
     printModalData.value = {
@@ -452,84 +453,12 @@ async function openPrintModal(story: any, sessionId: string) {
   }
 }
 
-    // Helper to get all images for this story
-    async function getAllImagesForExport() {
-      const { data } = await supabase
-        .from('story_images')
-        .select('*')
-        .eq('project_id', story.id)
-      return data || []
-    }
-
-    // 1. Generate interior PDF blob
-   const { blob: interiorBlob, pageCount: actualPageCount } = await exportTrueBookAsBlob(
-  story, mergedSections, getAllImagesForExport, loadImageAsBase64, story.cover_image_url || ''
-)
-
-console.log('Actual page count:', actualPageCount)
-    // 2. Count pages (jsPDF gives us page count via the export)
-    // Estimate: roughly 1 page per 2 answered sections + front matter (8 pages)
-   // const answeredCount = mergedSections.filter((s: any) => s.answer?.trim()).length
-   // const estimatedPages = Math.max(28, 8 + Math.ceil(answeredCount * 1.4))
-
-    // Add this before generateCoverPDF() call in startPrintOrder()
-    const dimsResponse = await fetch(`${import.meta.env.VITE_API_BASE_URL}/lulu-cover-dimensions`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        pod_package_id: '0600X0900.FC.STD.PB.060UW444.MXX',
-        interior_page_count: actualPageCount,
-        unit: 'mm',
-      }),
-    })
-    const dims = await dimsResponse.json()
-
-console.log('Cover dims from Lulu:', dims.width, dims.height)
-    // 3. Generate cover PDF blob
-    const coverBlob = await generateCoverPDF({
-      title: storyTitle,
-      subtitle,
-      pageCount: actualPageCount,
-      coverImageUrl: story.cover_image_url || '',
-      loadImageAsBase64,
-      luluWidth: parseFloat(dims.width),
-      luluHeight: parseFloat(dims.height),
-    })
-
-    // 4. Get last Stripe payment ID for this user (as external reference)
-    
-
-    const stripePaymentId = `tmys-${story.id}-${Date.now()}`
-
-    // 5. Open modal with both blobs ready
-    printModalData.value = {
-      interiorBlob,
-      coverBlob,
-      pageCount: actualPageCount,
-      storyTitle,
-      storyId: story.id,
-      userId: user.id,
-      userEmail: user.email || '',
-      stripePaymentId,
-    }
-    printModalOpen.value = true
-
-  } catch (err) {
-    console.error('Print order preparation error:', err)
-    alert('Something went wrong preparing your book. Please try again.')
-  } finally {
-    generatingPrintId.value = null
-  }
-}
-
 function onOrdered(printJobId: string) {
   printModalOpen.value = false
   track('print_book_ordered', { print_job_id: printJobId })
 }
 
-// ── CRUD ──────────────────────────────────────────────────────────────────────
-
-
+// ─── CRUD ─────────────────────────────────────────────────────────────────────
 
 async function createStory(type: string) {
   const { data: { user } } = await supabase.auth.getUser()
@@ -557,7 +486,7 @@ async function fetchStories() {
 
   if (data) {
     const storiesWithProgress = await Promise.all(
-      data.map(async (story) => ({ ...story, progress: await getProgress(story) }))
+      data.map(async story => ({ ...story, progress: await getProgress(story) }))
     )
     stories.value = storiesWithProgress
     isFirstTimeUser.value = storiesWithProgress.length === 0
@@ -586,8 +515,8 @@ async function getProgress(story: any) {
     .from('story_sections').select('*').eq('story_type', story.story_type)
   if (sectionsError) { console.error('Sections error:', sectionsError.message); return 0 }
 
-  const total = sections?.length || 0
-  const completed = answers?.filter((a) => a.answer?.trim() !== '').length || 0
+  const total     = sections?.length || 0
+  const completed = answers?.filter(a => a.answer?.trim() !== '').length || 0
   return total === 0 ? 0 : Math.round((completed / total) * 100)
 }
 
@@ -601,26 +530,23 @@ async function loadUserAccess() {
   userAccess.value = data || []
 }
 
+// ─── Lifecycle ────────────────────────────────────────────────────────────────
+
 onMounted(async () => {
   await loadUserAccess()
   await fetchStories()
 
-  // Returning from successful Stripe print payment
-  const params    = new URLSearchParams(window.location.search)
+  // Detect return from Stripe print payment
+  const params      = new URLSearchParams(window.location.search)
   const printStatus = params.get('print')
-  const storyId   = params.get('story')
-  const sessionId = params.get('session_id')
+  const storyId     = params.get('story')
+  const sessionId   = params.get('session_id')
 
   if (printStatus === 'success' && storyId && sessionId) {
-    // Clean URL immediately
     window.history.replaceState({}, '', '/dashboard')
-
-    // Wait for stories to load then open modal
     await nextTick()
     const story = stories.value.find((s: any) => s.id === storyId)
-    if (story) {
-      await openPrintModal(story, sessionId)
-    }
+    if (story) await openPrintModal(story, sessionId)
   }
 })
 </script>
