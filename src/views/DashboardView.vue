@@ -327,7 +327,10 @@ function hasAllStoriesAccess() {
 // ── Print access — Premium Keepsake tier only ─────────────────────────────────
 function hasPrintAccess() {
   return userAccess.value.some(
-    (item) => item.access_type === 'print' || item.variant === 'premium'
+    (item) =>
+      item.access_type === 'print' ||
+      item.variant === 'premium' ||
+      item.variant === 'with_images'  // anyone with photo export gets print too
   )
 }
 

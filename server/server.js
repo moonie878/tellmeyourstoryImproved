@@ -131,6 +131,11 @@ app.post(
               access_type: 'export',
               variant: 'with_images',
             },
+            {
+      user_id: userId,
+      access_type: 'print',
+      variant: 'premium',
+    },
           ]
         }
 
