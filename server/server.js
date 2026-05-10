@@ -448,6 +448,54 @@ app.post('/lulu-validate-interior', async (req, res) => {
   }
 })
 
+app.post('/lulu-validate-cover', async (req, res) => {
+  try {
+    const token = await getLuluAccessToken()
+
+    // Submit cover for validation
+    const submitResponse = await fetch(`${LULU_API_URL}/validate-cover/`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        source_url: 'https://jeyybcdnmezivjuvmmcu.supabase.co/storage/v1/object/public/story-exports/print-orders/1b595e55-7fe9-429c-ab0e-0e761e3d718c/0411757e-8df2-40d0-904d-f8432f148237-cover-1778379539350.pdf',
+        pod_package_id: '0600X0900.FC.STD.PB.060UW444.MXX',
+        page_count: 28,
+      }),
+    })
+
+    const submitText = await submitResponse.text()
+    console.log('Cover validation submit:', submitResponse.status, submitText)
+
+    if (!submitResponse.ok) {
+      return res.status(submitResponse.status).send(submitText)
+    }
+
+    const submitData = JSON.parse(submitText)
+    const validationId = submitData.id
+
+    // Wait 8 seconds then poll
+    await new Promise(resolve => setTimeout(resolve, 8000))
+
+    const resultResponse = await fetch(
+      `${LULU_API_URL}/validate-cover/${validationId}/`,
+      {
+        headers: { 'Authorization': `Bearer ${token}` },
+      }
+    )
+
+    const resultText = await resultResponse.text()
+    console.log('Cover validation result:', resultResponse.status, resultText)
+    res.status(resultResponse.status).send(resultText)
+
+  } catch (err) {
+    console.error('Cover validation error:', err.message)
+    res.status(500).json({ error: err.message })
+  }
+})
+
 app.post('/lulu-print-job-cancel/:id', async (req, res) => {
   try {
     const token = await getLuluAccessToken()
