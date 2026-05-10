@@ -331,6 +331,7 @@
             :image-upload-status="imageUploadStatus"
             :has-image-export-access="hasImageExportAccess"
             :is-highlighted="!!currentSection?.is_highlighted"
+            :project-id="projectId"
             @update-answer="updateCurrentAnswer"
             @image-upload="handleImageUpload"
             @remove-image="removeCurrentImage"

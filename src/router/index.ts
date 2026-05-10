@@ -126,6 +126,7 @@ const routes = [
   { path: '/plans', redirect: '/pricing' },
   { path: '/subscriptions', redirect: '/pricing' },
   { path: '/billing', redirect: '/pricing' },
+  { path: '/listen/:id', name: 'listen', component: () => import('../views/ListenView.vue') },
 
   // ── SEO landing pages ─────────────────────────────────────────────────────
   {
