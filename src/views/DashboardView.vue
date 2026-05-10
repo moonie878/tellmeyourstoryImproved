@@ -386,18 +386,15 @@ async function startPrintOrder(story: any) {
     }
 
     // 1. Generate interior PDF blob
-    const interiorBlob = await exportTrueBookAsBlob(
-      story,
-      mergedSections,
-      getAllImagesForExport,
-      loadImageAsBase64,
-      story.cover_image_url || ''
-    )
+   const { blob: interiorBlob, pageCount: actualPageCount } = await exportTrueBookAsBlob(
+  story, mergedSections, getAllImagesForExport, loadImageAsBase64, story.cover_image_url || ''
+)
 
+console.log('Actual page count:', actualPageCount)
     // 2. Count pages (jsPDF gives us page count via the export)
     // Estimate: roughly 1 page per 2 answered sections + front matter (8 pages)
-    const answeredCount = mergedSections.filter((s: any) => s.answer?.trim()).length
-    const estimatedPages = Math.max(28, 8 + Math.ceil(answeredCount * 1.4))
+   // const answeredCount = mergedSections.filter((s: any) => s.answer?.trim()).length
+   // const estimatedPages = Math.max(28, 8 + Math.ceil(answeredCount * 1.4))
 
     // Add this before generateCoverPDF() call in startPrintOrder()
     const dimsResponse = await fetch(`${import.meta.env.VITE_API_BASE_URL}/lulu-cover-dimensions`, {
@@ -405,7 +402,7 @@ async function startPrintOrder(story: any) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         pod_package_id: '0600X0900.FC.STD.PB.060UW444.MXX',
-        interior_page_count: estimatedPages,
+        interior_page_count: actualPageCount,
         unit: 'mm',
       }),
     })
@@ -416,7 +413,7 @@ console.log('Cover dims from Lulu:', dims.width, dims.height)
     const coverBlob = await generateCoverPDF({
       title: storyTitle,
       subtitle,
-      pageCount: estimatedPages,
+      pageCount: actualPageCount,
       coverImageUrl: story.cover_image_url || '',
       loadImageAsBase64,
       luluWidth: parseFloat(dims.width),
@@ -432,7 +429,7 @@ console.log('Cover dims from Lulu:', dims.width, dims.height)
     printModalData.value = {
       interiorBlob,
       coverBlob,
-      pageCount: estimatedPages,
+      pageCount: actualPageCount,
       storyTitle,
       storyId: story.id,
       userId: user.id,

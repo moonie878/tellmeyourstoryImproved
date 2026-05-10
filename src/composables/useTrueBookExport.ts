@@ -931,7 +931,7 @@ export function useStoryTrueBookExport() {
     getAllImagesForExport: () => Promise<StoryImage[]>,
     loadImageAsBase64: (url: string) => Promise<string>,
     coverImageUrl: string
-  ): Promise<Blob> {
+  ): Promise<{blob:Blob; pageCount: number}>{
     isExporting.value   = true
     progress.value      = 0
     progressLabel.value = 'Preparing your book for print…'
@@ -949,12 +949,13 @@ export function useStoryTrueBookExport() {
       progressLabel.value = 'Preparing for print…'
       progress.value = 98
 
-      const blob = doc.output('blob')
+     const blob = doc.output('blob')
+const pageCount = doc.getNumberOfPages()
 
-      progress.value = 100
-      progressLabel.value = 'Ready for print!'
+progress.value = 100
+progressLabel.value = 'Ready for print!'
 
-      return blob
+return { blob, pageCount }
 
     } catch (err) {
       console.error('True book blob export error:', err)
