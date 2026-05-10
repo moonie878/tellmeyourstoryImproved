@@ -45,7 +45,7 @@ export interface PrintOrderResult {
 
 // ─── Config ───────────────────────────────────────────────────────────────────
 
-const BACKEND_URL = import.meta.env.VITE_API_URL as string
+const BACKEND_URL = import.meta.env.VITE_API_BASE_URL as string
 
 // 6x9 full colour perfect bind softcover
 const LULU_POD_PACKAGE_ID = '0600X0900FCSTDPB060UW444MXX'
