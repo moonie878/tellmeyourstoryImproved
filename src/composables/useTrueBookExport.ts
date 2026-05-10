@@ -866,6 +866,13 @@ async function buildTrueBookDoc(
   const tocPageRef = { n: tocPageNum }
   renderTableOfContents(doc, answeredChapters, chapterPages, tocPageRef, skipHeader)
 
+const LULU_MIN_PAGES = 32
+while (doc.getNumberOfPages() < LULU_MIN_PAGES) {
+  doc.addPage()
+  pageBg(doc)
+  skipHeader.add(doc.getNumberOfPages())
+}
+
   return doc
 }
 
