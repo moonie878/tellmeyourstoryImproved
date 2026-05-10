@@ -406,8 +406,8 @@ app.post('/lulu-validate-interior', async (req, res) => {
   try {
     const token = await getLuluAccessToken()
 
-    // Step 1 — submit validation job
-    const submitResponse = await fetch(`${LULU_API_URL}/interior-validation/`, {
+    // Step 1 — submit for validation
+    const submitResponse = await fetch(`${LULU_API_URL}/validate-interior/`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -428,11 +428,11 @@ app.post('/lulu-validate-interior', async (req, res) => {
     const submitData = JSON.parse(submitText)
     const validationId = submitData.id
 
-    // Step 2 — wait 5 seconds then poll for result
-    await new Promise(resolve => setTimeout(resolve, 5000))
+    // Step 2 — wait 8 seconds then poll result
+    await new Promise(resolve => setTimeout(resolve, 8000))
 
     const resultResponse = await fetch(
-      `${LULU_API_URL}/print-jobs/interior-validation/${validationId}/`,
+      `${LULU_API_URL}/validate-interior/${validationId}/`,
       {
         headers: { 'Authorization': `Bearer ${token}` },
       }
