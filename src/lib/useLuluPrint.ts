@@ -189,11 +189,19 @@ export function useLuluPrint() {
         }),
       })
 
-      const data = await response.json()
+      const responseText = await response.text()
+console.log('Lulu raw response:', response.status, responseText)
 
-      if (!response.ok) {
-        throw new Error(`Print job failed: ${JSON.stringify(data)}`)
-      }
+let data: any
+try {
+  data = JSON.parse(responseText)
+} catch {
+  throw new Error(`Print job failed with non-JSON response: ${responseText}`)
+}
+
+if (!response.ok) {
+  throw new Error(`Print job failed: ${JSON.stringify(data)}`)
+}
 
       const luluPrintJobId = String(data.id)
       const status         = data.status?.name || 'CREATED'
