@@ -1,28 +1,5 @@
-/**
- * useLuluPrint.ts
- * Lulu Print API integration for Tell Me Your Story
- *
- * All Lulu API calls are proxied through your Express backend to avoid CORS
- * and to keep LULU_CLIENT_KEY and LULU_CLIENT_SECRET secure on the server.
- *
- * Backend endpoints required (add to your Express server):
- *   POST /lulu-shipping-cost
- *   POST /lulu-print-job
- *   GET  /lulu-print-job-status/:id
- *   POST /lulu-print-job-cancel/:id
- *
- * Backend env vars required:
- *   LULU_CLIENT_KEY=your_production_key
- *   LULU_CLIENT_SECRET=your_production_secret
- *
- * Frontend env var required:
- *   VITE_API_URL=https://your-backend.com
- */
-
 import { ref } from 'vue'
 import { supabase } from './supabase'
-
-// ─── Types ────────────────────────────────────────────────────────────────────
 
 export interface ShippingAddress {
   name: string
@@ -43,14 +20,8 @@ export interface PrintOrderResult {
   error?: string
 }
 
-// ─── Config ───────────────────────────────────────────────────────────────────
-
-const BACKEND_URL = import.meta.env.VITE_API_BASE_URL as string
-
-// 6x9 full colour perfect bind softcover
-const LULU_POD_PACKAGE_ID = '0600X0900.FC.STD.PB.060UW444.MXX'
-
-// ─── Upload PDF blob to Supabase storage ──────────────────────────────────────
+const BACKEND_URL     = import.meta.env.VITE_API_BASE_URL as string
+const POD_PACKAGE_ID  = '0600X0900.FC.STD.PB.060UW444.MXX'
 
 async function uploadBlob(blob: Blob, path: string): Promise<string> {
   const { error } = await supabase.storage
@@ -66,55 +37,6 @@ async function uploadBlob(blob: Blob, path: string): Promise<string> {
   return publicUrl
 }
 
-// ─── Get shipping cost estimate ────────────────────────────────────────────────
-
-export async function getLuluShippingCost(
-  pageCount: number,
-  shippingAddress: ShippingAddress,
-  quantity = 1
-): Promise<{ print_cost: number; shipping_cost: number; total: number }> {
-
-  const response = await fetch(`${BACKEND_URL}/lulu-shipping-cost`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      line_items: [
-        {
-          pod_package_id: LULU_POD_PACKAGE_ID,
-          page_count: pageCount,
-          quantity,
-        },
-      ],
-      shipping_address: {
-        name:         shippingAddress.name,
-        street1:      shippingAddress.street1,
-        street2:      shippingAddress.street2 || '',
-        city:         shippingAddress.city,
-        state_code:   shippingAddress.state || '',
-        postcode:     shippingAddress.postcode,
-        country_code: shippingAddress.country_code,
-        phone_number: shippingAddress.phone_number,
-        email:        shippingAddress.email,
-      },
-      shipping_level: 'MAIL',
-    }),
-  })
-
-  if (!response.ok) throw new Error(`Shipping cost failed: ${response.status}`)
-
-  const data = await response.json()
-  const printCost    = parseFloat(data.line_items?.[0]?.cost_excl_discounts || '0')
-  const shippingCost = parseFloat(data.shipping_cost?.cost_excl_tax || '0')
-
-  return {
-    print_cost:    printCost,
-    shipping_cost: shippingCost,
-    total:         printCost + shippingCost,
-  }
-}
-
-// ─── Main composable ──────────────────────────────────────────────────────────
-
 export function useLuluPrint() {
   const isOrdering  = ref(false)
   const orderStatus = ref('')
@@ -129,6 +51,7 @@ export function useLuluPrint() {
     userId: string,
     shippingAddress: ShippingAddress,
     stripePaymentId: string,
+    shippingLevel = 'MAIL',
     quantity = 1,
     amountCharged = 0
   ): Promise<PrintOrderResult> {
@@ -140,21 +63,18 @@ export function useLuluPrint() {
     try {
       const ts = Date.now()
 
-      // 1. Upload interior PDF to Supabase storage
       orderStatus.value = 'Uploading interior…'
       const interiorUrl = await uploadBlob(
         interiorBlob,
         `print-orders/${userId}/${storyId}-interior-${ts}.pdf`
       )
 
-      // 2. Upload cover PDF to Supabase storage
       orderStatus.value = 'Uploading cover…'
       const coverUrl = await uploadBlob(
         coverBlob,
         `print-orders/${userId}/${storyId}-cover-${ts}.pdf`
       )
 
-      // 3. Create print job via backend proxy
       orderStatus.value = 'Sending to print…'
 
       const response = await fetch(`${BACKEND_URL}/lulu-print-job`, {
@@ -168,7 +88,7 @@ export function useLuluPrint() {
               title:          storyTitle,
               interior:       { source_url: interiorUrl },
               cover:          { source_url: coverUrl },
-              pod_package_id: LULU_POD_PACKAGE_ID,
+              pod_package_id: POD_PACKAGE_ID,
               page_count:     pageCount,
               quantity,
             },
@@ -185,23 +105,23 @@ export function useLuluPrint() {
             phone_number: shippingAddress.phone_number,
             email:        shippingAddress.email,
           },
-          shipping_level: 'MAIL',
+          shipping_level: shippingLevel,
         }),
       })
 
       const responseText = await response.text()
-console.log('Lulu raw response:', response.status, responseText)
+      console.log('Lulu print job response:', response.status, responseText.slice(0, 300))
 
-let data: any
-try {
-  data = JSON.parse(responseText)
-} catch {
-  throw new Error(`Print job failed with non-JSON response: ${responseText}`)
-}
+      let data: any
+      try {
+        data = JSON.parse(responseText)
+      } catch {
+        throw new Error(`Lulu returned non-JSON: ${responseText.slice(0, 200)}`)
+      }
 
-if (!response.ok) {
-  throw new Error(`Print job failed: ${JSON.stringify(data)}`)
-}
+      if (!response.ok) {
+        throw new Error(`Print job failed: ${JSON.stringify(data)}`)
+      }
 
       const luluPrintJobId = String(data.id)
       const status         = data.status?.name || 'CREATED'
@@ -209,7 +129,6 @@ if (!response.ok) {
       printJobId.value  = luluPrintJobId
       orderStatus.value = 'Order placed!'
 
-      // 4. Save order to Supabase
       await supabase.from('print_orders').insert({
         user_id:           userId,
         story_id:          storyId,
@@ -240,9 +159,7 @@ if (!response.ok) {
   }
 
   async function getPrintJobStatus(luluPrintJobId: string) {
-    const response = await fetch(
-      `${BACKEND_URL}/lulu-print-job-status/${luluPrintJobId}`
-    )
+    const response = await fetch(`${BACKEND_URL}/lulu-print-job-status/${luluPrintJobId}`)
     if (!response.ok) throw new Error(`Status check failed: ${response.status}`)
     return response.json()
   }
@@ -255,12 +172,5 @@ if (!response.ok) {
     return response.ok
   }
 
-  return {
-    isOrdering,
-    orderStatus,
-    printJobId,
-    orderPrintedBook,
-    getPrintJobStatus,
-    cancelPrintJob,
-  }
+  return { isOrdering, orderStatus, printJobId, orderPrintedBook, getPrintJobStatus, cancelPrintJob }
 }
