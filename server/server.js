@@ -451,6 +451,7 @@ app.post('/lulu-validate-interior', async (req, res) => {
 app.post('/lulu-cover-dimensions', async (req, res) => {
   try {
     const token = await getLuluAccessToken()
+    const { interior_page_count = 28, pod_package_id = '0600X0900.FC.STD.PB.060UW444.MXX' } = req.body
 
     const response = await fetch(`${LULU_API_URL}/cover-dimensions/`, {
       method: 'POST',

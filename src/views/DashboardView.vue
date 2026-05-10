@@ -399,6 +399,19 @@ async function startPrintOrder(story: any) {
     const answeredCount = mergedSections.filter((s: any) => s.answer?.trim()).length
     const estimatedPages = Math.max(28, 8 + Math.ceil(answeredCount * 1.4))
 
+    // Add this before generateCoverPDF() call in startPrintOrder()
+    const dimsResponse = await fetch(`${import.meta.env.VITE_API_BASE_URL}/lulu-cover-dimensions`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        pod_package_id: '0600X0900.FC.STD.PB.060UW444.MXX',
+        interior_page_count: estimatedPages,
+        unit: 'mm',
+      }),
+    })
+    const dims = await dimsResponse.json()
+
+
     // 3. Generate cover PDF blob
     const coverBlob = await generateCoverPDF({
       title: storyTitle,
@@ -406,6 +419,8 @@ async function startPrintOrder(story: any) {
       pageCount: estimatedPages,
       coverImageUrl: story.cover_image_url || '',
       loadImageAsBase64,
+      luluWidth: parseFloat(dims.width),
+      luluHeight: parseFloat(dims.height),
     })
 
     // 4. Get last Stripe payment ID for this user (as external reference)

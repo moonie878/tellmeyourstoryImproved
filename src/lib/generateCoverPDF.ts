@@ -80,18 +80,22 @@ export interface CoverOptions {
   pageCount: number
   coverImageUrl?: string
   loadImageAsBase64?: (url: string) => Promise<string>
+  luluWidth?: number    // add these
+  luluHeight?: number   // add these
 }
 
 export async function generateCoverPDF(options: CoverOptions): Promise<Blob> {
-  const { title, subtitle, pageCount, coverImageUrl, loadImageAsBase64 } = options
+  const { title, subtitle, pageCount, coverImageUrl, loadImageAsBase64, luluWidth, luluHeight } = options
+
+    
 
   // ── Calculate dimensions ────────────────────────────────────────────────────
   const spineIn   = pageCount * PPI_60LB
   const totalWIn  = TRIM_W_IN * 2 + spineIn + BLEED_IN * 2
   const totalHIn  = TRIM_H_IN + BLEED_IN * 2
-
-  const totalW = inToMm(totalWIn)   // full cover width mm
-  const totalH = inToMm(totalHIn)   // full cover height mm
+ // Use Lulu's exact dimensions if provided, otherwise calculate
+  const totalW = luluWidth || inToMm(TRIM_W_IN * 2 + pageCount * PPI_60LB + BLEED_IN * 2)
+  const totalH = luluHeight || inToMm(TRIM_H_IN + BLEED_IN * 2)
   const bleed  = inToMm(BLEED_IN)  // 3.175mm
   const trimW  = inToMm(TRIM_W_IN) // 152.4mm per side
   const trimH  = inToMm(TRIM_H_IN) // 228.6mm
