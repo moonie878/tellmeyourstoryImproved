@@ -415,7 +415,6 @@ app.post('/lulu-validate-interior', async (req, res) => {
       },
       body: JSON.stringify({
         source_url: 'https://jeyybcdnmezivjuvmmcu.supabase.co/storage/v1/object/public/story-exports/print-orders/1b595e55-7fe9-429c-ab0e-0e761e3d718c/0411757e-8df2-40d0-904d-f8432f148237-interior-1778379201693.pdf',
-        pod_package_id: '0600X0900.FC.STD.PB.060UW444.MXX',
       }),
     })
 
