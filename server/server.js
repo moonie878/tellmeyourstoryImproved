@@ -192,6 +192,57 @@ app.post('/verify-turnstile', express.json(), async (req, res) => {
   }
 })
 
+app.post('/create-print-checkout', async (req, res) => {
+  try {
+    const { userId, storyId, storyTitle, quantity = 1 } = req.body
+
+    if (!userId || !storyId) {
+      return res.status(400).json({ error: 'Missing required fields' })
+    }
+
+    const session = await stripe.checkout.sessions.create({
+      mode: 'payment',
+      payment_method_types: ['card'],
+      line_items: [
+        {
+          price_data: {
+            currency: 'gbp',
+            product_data: {
+              name: `Keepsake Printed Book — ${storyTitle}`,
+              description: '6×9 softcover, printed and shipped by Lulu Press. Delivered in 10-14 days.',
+            },
+            unit_amount: 2999,
+          },
+          quantity,
+        },
+        {
+          price_data: {
+            currency: 'gbp',
+            product_data: {
+              name: 'UK Shipping — Royal Mail 2nd Class',
+            },
+            unit_amount: 499,
+          },
+          quantity: 1,
+        },
+      ],
+      success_url: `${FRONTEND_URL}/dashboard?print=success&story=${storyId}&session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url:  `${FRONTEND_URL}/dashboard?print=cancelled`,
+      metadata: {
+        userId,
+        storyId,
+        purchaseType: 'printed_book',
+        quantity:     String(quantity),
+      },
+    })
+
+    res.json({ url: session.url })
+  } catch (err) {
+    console.error('Print checkout error:', err)
+    res.status(500).json({ error: 'Failed to create checkout' })
+  }
+})
+
 app.post('/create-tribute-checkout', async (req, res) => {
   try {
     const { name, successUrl, cancelUrl } = req.body
@@ -205,7 +256,7 @@ app.post('/create-tribute-checkout', async (req, res) => {
       payment_method_types: ['card'],
       line_items: [
         {
-          price: 'price_1TUMGBR13CJL70CCqFP5L2tE',
+          price: 'price_1TUCM6R13CJL70CC423pQvkK',
           quantity: 1,
         },
       ],

@@ -250,7 +250,7 @@
 <script setup lang="ts">
 import { supabase } from '../lib/supabase'
 import { useRouter } from 'vue-router'
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, nextTick } from 'vue'
 import { track } from '../lib/analytics'
 import { STORY_TYPES } from '../data/storyTypes'
 import { useStoryTrueBookExport } from '../composables/useTrueBookExport'
@@ -336,14 +336,42 @@ function hasPrintAccess() {
 
 // ── Print order flow ──────────────────────────────────────────────────────────
 
+// Replace startPrintOrder with this
 async function startPrintOrder(story: any) {
   generatingPrintId.value = story.id
-
   try {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return
 
-    // Fetch sections and images for this story
+    const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/create-print-checkout`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        userId:     user.id,
+        storyId:    story.id,
+        storyTitle: story.title || 'My Story',
+      }),
+    })
+
+    const { url, error } = await response.json()
+    if (error) throw new Error(error)
+    window.location.href = url
+
+  } catch (err) {
+    console.error('Print checkout error:', err)
+    alert('Something went wrong. Please try again.')
+  } finally {
+    generatingPrintId.value = null
+  }
+}
+
+// Add this new function
+async function openPrintModal(story: any, sessionId: string) {
+  generatingPrintId.value = story.id
+  try {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return
+
     const { data: sections } = await supabase
       .from('story_sections')
       .select('*')
@@ -355,26 +383,74 @@ async function startPrintOrder(story: any) {
       .select('*')
       .eq('project_id', story.id)
 
-    // Merge answers into sections
     const mergedSections = (sections || []).map((s: any) => {
       const answer = answers?.find((a: any) => a.section_id === s.id)
       return { ...s, answer: answer?.answer || '', is_highlighted: answer?.is_highlighted || false }
     })
 
     const storyTitle = story.title || 'My Story'
-    const subtitle = `A life told through memories, moments, and love`
+    const subtitle   = 'A life told through memories, moments, and love'
 
-    // Helper to load images as base64
     async function loadImageAsBase64(url: string): Promise<string> {
       const response = await fetch(url)
-      const blob = await response.blob()
+      const blob     = await response.blob()
       return new Promise((resolve, reject) => {
-        const reader = new FileReader()
+        const reader  = new FileReader()
         reader.onload = () => resolve(reader.result as string)
         reader.onerror = reject
         reader.readAsDataURL(blob)
       })
     }
+
+    async function getAllImagesForExport() {
+      const { data } = await supabase.from('story_images').select('*').eq('project_id', story.id)
+      return data || []
+    }
+
+    const { blob: interiorBlob, pageCount: actualPageCount } = await exportTrueBookAsBlob(
+      story, mergedSections, getAllImagesForExport, loadImageAsBase64, story.cover_image_url || ''
+    )
+
+    const dimsResponse = await fetch(`${import.meta.env.VITE_API_BASE_URL}/lulu-cover-dimensions`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        pod_package_id:      '0600X0900.FC.STD.PB.060UW444.MXX',
+        interior_page_count: actualPageCount,
+        unit:                'mm',
+      }),
+    })
+    const dims = await dimsResponse.json()
+
+    const coverBlob = await generateCoverPDF({
+      title:          storyTitle,
+      subtitle,
+      pageCount:      actualPageCount,
+      coverImageUrl:  story.cover_image_url || '',
+      loadImageAsBase64,
+      luluWidth:      parseFloat(dims.width),
+      luluHeight:     parseFloat(dims.height),
+    })
+
+    printModalData.value = {
+      interiorBlob,
+      coverBlob,
+      pageCount:       actualPageCount,
+      storyTitle,
+      storyId:         story.id,
+      userId:          user.id,
+      userEmail:       user.email || '',
+      stripePaymentId: sessionId,
+    }
+    printModalOpen.value = true
+
+  } catch (err) {
+    console.error('Print modal error:', err)
+    alert('Something went wrong preparing your book. Please try again.')
+  } finally {
+    generatingPrintId.value = null
+  }
+}
 
     // Helper to get all images for this story
     async function getAllImagesForExport() {
@@ -453,6 +529,8 @@ function onOrdered(printJobId: string) {
 
 // ── CRUD ──────────────────────────────────────────────────────────────────────
 
+
+
 async function createStory(type: string) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return
@@ -526,5 +604,23 @@ async function loadUserAccess() {
 onMounted(async () => {
   await loadUserAccess()
   await fetchStories()
+
+  // Returning from successful Stripe print payment
+  const params    = new URLSearchParams(window.location.search)
+  const printStatus = params.get('print')
+  const storyId   = params.get('story')
+  const sessionId = params.get('session_id')
+
+  if (printStatus === 'success' && storyId && sessionId) {
+    // Clean URL immediately
+    window.history.replaceState({}, '', '/dashboard')
+
+    // Wait for stories to load then open modal
+    await nextTick()
+    const story = stories.value.find((s: any) => s.id === storyId)
+    if (story) {
+      await openPrintModal(story, sessionId)
+    }
+  }
 })
 </script>

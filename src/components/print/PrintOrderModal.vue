@@ -10,11 +10,8 @@
         <h2 class="font-display text-2xl font-bold text-[#1C1917]">Order placed!</h2>
         <p class="mt-3 text-sm leading-relaxed text-[#5C534E]">
           Your keepsake book is being printed and will be shipped to
-          <strong>{{ form.name }}</strong>.
-        </p>
-        <p v-if="selectedOption" class="mt-1 text-sm text-[#5C534E]">
-          Delivery via {{ selectedOption.carrier_service_name }} —
-          {{ selectedOption.total_days_min }}–{{ selectedOption.total_days_max }} days.
+          <strong>{{ form.name }}</strong> via Royal Mail 2nd Class.
+          Allow 10–14 days for delivery.
         </p>
         <p v-if="trackingRef" class="mt-2 text-xs text-[#8C847E]">Order ref: {{ trackingRef }}</p>
         <button
@@ -27,26 +24,24 @@
 
       <!-- Form state -->
       <template v-else>
-        <h2 class="font-display text-2xl font-bold text-[#1C1917]">Order your printed book</h2>
+        <h2 class="font-display text-2xl font-bold text-[#1C1917]">Enter your delivery address</h2>
         <p class="mt-2 text-sm text-[#5C534E]">
-          A beautifully printed 6×9 softcover — shipped directly to your door.
+          Your payment has been taken. Enter where you'd like your book delivered.
         </p>
 
         <!-- Price summary -->
         <div class="mt-4 rounded-2xl bg-[#F5F0E8] px-5 py-4">
           <div class="flex justify-between text-sm">
-            <span class="text-[#5C534E]">Printed keepsake book (× {{ quantity }})</span>
-            <span class="font-medium text-[#1C1917]">£{{ (printCost * quantity).toFixed(2) }}</span>
+            <span class="text-[#5C534E]">Printed keepsake book</span>
+            <span class="font-medium text-[#1C1917]">£{{ printCost.toFixed(2) }}</span>
           </div>
           <div class="flex justify-between text-sm mt-1">
-            <span class="text-[#5C534E]">Shipping</span>
-            <span class="font-medium text-[#1C1917]">
-              {{ shippingCost !== null ? `£${shippingCost.toFixed(2)}` : 'Enter address below →' }}
-            </span>
+            <span class="text-[#5C534E]">UK shipping — Royal Mail 2nd Class</span>
+            <span class="font-medium text-[#1C1917]">£4.99</span>
           </div>
-          <div v-if="shippingCost !== null" class="mt-2 border-t border-[#E8DDD0] pt-2 flex justify-between text-sm font-semibold">
-            <span class="text-[#1C1917]">Total</span>
-            <span class="text-[#1C1917]">£{{ totalCost }}</span>
+          <div class="mt-2 border-t border-[#E8DDD0] pt-2 flex justify-between text-sm font-semibold">
+            <span class="text-[#1C1917]">Total paid</span>
+            <span class="text-[#1C1917]">£{{ (printCost + 4.99).toFixed(2) }}</span>
           </div>
         </div>
 
@@ -61,7 +56,10 @@
             <input v-model="form.street1" type="text" placeholder="12 Oak Street" class="input" />
           </div>
           <div>
-            <label class="label">Address line 2 <span class="text-[#8C847E] font-normal">(optional)</span></label>
+            <label class="label">
+              Address line 2
+              <span class="text-[#8C847E] font-normal">(optional)</span>
+            </label>
             <input v-model="form.street2" type="text" placeholder="Flat 2" class="input" />
           </div>
           <div class="grid grid-cols-2 gap-3">
@@ -71,58 +69,13 @@
             </div>
             <div>
               <label class="label">Postcode</label>
-              <input
-                v-model="form.postcode"
-                type="text"
-                placeholder="SO14 1AA"
-                class="input"
-                @blur="fetchShippingOptions"
-              />
+              <input v-model="form.postcode" type="text" placeholder="SO14 1AA" class="input" />
             </div>
           </div>
           <div>
             <label class="label">Phone number</label>
             <input v-model="form.phone" type="tel" placeholder="07700 900000" class="input" />
           </div>
-        </div>
-
-        <!-- Shipping options -->
-        <div class="mt-5">
-          <label class="label">Shipping method</label>
-
-          <div v-if="loadingShipping" class="mt-2 text-sm text-[#8C847E]">
-            Calculating shipping options…
-          </div>
-
-          <div v-else-if="shippingOptions.length" class="mt-2 space-y-2">
-            <div
-              v-for="option in shippingOptions"
-              :key="option.level"
-              @click="selectedShipping = option.level"
-              class="flex items-center justify-between rounded-xl border px-4 py-3 cursor-pointer transition"
-              :class="selectedShipping === option.level
-                ? 'border-[#7C5C3B] bg-[#F5F0E8]'
-                : 'border-[#E8DDD0] bg-white hover:bg-stone-50'"
-            >
-              <div class="flex items-center gap-3">
-                <div
-                  class="h-4 w-4 rounded-full border-2 flex items-center justify-center flex-shrink-0"
-                  :class="selectedShipping === option.level ? 'border-[#7C5C3B]' : 'border-[#D6CFC8]'"
-                >
-                  <div v-if="selectedShipping === option.level" class="h-2 w-2 rounded-full bg-[#7C5C3B]" />
-                </div>
-                <div>
-                  <p class="text-sm font-medium text-[#1C1917]">{{ option.carrier_service_name }}</p>
-                  <p class="text-xs text-[#8C847E]">{{ option.total_days_min }}–{{ option.total_days_max }} working days</p>
-                </div>
-              </div>
-              <p class="text-sm font-semibold text-[#1C1917] ml-4">£{{ option.cost_excl_tax.toFixed(2) }}</p>
-            </div>
-          </div>
-
-          <p v-else class="mt-2 text-xs text-[#8C847E]">
-            Enter your city and postcode above to see shipping options
-          </p>
         </div>
 
         <!-- Quantity -->
@@ -156,15 +109,15 @@
           </button>
           <button
             @click="handleOrder"
-            :disabled="isOrdering || !isFormValid || shippingCost === null"
+            :disabled="isOrdering || !isFormValid"
             class="flex-1 rounded-full bg-[#7C5C3B] py-2.5 text-sm font-semibold text-white transition hover:opacity-90 disabled:opacity-50"
           >
-            {{ isOrdering ? 'Placing order…' : shippingCost === null ? 'Select shipping first' : `Order — £${totalCost}` }}
+            {{ isOrdering ? 'Placing order…' : 'Place order →' }}
           </button>
         </div>
 
         <p class="mt-3 text-center text-xs text-[#8C847E]">
-          Printed by Lulu Press · Tracked where available
+          Printed by Lulu Press · Royal Mail 2nd Class · 10–14 days
         </p>
       </template>
     </div>
@@ -172,19 +125,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
+import { ref, computed } from 'vue'
 import { useLuluPrint } from '../../lib/useLuluPrint'
 import type { ShippingAddress } from '../../lib/useLuluPrint'
-
-interface ShippingOption {
-  id: number
-  level: string
-  carrier_service_name: string
-  cost_excl_tax: number
-  total_days_min: number
-  total_days_max: number
-  traceable: boolean
-}
 
 const props = defineProps<{
   interiorPdfBlob: Blob
@@ -200,102 +143,30 @@ const props = defineProps<{
 
 const emit = defineEmits<{ close: []; ordered: [printJobId: string] }>()
 
-const BACKEND_URL = import.meta.env.VITE_API_BASE_URL as string
-const POD_PACKAGE_ID = '0600X0900.FC.STD.PB.060UW444.MXX'
-
 const { isOrdering, orderStatus, orderPrintedBook } = useLuluPrint()
 
 const form = ref({
   name: '', street1: '', street2: '', city: '', postcode: '', phone: '',
 })
 
-const quantity        = ref(1)
-const shippingOptions = ref<ShippingOption[]>([])
-const selectedShipping = ref<string>('MAIL')
-const loadingShipping = ref(false)
-const success         = ref(false)
-const trackingRef     = ref('')
-const errorMsg        = ref('')
-
-const selectedOption = computed(() =>
-  shippingOptions.value.find(o => o.level === selectedShipping.value) || null
-)
-
-const shippingCost = computed(() =>
-  selectedOption.value ? selectedOption.value.cost_excl_tax : null
-)
+const quantity    = ref(1)
+const success     = ref(false)
+const trackingRef = ref('')
+const errorMsg    = ref('')
 
 const isFormValid = computed(() =>
-  form.value.name.trim() && form.value.street1.trim() &&
-  form.value.city.trim() && form.value.postcode.trim() && form.value.phone.trim()
+  form.value.name.trim() &&
+  form.value.street1.trim() &&
+  form.value.city.trim() &&
+  form.value.postcode.trim() &&
+  form.value.phone.trim()
 )
-
-const totalCost = computed(() => {
-  if (shippingCost.value === null) return '…'
-  return (props.printCost * quantity.value + shippingCost.value).toFixed(2)
-})
-
-async function fetchShippingOptions() {
-  if (!form.value.postcode.trim() || !form.value.city.trim()) return
-
-  loadingShipping.value = true
-  shippingOptions.value = []
-
-  try {
-    const response = await fetch(`${BACKEND_URL}/lulu-shipping-options`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        currency: 'GBP',
-        line_items: [{
-          page_count: props.pageCount,
-          pod_package_id: POD_PACKAGE_ID,
-          quantity: quantity.value,
-        }],
-        shipping_address: {
-          city:     form.value.city,
-          country:  'GB',
-          postcode: form.value.postcode,
-          street1:  form.value.street1 || '1 Test St',
-        },
-      }),
-    })
-
-    const data = await response.json()
-
-    if (Array.isArray(data)) {
-      // Sort by cost ascending
-      shippingOptions.value = data.sort((a, b) => a.cost_excl_tax - b.cost_excl_tax)
-      // Default to cheapest option
-      if (data.length > 0) {
-        selectedShipping.value = data[0].level
-      }
-    }
-  } catch (err) {
-    console.error('Shipping options error:', err)
-    errorMsg.value = 'Could not load shipping options. Please try again.'
-  } finally {
-    loadingShipping.value = false
-  }
-}
-
-// Refetch when quantity changes
-watch(quantity, () => {
-  if (form.value.postcode && form.value.city) {
-    fetchShippingOptions()
-  }
-})
 
 async function handleOrder() {
   errorMsg.value = ''
 
   if (!isFormValid.value) {
     errorMsg.value = 'Please fill in all required fields.'
-    return
-  }
-
-  if (shippingCost.value === null) {
-    errorMsg.value = 'Please select a shipping option.'
     return
   }
 
@@ -319,13 +190,13 @@ async function handleOrder() {
     props.userId,
     address,
     props.stripePaymentId,
-    selectedShipping.value,
+    'MAIL',
     quantity.value,
-    props.printCost * quantity.value + shippingCost.value
+    props.printCost + 4.99
   )
 
   if (result.success && result.lulu_print_job_id) {
-    success.value  = true
+    success.value     = true
     trackingRef.value = result.lulu_print_job_id
     emit('ordered', result.lulu_print_job_id)
   } else {
@@ -340,6 +211,6 @@ async function handleOrder() {
 .input { width: 100%; border-radius: 12px; border: 1px solid #E8DDD0; padding: 10px 14px; font-size: 13px; color: #1C1917; outline: none; transition: border-color 0.15s; background: white; }
 .input:focus { border-color: #7C5C3B; box-shadow: 0 0 0 2px rgba(124,92,59,0.15); }
 .input::placeholder { color: #C4B8B0; }
-.qty-btn { display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 50%; border: 1px solid #D6CFC8; color: #1C1917; transition: background 0.15s; cursor: pointer; }
+.qty-btn { display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 50%; border: 1px solid #D6CFC8; color: #1C1917; transition: background 0.15s; cursor: pointer; background: white; }
 .qty-btn:hover { background: #F5F0E8; }
 </style>
