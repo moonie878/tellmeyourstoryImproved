@@ -91,8 +91,7 @@ export async function generateCoverPDF(options: CoverOptions): Promise<Blob> {
 
   // ── Calculate dimensions ────────────────────────────────────────────────────
   const spineIn   = pageCount * PPI_60LB
-  const totalWIn  = TRIM_W_IN * 2 + spineIn + BLEED_IN * 2
-  const totalHIn  = TRIM_H_IN + BLEED_IN * 2
+ 
  // Use Lulu's exact dimensions if provided, otherwise calculate
   const totalW = luluWidth || inToMm(TRIM_W_IN * 2 + pageCount * PPI_60LB + BLEED_IN * 2)
   const totalH = luluHeight || inToMm(TRIM_H_IN + BLEED_IN * 2)
