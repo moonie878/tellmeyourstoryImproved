@@ -8,22 +8,22 @@ import { EBGaramondBoldItalic } from '../fonts/EBGaramond-BoldItalic'
 
 // ─── Bleed ────────────────────────────────────────────────────────────
 // Blurb requires 3mm bleed on all sides for print
-const BLEED = 3
+const BLEED = 0
 
 // ─── Page dimensions — 6x9 inch + bleed ──────────────────────────────
-const PW = 152.4 + BLEED * 2  // 158.4mm
-const PH = 228.6 + BLEED * 2  // 234.6mm
+const PW = 152.4   // 158.4mm
+const PH = 228.6   // 234.6mm
 
 // ─── Margins (offset inward from bleed edge) ──────────────────────────
-const RECTO_INNER  = BLEED + 22
-const RECTO_OUTER  = BLEED + 16
-const RECTO_TOP    = BLEED + 20
-const RECTO_BOTTOM = BLEED + 18
+const RECTO_INNER  =  22
+const RECTO_OUTER  =  16
+const RECTO_TOP    =  20
+const RECTO_BOTTOM =  18
 
-const VERSO_INNER  = BLEED + 22
-const VERSO_OUTER  = BLEED + 16
-const VERSO_TOP    = BLEED + 20
-const VERSO_BOTTOM = BLEED + 18
+const VERSO_INNER  =  22
+const VERSO_OUTER  =  16
+const VERSO_TOP    =  20
+const VERSO_BOTTOM =  18
 
 // ─── Typography ───────────────────────────────────────────────────────
 const TITLE_SIZE       = 22
