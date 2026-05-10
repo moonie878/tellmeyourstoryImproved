@@ -8,6 +8,8 @@ const app = express()
 
 const PORT = process.env.PORT || 3000
 const FRONTEND_URL = process.env.FRONTEND_URL
+const LULU_API_URL  = 'https://api.lulu.com'
+const LULU_AUTH_URL = 'https://api.lulu.com/auth/realms/glasstree/protocol/openid-connect/token'
 
 if (!process.env.STRIPE_SECRET_KEY) {
   throw new Error('Missing STRIPE_SECRET_KEY')
@@ -248,6 +250,102 @@ app.post('/verify-tribute-payment', async (req, res) => {
   }
 })
 
+app.post('/lulu-shipping-cost', async (req, res) => {
+  try {
+    const token = await getLuluAccessToken()
+ 
+    const response = await fetch(`${LULU_API_URL}/print-job-cost-calculations/`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type':  'application/json',
+      },
+      body: JSON.stringify(req.body),
+    })
+ 
+    const data = await response.json()
+    res.status(response.status).json(data)
+ 
+  } catch (err) {
+    console.error('Lulu shipping cost error:', err.message)
+    res.status(500).json({ error: 'Failed to calculate shipping cost' })
+  }
+})
+ 
+// ─── Create print job ─────────────────────────────────────────────────────────
+ 
+app.post('/lulu-print-job', async (req, res) => {
+  try {
+    const token = await getLuluAccessToken()
+ 
+    const response = await fetch(`${LULU_API_URL}/print-jobs/`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type':  'application/json',
+      },
+      body: JSON.stringify(req.body),
+    })
+ 
+    const data = await response.json()
+ 
+    if (!response.ok) {
+      console.error('Lulu print job error:', JSON.stringify(data))
+    } else {
+      console.log('Lulu print job created:', data.id)
+    }
+ 
+    res.status(response.status).json(data)
+ 
+  } catch (err) {
+    console.error('Lulu print job error:', err.message)
+    res.status(500).json({ error: 'Failed to create print job' })
+  }
+})
+ 
+// ─── Get print job status ─────────────────────────────────────────────────────
+ 
+app.get('/lulu-print-job-status/:id', async (req, res) => {
+  try {
+    const token = await getLuluAccessToken()
+ 
+    const response = await fetch(`${LULU_API_URL}/print-jobs/${req.params.id}/`, {
+      headers: { 'Authorization': `Bearer ${token}` },
+    })
+ 
+    const data = await response.json()
+    res.status(response.status).json({
+      status:                  data.status?.name || 'UNKNOWN',
+      tracking_id:             data.tracking_id,
+      tracking_url:            data.tracking_url,
+      estimated_shipping_date: data.estimated_shipping_date,
+    })
+ 
+  } catch (err) {
+    console.error('Lulu status error:', err.message)
+    res.status(500).json({ error: 'Failed to get print job status' })
+  }
+})
+ 
+// ─── Cancel print job ─────────────────────────────────────────────────────────
+ 
+app.post('/lulu-print-job-cancel/:id', async (req, res) => {
+  try {
+    const token = await getLuluAccessToken()
+ 
+    const response = await fetch(`${LULU_API_URL}/print-jobs/${req.params.id}/`, {
+      method:  'DELETE',
+      headers: { 'Authorization': `Bearer ${token}` },
+    })
+ 
+    res.status(response.status).json({ cancelled: response.ok })
+ 
+  } catch (err) {
+    console.error('Lulu cancel error:', err.message)
+    res.status(500).json({ error: 'Failed to cancel print job' })
+  }
+})
+
 app.post('/create-checkout-session', async (req, res) => {
   try {
     const { priceId, userId, storyType, projectId, purchaseType } = req.body
@@ -303,4 +401,27 @@ async function verifyTurnstileToken(token, remoteIp) {
   })
 
   return response.json()
+}
+
+async function getLuluAccessToken() {
+  const credentials = Buffer.from(
+    `${process.env.LULU_CLIENT_KEY}:${process.env.LULU_CLIENT_SECRET}`
+  ).toString('base64')
+ 
+  const response = await fetch(LULU_AUTH_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type':  'application/x-www-form-urlencoded',
+      'Authorization': `Basic ${credentials}`,
+    },
+    body: 'grant_type=client_credentials',
+  })
+ 
+  if (!response.ok) {
+    const text = await response.text()
+    throw new Error(`Lulu auth failed: ${response.status} ${text}`)
+  }
+ 
+  const data = await response.json()
+  return data.access_token
 }
