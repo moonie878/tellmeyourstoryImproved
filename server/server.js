@@ -452,7 +452,7 @@ app.post('/lulu-cover-dimensions', async (req, res) => {
   try {
     const token = await getLuluAccessToken()
 
-    const response = await fetch(`${LULU_API_URL}/print-jobs/cover-dimensions/`, {
+    const response = await fetch(`${LULU_API_URL}/cover-dimensions/`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,
