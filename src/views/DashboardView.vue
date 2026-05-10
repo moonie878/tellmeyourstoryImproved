@@ -411,7 +411,7 @@ async function startPrintOrder(story: any) {
     })
     const dims = await dimsResponse.json()
 
-
+console.log('Cover dims from Lulu:', dims.width, dims.height)
     // 3. Generate cover PDF blob
     const coverBlob = await generateCoverPDF({
       title: storyTitle,
