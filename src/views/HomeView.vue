@@ -117,7 +117,7 @@
             </div>
             <h3 class="feature-title">Order a printed hardback</h3>
             <p class="feature-desc">
-              Turn any completed story into a beautifully printed 6×9 softcover book — professionally printed and shipped directly to your door. From £34.98 including UK delivery.
+              Turn any completed story into a beautifully printed 6×9 softcover book — professionally printed and shipped directly to your door. From £29.98 including UK delivery.
             </p>
             <div class="feature-tag">Printed by Lulu Press • Ships in 10–14 days</div>
           </div>
@@ -188,7 +188,7 @@
                 <li>Professional print quality</li>
                 <li>QR codes printed in the book</li>
                 <li>Shipped UK-wide</li>
-                <li>From £34.98 inc. delivery</li>
+                <li>From £29.98 inc. delivery</li>
               </ul>
               <div class="new-badge">Now available</div>
             </div>

@@ -175,7 +175,68 @@
         </p>
       </div>
     </section>
+<!-- ── Printed Book callout ──────────────────────────────────────── -->
+<section class="px-5 pb-8 sm:px-8">
+  <div class="mx-auto max-w-6xl">
+    <div class="overflow-hidden rounded-3xl border border-[#E8DDD0] bg-white">
+      <div class="grid md:grid-cols-2">
 
+        <!-- Left — info -->
+        <div class="p-8 sm:p-10">
+          <p class="eyebrow">Physical keepsake</p>
+          <h2 class="mt-3 font-display text-2xl font-bold text-[#1C1917] sm:text-3xl">
+            Order a Printed Book
+          </h2>
+          <p class="mt-3 text-sm leading-7 text-[#5C534E]">
+            Turn any completed story into a professionally printed 6×9 softcover keepsake book — the same beautiful design as the digital version, physically printed and shipped to your door.
+          </p>
+          <ul class="mt-5 space-y-2">
+            <li v-for="f in printedBookFeatures" :key="f" class="flex items-start gap-2 text-sm text-[#3C3530]">
+              <span class="mt-0.5 flex-shrink-0 text-[#7C5C3B]">✓</span>
+              {{ f }}
+            </li>
+          </ul>
+          <div class="mt-6 flex flex-wrap items-center gap-4">
+            <router-link
+              to="/dashboard"
+              class="rounded-full bg-[#1C1917] px-6 py-3 text-sm font-semibold text-white transition hover:opacity-90"
+            >
+              Order your printed book
+            </router-link>
+            <div>
+              <p class="text-2xl font-bold text-[#1C1917]">£34.98</p>
+              <p class="text-xs text-[#8C847E]">Includes UK shipping</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right — dark details -->
+        <div class="bg-[#1C1917] p-8 sm:p-10">
+          <p class="text-[10px] font-medium uppercase tracking-[0.2em] text-[#9C7C5C]">
+            What's in the book
+          </p>
+          <div class="mt-5 space-y-5">
+            <div v-for="step in printedBookSteps" :key="step.title" class="flex items-start gap-4">
+              <div class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-[#2C2420] text-sm">
+                {{ step.icon }}
+              </div>
+              <div>
+                <p class="text-sm font-semibold text-[#E8DDD0]">{{ step.title }}</p>
+                <p class="mt-0.5 text-xs leading-5 text-[#6C6460]">{{ step.desc }}</p>
+              </div>
+            </div>
+          </div>
+          <div class="mt-8 border-t border-[#2C2420] pt-6">
+            <p class="text-xs text-[#5C534E]">
+              Printed by Lulu Press · Royal Mail 2nd Class · Delivered in 10–14 days · Available on all paid tiers
+            </p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
     <!-- ── Tribute Video callout ──────────────────────────────────────── -->
     <section class="px-5 pb-8 sm:px-8">
       <div class="mx-auto max-w-6xl">
@@ -288,11 +349,29 @@ useSeo({
   description: 'Start free with no time limit. Unlock a beautifully designed keepsake book or video when you\'re ready. One-time payment — no subscription, no renewal.',
 })
 
+const printedBookFeatures = [
+  'Professionally printed 6×9 softcover',
+  'Chapters, layouts and cover image',
+  'QR codes printed next to voice answers',
+  'Family scan to hear their voice',
+  'Shipped UK-wide via Royal Mail',
+  'Available on all paid tiers',
+]
+
+const printedBookSteps = [
+  { icon: '📖', title: 'Beautiful typeset layout', desc: 'The same design as your digital PDF — chapters, drop caps, quote pages, and photos.' },
+  { icon: '🎙️', title: 'QR codes for voice recordings', desc: 'Each voice answer gets a QR code printed next to it. Family scan to hear their loved one speak.' },
+  { icon: '📦', title: 'Printed and shipped', desc: 'Professionally printed by Lulu Press and shipped directly to your door in 10–14 days.' },
+  { icon: '💷', title: 'From £34.98 including delivery', desc: 'One copy or multiple — £29.99 per book plus £4.99 UK shipping.' },
+]
+
 const writingRows = [
   { label: 'Start any story type', free: true, book: true, photos: true, all: true, premium: true },
   { label: 'All 100 guided questions', free: true, book: true, photos: true, all: true, premium: true },
   { label: 'Autosave', free: true, book: true, photos: true, all: true, premium: true },
   { label: 'Add photos per answer', free: true, book: true, photos: true, all: true, premium: true },
+  { label: 'Voice recording per answer 🎙️', free: true, book: true, photos: true, all: true, premium: true },
+  { label: 'QR code in printed book', free: true, book: true, photos: true, all: true, premium: true },
 ]
 
 const bookRows = [
@@ -310,6 +389,7 @@ const extrasRows = [
   { label: 'All story types unlocked', free: false, book: false, photos: false, all: true, premium: true },
   { label: 'Video export (MP4)', free: false, book: false, photos: false, all: false, premium: true },
   { label: 'Tribute video creator', free: false, book: false, photos: false, all: false, premium: true },
+  { label: 'Order printed book (£34.98)', free: false, book: true, photos: true, all: true, premium: true },
 ]
 
 const mobilePlans = [
@@ -339,6 +419,9 @@ const mobilePlans = [
       'PDF keepsake export',
       'Chapters, drop caps & layouts',
       'Design themes',
+      // Add to Keepsake Book, Book + Photos, All Stories features:
+'Voice recording per answer 🎙️',
+'Order a printed book from £29.98',
     ],
   },
   {
@@ -352,6 +435,9 @@ const mobilePlans = [
       'Everything in Keepsake Book',
       'Photos included in PDF',
       'Cover image',
+      // Add to Keepsake Book, Book + Photos, All Stories features:
+'Voice recording per answer 🎙️',
+'Order a printed book from £29.98',
     ],
   },
   {
@@ -365,6 +451,9 @@ const mobilePlans = [
       'All story types unlocked',
       'Unlimited stories',
       'Text-only PDF exports',
+      // Add to Keepsake Book, Book + Photos, All Stories features:
+'Voice recording per answer 🎙️',
+'Order a printed book from £29.98',
     ],
   },
   {
@@ -381,6 +470,9 @@ const mobilePlans = [
       'Portrait & Open Spread formats',
       'Video export (MP4)',
       'Tribute video creator (free)',
+       'Voice recording per answer 🎙️',  // add
+    'QR codes in printed book',         // add
+    'Order a printed book from £29.98', // add
     ],
   },
 ]
@@ -430,6 +522,14 @@ const faqs = [
     q: 'What is the Tribute Video Creator?',
     a: 'The Tribute Video Creator is a separate tool for creating memorial videos for someone you\'ve lost. Upload up to 30 photos, choose music, and generate a full HD MP4. It\'s free to preview and £9.99 to download — no account needed. It\'s included free with Premium Keepsake.',
   },
+  {
+  q: 'Can I record voice answers?',
+  a: 'Yes — tap the microphone button on any question and speak naturally. Your words appear live as you talk, no typing needed. The audio recording is saved alongside your written answer. Perfect for elderly parents who find typing difficult.',
+},
+{
+  q: 'What are QR codes in the printed book?',
+  a: 'When you record a voice answer, a small QR code is printed next to that answer in your physical book. Family members scan it with their phone camera and hear your loved one\'s voice reading that memory — years from now, at Christmas, a birthday, or whenever they open the book.',
+},
 ]
 </script>
 
