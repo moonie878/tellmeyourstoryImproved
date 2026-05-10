@@ -409,14 +409,9 @@ async function startPrintOrder(story: any) {
     })
 
     // 4. Get last Stripe payment ID for this user (as external reference)
-    const { data: payments } = await supabase
-      .from('payments')
-      .select('stripe_payment_intent_id')
-      .eq('user_id', user.id)
-      .order('created_at', { ascending: false })
-      .limit(1)
+    
 
-    const stripePaymentId = payments?.[0]?.stripe_payment_intent_id || `tmys-${story.id}`
+    const stripePaymentId = `tmys-${story.id}-${Date.now()}`
 
     // 5. Open modal with both blobs ready
     printModalData.value = {
