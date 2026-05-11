@@ -66,12 +66,7 @@
             </router-link>
           </div>
 
-          <!-- Turnstile hidden -->
-          <div class="invisible h-0 overflow-hidden">
-            <TurnstileWidget v-model="turnstileToken" />
-          </div>
-
-          <p v-if="turnstileError" class="text-sm text-red-600">{{ turnstileError }}</p>
+          
           <p v-if="errorMessage" class="text-sm text-red-600">{{ errorMessage }}</p>
 
           <button
@@ -105,8 +100,7 @@
 import { ref } from 'vue'
 import { supabase } from '../lib/supabase'
 import { useRouter } from 'vue-router'
-import TurnstileWidget from '../components/legal/TurnstileWidget.vue'
-import { verifyTurnstile } from '../lib/turnstile'
+
 import { track } from '../lib/analytics'
 import { posthog } from '../lib/posthog'
 
@@ -116,8 +110,7 @@ const loading = ref(false)
 const googleLoading = ref(false)
 const errorMessage = ref('')
 const router = useRouter()
-const turnstileToken = ref('')
-const turnstileError = ref('')
+
 const slowConnection = ref(false)
 
 let slowTimer: ReturnType<typeof setTimeout> | null = null
@@ -139,7 +132,6 @@ async function handleGoogleLogin() {
 async function handleLogin() {
   loading.value = true
   errorMessage.value = ''
-  turnstileError.value = ''
   slowConnection.value = false
 
   slowTimer = setTimeout(() => {
@@ -147,15 +139,6 @@ async function handleLogin() {
   }, 3000)
 
   try {
-    const isHuman = await verifyTurnstile(turnstileToken.value)
-
-    if (!isHuman) {
-      turnstileError.value = 'Please try again — verification failed.'
-      loading.value = false
-      clearSlowTimer()
-      return
-    }
-
     const { error } = await supabase.auth.signInWithPassword({
       email: email.value,
       password: password.value,
@@ -166,7 +149,6 @@ async function handleLogin() {
     } else {
       email.value = ''
       password.value = ''
-      turnstileToken.value = ''
 
       track('login_completed', { source: 'login_page' })
 
