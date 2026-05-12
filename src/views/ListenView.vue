@@ -1,6 +1,9 @@
 <template>
   <div class="min-h-screen bg-[#F5F0E8] flex items-center justify-center px-4 py-12">
-
+<!-- Temporary debug — remove after fixing -->
+<div v-if="debugInfo" class="fixed bottom-0 left-0 right-0 bg-black text-white text-xs p-3 z-50 break-all">
+  {{ debugInfo }}
+</div>
     <!-- Loading -->
     <div v-if="loading" class="text-center">
       <div class="mx-auto h-10 w-10 animate-spin rounded-full border-4 border-stone-200 border-t-[#7C5C3B]" />
@@ -140,6 +143,8 @@ const isPlaying   = ref(false)
 const currentTime = ref(0)
 const duration    = ref(0)
 
+const debugInfo = ref('')
+
 const audioRef       = ref<HTMLAudioElement | null>(null)
 const progressBarRef = ref<HTMLDivElement | null>(null)
 
@@ -182,6 +187,14 @@ function seekAudio(event: MouseEvent) {
 onMounted(async () => {
   const id = route.params.id as string
   loading.value = true
+
+    const { data: rec, error } = await supabase
+  .from('voice_recordings')
+  .select('*')
+  .eq('id', id)
+  .single()
+
+debugInfo.value = `ID: ${id} | rec: ${rec ? 'found' : 'null'} | error: ${error?.message || 'none'}`
 
   try {
     // Query 1 — get the recording
