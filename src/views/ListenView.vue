@@ -188,14 +188,6 @@ onMounted(async () => {
   const id = route.params.id as string
   loading.value = true
 
-    const { data: rec, error } = await supabase
-  .from('voice_recordings')
-  .select('*')
-  .eq('id', id)
-  .single()
-
-debugInfo.value = `ID: ${id} | rec: ${rec ? 'found' : 'null'} | error: ${error?.message || 'none'}`
-
   try {
     // Query 1 — get the recording
     const { data: rec, error } = await supabase
@@ -203,6 +195,9 @@ debugInfo.value = `ID: ${id} | rec: ${rec ? 'found' : 'null'} | error: ${error?.
       .select('*')
       .eq('id', id)
       .single()
+
+    // Debug — remove after fixing
+    debugInfo.value = `ID: ${id} | rec: ${rec ? 'found' : 'null'} | error: ${error?.message || 'none'}`
 
     console.log('Recording fetch:', rec, error)
 
