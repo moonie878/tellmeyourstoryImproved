@@ -181,30 +181,52 @@ function seekAudio(event: MouseEvent) {
 
 onMounted(async () => {
   const id = route.params.id as string
+  loading.value = true
 
-  // Fetch recording
-  const { data: rec } = await supabase
-    .from('voice_recordings')
-    .select('*, story_projects(title, story_type)')
-    .eq('id', id)
-    .single()
+  try {
+    // Query 1 — get the recording
+    const { data: rec, error } = await supabase
+      .from('voice_recordings')
+      .select('*')
+      .eq('id', id)
+      .single()
 
-  if (rec) {
+    console.log('Recording fetch:', rec, error)
+
+    if (!rec) {
+      loading.value = false
+      return
+    }
+
     recording.value = rec
-    storyTitle.value = rec.story_projects?.title || 'Someone special'
 
-    // Fetch the section question
+    // Query 2 — get the story title separately
+    if (rec.project_id) {
+      const { data: project } = await supabase
+        .from('story_projects')
+        .select('title, story_type')
+        .eq('id', rec.project_id)
+        .single()
+
+      if (project) storyTitle.value = project.title || 'Someone special'
+    }
+
+    // Query 3 — get the question
     if (rec.section_id) {
       const { data: section } = await supabase
         .from('story_sections')
         .select('question')
         .eq('id', rec.section_id)
         .single()
+
       if (section) question.value = section.question
     }
-  }
 
-  loading.value = false
+  } catch (err) {
+    console.error('Listen page error:', err)
+  } finally {
+    loading.value = false
+  }
 })
 </script>
 
