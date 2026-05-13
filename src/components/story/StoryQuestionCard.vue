@@ -315,9 +315,10 @@ async function loadExistingRecording() {
 }
 
 async function generateQRCode(recordingId: string) {
-  await nextTick()
-  await nextTick() // second tick ensures canvas is mounted after existingRecording is set
-  if (!qrCanvas.value) return
+  if (!qrCanvas.value) {
+    console.warn('QR canvas not available')
+    return
+  }
   const url = `${window.location.origin}/listen/${recordingId}`
   try {
     await QRCode.toCanvas(qrCanvas.value, url, {
@@ -330,12 +331,14 @@ async function generateQRCode(recordingId: string) {
   }
 }
 
-// Add this watcher — fires whenever existingRecording is set
+// flush: 'post' runs AFTER Vue has updated the DOM
+// so qrCanvas is guaranteed to be mounted when this fires
 watch(
   () => existingRecording.value?.id,
   async (id) => {
     if (id) await generateQRCode(id)
-  }
+  },
+  { flush: 'post' }
 )
 
 // ── Voice recording flow ──────────────────────────────────────────────────────
