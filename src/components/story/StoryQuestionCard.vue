@@ -311,14 +311,12 @@ async function toggleQR() {
 async function loadExistingRecording() {
   if (!props.section || !props.projectId) return
   existingRecording.value = await voiceRecording.loadRecording(props.section.id, props.projectId)
-  if (existingRecording.value) {
-    await nextTick()
-    generateQRCode(existingRecording.value.id)
-  }
+  // watcher on existingRecording.value?.id will handle QR generation
 }
 
 async function generateQRCode(recordingId: string) {
   await nextTick()
+  await nextTick() // second tick ensures canvas is mounted after existingRecording is set
   if (!qrCanvas.value) return
   const url = `${window.location.origin}/listen/${recordingId}`
   try {
@@ -331,6 +329,14 @@ async function generateQRCode(recordingId: string) {
     console.error('QR generation error:', err)
   }
 }
+
+// Add this watcher — fires whenever existingRecording is set
+watch(
+  () => existingRecording.value?.id,
+  async (id) => {
+    if (id) await generateQRCode(id)
+  }
+)
 
 // ── Voice recording flow ──────────────────────────────────────────────────────
 
@@ -354,8 +360,7 @@ async function handleVoiceToggle() {
 
     if (saved) {
       existingRecording.value = saved
-      await nextTick()
-      generateQRCode(saved.id)
+      await nextTick()     
     }
   } else {
     // Start recording
