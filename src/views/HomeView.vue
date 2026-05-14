@@ -54,12 +54,12 @@
               />
               <!-- Floating badge — updated to voice -->
               <div class="hero-badge">
-                <span class="hero-badge-icon">🎙️</span>
-                <div>
-                  <p class="hero-badge-title">Speak your answers</p>
-                  <p class="hero-badge-sub">Voice saved in the book</p>
-                </div>
-              </div>
+  <span class="hero-badge-icon">🎙️</span>
+  <div>
+    <p class="hero-badge-title">Nan's voice playing</p>
+    <p class="hero-badge-sub">Scan the QR in the book</p>
+  </div>
+</div>
             </div>
           </div>
 
@@ -75,8 +75,8 @@
 
         <div class="section-label text-center text-[#9C7C5C]">What makes us different</div>
         <h2 class="section-title mt-3 text-center text-white" style="margin-left:auto;margin-right:auto;">
-          Features no other memory app has
-        </h2>
+  The memory book that speaks
+</h2>
 
         <div class="mt-12 grid gap-5 md:grid-cols-3 md:gap-6">
 
@@ -351,6 +351,75 @@
     </section>
 
     <!-- ═══════════════════════════════════════ -->
+<!-- TESTIMONIALS                           -->
+<!-- ═══════════════════════════════════════ -->
+<section class="bg-[#FAF7F4] px-5 py-16 sm:px-8 sm:py-20">
+  <div class="mx-auto max-w-6xl">
+
+    <div class="section-label text-center">What families say</div>
+    <h2 class="section-title mt-3 text-center">
+      Stories that matter, kept forever
+    </h2>
+
+    <div class="mt-12 grid gap-5 md:grid-cols-3 md:gap-6">
+
+      <div class="testimonial-card">
+        <div class="testimonial-stars">★★★★★</div>
+        <p class="testimonial-quote">
+          "I did this with my mum last Christmas. She spoke her answers out loud and hearing her voice come back through the book is something I'll treasure forever."
+        </p>
+        <div class="testimonial-author">
+          <div class="testimonial-avatar">S</div>
+          <div>
+            <p class="testimonial-name">Sarah</p>
+            <p class="testimonial-detail">Created Mum's Story</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="testimonial-card testimonial-card-accent">
+        <div class="testimonial-stars" style="color:#C4A882;">★★★★★</div>
+        <p class="testimonial-quote" style="color:#E8E0D8;">
+          "My dad passed six months after we did this. I scan the QR codes in the book whenever I miss him. I can hear him laugh. Nothing could replace that."
+        </p>
+        <div class="testimonial-author">
+          <div class="testimonial-avatar" style="background:#7C5C3B;">J</div>
+          <div>
+            <p class="testimonial-name" style="color:white;">James</p>
+            <p class="testimonial-detail" style="color:#8C847E;">Created Dad's Story</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="testimonial-card">
+        <div class="testimonial-stars">★★★★★</div>
+        <p class="testimonial-quote">
+          "My nan is 87 and doesn't use technology. She just spoke her answers and I typed along. The finished book made her cry. It made all of us cry."
+        </p>
+        <div class="testimonial-author">
+          <div class="testimonial-avatar">R</div>
+          <div>
+            <p class="testimonial-name">Rachel</p>
+            <p class="testimonial-detail">Created Grandma's Story</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Trust bar -->
+    <div class="mt-12 flex flex-wrap items-center justify-center gap-x-8 gap-y-4 text-sm text-[#8C847E]">
+      <span class="flex items-center gap-2"><span class="text-[#7C5C3B]">✓</span> Free to start</span>
+      <span class="flex items-center gap-2"><span class="text-[#7C5C3B]">✓</span> No subscription</span>
+      <span class="flex items-center gap-2"><span class="text-[#7C5C3B]">✓</span> Voice recording included</span>
+      <span class="flex items-center gap-2"><span class="text-[#7C5C3B]">✓</span> Printed book available</span>
+      <span class="flex items-center gap-2"><span class="text-[#7C5C3B]">✓</span> QR codes in every book</span>
+    </div>
+
+  </div>
+</section>
+
+    <!-- ═══════════════════════════════════════ -->
     <!-- STORY TYPES                            -->
     <!-- ═══════════════════════════════════════ -->
     <section class="bg-white px-5 py-16 sm:px-8 sm:py-20">
@@ -359,16 +428,23 @@
         <div class="section-label">Story types</div>
         <h2 class="section-title mt-3">Made for the people who matter most</h2>
 
-        <div class="mt-10 grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-4 lg:grid-cols-6">
-          <div v-for="type in storyTypes" :key="type.id" class="story-type-chip">
-            <span class="story-type-emoji">{{ type.emoji }}</span>
-            <span class="story-type-label">{{ type.label }}</span>
-          </div>
-        </div>
+        <div class="mt-10 grid grid-cols-2 gap-3 sm:grid-cols-3 md:gap-4 lg:grid-cols-6">
+  <router-link
+    v-for="type in storyTypes"
+    :key="type.id"
+    to="/register"
+    @click="trackStart"
+    class="story-type-chip"
+  >
+    <span class="story-type-emoji">{{ type.emoji }}</span>
+    <span class="story-type-label">{{ type.label }}</span>
+    <span class="story-type-sub">{{ type.sub }}</span>
+  </router-link>
+</div>
 
-        <p class="mt-8 text-sm text-[#8C847E]">
-          Each story type has its own set of guided questions — thoughtfully written for that person and their life.
-        </p>
+<p class="mt-8 text-sm text-[#8C847E]">
+  Each story type has its own set of guided questions — thoughtfully written for that person and their life.
+</p>
       </div>
     </section>
 
@@ -413,7 +489,8 @@ useSeo({
   title: 'Tell Me Your Story | Voice-recorded life story keepsake books',
   description:
     'Answer guided questions about someone you love — by typing or speaking. Voice recordings are saved with QR codes in your printed keepsake book, so family can hear their stories forever.',
-  schema: {
+  canonical: 'https://tellmeyourstory.uk', 
+    schema: {
     '@context': 'https://schema.org',
     '@graph': [
       {
@@ -451,12 +528,12 @@ useSeo({
 })
 
 const storyTypes = [
-  { id: 'mum', emoji: '💛', label: "Mum's Story" },
-  { id: 'dad', emoji: '💙', label: "Dad's Story" },
-  { id: 'grandma', emoji: '🌸', label: "Grandma's Story" },
-  { id: 'grandad', emoji: '⭐', label: "Grandad's Story" },
-  { id: 'life', emoji: '📖', label: 'Life Story' },
-  { id: 'couple', emoji: '💞', label: 'Couple Story' },
+  { id: 'mum',     emoji: '💛', label: "Mum's Story",     sub: 'Her life in her words' },
+  { id: 'dad',     emoji: '💙', label: "Dad's Story",     sub: 'His story, preserved' },
+  { id: 'grandma', emoji: '🌸', label: "Grandma's Story", sub: 'Memories worth keeping' },
+  { id: 'grandad', emoji: '⭐', label: "Grandad's Story", sub: 'Stories to pass down' },
+  { id: 'life',    emoji: '📖', label: 'Life Story',      sub: 'Your own journey' },
+  { id: 'couple',  emoji: '💞', label: 'Couple Story',    sub: 'A love story told together' },
 ]
 
 function trackStart() { track('upgrade_clicked', { source: 'homepage' }) }
@@ -557,10 +634,28 @@ h1 { font-family: 'Playfair Display', Georgia, serif; }
 .why-sub { font-size: 16px; color: #8C847E; }
 
 /* ── Story type chips ───────────────────── */
-.story-type-chip { display: flex; flex-direction: column; align-items: center; gap: 8px; background: #F5F0E8; border: 1px solid #E8E0D8; border-radius: 16px; padding: 20px 12px; text-align: center; transition: border-color 0.2s, background 0.2s; }
-.story-type-chip:hover { border-color: #7C5C3B; background: #F0E8DC; }
-.story-type-emoji { font-size: 24px; }
-.story-type-label { font-size: 12px; font-weight: 500; color: #5C534E; line-height: 1.3; }
+.story-type-chip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  background: #F5F0E8;
+  border: 1px solid #E8E0D8;
+  border-radius: 20px;
+  padding: 24px 16px;
+  text-align: center;
+  text-decoration: none;
+  transition: border-color 0.2s, background 0.2s, transform 0.15s;
+  cursor: pointer;
+}
+.story-type-chip:hover {
+  border-color: #7C5C3B;
+  background: #F0E8DC;
+  transform: translateY(-2px);
+}
+.story-type-emoji { font-size: 28px; }
+.story-type-label { font-size: 13px; font-weight: 600; color: #1C1917; line-height: 1.3; }
+.story-type-sub   { font-size: 11px; color: #9C7C5C; line-height: 1.4; margin-top: 2px; }
 
 /* ── Pricing ────────────────────────────── */
 .price-card { background: white; border: 1px solid #E8E0D8; border-radius: 24px; padding: 28px 24px 32px; display: flex; flex-direction: column; }
@@ -586,4 +681,14 @@ h1 { font-family: 'Playfair Display', Georgia, serif; }
 /* ── Final CTA ──────────────────────────── */
 .final-cta { background: linear-gradient(160deg, #2C2420 0%, #1C1917 100%); position: relative; overflow: hidden; }
 .format-card-dark .format-title { color: white; }
+
+/* ── Testimonials ───────────────────────── */
+.testimonial-card { background: white; border: 1px solid #E8E0D8; border-radius: 24px; padding: 28px 28px 32px; display: flex; flex-direction: column; gap: 16px; }
+.testimonial-card-accent { background: #1C1917; border-color: #2C2420; }
+.testimonial-stars { font-size: 14px; color: #7C5C3B; letter-spacing: 2px; }
+.testimonial-quote { font-size: 14px; line-height: 1.8; color: #5C534E; font-style: italic; flex: 1; }
+.testimonial-author { display: flex; align-items: center; gap: 12px; margin-top: auto; }
+.testimonial-avatar { width: 36px; height: 36px; border-radius: 50%; background: #E8E0D8; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 600; color: #5C534E; flex-shrink: 0; }
+.testimonial-name { font-size: 13px; font-weight: 600; color: #1C1917; }
+.testimonial-detail { font-size: 11px; color: #9C7C5C; margin-top: 1px; }
 </style>
