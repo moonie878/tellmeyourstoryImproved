@@ -172,7 +172,54 @@
             This QR code will appear in your printed book next to this answer
           </p>
         </div>
-
+<!-- Writing assist -->
+<div class="mt-4">
+  <button
+    v-if="section?.answer?.trim().length > 20 && !writingAssistLoading"
+    type="button"
+    @click="fetchWritingAssist"
+    class="inline-flex items-center gap-1.5 rounded-full border border-stone-300 bg-white px-4 py-2 text-xs font-medium text-stone-700 transition hover:bg-stone-50"
+  >
+    <span>✨</span>
+    <span>Help me expand this answer</span>
+  </button>
+ 
+  <div v-if="writingAssistLoading" class="mt-3 flex items-center gap-2 text-xs text-stone-400">
+    <span class="inline-block h-3 w-3 animate-spin rounded-full border-2 border-stone-300 border-t-stone-600" />
+    Getting suggestions…
+  </div>
+ 
+  <p v-if="writingAssistError" class="mt-2 text-xs text-red-500">
+    {{ writingAssistError }}
+  </p>
+ 
+  <div
+    v-if="writingAssistSuggestions.length"
+    class="mt-3 rounded-2xl border border-amber-100 bg-amber-50 p-4"
+  >
+    <p class="text-xs font-medium text-amber-800">
+      💡 Things to think about adding
+    </p>
+    <p class="mt-1 text-[10px] text-amber-600">
+      These are just prompts — keep writing in your own words
+    </p>
+    <ul class="mt-3 space-y-2">
+      <li
+        v-for="(suggestion, i) in writingAssistSuggestions"
+        :key="i"
+        class="text-xs leading-5 text-amber-900"
+      >
+        {{ suggestion }}
+      </li>
+    </ul>
+    <button
+      @click="writingAssistSuggestions = []"
+      class="mt-3 text-[10px] text-amber-600 hover:underline"
+    >
+      Dismiss
+    </button>
+  </div>
+</div>
         <!-- Highlight -->
         <div class="mt-4">
           <button
@@ -295,6 +342,10 @@ const existingCurrentTime = ref(0)
 const existingDuration    = ref(0)
 const existingProgress    = ref(0)
 
+const writingAssistLoading = ref(false)
+const writingAssistSuggestions = ref<string[]>([])
+const writingAssistError = ref('')
+
 const voiceRecording = useVoiceRecording()
 
 // ── Load existing recording when section changes ──────────────────────────────
@@ -312,6 +363,38 @@ async function loadExistingRecording() {
   if (!props.section || !props.projectId) return
   existingRecording.value = await voiceRecording.loadRecording(props.section.id, props.projectId)
   // watcher on existingRecording.value?.id will handle QR generation
+}
+
+async function fetchWritingAssist() {
+  if (!props.section?.question || !props.section?.answer?.trim()) return
+ 
+  writingAssistLoading.value = true
+  writingAssistSuggestions.value = []
+  writingAssistError.value = ''
+ 
+  try {
+    const response = await fetch('https://tellmeyourstoryimproved.onrender.com/writing-assist', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        question: props.section.question,
+        answer: props.section.answer,
+      }),
+    })
+ 
+    const data = await response.json()
+ 
+    if (!response.ok || !data.suggestions) {
+      writingAssistError.value = 'Could not load suggestions. Please try again.'
+      return
+    }
+ 
+    writingAssistSuggestions.value = data.suggestions
+  } catch {
+    writingAssistError.value = 'Could not reach the writing assistant. Please try again.'
+  } finally {
+    writingAssistLoading.value = false
+  }
 }
 
 async function generateQRCode(recordingId: string) {
@@ -428,6 +511,8 @@ watch(
   async () => {
     if (voiceRecording.isRecording.value) voiceRecording.cancelRecording()
     existingRecording.value = null
+  writingAssistSuggestions.value = []
+writingAssistError.value = ''
     isPlayingExisting.value = false
     await nextTick()
     textareaRef.value?.focus()

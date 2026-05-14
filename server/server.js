@@ -243,6 +243,82 @@ app.post('/create-print-checkout', async (req, res) => {
   }
 })
 
+// ─── ADD THIS BLOCK to server.js ──────────────────────────────────────────────
+// Place it just before the error handler at the bottom (before app.use((err...))
+// Also add GEMINI_API_KEY to your Render environment variables
+
+app.post('/writing-assist', async (req, res) => {
+  try {
+    const { question, answer } = req.body
+
+    if (!question || !answer || answer.trim().length < 5) {
+      return res.status(400).json({ error: 'Question and answer are required' })
+    }
+
+    if (!process.env.GEMINI_API_KEY) {
+      return res.status(500).json({ error: 'Writing assist not configured' })
+    }
+
+    const prompt = `You are a gentle, warm writing coach helping someone write their life story.
+
+The person is answering this question in their keepsake book:
+"${question}"
+
+Their answer so far:
+"${answer}"
+
+Your job is to help them think deeper and expand on what they've written — but NOT to write it for them. Give them 3 short, specific prompts that encourage them to add more in their own words.
+
+Rules:
+- Each prompt should be a gentle question or suggestion, 1 sentence max
+- Reference something specific from their answer
+- Keep the tone warm and personal, like a caring friend asking follow-up questions
+- Do NOT rewrite their answer or add content for them
+- Return ONLY a JSON array of 3 strings, no other text
+
+Example format:
+["You mentioned X — can you tell us a bit more about what that was like?", "What do you remember most vividly about that time?", "How did that experience shape who you became?"]`
+
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: {
+            temperature: 0.7,
+            maxOutputTokens: 300,
+          },
+        }),
+      }
+    )
+
+    if (!response.ok) {
+      const err = await response.text()
+      console.error('Gemini error:', err)
+      return res.status(500).json({ error: 'Writing assist failed' })
+    }
+
+    const data = await response.json()
+    const raw = data.candidates?.[0]?.content?.parts?.[0]?.text || '[]'
+
+    // Strip markdown code fences if Gemini wraps in ```json
+    const cleaned = raw.replace(/```json|```/g, '').trim()
+    const suggestions = JSON.parse(cleaned)
+
+    if (!Array.isArray(suggestions)) {
+      return res.status(500).json({ error: 'Unexpected response format' })
+    }
+
+    res.json({ suggestions })
+
+  } catch (err) {
+    console.error('Writing assist error:', err.message)
+    res.status(500).json({ error: 'Writing assist failed' })
+  }
+})
+
 app.post('/create-tribute-checkout', async (req, res) => {
   try {
     const { name, successUrl, cancelUrl } = req.body
