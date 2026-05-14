@@ -262,7 +262,7 @@ app.post('/writing-assist', async (req, res) => {
       return res.status(400).json({ error: 'Question and answer are required' })
     }
 
-    if (!process.env.GEMINI_API_KEY) {
+    if (!process.env.GROQ_API_KEY) {
       return res.status(500).json({ error: 'Writing assist not configured' })
     }
 
