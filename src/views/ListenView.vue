@@ -175,14 +175,16 @@ function onTimeUpdate() {
 }
 
 function onLoadedMetadata() {
-  if (audioRef.value) duration.value = audioRef.value.duration
+  if (audioRef.value && isFinite(audioRef.value.duration)) {
+    duration.value = audioRef.value.duration
+  }
 }
 
 function seekAudio(event: MouseEvent) {
   if (!audioRef.value || !progressBarRef.value) return
-  const rect    = progressBarRef.value.getBoundingClientRect()
+  const rect = progressBarRef.value.getBoundingClientRect()
   const percent = (event.clientX - rect.left) / rect.width
-  audioRef.value.currentTime = percent * duration.value
+  audioRef.value.currentTime = percent * duration.value  // ✅ uses the ref
 }
 
 onMounted(async () => {
