@@ -243,6 +243,13 @@ app.post('/create-print-checkout', async (req, res) => {
   }
 })
 
+app.get('/list-models', async (req, res) => {
+  const response = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models?key=${process.env.GEMINI_API_KEY}`
+  )
+  const data = await response.json()
+  res.json(data)
+})
 // ─── ADD THIS BLOCK to server.js ──────────────────────────────────────────────
 // Place it just before the error handler at the bottom (before app.use((err...))
 // Also add GEMINI_API_KEY to your Render environment variables
@@ -280,7 +287,7 @@ Example format:
 ["You mentioned X — can you tell us a bit more about what that was like?", "What do you remember most vividly about that time?", "How did that experience shape who you became?"]`
 
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${process.env.GEMINI_API_KEY}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
