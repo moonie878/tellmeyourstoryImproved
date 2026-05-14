@@ -154,12 +154,11 @@ const progressPercent = computed(() =>
 )
 
 function formatTime(seconds: number) {
-  if (!seconds || !isFinite(seconds) || isNaN(seconds)) return '0:00'
+  if (isNaN(seconds) || !isFinite(seconds) || seconds < 0) return '0:00'
   const m = Math.floor(seconds / 60)
   const s = Math.floor(seconds % 60)
   return `${m}:${s.toString().padStart(2, '0')}`
 }
-
 function togglePlay() {
   if (!audioRef.value) return
   if (isPlaying.value) {
@@ -189,6 +188,7 @@ function seekAudio(event: MouseEvent) {
 onMounted(async () => {
   const id = route.params.id as string
   loading.value = true
+   
 
   try {
     // Query 1 — get the recording
@@ -209,6 +209,10 @@ onMounted(async () => {
     }
 
     recording.value = rec
+
+    if (rec.duration_seconds) {
+  duration.value = rec.duration_seconds
+}
 
     // Query 2 — get the story title separately
     if (rec.project_id) {
