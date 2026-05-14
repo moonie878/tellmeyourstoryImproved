@@ -280,7 +280,7 @@ Example format:
 ["You mentioned X — can you tell us a bit more about what that was like?", "What do you remember most vividly about that time?", "How did that experience shape who you became?"]`
 
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${process.env.GEMINI_API_KEY}`
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
