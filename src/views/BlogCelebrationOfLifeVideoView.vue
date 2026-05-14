@@ -227,6 +227,7 @@ const comparisonRows = [
 useSeo({
   title: 'How to Create a Celebration of Life Video | Tell Me Your Story',
   description: 'A complete guide to creating a celebration of life video — what to include, how to make it personal and joyful, and how to show it at the service. Free to preview, £9.99 to download.',
+   canonical: 'https://tellmeyourstory.uk/blog/celebration-of-life-video',
   schema: {
     '@context': 'https://schema.org',
     '@graph': [

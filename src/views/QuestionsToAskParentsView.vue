@@ -159,6 +159,7 @@ import { useSeo } from '../composables/useSeo'
 useSeo({
   title: 'Questions to Ask Your Dad Before It\'s Too Late | Tell Me Your Story',
   description: '80 meaningful questions to ask your dad about his childhood, work, fatherhood, values, and legacy — across every chapter of his life. Start the conversation today.',
+  canonical: 'https://tellmeyourstory.uk/questions-to-ask-your-dad',
   schema: {
     '@context': 'https://schema.org',
     '@graph': [

@@ -197,6 +197,7 @@ import { useSeo } from '../composables/useSeo'
 useSeo({
   title: 'Free Memorial Slideshow Maker UK | Tell Me Your Story',
   description: 'Create a beautiful memorial slideshow for a funeral or celebration of life. Free to preview, £9.99 to download. No account needed — upload photos, add music, ready in minutes.',
+  canonical: 'https://tellmeyourstory.uk/blog/free-memorial-slideshow-maker',
   schema: {
     '@context': 'https://schema.org',
     '@graph': [

@@ -168,6 +168,7 @@ import { useSeo } from '../composables/useSeo'
 useSeo({
   title: 'Questions to Ask Your Grandparents Before It\'s Too Late | Tell Me Your Story',
   description: '80 meaningful questions to ask your grandparents about their childhood, history, family traditions, values, and legacy. Preserve their stories before they\'re lost.',
+  canonical: 'https://tellmeyourstory.uk/questions-to-ask-your-grandparents',
   schema: {
     '@context': 'https://schema.org',
     '@graph': [

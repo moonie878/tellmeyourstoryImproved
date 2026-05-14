@@ -346,6 +346,7 @@ import { useSeo } from '../composables/useSeo'
 useSeo({
   title: 'What to Do When a Parent Won\'t Open Up | Tell Me Your Story',
   description: 'Most parents don\'t volunteer their stories. Here are 12 practical approaches to gently unlock even the most private parent — without pressure or awkwardness.',
+  canonical: 'https://tellmeyourstory.uk/blog/what-to-do-when-a-parent-wont-open-up',
   schema: {
     '@context': 'https://schema.org',
     '@graph': [

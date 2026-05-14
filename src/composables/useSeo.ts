@@ -3,6 +3,7 @@ import { onMounted, onUnmounted, watchEffect } from 'vue'
 type SeoOptions = {
   title: string
   description: string
+   canonical?: string  // add this
   ogImage?: string
   schema?: object
 }
@@ -12,6 +13,17 @@ export function useSeo(options: SeoOptions) {
 
  const apply = () => {
   document.title = options.title
+
+// Canonical
+if (options.canonical) {
+  let canonicalTag = document.querySelector('link[rel="canonical"]')
+  if (!canonicalTag) {
+    canonicalTag = document.createElement('link')
+    canonicalTag.setAttribute('rel', 'canonical')
+    document.head.appendChild(canonicalTag)
+  }
+  canonicalTag.setAttribute('href', options.canonical)
+}
 
   // Meta description
   let descriptionTag = document.querySelector('meta[name="description"]')

@@ -159,6 +159,7 @@ import { useSeo } from '../composables/useSeo'
 useSeo({
   title: 'Questions to Ask Your Mum Before It\'s Too Late | Tell Me Your Story',
   description: '80 meaningful questions to ask your mum about her childhood, memories, motherhood, values, and legacy — across every chapter of her life. Start the conversation today.',
+  canonical: 'https://tellmeyourstory.uk/questions-to-ask-your-mum',
   schema: {
     '@context': 'https://schema.org',
     '@graph': [

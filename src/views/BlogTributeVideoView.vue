@@ -308,6 +308,7 @@ import { useSeo } from '../composables/useSeo'
 useSeo({
   title: 'How to Make a Memorial Tribute Video for a Funeral | Tell Me Your Story',
   description: 'A step-by-step guide to creating a beautiful memorial tribute video for a funeral or celebration of life. Free to preview, ready in minutes — no account needed.',
+  canonical: 'https://tellmeyourstory.uk/blog/how-to-make-a-memorial-tribute-video',
   schema: {
     '@context': 'https://schema.org',
     '@graph': [

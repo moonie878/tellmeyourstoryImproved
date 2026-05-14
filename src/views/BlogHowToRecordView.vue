@@ -283,6 +283,7 @@ import { useSeo } from '../composables/useSeo'
 useSeo({
   title: 'How to Record Your Parent\'s Life Story | Tell Me Your Story',
   description: 'A practical guide to capturing your parent\'s memories — what equipment you need, how to get them talking, and how to turn recordings into a keepsake your family can keep forever.',
+  canonical: 'https://tellmeyourstory.uk/blog/how-to-record-your-parents-life-story',
   schema: {
     '@context': 'https://schema.org',
     '@graph': [
