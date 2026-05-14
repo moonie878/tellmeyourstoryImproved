@@ -286,39 +286,36 @@ Rules:
 Example format:
 ["You mentioned X — can you tell us a bit more about what that was like?", "What do you remember most vividly about that time?", "How did that experience shape who you became?"]`
 
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent?key=${process.env.GEMINI_API_KEY}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: {
-            temperature: 0.7,
-            maxOutputTokens: 300,
-          },
-        }),
-      }
-    )
+    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${process.env.GROQ_API_KEY}`,
+  },
+  body: JSON.stringify({
+    model: 'llama-3.1-8b-instant',
+    messages: [{ role: 'user', content: prompt }],
+    temperature: 0.7,
+    max_tokens: 300,
+  }),
+})
 
-    if (!response.ok) {
-      const err = await response.text()
-      console.error('Gemini error:', err)
-      return res.status(500).json({ error: 'Writing assist failed' })
-    }
+if (!response.ok) {
+  const err = await response.text()
+  console.error('Groq error:', err)
+  return res.status(500).json({ error: 'Writing assist failed' })
+}
 
-    const data = await response.json()
-    const raw = data.candidates?.[0]?.content?.parts?.[0]?.text || '[]'
+const data = await response.json()
+const raw = data.choices?.[0]?.message?.content || '[]'
+const cleaned = raw.replace(/```json|```/g, '').trim()
+const suggestions = JSON.parse(cleaned)
 
-    // Strip markdown code fences if Gemini wraps in ```json
-    const cleaned = raw.replace(/```json|```/g, '').trim()
-    const suggestions = JSON.parse(cleaned)
+if (!Array.isArray(suggestions)) {
+  return res.status(500).json({ error: 'Unexpected response format' })
+}
 
-    if (!Array.isArray(suggestions)) {
-      return res.status(500).json({ error: 'Unexpected response format' })
-    }
-
-    res.json({ suggestions })
+res.json({ suggestions })
 
  } catch (err) {
   console.error('Writing assist error:', err.message, err.stack)
