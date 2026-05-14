@@ -1,9 +1,9 @@
 <template>
   <div class="min-h-screen bg-[#F5F0E8] flex items-center justify-center px-4 py-12">
 <!-- Temporary debug — remove after fixing -->
-<div v-if="debugInfo" class="fixed bottom-0 left-0 right-0 bg-black text-white text-xs p-3 z-50 break-all">
+<!-- <div v-if="debugInfo" class="fixed bottom-0 left-0 right-0 bg-black text-white text-xs p-3 z-50 break-all">
   {{ debugInfo }}
-</div>
+</div> -->
     <!-- Loading -->
     <div v-if="loading" class="text-center">
       <div class="mx-auto h-10 w-10 animate-spin rounded-full border-4 border-stone-200 border-t-[#7C5C3B]" />

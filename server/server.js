@@ -313,10 +313,10 @@ Example format:
 
     res.json({ suggestions })
 
-  } catch (err) {
-    console.error('Writing assist error:', err.message)
-    res.status(500).json({ error: 'Writing assist failed' })
-  }
+ } catch (err) {
+  console.error('Writing assist error:', err.message, err.stack)
+  res.status(500).json({ error: err.message }) // return real error temporarily
+}
 })
 
 app.post('/create-tribute-checkout', async (req, res) => {
