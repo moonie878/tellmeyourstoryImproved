@@ -174,15 +174,28 @@
         </div>
 <!-- Writing assist -->
 <div class="mt-4">
-  <button
-    v-if="section?.answer?.trim().length > 20 && !writingAssistLoading"
-    type="button"
-    @click="fetchWritingAssist"
-    class="inline-flex items-center gap-1.5 rounded-full border border-stone-300 bg-white px-4 py-2 text-xs font-medium text-stone-700 transition hover:bg-stone-50"
-  >
-    <span>✨</span>
-    <span>Help me expand this answer</span>
-  </button>
+ <!-- Show "start" button when answer is short/empty -->
+<button
+  v-if="!section?.answer?.trim() || section.answer.trim().length <= 20"
+  type="button"
+  @click="fetchWritingAssist('start')"
+  :disabled="writingAssistLoading"
+  class="inline-flex items-center gap-1.5 rounded-full border border-stone-300 bg-white px-4 py-2 text-xs font-medium text-stone-700 transition hover:bg-stone-50 disabled:opacity-50"
+>
+  <span>💡</span>
+  <span>Help me start this answer</span>
+</button>
+
+<!-- Show "expand" button when answer has content -->
+<button
+  v-else-if="!writingAssistLoading"
+  type="button"
+  @click="fetchWritingAssist('expand')"
+  class="inline-flex items-center gap-1.5 rounded-full border border-stone-300 bg-white px-4 py-2 text-xs font-medium text-stone-700 transition hover:bg-stone-50"
+>
+  <span>✨</span>
+  <span>Help me expand this answer</span>
+</button>
  
   <div v-if="writingAssistLoading" class="mt-3 flex items-center gap-2 text-xs text-stone-400">
     <span class="inline-block h-3 w-3 animate-spin rounded-full border-2 border-stone-300 border-t-stone-600" />
@@ -365,30 +378,29 @@ async function loadExistingRecording() {
   // watcher on existingRecording.value?.id will handle QR generation
 }
 
-async function fetchWritingAssist() {
-  if (!props.section?.question || !props.section?.answer?.trim()) return
- 
+async function fetchWritingAssist(mode: 'start' | 'expand') {
+  if (!props.section?.question) return
+
   writingAssistLoading.value = true
   writingAssistSuggestions.value = []
   writingAssistError.value = ''
- 
+
   try {
     const response = await fetch('https://tellmeyourstoryimproved.onrender.com/writing-assist', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         question: props.section.question,
-        answer: props.section.answer,
+        answer: props.section.answer || '',
+        mode,
       }),
     })
- 
+
     const data = await response.json()
- 
     if (!response.ok || !data.suggestions) {
       writingAssistError.value = 'Could not load suggestions. Please try again.'
       return
     }
- 
     writingAssistSuggestions.value = data.suggestions
   } catch {
     writingAssistError.value = 'Could not reach the writing assistant. Please try again.'

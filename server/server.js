@@ -256,7 +256,7 @@ app.get('/list-models', async (req, res) => {
 
 app.post('/writing-assist', async (req, res) => {
   try {
-    const { question, answer } = req.body
+    const { question, answer, mode } = req.body
 
     if (!question || !answer || answer.trim().length < 5) {
       return res.status(400).json({ error: 'Question and answer are required' })
@@ -266,7 +266,21 @@ app.post('/writing-assist', async (req, res) => {
       return res.status(500).json({ error: 'Writing assist not configured' })
     }
 
-    const prompt = `You are a gentle, warm writing coach helping someone write their life story.
+   const prompt = mode === 'start'
+  ? `You are a gentle, warm writing coach helping someone write their life story.
+
+They are answering this question in their keepsake book:
+"${question}"
+
+They haven't written anything yet. Give them 3 short, specific prompts to help them get started — but NOT to write it for them.
+
+Rules:
+- Each prompt is a gentle question or memory jogger, 1 sentence max
+- Keep the tone warm and personal, like a caring friend helping them think
+- Do NOT write their answer for them
+- Return ONLY a JSON array of 3 strings, no other text`
+
+  : `You are a gentle, warm writing coach helping someone write their life story.
 
 The person is answering this question in their keepsake book:
 "${question}"
@@ -274,17 +288,12 @@ The person is answering this question in their keepsake book:
 Their answer so far:
 "${answer}"
 
-Your job is to help them think deeper and expand on what they've written — but NOT to write it for them. Give them 3 short, specific prompts that encourage them to add more in their own words.
+Give them 3 short, specific prompts to help them add more in their own words. Reference something specific from their answer. Do NOT rewrite it for them.
 
 Rules:
-- Each prompt should be a gentle question or suggestion, 1 sentence max
-- Reference something specific from their answer
-- Keep the tone warm and personal, like a caring friend asking follow-up questions
-- Do NOT rewrite their answer or add content for them
-- Return ONLY a JSON array of 3 strings, no other text
-
-Example format:
-["You mentioned X — can you tell us a bit more about what that was like?", "What do you remember most vividly about that time?", "How did that experience shape who you became?"]`
+- Each prompt is a gentle question or suggestion, 1 sentence max
+- Warm and personal tone
+- Return ONLY a JSON array of 3 strings, no other text`
 
     const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
   method: 'POST',
