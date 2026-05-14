@@ -69,6 +69,8 @@
                 </svg>
                 {{ voiceRecording.isRecording.value ? 'Stop' : existingRecording ? 'Re-record' : 'Speak' }}
               </button>
+              </div>
+          </div>
               <!-- QR toggle -->
 <div v-if="existingRecording" class="mt-3 flex items-center justify-between border-t border-green-200 pt-3">
   <div>
@@ -86,8 +88,7 @@
     />
   </button>
 </div>
-            </div>
-          </div>
+           
 
           <textarea
             ref="textareaRef"
