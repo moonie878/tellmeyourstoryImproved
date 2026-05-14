@@ -9,7 +9,7 @@
       <div class="hero-circle"></div>
 
       <div class="relative mx-auto max-w-6xl">
-        <div class="grid items-end gap-12 md:grid-cols-2 md:gap-16">
+        <div class="grid items-center gap-12 md:grid-cols-2 md:gap-16">
 
           <!-- Left — text -->
           <div class="hero-text pb-12 text-center md:text-left">
@@ -560,9 +560,9 @@ function trackPricing(plan: string) { track('upgrade_clicked', { source: 'home_p
 h1 { font-family: 'Playfair Display', Georgia, serif; }
 .check { color: #7C5C3B; font-weight: 600; }
 
-.hero-image-wrap { position: relative; z-index: 1; }
+.hero-image-wrap { position: relative; z-index: 1; width: 100%; }
 .hero-image-frame { position: relative; display: inline-block; }
-.hero-img { width: 100%; max-width: 440px; border-radius: 24px; box-shadow: 0 32px 80px rgba(0,0,0,0.14), 0 8px 24px rgba(0,0,0,0.08); }
+.hero-img { width: 100%; max-width: 560px; border-radius: 24px; box-shadow: 0 32px 80px rgba(0,0,0,0.14), 0 8px 24px rgba(0,0,0,0.08); }
 .hero-badge { position: absolute; bottom: 24px; left: -20px; display: flex; align-items: center; gap: 10px; background: white; border-radius: 16px; padding: 10px 16px; box-shadow: 0 8px 32px rgba(0,0,0,0.12); font-size: 13px; max-width: 200px; }
 .hero-badge-icon { font-size: 22px; flex-shrink: 0; }
 .hero-badge-title { font-weight: 600; color: #1C1917; line-height: 1.3; }
