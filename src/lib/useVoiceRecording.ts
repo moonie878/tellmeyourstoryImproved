@@ -99,6 +99,13 @@ export function useVoiceRecording() {
         liveTranscript.value = baseText + interim
       }
 
+      recognition.onend = () => {
+  // Auto-restart if still recording (handles iOS 60s timeout)
+  if (isRecording.value && recognition) {
+    try { recognition.start() } catch {}
+  }
+}
+
       recognition.onerror = (e: any) => {
         console.error('Speech recognition error:', e.error)
       }
@@ -223,12 +230,17 @@ export function useVoiceRecording() {
   // ── Delete a recording ────────────────────────────────────────────────────
 
   async function deleteRecording(sectionId: string, projectId: string): Promise<void> {
-    await supabase
-      .from('voice_recordings')
-      .delete()
-      .eq('section_id', sectionId)
-      .eq('project_id', projectId)
+  const existing = await loadRecording(sectionId, projectId)
+  if (existing?.audio_url) {
+    const path = existing.audio_url.split('/voice-recordings/')[1]
+    if (path) await supabase.storage.from('voice-recordings').remove([path])
   }
+  await supabase
+    .from('voice_recordings')
+    .delete()
+    .eq('section_id', sectionId)
+    .eq('project_id', projectId)
+}
 
   // ── Cancel without saving ─────────────────────────────────────────────────
 
