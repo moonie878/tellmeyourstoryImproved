@@ -524,11 +524,15 @@ watch(
   async () => {
     if (voiceRecording.isRecording.value) voiceRecording.cancelRecording()
     existingRecording.value = null
-  writingAssistSuggestions.value = []
-writingAssistError.value = ''
+    writingAssistSuggestions.value = []
+    writingAssistError.value = ''
     isPlayingExisting.value = false
     await nextTick()
     textareaRef.value?.focus()
+
+    // Wait for the out-in transition to complete (250ms) before loading
+    // so the canvas is guaranteed to be mounted when the QR watcher fires
+    await new Promise(resolve => setTimeout(resolve, 280))
     await loadExistingRecording()
   },
   { immediate: true }
