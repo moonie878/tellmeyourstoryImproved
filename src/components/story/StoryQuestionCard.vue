@@ -445,10 +445,8 @@ async function handleVoiceToggle() {
     const result = await voiceRecording.stopRecording()
     if (!result || !props.section) return
 
-    // Emit the final transcript as the answer
     emit('update-answer', result.transcript)
 
-    // Save audio to Supabase
     const saved = await voiceRecording.saveRecording(
       result.blob,
       result.transcript,
@@ -459,10 +457,18 @@ async function handleVoiceToggle() {
 
     if (saved) {
       existingRecording.value = saved
-      await nextTick()     
+      await nextTick()
     }
   } else {
-    // Start recording
+    // If re-recording — stop existing playback and pause audio
+    if (existingAudioRef.value) {
+      existingAudioRef.value.pause()
+      isPlayingExisting.value = false
+    }
+
+    // Wait for any existing recognition to fully release
+    await new Promise(resolve => setTimeout(resolve, 600))
+
     await voiceRecording.startRecording(props.section?.answer || '')
   }
 }
