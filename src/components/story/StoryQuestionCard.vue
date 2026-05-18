@@ -465,11 +465,14 @@ async function handleVoiceToggle() {
       existingAudioRef.value.pause()
       isPlayingExisting.value = false
     }
+if (existingRecording.value) {
+    await new Promise(resolve => setTimeout(resolve, 600))
+  }
 
-    // Wait for any existing recognition to fully release
-    
+  await voiceRecording.startRecording(props.section?.answer || '')
+    // Wait for any existing recognition to fully release   
 
-    await voiceRecording.startRecording(props.section?.answer || '')
+   
   }
 }
 

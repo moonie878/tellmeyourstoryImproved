@@ -45,99 +45,72 @@ export function useVoiceRecording() {
   // ── Start recording ───────────────────────────────────────────────────────
 
   async function startRecording(existingAnswer: string = '') {
-    // Clean up any existing recognition instance before starting
-  if (recognition) {
-    try { recognition.abort() } catch {}
-    recognition = null
-    await new Promise(resolve => setTimeout(resolve, 500)) // let it fully close
+  error.value = ''
+  liveTranscript.value = existingAnswer
+  baseText = existingAnswer
+
+  // Request microphone
+  let stream: MediaStream
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+  } catch {
+    error.value = 'Microphone access denied. Please allow microphone access and try again.'
+    return false
   }
-  if (mediaRecorder) {
-    try { mediaRecorder.stop() } catch {}
-    mediaRecorder?.stream?.getTracks().forEach(t => t.stop())
-    mediaRecorder = null
-    audioChunks = []
+
+  // ── MediaRecorder — captures audio blob ────────────────────────────────
+  audioChunks = []
+  const mimeType = MediaRecorder.isTypeSupported('audio/webm')
+    ? 'audio/webm'
+    : MediaRecorder.isTypeSupported('audio/ogg')
+    ? 'audio/ogg'
+    : 'audio/mp4'
+
+  mediaRecorder = new MediaRecorder(stream, { mimeType })
+
+  mediaRecorder.ondataavailable = (e) => {
+    if (e.data.size > 0) audioChunks.push(e.data)
   }
- 
 
-    error.value = ''
-    liveTranscript.value = existingAnswer
-    baseText = existingAnswer
+  mediaRecorder.start(100)
+  recordingStart = Date.now()
 
-    // Request microphone
-    let stream: MediaStream
-    try {
-      stream = await navigator.mediaDevices.getUserMedia({ audio: true })
-    } catch {
-      error.value = 'Microphone access denied. Please allow microphone access and try again.'
-      return false
-    }
+  // ── Web Speech API — live transcription ────────────────────────────────
+  if (SpeechRecognition) {
+    recognition = new SpeechRecognition()
+    recognition.continuous     = true
+    recognition.interimResults = true
+    recognition.lang           = 'en-GB'
 
-    // ── MediaRecorder — captures audio blob ────────────────────────────────
-    audioChunks = []
-    const mimeType = MediaRecorder.isTypeSupported('audio/webm')
-      ? 'audio/webm'
-      : MediaRecorder.isTypeSupported('audio/ogg')
-      ? 'audio/ogg'
-      : 'audio/mp4'
-
-    mediaRecorder = new MediaRecorder(stream, { mimeType })
-
-    mediaRecorder.ondataavailable = (e) => {
-      if (e.data.size > 0) audioChunks.push(e.data)
-    }
-
-    mediaRecorder.start(100) // collect chunks every 100ms
-    recordingStart = Date.now()
-
-    // ── Web Speech API — live transcription ────────────────────────────────
-    if (SpeechRecognition) {
-      recognition = new SpeechRecognition()
-      recognition.continuous     = true
-      recognition.interimResults = true
-      recognition.lang            = 'en-GB'
-
-      recognition.onresult = (event: any) => {
-        let interim = ''
-        let final   = ''
-
-        for (let i = event.resultIndex; i < event.results.length; i++) {
-          const text = event.results[i][0].transcript
-          if (event.results[i].isFinal) {
-            final += text + ' '
-          } else {
-            interim += text
-          }
+    recognition.onresult = (event: any) => {
+      let interim = ''
+      let final   = ''
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const text = event.results[i][0].transcript
+        if (event.results[i].isFinal) {
+          final += text + ' '
+        } else {
+          interim += text
         }
-
-        if (final) baseText = baseText + final
-        liveTranscript.value = baseText + interim
       }
-
-      recognition.onerror = (e: any) => {
-  console.error('Speech recognition error:', e.error)
-  // Don't restart on network errors — it causes an infinite loop
-  if (e.error === 'network') {
-    recognition = null
-  }
-}
-
-recognition.onend = () => {
-  // Auto-restart only if still recording AND no network error
-  if (isRecording.value && recognition) {
-    try { recognition.start() } catch {}
-  }
-}
-
-      try {
-        recognition.start()
-      } catch (err) {
-        console.error('Could not start speech recognition:', err)
-      }
+      if (final) baseText = baseText + final
+      liveTranscript.value = baseText + interim
     }
 
-    isRecording.value = true
-    return true
+    recognition.onerror = (e: any) => {
+      console.error('Speech recognition error:', e.error)
+    }
+
+    try {
+      recognition.start()
+    } catch (err) {
+      console.error('Could not start speech recognition:', err)
+    }
   }
+
+  isRecording.value = true
+  return true
+}
 
   // ── Stop recording — returns audio blob + final transcript ────────────────
 
