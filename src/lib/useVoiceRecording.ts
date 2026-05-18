@@ -55,7 +55,10 @@ export function useVoiceRecording() {
     try { mediaRecorder.stop() } catch {}
     mediaRecorder?.stream?.getTracks().forEach(t => t.stop())
     mediaRecorder = null
+    audioChunks = []
   }
+  await new Promise(resolve => setTimeout(resolve, 500)) // let it fully close
+
     error.value = ''
     liveTranscript.value = existingAnswer
     baseText = existingAnswer
