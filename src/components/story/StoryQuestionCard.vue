@@ -467,7 +467,7 @@ async function handleVoiceToggle() {
     }
 
     // Wait for any existing recognition to fully release
-    await new Promise(resolve => setTimeout(resolve, 400))
+    
 
     await voiceRecording.startRecording(props.section?.answer || '')
   }
