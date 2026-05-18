@@ -219,6 +219,42 @@
           <p class="mt-2 text-sm leading-6 text-stone-600">Turn completed stories into polished keepsakes you can save, print, and share.</p>
         </div>
       </section>
+      <!-- ── Share section ── -->
+<section class="rounded-[2rem] border border-stone-200 bg-white p-5 shadow-sm sm:p-6 md:p-8">
+  <div class="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+    <div>
+      <p class="text-xs font-medium uppercase tracking-[0.25em] text-stone-500">Share</p>
+      <h2 class="mt-2 text-xl font-bold text-stone-900">Know someone who'd love this?</h2>
+      <p class="mt-2 max-w-lg text-sm leading-6 text-stone-600">
+        If Tell Me Your Story means something to you, sharing it with one person who has an elderly parent or grandparent is the kindest thing you can do.
+      </p>
+    </div>
+    <div class="flex flex-shrink-0 flex-col gap-2 sm:items-end">
+      <button
+        @click="handleShare"
+        class="inline-flex items-center gap-2 rounded-full bg-[#7C5C3B] px-5 py-3 text-sm font-medium text-white transition hover:opacity-90"
+      >
+        <span>🤍</span>
+        <span>Share Tell Me Your Story</span>
+      </button>
+      <div class="flex gap-2">
+        <button
+          @click="shareWhatsApp('dashboard')"
+          class="inline-flex items-center gap-1.5 rounded-full border border-stone-200 bg-white px-4 py-2 text-xs font-medium text-stone-700 transition hover:bg-stone-50"
+        >
+          <span>💬</span> WhatsApp
+        </button>
+        <button
+          @click="shareEmail('dashboard')"
+          class="inline-flex items-center gap-1.5 rounded-full border border-stone-200 bg-white px-4 py-2 text-xs font-medium text-stone-700 transition hover:bg-stone-50"
+        >
+          <span>✉️</span> Email
+        </button>
+      </div>
+      <p v-if="shareResult" class="text-xs text-green-600">{{ shareResult }}</p>
+    </div>
+  </div>
+</section>
     </div>
 
     <!-- Print Order Modal -->
@@ -248,6 +284,7 @@ import { STORY_TYPES } from '../data/storyTypes'
 import { useStoryTrueBookExport } from '../composables/useTrueBookExport'
 import { generateCoverPDF } from '../lib/generateCoverPDF'
 import PrintOrderModal from '../components/print/PrintOrderModal.vue'
+import { useShare } from '../composables/useShare'
 
 // ─── State ────────────────────────────────────────────────────────────────────
 
@@ -274,6 +311,18 @@ const { exportTrueBookAsBlob } = useStoryTrueBookExport()
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL as string
 const POD_PACKAGE_ID = '0600X0900.FC.STD.PB.060UW444.MXX'
+
+const shareResult    = ref<string>('')
+
+const { share, shareWhatsApp, shareEmail } = useShare()
+
+async function handleShare() {
+  const result = await share('dashboard')
+  if (result === 'copied') {
+    shareResult.value = 'Link copied to clipboard!'
+    setTimeout(() => shareResult.value = '', 3000)
+  }
+}
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 

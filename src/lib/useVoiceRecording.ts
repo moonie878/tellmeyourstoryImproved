@@ -45,6 +45,17 @@ export function useVoiceRecording() {
   // ── Start recording ───────────────────────────────────────────────────────
 
   async function startRecording(existingAnswer: string = '') {
+    // Clean up any existing recognition instance before starting
+  if (recognition) {
+    try { recognition.abort() } catch {}
+    recognition = null
+    await new Promise(resolve => setTimeout(resolve, 300)) // let it fully close
+  }
+  if (mediaRecorder) {
+    try { mediaRecorder.stop() } catch {}
+    mediaRecorder?.stream?.getTracks().forEach(t => t.stop())
+    mediaRecorder = null
+  }
     error.value = ''
     liveTranscript.value = existingAnswer
     baseText = existingAnswer

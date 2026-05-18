@@ -298,7 +298,49 @@
       @tier3="upgradeAllText"
       @tier4="upgradeAllImages"
     />
-
+<!-- Share nudge — shown after 10 answers -->
+<Transition name="fade">
+  <div
+    v-if="showShareNudge"
+    class="mb-5 rounded-2xl border border-[#E8DDD0] bg-[#FAF7F4] px-5 py-4"
+  >
+    <div class="flex items-start justify-between gap-4">
+      <div class="flex-1">
+        <p class="text-sm font-medium text-[#1C1917]">
+          🤍 Know someone who should do this?
+        </p>
+        <p class="mt-1 text-xs leading-5 text-stone-500">
+          If this feels meaningful, share it with someone who has a parent or grandparent whose stories should be kept.
+        </p>
+        <div class="mt-3 flex flex-wrap gap-2">
+          <button
+            @click="handleShare"
+            class="inline-flex items-center gap-1.5 rounded-full bg-[#7C5C3B] px-4 py-2 text-xs font-medium text-white transition hover:opacity-90"
+          >
+            Share the site
+          </button>
+          <button
+            @click="shareWhatsApp('story_editor')"
+            class="inline-flex items-center gap-1.5 rounded-full border border-stone-200 bg-white px-3 py-2 text-xs font-medium text-stone-700 transition hover:bg-stone-50"
+          >
+            💬 WhatsApp
+          </button>
+          <button
+            @click="shareEmail('story_editor')"
+            class="inline-flex items-center gap-1.5 rounded-full border border-stone-200 bg-white px-3 py-2 text-xs font-medium text-stone-700 transition hover:bg-stone-50"
+          >
+            ✉️ Email
+          </button>
+          <p v-if="shareResult" class="self-center text-xs text-green-600">{{ shareResult }}</p>
+        </div>
+      </div>
+      <button
+        @click="showShareNudge = false"
+        class="mt-0.5 text-stone-400 hover:text-stone-600"
+      >✕</button>
+    </div>
+  </div>
+</Transition>
     <!-- Main editor -->
     <div class="grid gap-4 lg:grid-cols-[320px_minmax(0,1fr)] lg:gap-8">
       <div class="order-2 lg:order-1 lg:self-start">
@@ -429,6 +471,7 @@
 import { useStoryVideo } from '../composables/useStoryVideo'
 import TrueBookExportModal from '../components/story/TrueBookExportModal.vue'
 import { useStoryTrueBookExport } from '../composables/useTrueBookExport'
+import { useShare } from '../composables/useShare'
 
     const route = useRoute()
     const router = useRouter()
@@ -469,6 +512,18 @@ import { useStoryTrueBookExport } from '../composables/useTrueBookExport'
     const lastSavedAt = ref<Date | null>(null)
     const answerTextarea = ref<HTMLTextAreaElement | null>(null)
     const saveStatus = ref('')
+
+    const showShareNudge = ref(false)
+const shareResult    = ref('')
+const { share, shareWhatsApp, shareEmail } = useShare()
+
+async function handleShare() {
+  const result = await share('story_editor')
+  if (result === 'copied') {
+    shareResult.value = 'Link copied!'
+    setTimeout(() => shareResult.value = '', 3000)
+  }
+}
 
     const showVideoModal = ref(false)
 const { isGenerating: videoGenerating, progress: videoProgress,
@@ -658,6 +713,14 @@ watch(
        
       showMidwayUpgrade.value = true
       hasShownMidwayUpgrade.value = true
+    }
+  }
+)
+watch(
+  () => answeredSections.value,
+  (val, oldVal) => {
+    if (val >= 10 && oldVal < 10) {
+      showShareNudge.value = true
     }
   }
 )
@@ -1240,4 +1303,6 @@ async function handleTrueBookExport() {
         opacity: 0;
         transform: translateY(-8px);
     }
+    .fade-enter-active, .fade-leave-active { transition: opacity 0.3s ease; }
+.fade-enter-from, .fade-leave-to { opacity: 0; }
 </style>
