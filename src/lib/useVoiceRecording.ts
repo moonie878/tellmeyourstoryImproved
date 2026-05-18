@@ -49,7 +49,7 @@ export function useVoiceRecording() {
   if (recognition) {
     try { recognition.abort() } catch {}
     recognition = null
-    await new Promise(resolve => setTimeout(resolve, 300)) // let it fully close
+    await new Promise(resolve => setTimeout(resolve, 500)) // let it fully close
   }
   if (mediaRecorder) {
     try { mediaRecorder.stop() } catch {}
@@ -110,16 +110,20 @@ export function useVoiceRecording() {
         liveTranscript.value = baseText + interim
       }
 
-      recognition.onend = () => {
-  // Auto-restart if still recording (handles iOS 60s timeout)
+      recognition.onerror = (e: any) => {
+  console.error('Speech recognition error:', e.error)
+  // Don't restart on network errors — it causes an infinite loop
+  if (e.error === 'network') {
+    recognition = null
+  }
+}
+
+recognition.onend = () => {
+  // Auto-restart only if still recording AND no network error
   if (isRecording.value && recognition) {
     try { recognition.start() } catch {}
   }
 }
-
-      recognition.onerror = (e: any) => {
-        console.error('Speech recognition error:', e.error)
-      }
 
       try {
         recognition.start()
