@@ -215,7 +215,7 @@ export function useVoiceRecording() {
       .select('*')
       .eq('section_id', sectionId)
       .eq('project_id', projectId)
-      .single()
+      .maybeSingle()
 
     return data || null
   }
