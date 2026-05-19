@@ -435,7 +435,11 @@ async function generateQRCode(recordingId: string) {
 watch(
   () => existingRecording.value?.id,
   async (id) => {
-    if (id) await generateQRCode(id)
+    if (!id) return
+    // Wait two ticks — one for Vue to mount the canvas, one for the DOM to paint
+    await nextTick()
+    await nextTick()
+    await generateQRCode(id)
   },
   { flush: 'post' }
 )
