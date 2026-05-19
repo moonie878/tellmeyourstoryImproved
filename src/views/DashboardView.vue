@@ -123,7 +123,7 @@
               </div>
 
               <!-- Content -->
-<div class="flex flex-col p-5 sm:p-6">
+<div class="flex flex-col p-5 sm:p-6 min-w-0 overflow-hidden">
 
   <!-- Title + badge -->
   <div class="flex flex-wrap items-center gap-2">
