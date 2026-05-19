@@ -123,122 +123,126 @@
               </div>
 
               <!-- Content -->
-              <div class="p-5 sm:p-6">
-                <div class="flex flex-wrap items-center gap-2">
-                  <h3 class="text-xl font-semibold text-stone-900">{{ story.title }}</h3>
-                  <span v-if="hasAllStoriesAccess()" class="rounded-full bg-stone-900 px-3 py-1 text-xs font-medium text-white">All Stories</span>
-                  <span v-else-if="hasStoryAccess(story.story_type)" class="rounded-full bg-stone-200 px-3 py-1 text-xs font-medium text-stone-700">Unlocked</span>
-                  <span v-else class="rounded-full bg-amber-100 px-3 py-1 text-xs font-medium text-amber-700">Free Draft</span>
-                </div>
+<div class="flex flex-col p-5 sm:p-6">
 
-                <p class="mt-2 text-sm text-stone-500">
-                  {{ formatStoryType(story.story_type) }} • {{ formatDate(story.created_at) }}
-                </p>
+  <!-- Title + badge -->
+  <div class="flex flex-wrap items-center gap-2">
+    <h3 class="text-xl font-semibold text-stone-900">{{ story.title }}</h3>
+    <span v-if="hasAllStoriesAccess()" class="rounded-full bg-stone-900 px-2.5 py-0.5 text-xs font-medium text-white">All Stories</span>
+    <span v-else-if="hasStoryAccess(story.story_type)" class="rounded-full bg-stone-200 px-2.5 py-0.5 text-xs font-medium text-stone-700">Unlocked</span>
+    <span v-else class="rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-medium text-amber-700">Free Draft</span>
+  </div>
 
-                <div class="mt-5">
-                  <div class="flex items-center justify-between text-sm text-stone-600">
-                    <span>Progress</span>
-                    <span class="font-medium text-stone-900">{{ story.progress }}%</span>
-                  </div>
-                  <div class="mt-2 h-2 w-full rounded-full bg-stone-200">
-                    <div class="h-2 rounded-full bg-[#7C5C3B] transition-all" :style="{ width: `${story.progress}%` }" />
-                  </div>
-                </div>
+  <!-- Meta -->
+  <p class="mt-1.5 text-sm text-stone-500">{{ formatStoryType(story.story_type) }} • {{ formatDate(story.created_at) }}</p>
 
-                <div class="mt-4 space-y-1 text-sm text-stone-600">
-                  <p>
-                    Story access:
-                    <span v-if="hasStoryAccess(story.story_type)" class="font-medium text-green-600">Unlocked</span>
-                    <span v-else class="font-medium text-amber-600">Free draft</span>
-                  </p>
-                  <p>
-                    Export:
-                    <span v-if="canExportStory(story.story_type)" class="font-medium text-green-600">Unlocked</span>
-                    <span v-else class="font-medium text-amber-600">Locked</span>
-                  </p>
-                </div>
+  <!-- Progress -->
+  <div class="mt-4">
+    <div class="flex items-center justify-between text-xs text-stone-500">
+      <span>Progress</span>
+      <span class="font-medium text-stone-700">{{ story.progress }}%</span>
+    </div>
+    <div class="mt-1.5 h-1.5 w-full rounded-full bg-stone-200">
+      <div class="h-1.5 rounded-full bg-[#7C5C3B] transition-all" :style="{ width: `${story.progress}%` }" />
+    </div>
+  </div>
 
-                <p class="mt-4 text-sm leading-6 text-stone-600">
-                  {{ hasStoryAccess(story.story_type)
-                    ? `Keep building this story whenever you're ready, then turn it into a finished keepsake.`
-                    : `Keep writing for free, then upgrade when you're ready to create the finished keepsake.` }}
-                </p>
+  <!-- Access status -->
+  <div class="mt-3 flex gap-4 text-xs text-stone-500">
+    <span>
+      Story:
+      <span v-if="hasStoryAccess(story.story_type)" class="font-medium text-green-600">Unlocked</span>
+      <span v-else class="font-medium text-amber-600">Free draft</span>
+    </span>
+    <span>
+      Export:
+      <span v-if="canExportStory(story.story_type)" class="font-medium text-green-600">Unlocked</span>
+      <span v-else class="font-medium text-amber-600">Locked</span>
+    </span>
+  </div>
 
-                <!-- Action buttons -->
-                <div class="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-
-                  <button
-                    @click="openStory(story.id)"
-                    class="rounded-full bg-[#7C5C3B] px-4 py-3 text-sm font-medium text-white transition hover:opacity-90"
-                  >
-                    {{ hasStoryAccess(story.story_type) ? 'Continue' : 'Edit Draft' }}
-                  </button>
-
-                  <!-- Order Printed Book — shows for users with print access -->
-                  <button
-                    v-if="hasPrintAccess()"
-                    @click="startPrintOrder(story)"
-                    :disabled="generatingPrintId === story.id"
-                    class="rounded-full border border-[#7C5C3B] bg-white px-4 py-3 text-sm font-medium text-[#7C5C3B] transition hover:bg-[#F5F0E8] disabled:opacity-50"
-                  >
-                   {{ generatingPrintId === story.id ? 'Preparing…' : '📖 Order Printed Book — £29.98' }}
-                  </button>
-                  <p v-if="hasPrintAccess()" class="text-xs text-stone-500 mt-1">
-  Printed & shipped to your door — £24.99 + £4.99 UK shipping
-</p>
-                  <button
-                    @click.stop="deleteStory(story.id)"
-                    :disabled="deletingStoryId === story.id"
-                    class="rounded-full border border-red-300 bg-white px-4 py-3 text-sm font-medium text-red-600 transition hover:bg-red-50 disabled:opacity-50"
-                  >
-                    {{ deletingStoryId === story.id ? 'Deleting...' : 'Delete' }}
-                  </button>
-
-<!-- Family share -->
-<div class="mt-4 border-t border-stone-100 pt-4">
-  <div v-if="!shareLinks[story.id]">
+  <!-- Primary actions -->
+  <div class="mt-5 flex flex-wrap gap-2">
     <button
-      @click="generateShareLink(story.id)"
-      :disabled="sharingStoryId === story.id"
-      class="inline-flex items-center gap-1.5 rounded-full border border-stone-200 bg-stone-50 px-3 py-1.5 text-xs font-medium text-stone-600 transition hover:bg-stone-100 disabled:opacity-50"
+      @click="openStory(story.id)"
+      class="rounded-full bg-[#7C5C3B] px-5 py-2.5 text-sm font-medium text-white transition hover:opacity-90"
     >
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/>
-        <polyline points="16 6 12 2 8 6"/>
-        <line x1="12" y1="2" x2="12" y2="15"/>
-      </svg>
-      {{ sharingStoryId === story.id ? 'Generating…' : 'Share with family' }}
+      {{ hasStoryAccess(story.story_type) ? 'Continue' : 'Edit Draft' }}
+    </button>
+
+    <button
+      v-if="hasPrintAccess()"
+      @click="startPrintOrder(story)"
+      :disabled="generatingPrintId === story.id"
+      class="rounded-full border border-[#7C5C3B] bg-white px-5 py-2.5 text-sm font-medium text-[#7C5C3B] transition hover:bg-[#F5F0E8] disabled:opacity-50"
+    >
+      {{ generatingPrintId === story.id ? 'Preparing…' : '📖 Order Printed Book — £29.98' }}
     </button>
   </div>
 
-  <div v-else class="rounded-2xl border border-stone-200 bg-stone-50 p-3 space-y-2">
-    <p class="text-xs font-medium text-stone-700">🤍 Share with family</p>
-    <div class="flex items-center gap-2 rounded-xl border border-stone-200 bg-white px-3 py-2">
-      <p class="flex-1 truncate text-xs text-stone-500 min-w-0">{{ shareLinks[story.id] }}</p>
-      <button
-        @click="copyShareLink(story.id)"
-        class="flex-shrink-0 rounded-full bg-stone-900 px-3 py-1 text-xs font-medium text-white transition hover:opacity-80"
-      >
-        {{ shareCopied === story.id ? '✓ Copied' : 'Copy' }}
-      </button>
-    </div>
-    <div class="flex items-center gap-2">
-      <button
-        @click="shareStoryWhatsApp(story.id, story.title)"
-        class="inline-flex items-center gap-1 rounded-full border border-stone-200 bg-white px-3 py-1.5 text-xs font-medium text-stone-700 transition hover:bg-stone-50"
-      >
-        💬 WhatsApp
-      </button>
-      <p class="text-[10px] text-stone-400">Family can view and leave comments</p>
-    </div>
-  </div>
-</div>
-                </div>
+  <p v-if="hasPrintAccess()" class="mt-1.5 text-xs text-stone-400">
+    Printed & shipped to your door — £24.99 + £4.99 UK shipping
+  </p>
 
-                <p v-if="generatingPrintId === story.id" class="mt-2 text-xs text-stone-500">
-                  Building your book for print — this takes about 30 seconds…
-                </p>
-              </div>
+  <p v-if="generatingPrintId === story.id" class="mt-1.5 text-xs text-stone-500">
+    Building your book for print — this takes about 30 seconds…
+  </p>
+
+  <!-- Secondary actions — share + delete -->
+  <div class="mt-5 flex items-center gap-3 border-t border-stone-100 pt-4">
+
+    <!-- Share with family -->
+    <div class="flex-1 min-w-0">
+      <div v-if="!shareLinks[story.id]">
+        <button
+          @click="generateShareLink(story.id)"
+          :disabled="sharingStoryId === story.id"
+          class="inline-flex items-center gap-1.5 text-xs text-stone-500 transition hover:text-stone-800 disabled:opacity-50"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/>
+            <polyline points="16 6 12 2 8 6"/>
+            <line x1="12" y1="2" x2="12" y2="15"/>
+          </svg>
+          {{ sharingStoryId === story.id ? 'Generating…' : 'Share with family' }}
+        </button>
+      </div>
+
+      <div v-else class="space-y-2">
+        <p class="text-xs font-medium text-stone-700">🤍 Family link</p>
+        <div class="flex items-center gap-2 rounded-xl border border-stone-200 bg-stone-50 px-3 py-2 min-w-0">
+          <p class="flex-1 truncate text-xs text-stone-500 min-w-0">{{ shareLinks[story.id] }}</p>
+          <button
+            @click="copyShareLink(story.id)"
+            class="flex-shrink-0 text-xs font-medium text-[#7C5C3B] hover:underline"
+          >
+            {{ shareCopied === story.id ? '✓ Copied' : 'Copy' }}
+          </button>
+        </div>
+        <div class="flex items-center gap-2">
+          <button
+            @click="shareStoryWhatsApp(story.id, story.title)"
+            class="inline-flex items-center gap-1 rounded-full border border-stone-200 bg-white px-3 py-1.5 text-xs font-medium text-stone-700 transition hover:bg-stone-50"
+          >
+            💬 WhatsApp
+          </button>
+          <p class="text-[10px] text-stone-400">Family can view & comment</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Delete — tucked to the right, small and unobtrusive -->
+    <button
+      @click.stop="deleteStory(story.id)"
+      :disabled="deletingStoryId === story.id"
+      class="flex-shrink-0 text-xs text-stone-400 transition hover:text-red-500 disabled:opacity-50"
+    >
+      {{ deletingStoryId === story.id ? 'Deleting…' : 'Delete' }}
+    </button>
+
+  </div>
+
+</div>
             </div>
           </article>
         </div>
