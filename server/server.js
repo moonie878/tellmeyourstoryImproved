@@ -74,30 +74,30 @@ app.post('/transcribe', upload.single('audio'), async (req, res) => {
 
     // Build multipart form for Groq Whisper
     const FormData = require('form-data')
-    const form = new FormData()
+const form = new FormData()
 
-    // Groq expects a filename with the correct extension
-    const ext = req.file.mimetype.includes('webm') ? 'webm'
-      : req.file.mimetype.includes('ogg') ? 'ogg'
-      : req.file.mimetype.includes('mp4') ? 'mp4'
-      : 'webm'
+const ext = req.file.mimetype.includes('webm') ? 'webm'
+  : req.file.mimetype.includes('ogg') ? 'ogg'
+  : req.file.mimetype.includes('mp4') ? 'mp4'
+  : 'webm'
 
-    form.append('file', req.file.buffer, {
-      filename: `recording.${ext}`,
-      contentType: req.file.mimetype,
-    })
-    form.append('model', 'whisper-large-v3-turbo')
-    form.append('language', 'en')
-    form.append('response_format', 'json')
+form.append('file', req.file.buffer, {
+  filename: `recording.${ext}`,
+  contentType: req.file.mimetype,
+  knownLength: req.file.buffer.length,
+})
+form.append('model', 'whisper-large-v3-turbo')
+form.append('language', 'en')
+form.append('response_format', 'json')
 
-    const response = await fetch('https://api.groq.com/openai/v1/audio/transcriptions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${process.env.GROQ_API_KEY}`,
-        ...form.getHeaders(),
-      },
-      body: form,
-    })
+const response = await fetch('https://api.groq.com/openai/v1/audio/transcriptions', {
+  method: 'POST',
+  headers: {
+    'Authorization': `Bearer ${process.env.GROQ_API_KEY}`,
+    ...form.getHeaders(),
+  },
+  body: form,
+})
 
     if (!response.ok) {
       const err = await response.text()
