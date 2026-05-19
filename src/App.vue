@@ -1,5 +1,6 @@
 <template>
   <div class="min-h-screen bg-stone-50 text-stone-900">
+    <SpeedInsights />
     <header class="sticky top-0 z-40 border-b border-stone-200 bg-stone-50/90 backdrop-blur">
       <div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6">
         <router-link
@@ -198,6 +199,7 @@ import { useRouter } from 'vue-router'
 import { posthog } from './lib/posthog'
 import SiteFooter from './components/layout/SiteFooter.vue'
 import CookieBanner from './components/legal/CookieBanner.vue'
+import { SpeedInsights } from '@vercel/speed-insights/vue'
 
 const router = useRouter()
 const user = ref<any>(null)
