@@ -1,5 +1,5 @@
 <template>
-  <aside class="h-fit rounded-2xl border border-stone-200 bg-white p-4">
+  <aside class="rounded-2xl border border-stone-200 bg-white p-4 lg:max-h-[calc(100vh-100px)] lg:overflow-y-auto">
     <!-- Mobile / compact header -->
     <button
       type="button"

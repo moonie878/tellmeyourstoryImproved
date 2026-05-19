@@ -574,7 +574,7 @@ function initializeOpenChapters() {
   const chapterMap: Record<string, boolean> = {}
   sections.value.forEach((section) => {
     const chapter = section.chapter || 'Other'
-    if (!(chapter in chapterMap)) chapterMap[chapter] = true
+    if (!(chapter in chapterMap)) chapterMap[chapter] = false
   })
   openChapters.value = chapterMap
 }
@@ -582,6 +582,10 @@ function initializeOpenChapters() {
 async function goToSectionByIndex(index: number) {
   if (currentSection.value) await saveAnswer(currentSection.value)
   currentSectionIndex.value = index
+
+  // Open the chapter of the section we navigated to
+  const chapter = sections.value[index]?.chapter
+  if (chapter) openChapters.value[chapter] = true
 }
 
 async function loadSections() {
@@ -733,9 +737,14 @@ async function saveCurrentAnswerBeforeCheckout() {
 
 function goToResumeSection() {
   const lastAnsweredIndex = [...sections.value]
-    .map((section, index) => ({ index, hasAnswer: !!section.answer?.trim() }))
-    .filter((item) => item.hasAnswer).map((item) => item.index).pop()
+    .map((s, i) => ({ i, has: !!s.answer?.trim() }))
+    .filter(x => x.has).map(x => x.i).pop()
+
   currentSectionIndex.value = lastAnsweredIndex ?? 0
+
+  // Open the starting chapter
+  const chapter = sections.value[currentSectionIndex.value]?.chapter
+  if (chapter) openChapters.value[chapter] = true
 }
 
 async function savePdfDesign() {
