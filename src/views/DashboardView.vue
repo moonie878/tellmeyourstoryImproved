@@ -192,7 +192,7 @@
   <div class="mt-5 flex items-center gap-3 border-t border-stone-100 pt-4">
 
     <!-- Share with family -->
-    <div class="flex-1 min-w-0">
+    <div class="flex-1 min-w-0 overflow-hidden">
       <div v-if="!shareLinks[story.id]">
         <button
           @click="generateShareLink(story.id)"
@@ -210,8 +210,8 @@
 
       <div v-else class="space-y-2">
         <p class="text-xs font-medium text-stone-700">🤍 Family link</p>
-        <div class="flex items-center gap-2 rounded-xl border border-stone-200 bg-stone-50 px-3 py-2 min-w-0">
-          <p class="flex-1 truncate text-xs text-stone-500 min-w-0">{{ shareLinks[story.id] }}</p>
+       <div class="flex items-center gap-2 rounded-xl border border-stone-200 bg-stone-50 px-3 py-2 overflow-hidden">
+  <p class="flex-1 truncate text-xs text-stone-500 min-w-0 overflow-hidden">{{ shareLinks[story.id] }}</p>
           <button
             @click="copyShareLink(story.id)"
             class="flex-shrink-0 text-xs font-medium text-[#7C5C3B] hover:underline"
