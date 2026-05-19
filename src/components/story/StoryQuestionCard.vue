@@ -97,10 +97,13 @@
             class="min-h-[220px] w-full resize-none rounded-2xl border bg-stone-50 p-4 text-base leading-7 text-stone-900 placeholder:text-stone-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-stone-900 sm:min-h-[260px] transition"
             :class="voiceRecording.isRecording.value ? 'border-red-300 ring-1 ring-red-200' : 'border-stone-300'"
             rows="8"
-            :placeholder="voiceRecording.isRecording.value ? 'Listening… speak your answer' : 'Write your answer here...'"
+            :placeholder="voiceRecording.isRecording.value ? 'Recording… speak your answer, transcript appears when you stop' : 'Write your answer here...'"
             :readonly="voiceRecording.isRecording.value"
           />
 
+          <p v-if="voiceRecording.isTranscribing.value" class="mt-1.5 text-xs text-stone-400">
+  ✦ Transcribing your recording…
+</p>
           <!-- Voice error -->
           <p v-if="voiceRecording.error.value" class="mt-1.5 text-xs text-red-600">
             {{ voiceRecording.error.value }}
@@ -311,8 +314,8 @@
 <script setup lang="ts">
 import { ref, watch, nextTick, onUnmounted } from 'vue'
 import type { StorySection } from '../../types/story'
-import { useVoiceRecording } from '../../lib/useVoiceRecording'
-import type { VoiceRecording } from '../../lib/useVoiceRecording'
+import { useVoiceRecording } from '../../lib/useVoiceRecording_whisper'
+import type { VoiceRecording } from '../../lib/useVoiceRecording_whisper'
 import QRCode from 'qrcode'
 import { supabase } from '../../lib/supabase'
 

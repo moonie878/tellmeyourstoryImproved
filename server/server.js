@@ -54,6 +54,66 @@ app.get('/health', (_req, res) => {
   res.status(200).json({ ok: true })
 })
 
+// ── ADD THIS to server.js ─────────────────────────────────────────────────────
+// Requires: npm install multer
+// Add just before the error handler (before app.use((err, req, res, next) => {)
+// Also requires GROQ_API_KEY in Render environment variables
+
+const multer = require('multer')
+const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 25 * 1024 * 1024 } })
+
+app.post('/transcribe', upload.single('audio'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: 'No audio file provided' })
+    }
+
+    if (!process.env.GROQ_API_KEY) {
+      return res.status(500).json({ error: 'Transcription not configured' })
+    }
+
+    // Build multipart form for Groq Whisper
+    const FormData = require('form-data')
+    const form = new FormData()
+
+    // Groq expects a filename with the correct extension
+    const ext = req.file.mimetype.includes('webm') ? 'webm'
+      : req.file.mimetype.includes('ogg') ? 'ogg'
+      : req.file.mimetype.includes('mp4') ? 'mp4'
+      : 'webm'
+
+    form.append('file', req.file.buffer, {
+      filename: `recording.${ext}`,
+      contentType: req.file.mimetype,
+    })
+    form.append('model', 'whisper-large-v3-turbo')
+    form.append('language', 'en')
+    form.append('response_format', 'json')
+
+    const response = await fetch('https://api.groq.com/openai/v1/audio/transcriptions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${process.env.GROQ_API_KEY}`,
+        ...form.getHeaders(),
+      },
+      body: form,
+    })
+
+    if (!response.ok) {
+      const err = await response.text()
+      console.error('Groq transcription error:', err)
+      return res.status(500).json({ error: 'Transcription failed' })
+    }
+
+    const data = await response.json()
+    res.json({ transcript: data.text || '' })
+
+  } catch (err) {
+    console.error('Transcribe endpoint error:', err.message)
+    res.status(500).json({ error: 'Transcription failed' })
+  }
+})
+
 app.post(
   '/webhook',
   express.raw({ type: 'application/json' }),

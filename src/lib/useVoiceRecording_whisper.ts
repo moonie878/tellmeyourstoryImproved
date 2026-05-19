@@ -1,10 +1,15 @@
 /**
- * useVoiceRecording.ts
- * REVERTED — original working version, no singleton
+ * useVoiceRecording.ts — Groq Whisper transcription
+ *
+ * Records audio with MediaRecorder, then sends to Express /transcribe
+ * endpoint which uses Groq Whisper for accurate transcription.
+ * Removes dependency on unreliable Web Speech API entirely.
  */
 
 import { ref } from 'vue'
 import { supabase } from './supabase'
+
+const SERVER_URL = 'https://tellmeyourstoryimproved.onrender.com'
 
 export interface VoiceRecording {
   id: string
@@ -23,27 +28,33 @@ export function useVoiceRecording() {
   const isSaving        = ref(false)
   const liveTranscript  = ref('')
   const error           = ref('')
-  const speechSupported = !!(
-    (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
-  )
+
+  // Whisper is server-side so always "supported"
+  const speechSupported = true
 
   let mediaRecorder:  MediaRecorder | null = null
-  let recognition:    any = null
   let audioChunks:    Blob[] = []
   let recordingStart: number = 0
-  let baseText:       string = ''
+  let activeStream:   MediaStream | null = null
 
-  const SpeechRecognition =
-    (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
+  // ── Start recording ─────────────────────────────────────────────────────────
 
   async function startRecording(existingAnswer: string = '') {
     error.value = ''
     liveTranscript.value = existingAnswer
-    baseText = existingAnswer
 
-    let stream: MediaStream
+    // Clean up any previous session
+    if (mediaRecorder) {
+      try { mediaRecorder.stop() } catch {}
+      activeStream?.getTracks().forEach(t => t.stop())
+      mediaRecorder = null
+      activeStream = null
+      audioChunks = []
+    }
+
+    // Request microphone
     try {
-      stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+      activeStream = await navigator.mediaDevices.getUserMedia({ audio: true })
     } catch {
       error.value = 'Microphone access denied. Please allow microphone access and try again.'
       return false
@@ -56,48 +67,18 @@ export function useVoiceRecording() {
       ? 'audio/ogg'
       : 'audio/mp4'
 
-    mediaRecorder = new MediaRecorder(stream, { mimeType })
+    mediaRecorder = new MediaRecorder(activeStream, { mimeType })
     mediaRecorder.ondataavailable = (e) => {
       if (e.data.size > 0) audioChunks.push(e.data)
     }
     mediaRecorder.start(100)
     recordingStart = Date.now()
-
-    if (SpeechRecognition) {
-      recognition = new SpeechRecognition()
-      recognition.continuous     = true
-      recognition.interimResults = true
-      recognition.lang           = 'en-GB'
-
-      recognition.onresult = (event: any) => {
-        let interim = ''
-        let final   = ''
-        for (let i = event.resultIndex; i < event.results.length; i++) {
-          const text = event.results[i][0].transcript
-          if (event.results[i].isFinal) {
-            final += text + ' '
-          } else {
-            interim += text
-          }
-        }
-        if (final) baseText = baseText + final
-        liveTranscript.value = baseText + interim
-      }
-
-      recognition.onerror = (e: any) => {
-        console.error('Speech recognition error:', e.error)
-      }
-
-      try {
-        recognition.start()
-      } catch (err) {
-        console.error('Could not start speech recognition:', err)
-      }
-    }
-
     isRecording.value = true
+
     return true
   }
+
+  // ── Stop recording — returns blob + transcribes via Groq Whisper ─────────────
 
   async function stopRecording(): Promise<{ blob: Blob; transcript: string; durationSeconds: number } | null> {
     if (!mediaRecorder) return null
@@ -105,29 +86,54 @@ export function useVoiceRecording() {
     isRecording.value    = false
     isTranscribing.value = true
 
-    if (recognition) {
-      try { recognition.stop() } catch {}
-      recognition = null
+    const durationSeconds = Math.round((Date.now() - recordingStart) / 1000)
+
+    // Stop media recorder and collect blob
+    const blob = await new Promise<Blob>((resolve) => {
+      mediaRecorder!.onstop = () => {
+        const mimeType = mediaRecorder?.mimeType || 'audio/webm'
+        const b = new Blob(audioChunks, { type: mimeType })
+        activeStream?.getTracks().forEach(t => t.stop())
+        activeStream  = null
+        mediaRecorder = null
+        resolve(b)
+      }
+      mediaRecorder!.stop()
+    })
+
+    // Transcribe via Groq Whisper
+    let transcript = liveTranscript.value // keep existing text as fallback
+    try {
+      const form = new FormData()
+      const ext = blob.type.includes('webm') ? 'webm'
+        : blob.type.includes('ogg') ? 'ogg'
+        : 'mp4'
+      form.append('audio', blob, `recording.${ext}`)
+
+      const response = await fetch(`${SERVER_URL}/transcribe`, {
+        method: 'POST',
+        body: form,
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        if (data.transcript) {
+          transcript = data.transcript
+          liveTranscript.value = transcript
+        }
+      } else {
+        console.error('Transcription failed:', await response.text())
+      }
+    } catch (err) {
+      console.error('Transcription request failed:', err)
+    } finally {
+      isTranscribing.value = false
     }
 
-    const durationSeconds = Math.round((Date.now() - recordingStart) / 1000)
-    const finalTranscript = liveTranscript.value
-
-    return new Promise((resolve) => {
-      if (!mediaRecorder) { isTranscribing.value = false; resolve(null); return }
-
-      mediaRecorder.onstop = () => {
-        const mimeType = mediaRecorder?.mimeType || 'audio/webm'
-        const blob = new Blob(audioChunks, { type: mimeType })
-        mediaRecorder?.stream?.getTracks().forEach(t => t.stop())
-        mediaRecorder = null
-        isTranscribing.value = false
-        resolve({ blob, transcript: finalTranscript, durationSeconds })
-      }
-
-      mediaRecorder.stop()
-    })
+    return { blob, transcript, durationSeconds }
   }
+
+  // ── Save recording to Supabase ───────────────────────────────────────────────
 
   async function saveRecording(
     blob: Blob,
@@ -181,6 +187,8 @@ export function useVoiceRecording() {
     }
   }
 
+  // ── Load existing recording ──────────────────────────────────────────────────
+
   async function loadRecording(sectionId: string, projectId: string): Promise<VoiceRecording | null> {
     const { data } = await supabase
       .from('voice_recordings')
@@ -191,6 +199,8 @@ export function useVoiceRecording() {
 
     return data || null
   }
+
+  // ── Delete a recording ───────────────────────────────────────────────────────
 
   async function deleteRecording(sectionId: string, projectId: string): Promise<void> {
     const existing = await loadRecording(sectionId, projectId)
@@ -205,15 +215,14 @@ export function useVoiceRecording() {
       .eq('project_id', projectId)
   }
 
+  // ── Cancel without saving ────────────────────────────────────────────────────
+
   function cancelRecording() {
-    if (recognition) {
-      try { recognition.stop() } catch {}
-      recognition = null
-    }
     if (mediaRecorder) {
-      mediaRecorder.stream?.getTracks().forEach(t => t.stop())
+      activeStream?.getTracks().forEach(t => t.stop())
       try { mediaRecorder.stop() } catch {}
       mediaRecorder = null
+      activeStream  = null
     }
     isRecording.value    = false
     isTranscribing.value = false
