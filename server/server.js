@@ -302,9 +302,13 @@ app.post('/writing-assist', async (req, res) => {
   try {
     const { question, answer, mode } = req.body
 
-    if (!question || !answer || answer.trim().length < 5) {
-      return res.status(400).json({ error: 'Question and answer are required' })
-    }
+    if (!question) {
+  return res.status(400).json({ error: 'Question and answer are required' })
+}
+
+if (mode !== 'start' && (!answer || answer.trim().length < 5)) {
+  return res.status(400).json({ error: 'Question and answer are required' })
+}
 
     if (!process.env.GROQ_API_KEY) {
       return res.status(500).json({ error: 'Writing assist not configured' })
