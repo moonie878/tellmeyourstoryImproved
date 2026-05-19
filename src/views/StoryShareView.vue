@@ -177,12 +177,14 @@ async function submitComment(sectionId: string) {
 onMounted(async () => {
   const token = route.params.token as string
 
-  // Load share record
-  const { data: shareData } = await supabase
+  // 1 — Load share record
+  const { data: shareData, error: shareError } = await supabase
     .from('story_shares')
     .select('*')
     .eq('token', token)
     .maybeSingle()
+
+  if (shareError) console.error('Share error:', shareError)
 
   if (!shareData) {
     loading.value = false
@@ -191,7 +193,7 @@ onMounted(async () => {
 
   share.value = shareData
 
-  // Load project
+  // 2 — Load project
   const { data: projectData } = await supabase
     .from('story_projects')
     .select('title, story_type')
@@ -200,23 +202,45 @@ onMounted(async () => {
 
   project.value = projectData
 
-  // Load sections with answers
-  // Replace the sections query in onMounted with:
-const { data: answerData } = await supabase
-  .from('story_answers')
-  .select('id, section_id, answer, is_highlighted, story_sections(id, chapter, question, order_index)')
-  .eq('project_id', shareData.project_id)
-  .not('answer', 'is', null)
-  .neq('answer', '')
-  .order('story_sections(order_index)', { ascending: true })
+  // 3 — Load answers for this project
+  const { data: answerData, error: answerError } = await supabase
+    .from('story_answers')
+    .select('id, section_id, answer')
+    .eq('project_id', shareData.project_id)
+    .not('answer', 'is', null)
+    .neq('answer', '')
 
-sections.value = (answerData || []).map((a: any) => ({
-  id: a.section_id,
-  answer_id: a.id,
-  chapter: a.story_sections?.chapter,
-  question: a.story_sections?.question,
-  answer: a.answer,
-}))
+  if (answerError) console.error('Answer error:', answerError)
+
+  const answers = answerData || []
+
+  if (answers.length === 0) {
+    loading.value = false
+    await loadComments()
+    return
+  }
+
+  // 4 — Load the matching sections ordered correctly
+  const sectionIds = answers.map((a: any) => a.section_id)
+
+  const { data: sectionData, error: sectionError } = await supabase
+    .from('story_sections')
+    .select('id, chapter, question, order_index')
+    .in('id', sectionIds)
+    .order('order_index', { ascending: true })
+
+  if (sectionError) console.error('Section error:', sectionError)
+
+  // 5 — Merge sections with their answers
+  sections.value = (sectionData || []).map((s: any) => {
+    const a = answers.find((ans: any) => ans.section_id === s.id)
+    return {
+      id:       s.id,
+      chapter:  s.chapter,
+      question: s.question,
+      answer:   a?.answer || '',
+    }
+  }).filter((s: any) => s.answer.trim())
 
   await loadComments()
   loading.value = false
