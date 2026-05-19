@@ -10,8 +10,8 @@
           <em>they'll carry forever</em>
         </h1>
         <p class="hero-sub">
-          Upload photos, add music, and create a beautiful memorial video
-          in minutes — free to preview, £9.99 to download.
+          Upload photos and video clips, add music, 
+          and create a beautiful memorial video in minutes — free to preview, £9.99 to download.
         </p>
         <div class="hero-trust">
           <span>✦ No account needed</span>
@@ -279,7 +279,14 @@
               <span class="summary-label">Dates</span>
               <span class="summary-value">{{ [form.birthYear, form.deathYear].filter(Boolean).join(' — ') }}</span>
             </div>
-            <div class="summary-row"><span class="summary-label">Photos</span><span class="summary-value">{{ form.photos.length }} photos</span></div>
+           <div class="summary-row">
+  <span class="summary-label">Photos</span>
+  <span class="summary-value">{{ photoCount }} photo{{ photoCount !== 1 ? 's' : '' }}</span>
+</div>
+<div v-if="videoCount > 0" class="summary-row">
+  <span class="summary-label">Video clips</span>
+  <span class="summary-value">{{ videoCount }} clip{{ videoCount !== 1 ? 's' : '' }}</span>
+</div>
             <div class="summary-row"><span class="summary-label">Music</span><span class="summary-value">{{ MUSIC_TRACKS[form.musicTrack].label }}</span></div>
             <div class="summary-row"><span class="summary-label">Duration</span><span class="summary-value">~{{ estimatedLength }}</span></div>
           </div>
@@ -382,7 +389,11 @@
         <p class="why-eyebrow">Tell Me Your Story</p>
         <h2 class="why-title">A beautiful way to honour a life</h2>
         <div class="why-grid">
-          <div class="why-card"><span class="why-icon">📸</span><p class="why-card-title">Up to 30 photos</p><p class="why-card-desc">Every photo flows beautifully with elegant transitions and a cinematic style.</p></div>
+          <div class="why-card">
+  <span class="why-icon">📸</span>
+  <p class="why-card-title">Photos & video clips</p>
+  <p class="why-card-desc">Up to 30 photos and 5 video clips — arranged in any order, flowing beautifully with elegant transitions.</p>
+</div>
           <div class="why-card"><span class="why-icon">🎵</span><p class="why-card-title">Music that fits</p><p class="why-card-desc">Choose from curated gentle tracks or upload your own music that was meaningful to them.</p></div>
           <div class="why-card"><span class="why-icon">💛</span><p class="why-card-title">Their words</p><p class="why-card-desc">Add a tribute that becomes a beautiful quote slide woven through the video.</p></div>
           <div class="why-card"><span class="why-icon">🎬</span><p class="why-card-title">Full HD MP4</p><p class="why-card-desc">Download and share with family, play at a memorial service, or keep it forever.</p></div>
