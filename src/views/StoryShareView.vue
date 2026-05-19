@@ -133,9 +133,7 @@ const commenterName = ref('')
 const commentText  = ref('')
 const submitting   = ref(false)
 
-const answeredSections = computed(() =>
-  sections.value.filter(s => s.answer?.trim())
-)
+const answeredSections = computed(() => sections.value)
 
 function getComments(sectionId: string) {
   return comments.value.filter(c => c.section_id === sectionId)
@@ -203,13 +201,22 @@ onMounted(async () => {
   project.value = projectData
 
   // Load sections with answers
-  const { data: sectionData } = await supabase
-    .from('story_sections')
-    .select('id, chapter, question, answer')
-    .eq('project_id', shareData.project_id)
-    .order('order_index', { ascending: true })
+  // Replace the sections query in onMounted with:
+const { data: answerData } = await supabase
+  .from('story_answers')
+  .select('id, section_id, answer, is_highlighted, story_sections(id, chapter, question, order_index)')
+  .eq('project_id', shareData.project_id)
+  .not('answer', 'is', null)
+  .neq('answer', '')
+  .order('story_sections(order_index)', { ascending: true })
 
-  sections.value = sectionData || []
+sections.value = (answerData || []).map((a: any) => ({
+  id: a.section_id,
+  answer_id: a.id,
+  chapter: a.story_sections?.chapter,
+  question: a.story_sections?.question,
+  answer: a.answer,
+}))
 
   await loadComments()
   loading.value = false
