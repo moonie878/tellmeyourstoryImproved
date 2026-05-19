@@ -237,6 +237,34 @@
     </button>
   </div>
 </div>
+<!-- Family comments -->
+<div v-if="commentCount > 0" class="mt-4">
+  <button
+    @click="showComments = !showComments"
+    class="inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-4 py-2 text-xs font-medium text-amber-800 transition hover:bg-amber-100"
+  >
+    <span>💬</span>
+    <span>{{ commentCount }} family comment{{ commentCount === 1 ? '' : 's' }}</span>
+    <span>{{ showComments ? '▲' : '▼' }}</span>
+  </button>
+
+  <div v-if="showComments" class="mt-3 space-y-3 rounded-2xl border border-amber-100 bg-amber-50 p-4">
+    <p class="text-xs font-medium text-amber-800">What family said about this answer</p>
+    <div
+      v-for="comment in sectionComments"
+      :key="comment.id"
+      class="flex gap-3"
+    >
+      <div class="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-amber-200 text-xs font-semibold text-amber-800">
+        {{ comment.author_name.charAt(0).toUpperCase() }}
+      </div>
+      <div>
+        <p class="text-xs font-medium text-stone-800">{{ comment.author_name }}</p>
+        <p class="mt-0.5 text-xs leading-5 text-stone-600">{{ comment.comment }}</p>
+      </div>
+    </div>
+  </div>
+</div>
         <!-- Highlight -->
         <div class="mt-4">
           <button
@@ -312,7 +340,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, nextTick, onUnmounted } from 'vue'
+import { ref, watch, nextTick, onUnmounted, computed } from 'vue'
 import type { StorySection } from '../../types/story'
 import { useVoiceRecording } from '../../lib/useVoiceRecording_whisper'
 import type { VoiceRecording } from '../../lib/useVoiceRecording_whisper'
@@ -363,6 +391,10 @@ const writingAssistLoading = ref(false)
 const writingAssistSuggestions = ref<string[]>([])
 const writingAssistError = ref('')
 
+const sectionComments     = ref<any[]>([])
+const showComments        = ref(false)
+const commentCount        = computed(() => sectionComments.value.length)
+
 const voiceRecording = useVoiceRecording()
 
 // ── Load existing recording when section changes ──────────────────────────────
@@ -374,6 +406,17 @@ async function toggleQR() {
     .update({ show_qr: newValue })
     .eq('id', existingRecording.value.id)
   existingRecording.value = { ...existingRecording.value, show_qr: newValue }
+}
+
+async function loadSectionComments() {
+  if (!props.section || !props.projectId) return
+  const { data } = await supabase
+    .from('story_comments')
+    .select('*')
+    .eq('project_id', props.projectId)
+    .eq('section_id', props.section.id)
+    .order('created_at', { ascending: true })
+  sectionComments.value = data || []
 }
 
 async function loadExistingRecording() {
@@ -528,6 +571,9 @@ watch(
     existingRecording.value = null
     writingAssistSuggestions.value = []
     writingAssistError.value = ''
+    sectionComments.value = []
+showComments.value = false
+await loadSectionComments()
     isPlayingExisting.value = false
     await nextTick()
     textareaRef.value?.focus()
