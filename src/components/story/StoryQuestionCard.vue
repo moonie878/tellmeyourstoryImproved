@@ -457,10 +457,13 @@ async function handleVoiceToggle() {
       result.blob, result.transcript, result.durationSeconds,
       props.section.id, props.projectId
     )
-    if (saved) {
-      existingRecording.value = saved
-      await nextTick()
-    }
+ if (saved) {
+  existingRecording.value = null  // force the v-if to unmount the canvas
+  await nextTick()                // let Vue remove it
+  existingRecording.value = saved // remount with new id
+  await nextTick()                // let Vue mount the canvas
+  await new Promise(resolve => setTimeout(resolve, 100)) // let DOM paint
+}
   } else {
     await voiceRecording.startRecording(props.section?.answer || '')
   }
