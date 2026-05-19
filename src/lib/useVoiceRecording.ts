@@ -35,27 +35,12 @@ const SpeechRecognitionAPI =
 
 let globalRecognition: any = null
 
-function killRecognition(): Promise<void> {
-  return new Promise((resolve) => {
-    if (!globalRecognition) {
-      resolve()
-      return
-    }
-    const r = globalRecognition
-    globalRecognition = null
-
-    // onend fires after abort — wait for it before resolving
-    const prev = r.onend
-    r.onend = () => {
-      if (prev) prev()
-      resolve()
-    }
-
-    try { r.abort() } catch { resolve() }
-
-    // Safety timeout — if onend never fires, resolve anyway
-    setTimeout(resolve, 500)
-  })
+async function killRecognition(): Promise<void> {
+  if (!globalRecognition) return
+  try { globalRecognition.abort() } catch {}
+  globalRecognition = null
+  // Small wait for Chrome to release the API
+  await new Promise(resolve => setTimeout(resolve, 150))
 }
 
 // ── Composable ────────────────────────────────────────────────────────────────
@@ -126,50 +111,48 @@ export function useVoiceRecording() {
   }
 
   function startSpeechRecognition() {
-    if (!SpeechRecognitionAPI) return
+  if (!SpeechRecognitionAPI) return
 
-    globalRecognition = new SpeechRecognitionAPI()
-    globalRecognition.continuous     = true
-    globalRecognition.interimResults = true
-    globalRecognition.lang           = 'en-GB'
+  const r = new SpeechRecognitionAPI()
+  globalRecognition = r
 
-    globalRecognition.onresult = (event: any) => {
-      let interim = ''
-      let final   = ''
-      for (let i = event.resultIndex; i < event.results.length; i++) {
-        const text = event.results[i][0].transcript
-        if (event.results[i].isFinal) {
-          final += text + ' '
-        } else {
-          interim += text
-        }
-      }
-      if (final) baseText = baseText + final
-      liveTranscript.value = baseText + interim
-    }
+  r.continuous     = true
+  r.interimResults = true
+  r.lang           = 'en-GB'
 
-    globalRecognition.onerror = (e: any) => {
-      // network errors are usually transient — don't show to user
-      if (e.error === 'network') {
-        console.warn('Speech recognition network error — will retry')
-        return
-      }
-      console.error('Speech recognition error:', e.error)
-    }
-
-    globalRecognition.onend = () => {
-      // Auto-restart if still recording (handles Chrome/iOS timeout)
-      if (isRecording.value && globalRecognition) {
-        try { globalRecognition.start() } catch {}
+  r.onresult = (event: any) => {
+    let interim = ''
+    let final   = ''
+    for (let i = event.resultIndex; i < event.results.length; i++) {
+      const text = event.results[i][0].transcript
+      if (event.results[i].isFinal) {
+        final += text + ' '
+      } else {
+        interim += text
       }
     }
+    if (final) baseText = baseText + final
+    liveTranscript.value = baseText + interim
+  }
 
-    try {
-      globalRecognition.start()
-    } catch (err) {
-      console.error('Could not start speech recognition:', err)
+  r.onerror = (e: any) => {
+    if (e.error === 'network') return // transient, onend will restart
+    console.error('Speech recognition error:', e.error)
+  }
+
+  r.onend = () => {
+    // Only restart if this is still the active instance and we're recording
+    if (isRecording.value && globalRecognition === r) {
+      try { r.start() } catch {}
     }
   }
+
+  try {
+    r.start()
+  } catch (err) {
+    console.error('Could not start speech recognition:', err)
+  }
+}
 
   // ── Stop recording ───────────────────────────────────────────────────────────
 
