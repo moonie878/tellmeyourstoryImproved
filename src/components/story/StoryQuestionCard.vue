@@ -444,46 +444,21 @@ watch(
 
 async function handleVoiceToggle() {
   if (voiceRecording.isRecording.value) {
-    // ── Stop and save ────────────────────────────────────────────────────
     const result = await voiceRecording.stopRecording()
     if (!result || !props.section) return
-
     emit('update-answer', result.transcript)
-
     const saved = await voiceRecording.saveRecording(
-      result.blob,
-      result.transcript,
-      result.durationSeconds,
-      props.section.id,
-      props.projectId
+      result.blob, result.transcript, result.durationSeconds,
+      props.section.id, props.projectId
     )
-
     if (saved) {
       existingRecording.value = saved
       await nextTick()
     }
   } else {
-    // ── Start recording ──────────────────────────────────────────────────
-    // Pause existing playback if any
-    if (existingAudioRef.value) {
-      existingAudioRef.value.pause()
-      isPlayingExisting.value = false
-    }
-
-    // killRecognition() inside startRecording handles all cleanup
     await voiceRecording.startRecording(props.section?.answer || '')
   }
 }
-
-// Also update cancelRecording calls to await since it's now async:
-// In the section watcher (line 534):
-//   if (voiceRecording.isRecording.value) await voiceRecording.cancelRecording()
-//
-// In handleNextClick (line 521):
-//   if (voiceRecording.isRecording.value) await voiceRecording.cancelRecording()
-//
-// In onUnmounted (line 550):
-//   voiceRecording.cancelRecording()  // fine to not await in unmounted
 
 // ── Existing recording playback ───────────────────────────────────────────────
 
@@ -526,8 +501,8 @@ function onAnswerInput(event: Event) {
 
 // ── Navigation ────────────────────────────────────────────────────────────────
 
-async function handleNextClick() {
- if (voiceRecording.isRecording.value) await voiceRecording.cancelRecording()
+function handleNextClick() {
+  if (voiceRecording.isRecording.value) voiceRecording.cancelRecording()
   if (props.currentIndex === props.totalSections - 1) {
     emit('finish')
   } else {

@@ -1,15 +1,6 @@
 /**
  * useVoiceRecording.ts
- *
- * Records voice answers and saves them to Supabase storage.
- * Runs MediaRecorder (audio capture) alongside Web Speech API (transcription)
- * simultaneously so you get both the audio file and the text transcript.
- *
- * Uses a module-level singleton for SpeechRecognition so Chrome never has
- * two instances competing — fixes the "network" error on re-record.
- *
- * Storage: Supabase bucket 'voice-recordings' (public)
- * Table:   voice_recordings (id, section_id, project_id, audio_url, transcript, duration_seconds)
+ * REVERTED — original working version, no singleton
  */
 
 import { ref } from 'vue'
@@ -26,67 +17,38 @@ export interface VoiceRecording {
   show_qr: boolean
 }
 
-// ── Module-level singleton ─────────────────────────────────────────────────────
-// Chrome allows only one SpeechRecognition instance at a time.
-// Keeping it at module level means it survives component remounts
-// and can be properly killed before a new session starts.
-const SpeechRecognitionAPI =
-  (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
-
-let globalRecognition: any = null
-
-async function killRecognition(): Promise<void> {
-  if (!globalRecognition) return
-  try { globalRecognition.abort() } catch {}
-  globalRecognition = null
-  // Small wait for Chrome to release the API
-  await new Promise(resolve => setTimeout(resolve, 150))
-}
-
-// ── Composable ────────────────────────────────────────────────────────────────
-
 export function useVoiceRecording() {
   const isRecording     = ref(false)
   const isTranscribing  = ref(false)
   const isSaving        = ref(false)
   const liveTranscript  = ref('')
   const error           = ref('')
-  const speechSupported = !!SpeechRecognitionAPI
+  const speechSupported = !!(
+    (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
+  )
 
   let mediaRecorder:  MediaRecorder | null = null
+  let recognition:    any = null
   let audioChunks:    Blob[] = []
   let recordingStart: number = 0
   let baseText:       string = ''
-  let activeStream:   MediaStream | null = null
 
-  // ── Start recording ─────────────────────────────────────────────────────────
+  const SpeechRecognition =
+    (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
 
   async function startRecording(existingAnswer: string = '') {
     error.value = ''
     liveTranscript.value = existingAnswer
     baseText = existingAnswer
 
-    // Kill any existing recognition and wait for it to fully close
-    await killRecognition()
-
-    // Stop any existing media recorder
-    if (mediaRecorder) {
-      try { mediaRecorder.stop() } catch {}
-      activeStream?.getTracks().forEach(t => t.stop())
-      mediaRecorder = null
-      activeStream = null
-      audioChunks = []
-    }
-
-    // Request microphone
+    let stream: MediaStream
     try {
-      activeStream = await navigator.mediaDevices.getUserMedia({ audio: true })
+      stream = await navigator.mediaDevices.getUserMedia({ audio: true })
     } catch {
       error.value = 'Microphone access denied. Please allow microphone access and try again.'
       return false
     }
 
-    // ── MediaRecorder — captures audio blob ──────────────────────────────────
     audioChunks = []
     const mimeType = MediaRecorder.isTypeSupported('audio/webm')
       ? 'audio/webm'
@@ -94,67 +56,48 @@ export function useVoiceRecording() {
       ? 'audio/ogg'
       : 'audio/mp4'
 
-    mediaRecorder = new MediaRecorder(activeStream, { mimeType })
+    mediaRecorder = new MediaRecorder(stream, { mimeType })
     mediaRecorder.ondataavailable = (e) => {
       if (e.data.size > 0) audioChunks.push(e.data)
     }
     mediaRecorder.start(100)
     recordingStart = Date.now()
-    isRecording.value = true
 
-    // ── Web Speech API — live transcription ──────────────────────────────────
-    if (SpeechRecognitionAPI) {
-      startSpeechRecognition()
-    }
+    if (SpeechRecognition) {
+      recognition = new SpeechRecognition()
+      recognition.continuous     = true
+      recognition.interimResults = true
+      recognition.lang           = 'en-GB'
 
-    return true
-  }
+      recognition.onresult = (event: any) => {
+        let interim = ''
+        let final   = ''
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          const text = event.results[i][0].transcript
+          if (event.results[i].isFinal) {
+            final += text + ' '
+          } else {
+            interim += text
+          }
+        }
+        if (final) baseText = baseText + final
+        liveTranscript.value = baseText + interim
+      }
 
-  function startSpeechRecognition() {
-  if (!SpeechRecognitionAPI) return
+      recognition.onerror = (e: any) => {
+        console.error('Speech recognition error:', e.error)
+      }
 
-  const r = new SpeechRecognitionAPI()
-  globalRecognition = r
-
-  r.continuous     = true
-  r.interimResults = true
-  r.lang           = 'en-GB'
-
-  r.onresult = (event: any) => {
-    let interim = ''
-    let final   = ''
-    for (let i = event.resultIndex; i < event.results.length; i++) {
-      const text = event.results[i][0].transcript
-      if (event.results[i].isFinal) {
-        final += text + ' '
-      } else {
-        interim += text
+      try {
+        recognition.start()
+      } catch (err) {
+        console.error('Could not start speech recognition:', err)
       }
     }
-    if (final) baseText = baseText + final
-    liveTranscript.value = baseText + interim
-  }
 
-  r.onerror = (e: any) => {
-    if (e.error === 'network') return // transient, onend will restart
-    console.error('Speech recognition error:', e.error)
+    isRecording.value = true
+    return true
   }
-
-  r.onend = () => {
-    // Only restart if this is still the active instance and we're recording
-    if (isRecording.value && globalRecognition === r) {
-      try { r.start() } catch {}
-    }
-  }
-
-  try {
-    r.start()
-  } catch (err) {
-    console.error('Could not start speech recognition:', err)
-  }
-}
-
-  // ── Stop recording ───────────────────────────────────────────────────────────
 
   async function stopRecording(): Promise<{ blob: Blob; transcript: string; durationSeconds: number } | null> {
     if (!mediaRecorder) return null
@@ -162,21 +105,21 @@ export function useVoiceRecording() {
     isRecording.value    = false
     isTranscribing.value = true
 
-    // Stop speech recognition
-    await killRecognition()
+    if (recognition) {
+      try { recognition.stop() } catch {}
+      recognition = null
+    }
 
     const durationSeconds = Math.round((Date.now() - recordingStart) / 1000)
     const finalTranscript = liveTranscript.value
 
-    // Stop media recorder and collect blob
     return new Promise((resolve) => {
       if (!mediaRecorder) { isTranscribing.value = false; resolve(null); return }
 
       mediaRecorder.onstop = () => {
         const mimeType = mediaRecorder?.mimeType || 'audio/webm'
         const blob = new Blob(audioChunks, { type: mimeType })
-        activeStream?.getTracks().forEach(t => t.stop())
-        activeStream  = null
+        mediaRecorder?.stream?.getTracks().forEach(t => t.stop())
         mediaRecorder = null
         isTranscribing.value = false
         resolve({ blob, transcript: finalTranscript, durationSeconds })
@@ -185,8 +128,6 @@ export function useVoiceRecording() {
       mediaRecorder.stop()
     })
   }
-
-  // ── Save recording to Supabase ───────────────────────────────────────────────
 
   async function saveRecording(
     blob: Blob,
@@ -240,8 +181,6 @@ export function useVoiceRecording() {
     }
   }
 
-  // ── Load existing recording ──────────────────────────────────────────────────
-
   async function loadRecording(sectionId: string, projectId: string): Promise<VoiceRecording | null> {
     const { data } = await supabase
       .from('voice_recordings')
@@ -252,8 +191,6 @@ export function useVoiceRecording() {
 
     return data || null
   }
-
-  // ── Delete a recording ───────────────────────────────────────────────────────
 
   async function deleteRecording(sectionId: string, projectId: string): Promise<void> {
     const existing = await loadRecording(sectionId, projectId)
@@ -268,19 +205,19 @@ export function useVoiceRecording() {
       .eq('project_id', projectId)
   }
 
-  // ── Cancel without saving ────────────────────────────────────────────────────
-
-  async function cancelRecording() {
-    isRecording.value    = false
-    isTranscribing.value = false
-    await killRecognition()
+  function cancelRecording() {
+    if (recognition) {
+      try { recognition.stop() } catch {}
+      recognition = null
+    }
     if (mediaRecorder) {
-      activeStream?.getTracks().forEach(t => t.stop())
+      mediaRecorder.stream?.getTracks().forEach(t => t.stop())
       try { mediaRecorder.stop() } catch {}
       mediaRecorder = null
-      activeStream  = null
     }
-    audioChunks = []
+    isRecording.value    = false
+    isTranscribing.value = false
+    audioChunks          = []
   }
 
   return {
