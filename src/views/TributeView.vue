@@ -82,38 +82,111 @@
         </div>
 
         <!-- ── Step 1 — Photos ──────────────────────────────────────────── -->
-        <div v-else-if="currentStep === 1" class="builder-card">
-          <h2 class="card-title">Their photos</h2>
-          <p class="card-sub">Upload up to 30 photos. The first photo will be used as the opening frame.</p>
+      <!-- ── Step 1 — Photos & Videos ────────────────────────────────────────── -->
+<div v-else-if="currentStep === 1" class="builder-card">
+  <h2 class="card-title">Photos & videos</h2>
+  <p class="card-sub">
+    Upload photos and short video clips. Drag to reorder — they'll appear in this order in your tribute.
+  </p>
 
-          <div class="upload-zone" :class="{ 'upload-zone-hover': isDragging }" @dragover.prevent="isDragging = true" @dragleave="isDragging = false" @drop.prevent="onDrop" @click="triggerFileInput">
-            <input ref="fileInputRef" type="file" accept="image/*" multiple class="hidden" @change="onFileSelect" />
-            <div class="upload-zone-content">
-              <span class="upload-icon">📷</span>
-              <p class="upload-text">Drop photos here or <span class="upload-link">browse files</span></p>
-              <p class="upload-hint">JPG, PNG, WebP — up to 30 photos</p>
-            </div>
-          </div>
+  <!-- Upload zone -->
+  <div
+    class="upload-zone"
+    :class="{ 'upload-zone-hover': isDragging }"
+    @dragover.prevent="isDragging = true"
+    @dragleave="isDragging = false"
+    @drop.prevent="onDrop"
+  >
+    <div class="upload-zone-content">
+      <span class="upload-icon">📷</span>
+      <p class="upload-text">Drop photos or videos here</p>
+      <p class="upload-hint">or choose what to add:</p>
+      <div class="upload-btn-row">
+        <label class="upload-type-btn">
+          📷 Add photos
+          <input
+            ref="fileInputRef"
+            type="file"
+            accept="image/*"
+            multiple
+            class="hidden"
+            @change="onFileSelect"
+          />
+        </label>
+        <label class="upload-type-btn" :class="videoCount >= MAX_VIDEOS ? 'upload-type-btn-disabled' : ''">
+          🎬 Add video clip {{ videoCount > 0 ? `(${videoCount}/${MAX_VIDEOS})` : '' }}
+          <input
+            type="file"
+            accept="video/mp4,video/mov,video/quicktime,video/*"
+            class="hidden"
+            :disabled="videoCount >= MAX_VIDEOS"
+            @change="onVideoSelect"
+          />
+        </label>
+      </div>
+      <p class="upload-hint">Up to 30 photos + 5 video clips · Videos max 30 seconds each</p>
+    </div>
+  </div>
 
-          <div v-if="form.photos.length > 0" class="photo-grid">
-            <div v-for="(photo, i) in form.photos" :key="i" class="photo-thumb" :class="{ 'photo-thumb-first': i === 0 }">
-              <img :src="photo" :alt="`Photo ${i + 1}`" class="photo-img" loading="lazy" />
-              <div class="photo-overlay">
-                <button v-if="i > 0" @click="movePhoto(i, -1)" class="photo-btn">←</button>
-                <button @click="removePhoto(i)" class="photo-btn photo-btn-remove">✕</button>
-                <button v-if="i < form.photos.length - 1" @click="movePhoto(i, 1)" class="photo-btn">→</button>
-              </div>
-              <div v-if="i === 0" class="photo-first-badge">Cover</div>
-            </div>
-          </div>
+  <!-- Media grid -->
+  <div v-if="form.media.length > 0" class="photo-grid">
+    <div
+      v-for="(item, i) in form.media"
+      :key="i"
+      class="photo-thumb"
+      :class="{ 'photo-thumb-first': i === 0, 'photo-thumb-video': item.type === 'video' }"
+    >
+      <!-- Photo -->
+      <img
+        v-if="item.type === 'photo'"
+        :src="item.src"
+        :alt="`Photo ${i + 1}`"
+        class="photo-img"
+        loading="lazy"
+      />
 
-          <p v-if="form.photos.length === 0" class="photo-empty">No photos added yet — upload at least one to continue.</p>
+      <!-- Video -->
+      <div v-else class="video-thumb-inner">
+        <video
+          :src="item.previewUrl"
+          class="photo-img"
+          muted
+          preload="metadata"
+        />
+        <div class="video-badge">🎬 Video</div>
+      </div>
 
-          <div class="btn-row">
-            <button @click="currentStep--" class="btn-secondary">← Back</button>
-            <button @click="nextStep" :disabled="form.photos.length === 0" class="btn-primary">Continue — choose music →</button>
-          </div>
-        </div>
+      <!-- Controls overlay -->
+      <div class="photo-overlay">
+        <button v-if="i > 0" @click="moveMedia(i, -1)" class="photo-btn">←</button>
+        <button @click="removeMedia(i)" class="photo-btn photo-btn-remove">✕</button>
+        <button v-if="i < form.media.length - 1" @click="moveMedia(i, 1)" class="photo-btn">→</button>
+      </div>
+
+      <div v-if="i === 0" class="photo-first-badge">Cover</div>
+    </div>
+  </div>
+
+  <p v-if="form.media.length === 0" class="photo-empty">
+    No photos or videos added yet — upload at least one photo to continue.
+  </p>
+
+  <div class="media-counts" v-if="form.media.length > 0">
+    <span>{{ photoCount }} photo{{ photoCount !== 1 ? 's' : '' }}</span>
+    <span v-if="videoCount > 0">· {{ videoCount }} video clip{{ videoCount !== 1 ? 's' : '' }}</span>
+  </div>
+
+  <div class="btn-row">
+    <button @click="currentStep--" class="btn-secondary">← Back</button>
+    <button
+      @click="nextStep"
+      :disabled="photoCount === 0"
+      class="btn-primary"
+    >
+      Continue — choose music →
+    </button>
+  </div>
+</div>
 
         <!-- ── Step 2 — Music & Style ────────────────────────────────────── -->
         <div v-else-if="currentStep === 2" class="builder-card">
@@ -338,7 +411,7 @@
 import { ref, computed, watch, nextTick, onMounted, onUnmounted } from 'vue'
 import { useTributeVideo, MUSIC_TRACKS } from '../composables/useTributeVideo'
 import TributePaymentModal from '../components/tribute/TributePaymentModal.vue'
-import type { TributeMusicTrack, TributeTransition, TributeSlideDuration, TributeOptions } from '../composables/useTributeVideo'
+import type { TributeMusicTrack, TributeTransition, TributeSlideDuration, TributeOptions, TributeMediaItem } from '../composables/useTributeVideo'
 import { supabase } from '../lib/supabase'
 import { track } from '../lib/analytics'
 import { useSeo } from '../composables/useSeo'
@@ -424,7 +497,6 @@ useSeo({
 // ── State ─────────────────────────────────────────────────────────────────────
 const currentStep           = ref(0)
 const isDragging            = ref(false)
-const fileInputRef          = ref<HTMLInputElement | null>(null)
 const turnstileRef          = ref<HTMLElement | null>(null)
 const turnstileToken        = ref('')
 const turnstileError        = ref(false)
@@ -492,17 +564,25 @@ async function handleFreeDownload() {
 }
 
 // ── Form ──────────────────────────────────────────────────────────────────────
+const MAX_VIDEOS = 5
+const MAX_MEDIA  = 35 // 30 photos + 5 videos
+
 const form = ref({
   name:          '',
   birthYear:     '',
   deathYear:     '',
   tribute:       '',
-  photos:        [] as string[],
+  photos:        [] as string[],        // kept for backwards compat
+  media:         [] as TributeMediaItem[], // new unified list
   musicTrack:    'gentle-piano' as TributeMusicTrack,
   musicFile:     null as File | null,
   slideDuration: 5 as TributeSlideDuration,
   transition:    'fade' as TributeTransition,
+  watermark:     true,
 })
+
+const videoCount = computed(() => form.value.media.filter(m => m.type === 'video').length)
+const photoCount = computed(() => form.value.media.filter(m => m.type === 'photo').length)
 
 const steps = [
   { id: 'details', label: 'Details' },
@@ -630,37 +710,94 @@ function onStorageChange(event: StorageEvent) {
 }
 
 // ── Photos ────────────────────────────────────────────────────────────────────
-function triggerFileInput() { fileInputRef.value?.click() }
+
 
 async function onFileSelect(event: Event) {
-  const target = event.target as HTMLInputElement
-  await addFiles(Array.from(target.files || []))
+  const input = event.target as HTMLInputElement
+  if (!input.files) return
+  const files = Array.from(input.files)
+  for (const file of files) {
+    if (form.value.media.length >= MAX_MEDIA) break
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      const src = e.target?.result as string
+      form.value.media.push({ type: 'photo', src })
+      form.value.photos.push(src) // keep backwards compat
+    }
+    reader.readAsDataURL(file)
+  }
+  input.value = ''
 }
 
-async function onDrop(event: DragEvent) {
+
+
+function onDrop(event: DragEvent) {
   isDragging.value = false
-  await addFiles(Array.from(event.dataTransfer?.files || []).filter((f) => f.type.startsWith('image/')))
-}
-
-async function addFiles(files: File[]) {
-  const toAdd = files.slice(0, 30 - form.value.photos.length)
-  for (const file of toAdd) {
-    const dataUrl = await new Promise<string>((resolve) => {
+  const files = Array.from(event.dataTransfer?.files || [])
+  for (const file of files) {
+    if (form.value.media.length >= MAX_MEDIA) break
+    if (file.type.startsWith('image/')) {
       const reader = new FileReader()
-      reader.onload = (e) => resolve(e.target?.result as string)
+      reader.onload = (e) => {
+        const src = e.target?.result as string
+        form.value.media.push({ type: 'photo', src })
+        form.value.photos.push(src)
+      }
       reader.readAsDataURL(file)
-    })
-    form.value.photos.push(dataUrl)
+    } else if (file.type.startsWith('video/') && videoCount.value < MAX_VIDEOS) {
+      form.value.media.push({ type: 'video', file, previewUrl: URL.createObjectURL(file) })
+    }
   }
 }
 
-function removePhoto(index: number) { form.value.photos.splice(index, 1) }
+function onVideoSelect(event: Event) {
+  const input = event.target as HTMLInputElement
+  if (!input.files) return
+  
+  const files = Array.from(input.files)
+  
+  for (const file of files) {
+    if (videoCount.value >= MAX_VIDEOS) {
+      alert(`Maximum ${MAX_VIDEOS} video clips allowed`)
+      break
+    }
+    if (form.value.media.length >= MAX_MEDIA) {
+      alert(`Maximum ${MAX_MEDIA} total media items allowed`)
+      break
+    }
+    
+    // Validate file type
+    if (!file.type.startsWith('video/')) continue
+    
+    // Validate size (max 200MB per clip)
+    if (file.size > 200 * 1024 * 1024) {
+      alert(`${file.name} is too large — maximum 200MB per video clip`)
+      continue
+    }
+    
+    const previewUrl = URL.createObjectURL(file)
+    form.value.media.push({ type: 'video', file, previewUrl })
+  }
+  
+  input.value = ''
+}
 
-function movePhoto(index: number, direction: -1 | 1) {
-  const photos = form.value.photos
-  const target = index + direction
-  if (target < 0 || target >= photos.length) return;
-  [photos[index], photos[target]] = [photos[target], photos[index]]
+function removeMedia(index: number) {
+  const item = form.value.media[index]
+  if (item.type === 'video' && item.previewUrl) {
+    URL.revokeObjectURL(item.previewUrl)
+  }
+  form.value.media.splice(index, 1)
+  // Rebuild photos array for backwards compat
+  form.value.photos = form.value.media.filter(m => m.type === 'photo').map(m => m.src!)
+}
+
+function moveMedia(index: number, direction: -1 | 1) {
+  const newIndex = index + direction
+  if (newIndex < 0 || newIndex >= form.value.media.length) return
+  const temp = form.value.media[index]
+  form.value.media[index] = form.value.media[newIndex]
+  form.value.media[newIndex] = temp
 }
 
 function onMusicUpload(event: Event) {
@@ -672,15 +809,16 @@ function onMusicUpload(event: Event) {
 // ── Build options ─────────────────────────────────────────────────────────────
 function buildOptions(watermark: boolean): TributeOptions {
   return {
+    media:         form.value.media,
     photos:        form.value.photos,
     name:          form.value.name,
-    birthYear:     form.value.birthYear || undefined,
-    deathYear:     form.value.deathYear || undefined,
+    birthYear:     form.value.birthYear,
+    deathYear:     form.value.deathYear,
     tribute:       form.value.tribute,
     musicTrack:    form.value.musicTrack,
     musicFile:     form.value.musicFile,
-    transition:    form.value.transition,
     slideDuration: form.value.slideDuration,
+    transition:    form.value.transition,
     watermark,
   }
 }
@@ -970,6 +1108,65 @@ async function verifyAndGenerate(sessionId: string) {
   border-top-color: #7C5C3B;
   animation: spin 0.8s linear infinite;
   flex-shrink: 0;
+}
+
+.upload-btn-row {
+  display: flex;
+  gap: 12px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.upload-type-btn {
+  cursor: pointer;
+  background: white;
+  border: 1px solid #E8DDD0;
+  border-radius: 999px;
+  padding: 8px 20px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #1C1917;
+  transition: background 0.15s;
+}
+
+.upload-type-btn:hover {
+  background: #F5F0E8;
+}
+
+.upload-type-btn-disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.photo-thumb-video {
+  border: 2px solid #7C5C3B;
+}
+
+.video-thumb-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.video-badge {
+  position: absolute;
+  bottom: 6px;
+  left: 6px;
+  background: rgba(28,25,23,0.75);
+  color: white;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+
+.media-counts {
+  margin-top: 8px;
+  font-size: 12px;
+  color: #8C847E;
+  display: flex;
+  gap: 8px;
 }
 
 @keyframes spin { to { transform: rotate(360deg); } }

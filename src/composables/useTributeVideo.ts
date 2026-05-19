@@ -2,20 +2,28 @@ import { ref } from 'vue'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-export type TributeTransition = 'fade' | 'slow-fade' | 'cut'
+export type TributeTransition  = 'fade' | 'slow-fade' | 'cut'
 export type TributeSlideDuration = 3 | 5 | 8
 
+export interface TributeMediaItem {
+  type: 'photo' | 'video'
+  src?: string        // base64 data URL for photos
+  file?: File         // File object for videos
+  previewUrl?: string // object URL for video preview thumbnail
+}
+
 export interface TributeOptions {
-  photos: string[]           // base64 data URLs
+  media: TributeMediaItem[]    // ordered list of photos + videos
+  photos: string[]             // kept for backwards compatibility
   name: string
   birthYear?: string
   deathYear?: string
-  tribute: string            // short tribute text (max 200 words)
+  tribute: string
   musicTrack: TributeMusicTrack
-  musicFile: File | null     // custom MP3 upload
+  musicFile: File | null
   transition: TributeTransition
   slideDuration: TributeSlideDuration
-  watermark: boolean         // true = preview, false = paid full export
+  watermark: boolean
 }
 
 export type TributeMusicTrack =
@@ -27,38 +35,34 @@ export type TributeMusicTrack =
   | 'custom'
 
 export const MUSIC_TRACKS: Record<TributeMusicTrack, { label: string; description: string; emoji: string }> = {
-  'gentle-piano':   { label: 'Gentle Piano',    description: 'Soft and peaceful',     emoji: '🎹' },
-  'warm-strings':   { label: 'Warm Strings',    description: 'Tender and warm',       emoji: '🎻' },
-  'soft-acoustic':  { label: 'Soft Acoustic',   description: 'Simple and heartfelt',  emoji: '🎸' },
-  'peaceful-melody':{ label: 'Peaceful Melody', description: 'Calm and reflective',   emoji: '🎵' },
-  'silent':         { label: 'No Music',         description: 'Silence only',          emoji: '🔇' },
-  'custom':         { label: 'Upload your own', description: 'Your chosen music',     emoji: '📁' },
+  'gentle-piano':    { label: 'Gentle Piano',    description: 'Soft and peaceful',    emoji: '🎹' },
+  'warm-strings':    { label: 'Warm Strings',    description: 'Tender and warm',      emoji: '🎻' },
+  'soft-acoustic':   { label: 'Soft Acoustic',   description: 'Simple and heartfelt', emoji: '🎸' },
+  'peaceful-melody': { label: 'Peaceful Melody', description: 'Calm and reflective',  emoji: '🎵' },
+  'silent':          { label: 'No Music',         description: 'Silence only',         emoji: '🔇' },
+  'custom':          { label: 'Upload your own', description: 'Your chosen music',    emoji: '📁' },
 }
 
-// ─── Canvas dimensions ───────────────────────────────────────────────────────
-
+// ─── Canvas dimensions ────────────────────────────────────────────────────────
 const W = 1920
 const H = 1080
 
-// ─── Colours ─────────────────────────────────────────────────────────────────
+// ─── Colours ──────────────────────────────────────────────────────────────────
+const CREAM  = '#F8F4EF'
+const DARK   = '#1C1917'
+const ACCENT = '#947449'
+const MUTED  = '#8C847E'
 
-const CREAM   = '#F8F4EF'
-const DARK    = '#1C1917'
-const ACCENT  = '#947449'
-const MUTED   = '#8C847E'
-
-// ─── Helper — load image ─────────────────────────────────────────────────────
+// ─── Helpers ──────────────────────────────────────────────────────────────────
 
 async function loadImageFromUrl(url: string): Promise<HTMLImageElement | null> {
   return new Promise((resolve) => {
     const img = new Image()
-    img.onload = () => resolve(img)
+    img.onload  = () => resolve(img)
     img.onerror = () => resolve(null)
     img.src = url
   })
 }
-
-// ─── Helper — cover-fit image onto canvas ────────────────────────────────────
 
 function drawCoverImage(
   ctx: CanvasRenderingContext2D,
@@ -74,12 +78,6 @@ function drawCoverImage(
   ctx.drawImage(img, x + (w - dw) / 2, y + (h - dh) / 2, dw, dh)
   ctx.restore()
 }
-
-// ─── Helper — rounded rect clip ──────────────────────────────────────────────
-
-
-
-// ─── Helper — wrap text ───────────────────────────────────────────────────────
 
 function wrapText(ctx: CanvasRenderingContext2D, text: string, maxW: number): string[] {
   const words = text.split(' ')
@@ -98,8 +96,6 @@ function wrapText(ctx: CanvasRenderingContext2D, text: string, maxW: number): st
   return lines
 }
 
-// ─── Helper — ornament ───────────────────────────────────────────────────────
-
 function drawOrnament(ctx: CanvasRenderingContext2D, cx: number, y: number) {
   ctx.save()
   ctx.strokeStyle = ACCENT
@@ -115,223 +111,6 @@ function drawOrnament(ctx: CanvasRenderingContext2D, cx: number, y: number) {
   ctx.restore()
 }
 
-// ─── Slide renderers ──────────────────────────────────────────────────────────
-
-async function drawTitleSlide(
-  ctx: CanvasRenderingContext2D,
-  options: TributeOptions,
-  photoImg: HTMLImageElement | null
-) {
-  const cx = W / 2
-
-  // Background — dark with cream overlay
-  ctx.fillStyle = DARK
-  ctx.fillRect(0, 0, W, H)
-
-  // Full-bleed photo behind with overlay
-  if (photoImg) {
-    ctx.save()
-    drawCoverImage(ctx, photoImg, 0, 0, W, H, 0.35)
-    ctx.restore()
-  }
-
-  // Dark gradient overlay for readability
-  const grad = ctx.createLinearGradient(0, 0, 0, H)
-  grad.addColorStop(0, 'rgba(28,25,23,0.7)')
-  grad.addColorStop(0.5, 'rgba(28,25,23,0.4)')
-  grad.addColorStop(1, 'rgba(28,25,23,0.85)')
-  ctx.fillStyle = grad
-  ctx.fillRect(0, 0, W, H)
-
-  // Name
-  ctx.textAlign = 'center'
-  ctx.font = `bold 88px Georgia, serif`
-  ctx.fillStyle = '#F5F0E8'
-  ctx.fillText(options.name, cx, H * 0.44)
-
-  // Dates if provided
-  if (options.birthYear || options.deathYear) {
-    ctx.font = `300 28px Georgia, serif`
-    ctx.fillStyle = '#C4B8AC'
-    const dates = [options.birthYear, options.deathYear].filter(Boolean).join(' — ')
-    ctx.fillText(dates, cx, H * 0.52)
-  }
-
-  drawOrnament(ctx, cx, H * 0.58)
-
-  // Tagline
-  ctx.font = `italic 22px Georgia, serif`
-  ctx.fillStyle = MUTED
-  ctx.fillText('A life remembered with love', cx, H * 0.65)
-
-  // Watermark
-  if (options.watermark) {
-    drawWatermark(ctx)
-  }
-}
-
-async function drawPhotoSlide(
-  ctx: CanvasRenderingContext2D,
-  img: HTMLImageElement,
-  options: TributeOptions,
-  slideIndex: number,
-  totalPhotos: number
-) {
- 
-
-  // Cream background
-  ctx.fillStyle = CREAM
-  ctx.fillRect(0, 0, W, H)
-
-  // Main photo — large, centred with elegant frame
-  const photoW = W * 0.62
-  const photoH = H * 0.72
-  const photoX = (W - photoW) / 2
-  const photoY = (H - photoH) / 2 - 20
-
-  // Subtle shadow
-  ctx.save()
-  ctx.shadowColor = 'rgba(0,0,0,0.15)'
-  ctx.shadowBlur = 40
-  ctx.shadowOffsetY = 8
-  ctx.fillStyle = '#fff'
-  ctx.fillRect(photoX - 6, photoY - 6, photoW + 12, photoH + 12)
-  ctx.restore()
-
-  // Photo clipped
-  ctx.save()
-  ctx.beginPath()
-  ctx.rect(photoX, photoY, photoW, photoH)
-  ctx.clip()
-  drawCoverImage(ctx, img, photoX, photoY, photoW, photoH)
-  ctx.restore()
-
-  // Photo border
-  ctx.strokeStyle = '#E8DDD0'
-  ctx.lineWidth = 1.5
-  ctx.strokeRect(photoX, photoY, photoW, photoH)
-
-  // Name watermark bottom left
-  ctx.font = `italic 18px Georgia, serif`
-  ctx.fillStyle = MUTED
-  ctx.textAlign = 'left'
-  ctx.fillText(options.name, photoX + 12, photoY + photoH + 28)
-
-  // Slide counter bottom right
-  ctx.textAlign = 'right'
-  ctx.font = `300 14px Georgia, serif`
-  ctx.fillStyle = '#C4B8AC'
-  ctx.fillText(`${slideIndex} / ${totalPhotos}`, photoX + photoW, photoY + photoH + 28)
-
-  // Subtle top rule
-  ctx.strokeStyle = '#E8DDD0'
-  ctx.lineWidth = 0.5
-  ctx.beginPath()
-  ctx.moveTo(60, 36)
-  ctx.lineTo(W - 60, 36)
-  ctx.stroke()
-
-  if (options.watermark) drawWatermark(ctx)
-}
-
-async function drawTributeTextSlide(
-  ctx: CanvasRenderingContext2D,
-  options: TributeOptions,
-  photoImg: HTMLImageElement | null
-) {
-  const cx = W / 2
-
-  // Dark background
-  ctx.fillStyle = DARK
-  ctx.fillRect(0, 0, W, H)
-
-  // Blurred photo backdrop
-  if (photoImg) {
-    ctx.save()
-    drawCoverImage(ctx, photoImg, 0, 0, W, H, 0.2)
-    ctx.restore()
-  }
-
-  // Overlay
-  ctx.fillStyle = 'rgba(28,25,23,0.75)'
-  ctx.fillRect(0, 0, W, H)
-
-  // Ornament top
-  drawOrnament(ctx, cx, H * 0.28)
-
-  // Tribute text
-  ctx.textAlign = 'center'
-  ctx.font = `italic 34px Georgia, serif`
-  ctx.fillStyle = '#E8DDD0'
-
-  const maxW = 900
-  const lines = wrapText(ctx, `"${options.tribute}"`, maxW)
-  const lineH = 52
-  const totalTextH = lines.length * lineH
-  const startY = H / 2 - totalTextH / 2
-
-  lines.forEach((line, i) => {
-    ctx.fillText(line, cx, startY + i * lineH)
-  })
-
-  // Ornament bottom
-  drawOrnament(ctx, cx, H * 0.72)
-
-  // Name attribution
-  ctx.font = `300 20px Georgia, serif`
-  ctx.fillStyle = MUTED
-  ctx.fillText(`— ${options.name}`, cx, H * 0.78)
-
-  if (options.watermark) drawWatermark(ctx)
-}
-
-async function drawClosingSlide(
-  ctx: CanvasRenderingContext2D,
-  options: TributeOptions,
-  photoImg: HTMLImageElement | null
-) {
-  const cx = W / 2
-
-  ctx.fillStyle = DARK
-  ctx.fillRect(0, 0, W, H)
-
-  if (photoImg) {
-    ctx.save()
-    drawCoverImage(ctx, photoImg, 0, 0, W, H, 0.25)
-    ctx.restore()
-  }
-
-  ctx.fillStyle = 'rgba(28,25,23,0.8)'
-  ctx.fillRect(0, 0, W, H)
-
-  ctx.textAlign = 'center'
-
-  drawOrnament(ctx, cx, H * 0.36)
-
-  ctx.font = `italic 52px Georgia, serif`
-  ctx.fillStyle = '#F5F0E8'
-  ctx.fillText(options.name, cx, H * 0.46)
-
-  if (options.birthYear || options.deathYear) {
-    const dates = [options.birthYear, options.deathYear].filter(Boolean).join(' — ')
-    ctx.font = `300 22px Georgia, serif`
-    ctx.fillStyle = '#C4B8AC'
-    ctx.fillText(dates, cx, H * 0.54)
-  }
-
-  drawOrnament(ctx, cx, H * 0.61)
-
-  ctx.font = `300 18px Georgia, serif`
-  ctx.fillStyle = MUTED
-  ctx.fillText('Forever in our hearts', cx, H * 0.68)
-
-  ctx.font = `300 14px Georgia, serif`
-  ctx.fillStyle = '#5C534E'
-  ctx.fillText('Created with Tell Me Your Story · tellmeyourstory.uk', cx, H - 32)
-
-  if (options.watermark) drawWatermark(ctx)
-}
-
 function drawWatermark(ctx: CanvasRenderingContext2D) {
   ctx.save()
   ctx.globalAlpha = 0.4
@@ -342,6 +121,213 @@ function drawWatermark(ctx: CanvasRenderingContext2D) {
   ctx.rotate(-Math.PI / 12)
   ctx.fillText('PREVIEW — tellmeyourstory.uk', 0, 0)
   ctx.restore()
+}
+
+// ─── Slide renderers ──────────────────────────────────────────────────────────
+
+async function drawTitleSlide(
+  ctx: CanvasRenderingContext2D,
+  options: TributeOptions,
+  photoImg: HTMLImageElement | null
+) {
+  const cx = W / 2
+  ctx.fillStyle = DARK
+  ctx.fillRect(0, 0, W, H)
+  if (photoImg) {
+    ctx.save()
+    drawCoverImage(ctx, photoImg, 0, 0, W, H, 0.35)
+    ctx.restore()
+  }
+  const grad = ctx.createLinearGradient(0, 0, 0, H)
+  grad.addColorStop(0, 'rgba(28,25,23,0.7)')
+  grad.addColorStop(0.5, 'rgba(28,25,23,0.4)')
+  grad.addColorStop(1, 'rgba(28,25,23,0.85)')
+  ctx.fillStyle = grad
+  ctx.fillRect(0, 0, W, H)
+  ctx.textAlign = 'center'
+  ctx.font = `bold 88px Georgia, serif`
+  ctx.fillStyle = '#F5F0E8'
+  ctx.fillText(options.name, cx, H * 0.44)
+  if (options.birthYear || options.deathYear) {
+    ctx.font = `300 28px Georgia, serif`
+    ctx.fillStyle = '#C4B8AC'
+    const dates = [options.birthYear, options.deathYear].filter(Boolean).join(' — ')
+    ctx.fillText(dates, cx, H * 0.52)
+  }
+  drawOrnament(ctx, cx, H * 0.58)
+  ctx.font = `italic 22px Georgia, serif`
+  ctx.fillStyle = MUTED
+  ctx.fillText('A life remembered with love', cx, H * 0.65)
+  if (options.watermark) drawWatermark(ctx)
+}
+
+async function drawPhotoSlide(
+  ctx: CanvasRenderingContext2D,
+  img: HTMLImageElement,
+  options: TributeOptions,
+  slideIndex: number,
+  totalItems: number
+) {
+  ctx.fillStyle = CREAM
+  ctx.fillRect(0, 0, W, H)
+  const photoW = W * 0.62
+  const photoH = H * 0.72
+  const photoX = (W - photoW) / 2
+  const photoY = (H - photoH) / 2 - 20
+  ctx.save()
+  ctx.shadowColor = 'rgba(0,0,0,0.15)'
+  ctx.shadowBlur = 40
+  ctx.shadowOffsetY = 8
+  ctx.fillStyle = '#fff'
+  ctx.fillRect(photoX - 6, photoY - 6, photoW + 12, photoH + 12)
+  ctx.restore()
+  ctx.save()
+  ctx.beginPath()
+  ctx.rect(photoX, photoY, photoW, photoH)
+  ctx.clip()
+  drawCoverImage(ctx, img, photoX, photoY, photoW, photoH)
+  ctx.restore()
+  ctx.strokeStyle = '#E8DDD0'
+  ctx.lineWidth = 1.5
+  ctx.strokeRect(photoX, photoY, photoW, photoH)
+  ctx.font = `italic 18px Georgia, serif`
+  ctx.fillStyle = MUTED
+  ctx.textAlign = 'left'
+  ctx.fillText(options.name, photoX + 12, photoY + photoH + 28)
+  ctx.textAlign = 'right'
+  ctx.font = `300 14px Georgia, serif`
+  ctx.fillStyle = '#C4B8AC'
+  ctx.fillText(`${slideIndex} / ${totalItems}`, photoX + photoW, photoY + photoH + 28)
+  ctx.strokeStyle = '#E8DDD0'
+  ctx.lineWidth = 0.5
+  ctx.beginPath()
+  ctx.moveTo(60, 36)
+  ctx.lineTo(W - 60, 36)
+  ctx.stroke()
+  if (options.watermark) drawWatermark(ctx)
+}
+
+async function drawTributeTextSlide(
+  ctx: CanvasRenderingContext2D,
+  options: TributeOptions,
+  photoImg: HTMLImageElement | null
+) {
+  const cx = W / 2
+  ctx.fillStyle = DARK
+  ctx.fillRect(0, 0, W, H)
+  if (photoImg) {
+    ctx.save()
+    drawCoverImage(ctx, photoImg, 0, 0, W, H, 0.2)
+    ctx.restore()
+  }
+  ctx.fillStyle = 'rgba(28,25,23,0.75)'
+  ctx.fillRect(0, 0, W, H)
+  drawOrnament(ctx, cx, H * 0.28)
+  ctx.textAlign = 'center'
+  ctx.font = `italic 34px Georgia, serif`
+  ctx.fillStyle = '#E8DDD0'
+  const maxW = 900
+  const lines = wrapText(ctx, `"${options.tribute}"`, maxW)
+  const lineH = 52
+  const totalTextH = lines.length * lineH
+  const startY = H / 2 - totalTextH / 2
+  lines.forEach((line, i) => {
+    ctx.fillText(line, cx, startY + i * lineH)
+  })
+  drawOrnament(ctx, cx, H * 0.72)
+  ctx.font = `300 20px Georgia, serif`
+  ctx.fillStyle = MUTED
+  ctx.fillText(`— ${options.name}`, cx, H * 0.78)
+  if (options.watermark) drawWatermark(ctx)
+}
+
+async function drawClosingSlide(
+  ctx: CanvasRenderingContext2D,
+  options: TributeOptions,
+  photoImg: HTMLImageElement | null
+) {
+  const cx = W / 2
+  ctx.fillStyle = DARK
+  ctx.fillRect(0, 0, W, H)
+  if (photoImg) {
+    ctx.save()
+    drawCoverImage(ctx, photoImg, 0, 0, W, H, 0.25)
+    ctx.restore()
+  }
+  ctx.fillStyle = 'rgba(28,25,23,0.8)'
+  ctx.fillRect(0, 0, W, H)
+  ctx.textAlign = 'center'
+  drawOrnament(ctx, cx, H * 0.36)
+  ctx.font = `italic 52px Georgia, serif`
+  ctx.fillStyle = '#F5F0E8'
+  ctx.fillText(options.name, cx, H * 0.46)
+  if (options.birthYear || options.deathYear) {
+    const dates = [options.birthYear, options.deathYear].filter(Boolean).join(' — ')
+    ctx.font = `300 22px Georgia, serif`
+    ctx.fillStyle = '#C4B8AC'
+    ctx.fillText(dates, cx, H * 0.54)
+  }
+  drawOrnament(ctx, cx, H * 0.61)
+  ctx.font = `300 18px Georgia, serif`
+  ctx.fillStyle = MUTED
+  ctx.fillText('Forever in our hearts', cx, H * 0.68)
+  ctx.font = `300 14px Georgia, serif`
+  ctx.fillStyle = '#5C534E'
+  ctx.fillText('Created with Tell Me Your Story · tellmeyourstory.uk', cx, H - 32)
+  if (options.watermark) drawWatermark(ctx)
+}
+
+// ─── Video frame extractor ────────────────────────────────────────────────────
+// Extracts frames from a video file as PNG ArrayBuffers for FFmpeg
+
+async function extractVideoFrames(
+  file: File,
+  fps: number,
+  progressCallback: (p: number) => void
+): Promise<{ frames: ArrayBuffer[]; duration: number }> {
+  return new Promise((resolve, reject) => {
+    const video = document.createElement('video')
+    video.muted = true
+    video.playsInline = true
+    const url = URL.createObjectURL(file)
+    video.src = url
+
+    video.onloadedmetadata = async () => {
+      const duration = Math.min(video.duration, 30) // cap at 30s
+      const totalFrames = Math.ceil(duration * fps)
+      const canvas = document.createElement('canvas')
+      canvas.width = W
+      canvas.height = H
+      const ctx = canvas.getContext('2d')!
+      const frames: ArrayBuffer[] = []
+
+      for (let f = 0; f < totalFrames; f++) {
+        const time = f / fps
+        video.currentTime = time
+        await new Promise<void>((r) => { video.onseeked = () => r() })
+
+        // Draw video frame cover-fitted to canvas
+        ctx.fillStyle = DARK
+        ctx.fillRect(0, 0, W, H)
+        const scale = Math.max(W / video.videoWidth, H / video.videoHeight)
+        const dw = video.videoWidth * scale
+        const dh = video.videoHeight * scale
+        ctx.drawImage(video, (W - dw) / 2, (H - dh) / 2, dw, dh)
+
+        const blob: Blob = await new Promise((r) => canvas.toBlob((b) => r(b!), 'image/png'))
+        frames.push(await blob.arrayBuffer())
+        progressCallback(f / totalFrames)
+      }
+
+      URL.revokeObjectURL(url)
+      resolve({ frames, duration })
+    }
+
+    video.onerror = () => {
+      URL.revokeObjectURL(url)
+      reject(new Error('Could not load video file'))
+    }
+  })
 }
 
 // ─── Main composable ──────────────────────────────────────────────────────────
@@ -373,7 +359,7 @@ export function useTributeVideo() {
       })
 
       ffmpeg.on('progress', ({ progress: p }) => {
-        progress.value = Math.round(60 + p * 35)
+        progress.value = Math.round(70 + p * 25)
         progressLabel.value = `Encoding tribute… ${progress.value}%`
       })
 
@@ -383,38 +369,51 @@ export function useTributeVideo() {
       canvas.height = H
       const ctx = canvas.getContext('2d')!
 
-      // ── Pre-load all photos ───────────────────────────────────────────────
+      // ── Build media list ──────────────────────────────────────────────────
+      // Support both old (photos array) and new (media array) formats
+      const mediaItems: TributeMediaItem[] = options.media?.length
+        ? options.media
+        : options.photos.map(src => ({ type: 'photo' as const, src }))
+
+      const photoItems  = mediaItems.filter(m => m.type === 'photo')
+      const firstPhotoSrc = photoItems[0]?.src || null
+
+      // Pre-load all photo images
       progressLabel.value = 'Loading photos…'
       progress.value = 5
 
-      const photoImages: (HTMLImageElement | null)[] = []
-      for (const photoUrl of options.photos) {
-        photoImages.push(await loadImageFromUrl(photoUrl))
+      const photoImageCache = new Map<string, HTMLImageElement | null>()
+      for (const item of mediaItems) {
+        if (item.type === 'photo' && item.src && !photoImageCache.has(item.src)) {
+          photoImageCache.set(item.src, await loadImageFromUrl(item.src))
+        }
       }
+
+      const firstPhotoImg = firstPhotoSrc ? (photoImageCache.get(firstPhotoSrc) ?? null) : null
 
       // ── Build slide list ──────────────────────────────────────────────────
       type TributeSlide =
         | { type: 'title' }
-        | { type: 'photo'; photoIndex: number }
+        | { type: 'photo'; src: string }
+        | { type: 'video'; file: File }
         | { type: 'tribute-text' }
         | { type: 'closing' }
 
       const slides: TributeSlide[] = []
-
-      // Title slide
       slides.push({ type: 'title' })
 
-      // Photo slides — interleave tribute text roughly in middle
-      const halfPhotos = Math.floor(options.photos.length / 2)
-      for (let i = 0; i < options.photos.length; i++) {
-        slides.push({ type: 'photo', photoIndex: i })
-        // Insert tribute text after half the photos (if tribute text exists)
-        if (i === halfPhotos - 1 && options.tribute.trim()) {
+      const halfItems = Math.floor(mediaItems.length / 2)
+      for (let i = 0; i < mediaItems.length; i++) {
+        const item = mediaItems[i]
+        if (item.type === 'photo' && item.src) {
+          slides.push({ type: 'photo', src: item.src })
+        } else if (item.type === 'video' && item.file) {
+          slides.push({ type: 'video', file: item.file })
+        }
+        if (i === halfItems - 1 && options.tribute.trim()) {
           slides.push({ type: 'tribute-text' })
         }
       }
-
-      // Closing slide
       slides.push({ type: 'closing' })
 
       // ── Render all slides ─────────────────────────────────────────────────
@@ -427,127 +426,141 @@ export function useTributeVideo() {
         : 2
       const transitionFrameCount = transitionSecs * fps
 
-      const slideBuffers: ArrayBuffer[] = []
+      // Each segment is either a buffer array (photo/title/text) or video frames
+      type Segment = { frames: ArrayBuffer[]; isVideo: boolean }
+      const segments: Segment[] = []
 
-      for (let s = 0; s < slides.length; s++) {
-        const slide = slides[s]
-        const firstPhoto = photoImages[0]
+      let slideCount = 0
+      for (const slide of slides) {
+        slideCount++
+        progress.value = 5 + Math.round((slideCount / slides.length) * 40)
+        progressLabel.value = `Rendering slide ${slideCount} of ${slides.length}…`
 
-        progress.value = 5 + Math.round((s / slides.length) * 45)
-        progressLabel.value = `Rendering slide ${s + 1} of ${slides.length}…`
-
-        if (slide.type === 'title') {
-          await drawTitleSlide(ctx, options, firstPhoto)
-        } else if (slide.type === 'photo') {
-          const img = photoImages[slide.photoIndex]
-          if (img) {
-            await drawPhotoSlide(
-              ctx, img, options,
-              slide.photoIndex + 1,
-              options.photos.length
-            )
+        if (slide.type === 'video') {
+          // Extract video frames
+          progressLabel.value = `Extracting video clip ${slideCount}…`
+          const { frames } = await extractVideoFrames(
+            slide.file,
+            fps,
+            (p) => {
+              progress.value = 5 + Math.round((slideCount / slides.length) * 40) + Math.round(p * 5)
+            }
+          )
+          segments.push({ frames, isVideo: true })
+        } else {
+          // Render canvas slide to single frame, then repeat for duration
+          if (slide.type === 'title') {
+            await drawTitleSlide(ctx, options, firstPhotoImg)
+          } else if (slide.type === 'photo') {
+            const img = photoImageCache.get(slide.src) ?? null
+            if (img) {
+              const photoIndex = photoItems.findIndex(p => p.src === slide.src)
+              await drawPhotoSlide(ctx, img, options, photoIndex + 1, photoItems.length)
+            }
+          } else if (slide.type === 'tribute-text') {
+            await drawTributeTextSlide(ctx, options, firstPhotoImg)
+          } else if (slide.type === 'closing') {
+            await drawClosingSlide(ctx, options, firstPhotoImg)
           }
-        } else if (slide.type === 'tribute-text') {
-          await drawTributeTextSlide(ctx, options, firstPhoto)
-        } else if (slide.type === 'closing') {
-          await drawClosingSlide(ctx, options, firstPhoto)
-        }
 
-        const blob: Blob = await new Promise((r) => canvas.toBlob((b) => r(b!), 'image/png'))
-        slideBuffers.push(await blob.arrayBuffer())
+          const blob: Blob = await new Promise((r) => canvas.toBlob((b) => r(b!), 'image/png'))
+          const buf = await blob.arrayBuffer()
+          // Repeat frame for slide duration
+          const frameCount = frameDuration * fps
+          const frames: ArrayBuffer[] = Array(frameCount).fill(buf)
+          segments.push({ frames, isVideo: false })
+        }
       }
 
-      // ── Write frames with transitions ─────────────────────────────────────
+      // ── Write all frames with transitions ─────────────────────────────────
       progressLabel.value = 'Writing frames…'
       progress.value = 52
 
       let frameIndex = 0
 
-      async function writeFrames(buf: ArrayBuffer, count: number) {
-        for (let f = 0; f < count; f++) {
-          const copy = new Uint8Array(buf.byteLength)
-          copy.set(new Uint8Array(buf))
-          await ffmpeg.writeFile(`frame${String(frameIndex).padStart(5, '0')}.png`, copy)
-          frameIndex++
-        }
+      async function writeFrame(buf: ArrayBuffer) {
+        const copy = new Uint8Array(buf.byteLength)
+        copy.set(new Uint8Array(buf))
+        await ffmpeg.writeFile(`frame${String(frameIndex).padStart(5, '0')}.png`, copy)
+        frameIndex++
       }
 
-      async function captureBlend(
-        currImg: HTMLImageElement,
-        nextImg: HTMLImageElement,
-        alpha: number
-      ): Promise<ArrayBuffer> {
-        ctx.clearRect(0, 0, W, H)
-        ctx.globalAlpha = 1
-        ctx.drawImage(currImg, 0, 0)
-        ctx.globalAlpha = alpha
-        ctx.drawImage(nextImg, 0, 0)
-        ctx.globalAlpha = 1
-        const blob: Blob = await new Promise((r) => canvas.toBlob((b) => r(b!), 'image/png'))
-        return blob.arrayBuffer()
-      }
-
-      for (let s = 0; s < slideBuffers.length; s++) {
-        const buf = slideBuffers[s]
+      for (let s = 0; s < segments.length; s++) {
+        const seg = segments[s]
         const isFirst = s === 0
-        const isLast = s === slideBuffers.length - 1
-        const leadIn  = isFirst ? 0 : Math.floor(transitionFrameCount / 2)
-        const leadOut = isLast  ? 0 : Math.floor(transitionFrameCount / 2)
-        const staticFrames = Math.max(1, frameDuration * fps - leadIn - leadOut)
+        const isLast  = s === segments.length - 1
 
-        await writeFrames(buf, staticFrames)
+        if (seg.isVideo) {
+          // Write all video frames directly — no transitions for video clips
+          for (const frame of seg.frames) {
+            await writeFrame(frame)
+          }
+        } else {
+          // Static slide — write frames with transition
+          const leadIn  = isFirst ? 0 : Math.floor(transitionFrameCount / 2)
+          const leadOut = isLast  ? 0 : Math.floor(transitionFrameCount / 2)
+          const staticFrames = Math.max(1, seg.frames.length - leadIn - leadOut)
+          const frameBuf = seg.frames[0]
 
-        if (transitionFrameCount > 0 && !isLast) {
-          const currBlob = new Blob([slideBuffers[s]], { type: 'image/png' })
-          const nextBlob = new Blob([slideBuffers[s + 1]], { type: 'image/png' })
-
-          const currImg = new Image()
-          currImg.src = URL.createObjectURL(currBlob)
-          await new Promise((r) => { currImg.onload = r })
-
-          const nextImg = new Image()
-          nextImg.src = URL.createObjectURL(nextBlob)
-          await new Promise((r) => { nextImg.onload = r })
-
-          for (let t = 0; t < transitionFrameCount; t++) {
-            const alpha = t / (transitionFrameCount - 1)
-            const blendBuf = await captureBlend(currImg, nextImg, alpha)
-            const copy = new Uint8Array(blendBuf.byteLength)
-            copy.set(new Uint8Array(blendBuf))
-            await ffmpeg.writeFile(`frame${String(frameIndex).padStart(5, '0')}.png`, copy)
-            frameIndex++
+          for (let f = 0; f < staticFrames; f++) {
+            await writeFrame(frameBuf)
           }
 
-          URL.revokeObjectURL(currImg.src)
-          URL.revokeObjectURL(nextImg.src)
+          // Fade transition to next segment
+          if (transitionFrameCount > 0 && !isLast) {
+            const currBuf = seg.frames[0]
+            const nextSeg = segments[s + 1]
+            const nextBuf = nextSeg.frames[0]
+
+            const currBlob = new Blob([currBuf], { type: 'image/png' })
+            const nextBlob = new Blob([nextBuf], { type: 'image/png' })
+
+            const currImg = new Image()
+            currImg.src = URL.createObjectURL(currBlob)
+            await new Promise(r => { currImg.onload = r })
+
+            const nextImg = new Image()
+            nextImg.src = URL.createObjectURL(nextBlob)
+            await new Promise(r => { nextImg.onload = r })
+
+            for (let t = 0; t < transitionFrameCount; t++) {
+              const alpha = t / (transitionFrameCount - 1)
+              ctx.clearRect(0, 0, W, H)
+              ctx.globalAlpha = 1
+              ctx.drawImage(currImg, 0, 0)
+              ctx.globalAlpha = alpha
+              ctx.drawImage(nextImg, 0, 0)
+              ctx.globalAlpha = 1
+              const blendBlob: Blob = await new Promise(r => canvas.toBlob(b => r(b!), 'image/png'))
+              await writeFrame(await blendBlob.arrayBuffer())
+            }
+
+            URL.revokeObjectURL(currImg.src)
+            URL.revokeObjectURL(nextImg.src)
+          }
         }
       }
 
-      // ── Build ffmpeg command ──────────────────────────────────────────────
-      progress.value = 58
+      // ── Assemble with FFmpeg ──────────────────────────────────────────────
+      progress.value = 68
       progressLabel.value = 'Assembling tribute video…'
 
-      const totalDuration = slides.length * frameDuration
-        + (slides.length - 1) * transitionSecs
+      // Calculate total duration
+      let totalDuration = 0
+      for (const seg of segments) {
+        totalDuration += seg.frames.length / fps
+      }
 
-      // ── Resolve music source ──────────────────────────────────────────────
+      // Load music
       progressLabel.value = 'Loading music…'
-
       let resolvedMusicFile: File | null = options.musicFile
 
-      // If a curated track is selected, fetch it from public/audio/
-      if (
-        options.musicTrack !== 'custom' &&
-        options.musicTrack !== 'silent' &&
-        !options.musicFile
-      ) {
+      if (options.musicTrack !== 'custom' && options.musicTrack !== 'silent' && !options.musicFile) {
         try {
           const response = await fetch(`/audio/${options.musicTrack}.mp3`)
           if (response.ok) {
             const blob = await response.blob()
             resolvedMusicFile = new File([blob], `${options.musicTrack}.mp3`, { type: 'audio/mp3' })
-          } else {
-            console.warn(`Could not load track /audio/${options.musicTrack}.mp3 — continuing without music`)
           }
         } catch {
           console.warn('Music fetch failed — continuing without music')
@@ -561,7 +574,6 @@ export function useTributeVideo() {
         '-i', 'frame%05d.png',
       ]
 
-      // Music
       if (hasMusicFile && resolvedMusicFile) {
         const musicData = await fetchFile(resolvedMusicFile)
         await ffmpeg.writeFile('music.mp3', musicData)
@@ -630,9 +642,7 @@ export function useTributeVideo() {
 
     } catch (err) {
       console.error('Tribute generation error:', err)
-      error.value = err instanceof Error
-        ? err.message
-        : 'Something went wrong. Please try again.'
+      error.value = err instanceof Error ? err.message : 'Something went wrong. Please try again.'
     } finally {
       isGenerating.value = false
     }
