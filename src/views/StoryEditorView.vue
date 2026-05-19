@@ -62,12 +62,12 @@
               v-if="showMoreActions"
               class="absolute right-0 top-full z-30 mt-1 w-52 rounded-2xl border border-stone-200 bg-white py-2 shadow-lg"
             >
-              <button
+               <button
                 @click="openPremiumPreview(); showMoreActions = false"
                 class="w-full px-4 py-2.5 text-left text-sm text-stone-700 hover:bg-stone-50"
               >
-                Preview finished keepsake
-              </button>
+  👁️ Preview finished keepsake
+</button>
               <button
                 v-if="hasTier4Access"
                 @click="showTrueBookModal = true; showMoreActions = false"
@@ -87,32 +87,43 @@
                 :disabled="!isPaidUser || isExportingWord"
                 class="w-full px-4 py-2.5 text-left text-sm text-stone-700 hover:bg-stone-50 disabled:opacity-50"
               >
-                {{ isExportingWord ? 'Preparing…' : 'Download Word doc' }}
+                {{ isExportingWord ? 'Preparing…' : '📄 Download Word doc' }}
               </button>
               <button
                 v-if="isPaidUser"
                 @click="showPdfCustomizer = true; showMoreActions = false"
                 class="w-full px-4 py-2.5 text-left text-sm text-stone-700 hover:bg-stone-50"
               >
-                {{ hasTier4Access ? 'Design keepsake' : 'Preview premium design' }}
+                {{ hasTier4Access ? '🎨 Design keepsake' : '🎨 Preview premium design' }}
               </button>
               <button
                 v-if="isPaidUser && !hasImageExportAccess"
                 @click="upgradeFromTopButtons(); showMoreActions = false"
                 class="w-full px-4 py-2.5 text-left text-sm text-[#7C5C3B] hover:bg-stone-50"
               >
-                Add photos & premium layouts
+                ⭐ Add photos & premium layouts
               </button>
             </div>
           </div>
 
           <!-- Cover image button (tier 4 only) -->
-          <div v-if="hasTier4Access" class="relative">
-            <label class="cursor-pointer rounded-full border border-stone-200 bg-white px-3 py-2 text-xs font-medium text-stone-700 transition hover:bg-stone-50">
-              {{ coverImageUrl ? '🖼️ Cover' : '+ Cover' }}
-              <input type="file" accept="image/*" @change="handleCoverImageUpload" class="hidden" />
-            </label>
-          </div>
+          <div v-if="hasTier4Access" class="relative flex items-center gap-2">
+  <img
+    v-if="coverImageUrl"
+    :src="coverImageUrl"
+    class="h-8 w-6 rounded object-cover border border-stone-200"
+    alt="Cover"
+  />
+  <label class="cursor-pointer rounded-full border border-stone-200 bg-white px-3 py-2 text-xs font-medium text-stone-700 transition hover:bg-stone-50">
+    {{ coverImageUrl ? 'Change cover' : '+ Cover image' }}
+    <input type="file" accept="image/*" @change="handleCoverImageUpload" class="hidden" />
+  </label>
+  <button
+    v-if="coverImageUrl"
+    @click="removeCoverImage"
+    class="text-xs text-stone-400 hover:text-red-500"
+  >✕</button>
+</div>
 
         </div>
       </div>
@@ -736,6 +747,12 @@ async function savePdfDesign() {
   pdfSettingsSaved.value = 'PDF design saved'
   showPdfCustomizer.value = false
   setTimeout(() => { if (pdfSettingsSaved.value === 'PDF design saved') pdfSettingsSaved.value = '' }, 1500)
+}
+
+async function removeCoverImage() {
+  coverImageUrl.value = ''
+  coverImageStatus.value = ''
+  await supabase.from('story_projects').update({ cover_image_url: null }).eq('id', projectId)
 }
 
 function updateCurrentAnswer(value: string) {
