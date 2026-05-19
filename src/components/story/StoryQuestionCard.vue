@@ -439,9 +439,12 @@ watch(
 
 // ── Voice recording flow ──────────────────────────────────────────────────────
 
+// Replace handleVoiceToggle in StoryQuestionCard.vue (lines 442–477)
+// with this clean version — no manual delays needed
+
 async function handleVoiceToggle() {
   if (voiceRecording.isRecording.value) {
-    // Stop and save
+    // ── Stop and save ────────────────────────────────────────────────────
     const result = await voiceRecording.stopRecording()
     if (!result || !props.section) return
 
@@ -460,21 +463,27 @@ async function handleVoiceToggle() {
       await nextTick()
     }
   } else {
-    // If re-recording — stop existing playback and pause audio
+    // ── Start recording ──────────────────────────────────────────────────
+    // Pause existing playback if any
     if (existingAudioRef.value) {
       existingAudioRef.value.pause()
       isPlayingExisting.value = false
     }
-if (existingRecording.value) {
-    await new Promise(resolve => setTimeout(resolve, 600))
-  }
 
-  await voiceRecording.startRecording(props.section?.answer || '')
-    // Wait for any existing recognition to fully release   
-
-   
+    // killRecognition() inside startRecording handles all cleanup
+    await voiceRecording.startRecording(props.section?.answer || '')
   }
 }
+
+// Also update cancelRecording calls to await since it's now async:
+// In the section watcher (line 534):
+//   if (voiceRecording.isRecording.value) await voiceRecording.cancelRecording()
+//
+// In handleNextClick (line 521):
+//   if (voiceRecording.isRecording.value) await voiceRecording.cancelRecording()
+//
+// In onUnmounted (line 550):
+//   voiceRecording.cancelRecording()  // fine to not await in unmounted
 
 // ── Existing recording playback ───────────────────────────────────────────────
 
@@ -517,8 +526,8 @@ function onAnswerInput(event: Event) {
 
 // ── Navigation ────────────────────────────────────────────────────────────────
 
-function handleNextClick() {
-  if (voiceRecording.isRecording.value) voiceRecording.cancelRecording()
+async function handleNextClick() {
+ if (voiceRecording.isRecording.value) await voiceRecording.cancelRecording()
   if (props.currentIndex === props.totalSections - 1) {
     emit('finish')
   } else {
@@ -531,7 +540,7 @@ function handleNextClick() {
 watch(
   () => props.section?.id,
   async () => {
-    if (voiceRecording.isRecording.value) voiceRecording.cancelRecording()
+    if (voiceRecording.isRecording.value) await voiceRecording.cancelRecording()
     existingRecording.value = null
     writingAssistSuggestions.value = []
     writingAssistError.value = ''
