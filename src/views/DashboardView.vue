@@ -194,42 +194,42 @@
                     {{ deletingStoryId === story.id ? 'Deleting...' : 'Delete' }}
                   </button>
 
-                  <!-- Family share -->
+<!-- Family share -->
 <div class="mt-4 border-t border-stone-100 pt-4">
   <div v-if="!shareLinks[story.id]">
     <button
       @click="generateShareLink(story.id)"
       :disabled="sharingStoryId === story.id"
-      class="inline-flex items-center gap-1.5 text-xs text-stone-500 hover:text-stone-800 transition disabled:opacity-50"
+      class="inline-flex items-center gap-1.5 rounded-full border border-stone-200 bg-stone-50 px-3 py-1.5 text-xs font-medium text-stone-600 transition hover:bg-stone-100 disabled:opacity-50"
     >
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/>
         <polyline points="16 6 12 2 8 6"/>
         <line x1="12" y1="2" x2="12" y2="15"/>
       </svg>
-      {{ sharingStoryId === story.id ? 'Generating link…' : 'Share with family' }}
+      {{ sharingStoryId === story.id ? 'Generating…' : 'Share with family' }}
     </button>
   </div>
 
-  <div v-else class="space-y-2">
+  <div v-else class="rounded-2xl border border-stone-200 bg-stone-50 p-3 space-y-2">
     <p class="text-xs font-medium text-stone-700">🤍 Share with family</p>
-    <div class="flex items-center gap-2 rounded-xl border border-stone-200 bg-stone-50 px-3 py-2">
-      <p class="flex-1 truncate text-xs text-stone-600">{{ shareLinks[story.id] }}</p>
+    <div class="flex items-center gap-2 rounded-xl border border-stone-200 bg-white px-3 py-2">
+      <p class="flex-1 truncate text-xs text-stone-500 min-w-0">{{ shareLinks[story.id] }}</p>
       <button
         @click="copyShareLink(story.id)"
-        class="flex-shrink-0 text-xs font-medium text-[#7C5C3B] hover:underline"
+        class="flex-shrink-0 rounded-full bg-stone-900 px-3 py-1 text-xs font-medium text-white transition hover:opacity-80"
       >
-        {{ shareCopied === story.id ? 'Copied!' : 'Copy' }}
+        {{ shareCopied === story.id ? '✓ Copied' : 'Copy' }}
       </button>
     </div>
-    <div class="flex gap-2">
+    <div class="flex items-center gap-2">
       <button
         @click="shareStoryWhatsApp(story.id, story.title)"
         class="inline-flex items-center gap-1 rounded-full border border-stone-200 bg-white px-3 py-1.5 text-xs font-medium text-stone-700 transition hover:bg-stone-50"
       >
         💬 WhatsApp
       </button>
-      <p class="self-center text-[10px] text-stone-400">Family can view and leave comments</p>
+      <p class="text-[10px] text-stone-400">Family can view and leave comments</p>
     </div>
   </div>
 </div>
