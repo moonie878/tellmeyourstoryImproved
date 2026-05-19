@@ -391,6 +391,8 @@ const currentImagePreview = ref('')
 const coverImageUrl      = ref('')
 const coverImageStatus   = ref('')
 
+const isInitialLoad = ref(true)
+
 // ── Misc ───────────────────────────────────────────────────────────────────────
 const lastSavedAt    = ref<Date | null>(null)
 const answerTextarea = ref<HTMLTextAreaElement | null>(null)
@@ -502,6 +504,7 @@ watch(
   () => currentSection.value?.answer,
   () => {
     if (!currentSection.value) return
+    if (isInitialLoad.value) return  // ← add this line
     if (exportSuccess.value) exportSuccess.value = false
     if (saveTimeout) clearTimeout(saveTimeout)
     saveStatus.value = 'Saving...'
@@ -628,6 +631,10 @@ async function loadAnswers() {
   }
   initializeOpenChapters()
   goToResumeSection()
+
+   await nextTick()
+  isInitialLoad.value = false  // ← add this line
+
 }
 
 async function saveProjectTitle() {
