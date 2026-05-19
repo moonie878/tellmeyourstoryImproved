@@ -436,9 +436,8 @@ watch(
   () => existingRecording.value?.id,
   async (id) => {
     if (!id) return
-    // Wait two ticks — one for Vue to mount the canvas, one for the DOM to paint
     await nextTick()
-    await nextTick()
+    await new Promise(resolve => setTimeout(resolve, 50))
     await generateQRCode(id)
   },
   { flush: 'post' }
