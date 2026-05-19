@@ -515,7 +515,7 @@ function handleNextClick() {
 watch(
   () => props.section?.id,
   async () => {
-    if (voiceRecording.isRecording.value) await voiceRecording.cancelRecording()
+    if (voiceRecording.isRecording.value) voiceRecording.cancelRecording()
     existingRecording.value = null
     writingAssistSuggestions.value = []
     writingAssistError.value = ''
