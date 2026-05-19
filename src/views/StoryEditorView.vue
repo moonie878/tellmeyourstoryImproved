@@ -502,9 +502,9 @@ watch(currentSectionIndex, async () => {
 
 watch(
   () => currentSection.value?.answer,
-  () => {
+  (newVal, oldVal) => {
     if (!currentSection.value) return
-    if (isInitialLoad.value) return  // ← add this line
+    if (newVal === oldVal) return  // ← no actual change, skip
     if (exportSuccess.value) exportSuccess.value = false
     if (saveTimeout) clearTimeout(saveTimeout)
     saveStatus.value = 'Saving...'
@@ -539,6 +539,14 @@ watch(
 
 // ── Lifecycle ──────────────────────────────────────────────────────────────────
 onMounted(async () => {
+
+  // Wait for auth session to be fully established
+  const { data: { session } } = await supabase.auth.getSession()
+  if (!session) {
+    // Retry once after a short delay for OAuth redirect sessions
+    await new Promise(resolve => setTimeout(resolve, 500))
+  }
+
   await loadSections()
   await loadAnswers()
   await loadUserAccess()
@@ -622,19 +630,21 @@ async function loadAnswers() {
     .from('story_answers').select('*').eq('project_id', projectId)
 
   if (!error && data) {
+    // Set flag BEFORE updating sections so watcher doesn't fire during load
+    isInitialLoad.value = false  // ← move to here
+
     sections.value = sections.value.map((section) => {
       const saved = data
         .filter((a) => a.section_id === section.id)
         .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())[0]
       return { ...section, answer: saved?.answer || '', is_highlighted: saved?.is_highlighted || false }
     })
+  } else {
+    isInitialLoad.value = false  // ← also set if no data
   }
+
   initializeOpenChapters()
   goToResumeSection()
-
-   await nextTick()
-  isInitialLoad.value = false  // ← add this line
-
 }
 
 async function saveProjectTitle() {
