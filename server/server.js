@@ -59,6 +59,7 @@ app.get('/health', (_req, res) => {
 // Add just before the error handler (before app.use((err, req, res, next) => {)
 // Also requires GROQ_API_KEY in Render environment variables
 
+const Groq = require('groq-sdk')
 const multer = require('multer')
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 25 * 1024 * 1024 } })
 
@@ -72,41 +73,24 @@ app.post('/transcribe', upload.single('audio'), async (req, res) => {
       return res.status(500).json({ error: 'Transcription not configured' })
     }
 
-    // Build multipart form for Groq Whisper
-    const FormData = require('form-data')
-const form = new FormData()
+    const groq = new Groq({ apiKey: process.env.GROQ_API_KEY })
 
-const ext = req.file.mimetype.includes('webm') ? 'webm'
-  : req.file.mimetype.includes('ogg') ? 'ogg'
-  : req.file.mimetype.includes('mp4') ? 'mp4'
-  : 'webm'
+    const ext = req.file.mimetype.includes('webm') ? 'webm'
+      : req.file.mimetype.includes('ogg') ? 'ogg'
+      : req.file.mimetype.includes('mp4') ? 'mp4'
+      : 'webm'
 
-form.append('file', req.file.buffer, {
-  filename: `recording.${ext}`,
-  contentType: req.file.mimetype,
-  knownLength: req.file.buffer.length,
-})
-form.append('model', 'whisper-large-v3-turbo')
-form.append('language', 'en')
-form.append('response_format', 'json')
+    // Groq SDK expects a File-like object
+    const file = new File([req.file.buffer], `recording.${ext}`, { type: req.file.mimetype })
 
-const response = await fetch('https://api.groq.com/openai/v1/audio/transcriptions', {
-  method: 'POST',
-  headers: {
-    'Authorization': `Bearer ${process.env.GROQ_API_KEY}`,
-    ...form.getHeaders(),
-  },
-  body: form,
-})
+    const transcription = await groq.audio.transcriptions.create({
+      file,
+      model: 'whisper-large-v3-turbo',
+      language: 'en',
+      response_format: 'json',
+    })
 
-    if (!response.ok) {
-      const err = await response.text()
-      console.error('Groq transcription error:', err)
-      return res.status(500).json({ error: 'Transcription failed' })
-    }
-
-    const data = await response.json()
-    res.json({ transcript: data.text || '' })
+    res.json({ transcript: transcription.text || '' })
 
   } catch (err) {
     console.error('Transcribe endpoint error:', err.message)
