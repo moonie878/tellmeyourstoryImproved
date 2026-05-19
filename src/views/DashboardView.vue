@@ -193,6 +193,46 @@
                   >
                     {{ deletingStoryId === story.id ? 'Deleting...' : 'Delete' }}
                   </button>
+
+                  <!-- Family share -->
+<div class="mt-4 border-t border-stone-100 pt-4">
+  <div v-if="!shareLinks[story.id]">
+    <button
+      @click="generateShareLink(story.id)"
+      :disabled="sharingStoryId === story.id"
+      class="inline-flex items-center gap-1.5 text-xs text-stone-500 hover:text-stone-800 transition disabled:opacity-50"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/>
+        <polyline points="16 6 12 2 8 6"/>
+        <line x1="12" y1="2" x2="12" y2="15"/>
+      </svg>
+      {{ sharingStoryId === story.id ? 'Generating link…' : 'Share with family' }}
+    </button>
+  </div>
+
+  <div v-else class="space-y-2">
+    <p class="text-xs font-medium text-stone-700">🤍 Share with family</p>
+    <div class="flex items-center gap-2 rounded-xl border border-stone-200 bg-stone-50 px-3 py-2">
+      <p class="flex-1 truncate text-xs text-stone-600">{{ shareLinks[story.id] }}</p>
+      <button
+        @click="copyShareLink(story.id)"
+        class="flex-shrink-0 text-xs font-medium text-[#7C5C3B] hover:underline"
+      >
+        {{ shareCopied === story.id ? 'Copied!' : 'Copy' }}
+      </button>
+    </div>
+    <div class="flex gap-2">
+      <button
+        @click="shareStoryWhatsApp(story.id, story.title)"
+        class="inline-flex items-center gap-1 rounded-full border border-stone-200 bg-white px-3 py-1.5 text-xs font-medium text-stone-700 transition hover:bg-stone-50"
+      >
+        💬 WhatsApp
+      </button>
+      <p class="self-center text-[10px] text-stone-400">Family can view and leave comments</p>
+    </div>
+  </div>
+</div>
                 </div>
 
                 <p v-if="generatingPrintId === story.id" class="mt-2 text-xs text-stone-500">
@@ -314,6 +354,10 @@ const POD_PACKAGE_ID = '0600X0900.FC.STD.PB.060UW444.MXX'
 
 const shareResult    = ref<string>('')
 
+const sharingStoryId   = ref<string | null>(null)
+const shareLinks       = ref<Record<string, string>>({})
+const shareCopied      = ref<string | null>(null)
+
 const { share, shareWhatsApp, shareEmail } = useShare()
 
 async function handleShare() {
@@ -322,6 +366,58 @@ async function handleShare() {
     shareResult.value = 'Link copied to clipboard!'
     setTimeout(() => shareResult.value = '', 3000)
   }
+}
+
+async function generateShareLink(storyId: string) {
+  sharingStoryId.value = storyId
+
+  try {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return
+
+    // Check if a share already exists for this story
+    const { data: existing } = await supabase
+      .from('story_shares')
+      .select('token')
+      .eq('project_id', storyId)
+      .eq('created_by', user.id)
+      .maybeSingle()
+
+    if (existing?.token) {
+      shareLinks.value[storyId] = `${window.location.origin}/story/share/${existing.token}`
+      return
+    }
+
+    // Create a new share
+    const { data, error } = await supabase
+      .from('story_shares')
+      .insert({ project_id: storyId, created_by: user.id })
+      .select('token')
+      .single()
+
+    if (error) throw error
+    shareLinks.value[storyId] = `${window.location.origin}/story/share/${data.token}`
+
+  } catch (err) {
+    console.error('Share link error:', err)
+  } finally {
+    sharingStoryId.value = null
+  }
+}
+
+async function copyShareLink(storyId: string) {
+  const link = shareLinks.value[storyId]
+  if (!link) return
+  await navigator.clipboard.writeText(link)
+  shareCopied.value = storyId
+  setTimeout(() => shareCopied.value = null, 2000)
+}
+
+async function shareStoryWhatsApp(storyId: string, storyTitle: string) {
+  const link = shareLinks.value[storyId]
+  if (!link) return
+  const text = encodeURIComponent(`Come and read ${storyTitle} — a keepsake story being written on Tell Me Your Story 🤍\n\n${link}`)
+  window.open(`https://wa.me/?text=${text}`, '_blank')
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────

@@ -115,6 +115,10 @@ const routes = [
     name: 'blog-wont-open-up',
     component: () => import('../views/BlogWontOpenUpView.vue'),
   },
+  {
+  path: '/story/share/:token',
+  component: () => import('../views/StoryShareView.vue'),
+},
 
   // ── Redirects ─────────────────────────────────────────────────────────────
   {
