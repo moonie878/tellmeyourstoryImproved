@@ -392,6 +392,7 @@ app.post('/create-tribute-checkout', async (req, res) => {
     const session = await stripe.checkout.sessions.create({
       mode: 'payment',
       payment_method_types: ['card'],
+        allow_promotion_codes: true,  // ← add this line
       line_items: [
         {
           price: 'price_1TUCM6R13CJL70CC423pQvkK',
@@ -780,6 +781,7 @@ app.post('/create-checkout-session', async (req, res) => {
 
     const session = await stripe.checkout.sessions.create({
       mode: 'payment',
+        allow_promotion_codes: true,  // ← add this line
       line_items: [
         {
           price: priceId,
