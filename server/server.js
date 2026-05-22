@@ -247,6 +247,7 @@ app.post('/create-print-checkout', async (req, res) => {
     const session = await stripe.checkout.sessions.create({
       mode: 'payment',
       payment_method_types: ['card'],
+       allow_promotion_codes: true,  // ← add this line
       line_items: [
         {
           price_data: {
