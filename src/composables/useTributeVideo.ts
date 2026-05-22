@@ -314,7 +314,7 @@ async function extractVideoFrames(
         const dh = video.videoHeight * scale
         ctx.drawImage(video, (W - dw) / 2, (H - dh) / 2, dw, dh)
 
-        const blob: Blob = await new Promise((r) => canvas.toBlob((b) => r(b!), 'image/png'))
+        const blob: Blob = await new Promise((r) => canvas.toBlob((b) => r(b!), 'image/jpeg', 0.85))
         frames.push(await blob.arrayBuffer())
         progressCallback(f / totalFrames)
       }
@@ -419,7 +419,7 @@ export function useTributeVideo() {
       // ── Render all slides ─────────────────────────────────────────────────
       progressLabel.value = 'Rendering slides…'
 
-      const fps = 25
+      const fps = 12
       const frameDuration = options.slideDuration
       const transitionSecs = options.transition === 'cut' ? 0
         : options.transition === 'fade' ? 1
@@ -592,7 +592,7 @@ export function useTributeVideo() {
         '-pix_fmt', 'yuv420p',
         '-vf', `scale=${W}:${H}`,
         '-r', '25',
-        '-preset', 'fast',
+        '-preset', 'ultrafast',
         'output.mp4'
       )
 
