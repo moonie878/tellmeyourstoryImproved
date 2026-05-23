@@ -44,6 +44,10 @@ export const MUSIC_TRACKS: Record<TributeMusicTrack, { label: string; descriptio
 }
 
 // ─── Canvas dimensions ────────────────────────────────────────────────────────
+// ─── Frame rates ──────────────────────────────────────────────────────────────
+const SLIDE_FPS = 12   // photo/title/text slides — fast generation
+const VIDEO_FPS = 25   // user video clips — keeps motion smooth
+
 const W = 1920
 const H = 1080
 
@@ -314,7 +318,7 @@ async function extractVideoFrames(
         const dh = video.videoHeight * scale
         ctx.drawImage(video, (W - dw) / 2, (H - dh) / 2, dw, dh)
 
-        const blob: Blob = await new Promise((r) => canvas.toBlob((b) => r(b!), 'image/jpeg', 0.85))
+        const blob: Blob = await new Promise((r) => canvas.toBlob((b) => r(b!), 'image/png'))
         frames.push(await blob.arrayBuffer())
         progressCallback(f / totalFrames)
       }
@@ -419,7 +423,7 @@ export function useTributeVideo() {
       // ── Render all slides ─────────────────────────────────────────────────
       progressLabel.value = 'Rendering slides…'
 
-      const fps = 12
+      const fps = SLIDE_FPS
       const frameDuration = options.slideDuration
       const transitionSecs = options.transition === 'cut' ? 0
         : options.transition === 'fade' ? 1
@@ -441,7 +445,7 @@ export function useTributeVideo() {
           progressLabel.value = `Extracting video clip ${slideCount}…`
           const { frames } = await extractVideoFrames(
             slide.file,
-            fps,
+            VIDEO_FPS,
             (p) => {
               progress.value = 5 + Math.round((slideCount / slides.length) * 40) + Math.round(p * 5)
             }
@@ -592,7 +596,7 @@ export function useTributeVideo() {
         '-pix_fmt', 'yuv420p',
         '-vf', `scale=${W}:${H}`,
         '-r', '25',
-        '-preset', 'ultrafast',
+        '-preset', 'fast',
         'output.mp4'
       )
 
