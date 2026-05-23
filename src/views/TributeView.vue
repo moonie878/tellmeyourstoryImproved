@@ -727,13 +727,21 @@ async function onFileSelect(event: Event) {
   const input = event.target as HTMLInputElement
   if (!input.files) return
   const files = Array.from(input.files)
+  
   for (const file of files) {
-    if (form.value.media.length >= MAX_MEDIA) break
+    // Check BEFORE queuing the read
+    if (form.value.media.length >= MAX_MEDIA) {
+      alert(`Maximum ${MAX_MEDIA} photos and videos allowed`)
+      break
+    }
+    
     const reader = new FileReader()
     reader.onload = (e) => {
+      // Double check inside callback in case multiple reads complete
+      if (form.value.media.length >= MAX_MEDIA) return
       const src = e.target?.result as string
       form.value.media.push({ type: 'photo', src })
-      form.value.photos.push(src) // keep backwards compat
+      form.value.photos.push(src)
     }
     reader.readAsDataURL(file)
   }
@@ -746,16 +754,18 @@ function onDrop(event: DragEvent) {
   isDragging.value = false
   const files = Array.from(event.dataTransfer?.files || [])
   for (const file of files) {
-    if (form.value.media.length >= MAX_MEDIA) break
+    if (form.value.media.length >= MAX_MEDIA) break  // ← check before queuing
     if (file.type.startsWith('image/')) {
       const reader = new FileReader()
       reader.onload = (e) => {
+        if (form.value.media.length >= MAX_MEDIA) return  // ← double check
         const src = e.target?.result as string
         form.value.media.push({ type: 'photo', src })
         form.value.photos.push(src)
       }
       reader.readAsDataURL(file)
     } else if (file.type.startsWith('video/') && videoCount.value < MAX_VIDEOS) {
+      if (form.value.media.length >= MAX_MEDIA) break
       form.value.media.push({ type: 'video', file, previewUrl: URL.createObjectURL(file) })
     }
   }
