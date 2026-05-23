@@ -13,129 +13,130 @@
 
   <div class="min-h-screen bg-[#F5F0E8]">
 
-    <!-- ── Sticky top bar ──────────────────────────────────────────────────── -->
-    <div class="sticky top-0 z-20 border-b border-stone-200 bg-white px-4 py-3 sm:px-6">
-      <div class="mx-auto flex max-w-7xl items-center gap-3">
+   <!-- ── Sticky top bar ──────────────────────────────────────────────────── -->
+    <div class="sticky top-0 z-20 border-b border-stone-200 bg-white px-4 py-2.5 sm:px-6 sm:py-3">
+      <div class="mx-auto max-w-7xl">
 
-        <!-- Story title -->
-        <div class="min-w-0 flex-1">
+        <!-- Row 1: Title (all screen sizes) -->
+        <div class="mb-1.5 min-w-0">
           <input
             v-if="project"
             v-model="project.title"
             @blur="saveProjectTitle"
             type="text"
-            class="w-full truncate bg-transparent text-base font-semibold text-stone-900 focus:outline-none"
+            class="w-full truncate bg-transparent text-sm font-semibold text-stone-900 focus:outline-none sm:text-base"
             placeholder="Story title"
           />
         </div>
 
-        <!-- Action buttons -->
-        <div class="flex flex-shrink-0 items-center gap-2">
+        <!-- Row 2: Plan label + action buttons -->
+        <div class="flex items-center gap-2">
 
-          <!-- Primary: Export PDF (paid) or Preview keepsake (free) -->
-          <button
-            v-if="isPaidUser"
-            @click="handleExportClick"
-            :disabled="isExporting"
-            class="rounded-full bg-[#7C5C3B] px-4 py-2 text-xs font-medium text-white transition hover:opacity-90 disabled:opacity-50 sm:px-5 sm:text-sm"
-          >
-            {{ isExporting ? 'Creating…' : 'Export PDF' }}
-          </button>
+          <!-- Plan label — shrinks to fit -->
+          <p class="min-w-0 flex-1 truncate text-[10px] text-stone-400">
+            {{ currentPlanLabel }}
+            <span v-if="!hasImageExportAccess" class="hidden sm:inline">
+              · <button @click="upgradeFromTopButtons" class="text-[#7C5C3B] hover:underline">Upgrade</button>
+            </span>
+          </p>
 
-          <button
-            v-else
-            @click="openPremiumPreview"
-            class="rounded-full bg-[#7C5C3B] px-4 py-2 text-xs font-medium text-white transition hover:opacity-90 sm:px-5 sm:text-sm"
-          >
-            Preview keepsake
-          </button>
+          <!-- Buttons -->
+          <div class="flex flex-shrink-0 items-center gap-1.5">
 
-          <!-- More actions dropdown (paid users only) -->
-          <div class="relative" v-if="isPaidUser" data-more-actions>
+            <!-- Primary button -->
             <button
-              @click="showMoreActions = !showMoreActions"
-              class="rounded-full border border-stone-200 bg-white px-3 py-2 text-xs font-medium text-stone-700 transition hover:bg-stone-50"
+              v-if="isPaidUser"
+              @click="handleExportClick"
+              :disabled="isExporting"
+              class="rounded-full bg-[#7C5C3B] px-3 py-1.5 text-xs font-medium text-white transition hover:opacity-90 disabled:opacity-50 sm:px-5 sm:py-2 sm:text-sm"
             >
-              More ▾
+              {{ isExporting ? '…' : 'Export PDF' }}
             </button>
-            <div
-              v-if="showMoreActions"
-              class="absolute right-0 top-full z-30 mt-1 w-52 rounded-2xl border border-stone-200 bg-white py-2 shadow-lg"
+            <button
+              v-else
+              @click="openPremiumPreview"
+              class="rounded-full bg-[#7C5C3B] px-3 py-1.5 text-xs font-medium text-white transition hover:opacity-90 sm:px-5 sm:py-2 sm:text-sm"
             >
-               <button
-                @click="openPremiumPreview(); showMoreActions = false"
-                class="w-full px-4 py-2.5 text-left text-sm text-stone-700 hover:bg-stone-50"
-              >
-  👁️ Preview finished keepsake
-</button>
+              Preview
+            </button>
+
+            <!-- More dropdown (paid only) -->
+            <div class="relative" v-if="isPaidUser" data-more-actions>
               <button
-                v-if="hasTier4Access"
-                @click="showTrueBookModal = true; showMoreActions = false"
-                class="w-full px-4 py-2.5 text-left text-sm text-stone-700 hover:bg-stone-50"
+                @click="showMoreActions = !showMoreActions"
+                class="rounded-full border border-stone-200 bg-white px-2.5 py-1.5 text-xs font-medium text-stone-700 transition hover:bg-stone-50"
               >
-                📖 True Book PDF
+                More ▾
               </button>
-              <button
-                v-if="hasTier4Access"
-                @click="showVideoModal = true; showMoreActions = false"
-                class="w-full px-4 py-2.5 text-left text-sm text-stone-700 hover:bg-stone-50"
+              <div
+                v-if="showMoreActions"
+                class="absolute right-0 top-full z-30 mt-1 w-52 rounded-2xl border border-stone-200 bg-white py-2 shadow-lg"
               >
-                🎬 Create video
-              </button>
-              <button
-                @click="exportWordHandler(); showMoreActions = false"
-                :disabled="!isPaidUser || isExportingWord"
-                class="w-full px-4 py-2.5 text-left text-sm text-stone-700 hover:bg-stone-50 disabled:opacity-50"
-              >
-                {{ isExportingWord ? 'Preparing…' : '📄 Download Word doc' }}
-              </button>
-              <button
-                v-if="isPaidUser"
-                @click="showPdfCustomizer = true; showMoreActions = false"
-                class="w-full px-4 py-2.5 text-left text-sm text-stone-700 hover:bg-stone-50"
-              >
-                {{ hasTier4Access ? '🎨 Design keepsake' : '🎨 Preview premium design' }}
-              </button>
-              <button
-                v-if="isPaidUser && !hasImageExportAccess"
-                @click="upgradeFromTopButtons(); showMoreActions = false"
-                class="w-full px-4 py-2.5 text-left text-sm text-[#7C5C3B] hover:bg-stone-50"
-              >
-                ⭐ Add photos & premium layouts
-              </button>
+                <button
+                  @click="openPremiumPreview(); showMoreActions = false"
+                  class="w-full px-4 py-2.5 text-left text-sm text-stone-700 hover:bg-stone-50"
+                >
+                  👁️ Preview finished keepsake
+                </button>
+                <button
+                  v-if="hasTier4Access"
+                  @click="showTrueBookModal = true; showMoreActions = false"
+                  class="w-full px-4 py-2.5 text-left text-sm text-stone-700 hover:bg-stone-50"
+                >
+                  📖 True Book PDF
+                </button>
+                <button
+                  v-if="hasTier4Access"
+                  @click="showVideoModal = true; showMoreActions = false"
+                  class="w-full px-4 py-2.5 text-left text-sm text-stone-700 hover:bg-stone-50"
+                >
+                  🎬 Create video
+                </button>
+                <button
+                  @click="exportWordHandler(); showMoreActions = false"
+                  :disabled="!isPaidUser || isExportingWord"
+                  class="w-full px-4 py-2.5 text-left text-sm text-stone-700 hover:bg-stone-50 disabled:opacity-50"
+                >
+                  {{ isExportingWord ? 'Preparing…' : '📄 Download Word doc' }}
+                </button>
+                <button
+                  v-if="isPaidUser"
+                  @click="showPdfCustomizer = true; showMoreActions = false"
+                  class="w-full px-4 py-2.5 text-left text-sm text-stone-700 hover:bg-stone-50"
+                >
+                  {{ hasTier4Access ? '🎨 Design keepsake' : '🎨 Preview premium design' }}
+                </button>
+                <button
+                  v-if="isPaidUser && !hasImageExportAccess"
+                  @click="upgradeFromTopButtons(); showMoreActions = false"
+                  class="w-full px-4 py-2.5 text-left text-sm text-[#7C5C3B] hover:bg-stone-50"
+                >
+                  ⭐ Add photos & premium layouts
+                </button>
+              </div>
             </div>
+
+            <!-- Cover image (tier 4 only) — compact on mobile -->
+            <div v-if="hasTier4Access" class="flex items-center gap-1">
+              <img
+                v-if="coverImageUrl"
+                :src="coverImageUrl"
+                class="h-7 w-5 rounded object-cover border border-stone-200"
+                alt="Cover"
+              />
+              <label class="cursor-pointer rounded-full border border-stone-200 bg-white px-2.5 py-1.5 text-xs font-medium text-stone-700 transition hover:bg-stone-50 whitespace-nowrap">
+                {{ coverImageUrl ? '✎' : '+ Cover' }}
+                <input type="file" accept="image/*" @change="handleCoverImageUpload" class="hidden" />
+              </label>
+              <button
+                v-if="coverImageUrl"
+                @click="removeCoverImage"
+                class="text-xs text-stone-400 hover:text-red-500"
+              >✕</button>
+            </div>
+
           </div>
-
-          <!-- Cover image button (tier 4 only) -->
-          <div v-if="hasTier4Access" class="relative flex items-center gap-2">
-  <img
-    v-if="coverImageUrl"
-    :src="coverImageUrl"
-    class="h-8 w-6 rounded object-cover border border-stone-200"
-    alt="Cover"
-  />
-  <label class="cursor-pointer rounded-full border border-stone-200 bg-white px-3 py-2 text-xs font-medium text-stone-700 transition hover:bg-stone-50">
-    {{ coverImageUrl ? 'Change cover' : '+ Cover image' }}
-    <input type="file" accept="image/*" @change="handleCoverImageUpload" class="hidden" />
-  </label>
-  <button
-    v-if="coverImageUrl"
-    @click="removeCoverImage"
-    class="text-xs text-stone-400 hover:text-red-500"
-  >✕</button>
-</div>
-
         </div>
-      </div>
-
-      <!-- Plan label + upgrade link -->
-      <div class="mx-auto mt-1.5 max-w-7xl">
-        <p class="text-[10px] text-stone-400">
-          {{ currentPlanLabel }}
-          <span v-if="!hasImageExportAccess">
-            · <button @click="upgradeFromTopButtons" class="text-[#7C5C3B] hover:underline">Upgrade for photos &amp; premium layouts</button>
-          </span>
-        </p>
       </div>
     </div>
 
