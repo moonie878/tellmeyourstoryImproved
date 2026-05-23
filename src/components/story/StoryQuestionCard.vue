@@ -37,8 +37,8 @@
         <div class="px-5 py-4 sm:px-6">
 
           <!-- Toolbar -->
-          <div class="mb-3 flex items-center justify-between gap-2">
-            <p class="text-xs text-stone-400">
+          <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
+  <p class="text-xs text-stone-400 min-w-0">
               <span v-if="voiceRecording.isRecording.value" class="flex items-center gap-1.5 text-red-600 font-medium">
                 <span class="inline-block h-2 w-2 animate-pulse rounded-full bg-red-500" />
                 Recording…
@@ -46,9 +46,8 @@
               <span v-else-if="voiceRecording.isTranscribing.value" class="text-stone-400">✦ Transcribing…</span>
               <span v-else-if="voiceRecording.isSaving.value" class="text-stone-400">Saving…</span>
               <span v-else>Type your answer or speak it</span>
-            </p>
-
-            <div class="flex items-center gap-2">
+           </p>
+  <div class="flex flex-shrink-0 items-center gap-2">
               <!-- Voice saved badge -->
               <span
                 v-if="existingRecording && !voiceRecording.isRecording.value"
@@ -63,7 +62,7 @@
                 type="button"
                 @click="handleVoiceToggle"
                 :disabled="voiceRecording.isSaving.value || voiceRecording.isTranscribing.value"
-                class="flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition disabled:opacity-50"
+                class="flex items-center gap-1.5 rounded-full border px-2 py-1.5 text-xs font-medium transition disabled:opacity-50 sm:px-3"
                 :class="voiceRecording.isRecording.value
                   ? 'border-red-300 bg-red-50 text-red-700 hover:bg-red-100'
                   : 'border-stone-300 bg-white text-stone-700 hover:bg-stone-50'"
@@ -71,7 +70,7 @@
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M12 1a4 4 0 0 1 4 4v6a4 4 0 0 1-8 0V5a4 4 0 0 1 4-4zm0 2a2 2 0 0 0-2 2v6a2 2 0 0 0 4 0V5a2 2 0 0 0-2-2zm-1 14.93V20H9v2h6v-2h-2v-2.07A8 8 0 0 0 20 11h-2a6 6 0 0 1-12 0H4a8 8 0 0 0 7 7.93z"/>
                 </svg>
-                {{ voiceRecording.isRecording.value ? 'Stop' : existingRecording ? 'Re-record' : 'Speak' }}
+                {{ voiceRecording.isRecording.value ? 'Stop' : existingRecording ? 'Re-record' : '🎙️ Speak' }}
               </button>
             </div>
           </div>
