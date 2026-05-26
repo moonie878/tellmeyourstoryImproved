@@ -450,6 +450,7 @@ useSeo({
         '@type': 'Product',
         name: 'Memorial Tribute Video',
         description: 'A beautiful memorial video created from your photos and music. Upload up to 30 photos, choose music, and download a full HD MP4.',
+        image: 'https://tellmeyourstory.uk/logo/tribute.jpeg', // ← add this
         url: 'https://tellmeyourstory.uk/tribute',
         brand: {
           '@type': 'Brand',
