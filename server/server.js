@@ -2,28 +2,37 @@ const express = require('express')
 const Stripe = require('stripe')
 const cors = require('cors')
 const { createClient } = require('@supabase/supabase-js')
-require('dotenv').config()
+const Groq = require('groq-sdk')
+const multer = require('multer')
 const { Resend } = require('resend')
-const resend = new Resend(process.env.RESEND_API_KEY)
+require('dotenv').config()
 
 const app = express()
+const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 25 * 1024 * 1024 } })
 
-const PORT = process.env.PORT || 3000
+const PORT         = process.env.PORT || 3000
 const FRONTEND_URL = process.env.FRONTEND_URL
-const LULU_API_URL  = 'https://api.lulu.com'
-const LULU_AUTH_URL = 'https://api.lulu.com/auth/realms/glasstree/protocol/openid-connect/token'
+const LULU_API_URL = 'https://api.lulu.com'
 
+// ─── Env checks ───────────────────────────────────────────────────────────────
+if (!process.env.STRIPE_SECRET_KEY)        throw new Error('Missing STRIPE_SECRET_KEY')
+if (!process.env.SUPABASE_URL)             throw new Error('Missing SUPABASE_URL')
+if (!process.env.SUPABASE_SERVICE_ROLE_KEY) throw new Error('Missing SUPABASE_SERVICE_ROLE_KEY')
+if (!FRONTEND_URL)                         throw new Error('Missing FRONTEND_URL')
+if (!process.env.TURNSTILE_SECRET_KEY)     throw new Error('Missing TURNSTILE_SECRET_KEY')
 
-// ─── GIFT PURCHASE SYSTEM ─────────────────────────────────────────────────────
-// Add these endpoints to server.js before the error handler
-// Also add to Stripe dashboard: a new webhook event for checkout.session.completed
-// with metadata.purchaseType === 'gift'
- 
-// ── Price config ──────────────────────────────────────────────────────────────
+// ─── Clients ──────────────────────────────────────────────────────────────────
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
+const resend  = new Resend(process.env.RESEND_API_KEY)
+const supabaseAdmin = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY
+)
+
+// ─── Gift products config ─────────────────────────────────────────────────────
 const GIFT_PRODUCTS = {
   'single-story': {
-    priceId:     'price_1TJvcYR13CJL70CCXAigFPLP',
-    label:       "Dad's Story — Keepsake Book",
+    label:      "Dad's Story — Keepsake Book",
     description: 'PDF keepsake export for one story',
     accessType:  'story',
     variant:     'text_only',
@@ -31,8 +40,7 @@ const GIFT_PRODUCTS = {
     amount:      399,
   },
   'single-story-images': {
-    priceId:     'price_1TJvd3R13CJL70CCmOGoDDVT',
-    label:       "Dad's Story — Story + Photos",
+    label:      "Dad's Story — Story + Photos",
     description: 'PDF keepsake with photos for one story',
     accessType:  'export',
     variant:     'with_images',
@@ -40,8 +48,7 @@ const GIFT_PRODUCTS = {
     amount:      799,
   },
   'all-stories': {
-    priceId:     'price_1TJvdJR13CJL70CCrdpt1bg0',
-    label:       'All Stories — Keepsake Book',
+    label:      'All Stories — Keepsake Book',
     description: 'PDF keepsake export for all story types',
     accessType:  'story',
     variant:     'all',
@@ -49,8 +56,7 @@ const GIFT_PRODUCTS = {
     amount:      1199,
   },
   'premium': {
-    priceId:     'price_1TJvdiR13CJL70CCqAqRBjZq',
-    label:       'Premium Keepsake',
+    label:      'Premium Keepsake',
     description: 'Photos, premium layouts, all story types',
     accessType:  'export',
     variant:     'premium',
@@ -59,317 +65,279 @@ const GIFT_PRODUCTS = {
   },
 }
 
-if (!process.env.STRIPE_SECRET_KEY) {
-  throw new Error('Missing STRIPE_SECRET_KEY')
-}
-
-if (!process.env.SUPABASE_URL) {
-  throw new Error('Missing SUPABASE_URL')
-}
-
-if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
-  throw new Error('Missing SUPABASE_SERVICE_ROLE_KEY')
-}
-
-if (!FRONTEND_URL) {
-  throw new Error('Missing FRONTEND_URL')
-}
-
-if (!process.env.TURNSTILE_SECRET_KEY) {
-  throw new Error('Missing TURNSTILE_SECRET_KEY')
-}
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
-
-const supabaseAdmin = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY
-)
+// ─── Middleware ───────────────────────────────────────────────────────────────
 app.set('trust proxy', 1)
-app.use(
-  cors({
-    origin: [
-      'https://tellmeyourstory.uk',
-      'https://www.tellmeyourstory.uk',
-      'https://improvedtell.vercel.app' // keep this for testing if needed
-    ],
-    methods: ['GET', 'POST', 'OPTIONS'],
-    credentials: true,
-  })
-)
+app.use(cors({
+  origin: [
+    'https://tellmeyourstory.uk',
+    'https://www.tellmeyourstory.uk',
+    'https://improvedtell.vercel.app',
+  ],
+  methods: ['GET', 'POST', 'OPTIONS'],
+  credentials: true,
+}))
 
-app.get('/health', (_req, res) => {
-  res.status(200).json({ ok: true })
-})
+// ─── Health ───────────────────────────────────────────────────────────────────
+app.get('/health', (_req, res) => res.status(200).json({ ok: true }))
 
-// ── ADD THIS to server.js ─────────────────────────────────────────────────────
-// Requires: npm install multer
-// Add just before the error handler (before app.use((err, req, res, next) => {)
-// Also requires GROQ_API_KEY in Render environment variables
-
-const Groq = require('groq-sdk')
-const multer = require('multer')
-const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 25 * 1024 * 1024 } })
-
-app.post('/transcribe', upload.single('audio'), async (req, res) => {
-  try {
-    if (!req.file) {
-      return res.status(400).json({ error: 'No audio file provided' })
-    }
-
-    if (!process.env.GROQ_API_KEY) {
-      return res.status(500).json({ error: 'Transcription not configured' })
-    }
-
-    const groq = new Groq({ apiKey: process.env.GROQ_API_KEY })
-
-    const ext = req.file.mimetype.includes('webm') ? 'webm'
-      : req.file.mimetype.includes('ogg') ? 'ogg'
-      : req.file.mimetype.includes('mp4') ? 'mp4'
-      : 'webm'
-
-    // Groq SDK expects a File-like object
-    const file = new File([req.file.buffer], `recording.${ext}`, { type: req.file.mimetype })
-
-    const transcription = await groq.audio.transcriptions.create({
-      file,
-      model: 'whisper-large-v3-turbo',
-      language: 'en',
-      response_format: 'json',
-    })
-
-    res.json({ transcript: transcription.text || '' })
-
-  } catch (err) {
-    console.error('Transcribe endpoint error:', err.message)
-    res.status(500).json({ error: 'Transcription failed' })
-  }
-})
-
+// ─── Stripe webhook ───────────────────────────────────────────────────────────
 app.post(
   '/webhook',
   express.raw({ type: 'application/json' }),
   async (req, res) => {
-    const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET
     const sig = req.headers['stripe-signature']
-
     let event
 
     try {
-      event = stripe.webhooks.constructEvent(req.body, sig, endpointSecret)
+      event = stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET)
     } catch (err) {
-      console.error('Webhook signature verification failed:', err.message)
+      console.error('Webhook signature failed:', err.message)
       return res.sendStatus(400)
     }
 
     if (event.type === 'checkout.session.completed') {
-      const session = event.data.object
-
-      const userId = session.metadata?.userId
-      const storyType = session.metadata?.storyType || null
+      const session     = event.data.object
+      const userId      = session.metadata?.userId
+      const storyType   = session.metadata?.storyType || null
       const purchaseType = session.metadata?.purchaseType || 'single_story'
 
-      console.log('Payment successful for user:', userId)
+      console.log('Payment completed, purchaseType:', purchaseType, 'userId:', userId)
 
-      if (userId) {
+      // ── Gift purchase ──────────────────────────────────────────────────────
+      if (purchaseType === 'gift') {
+        const {
+          productKey, buyerEmail, recipientEmail, recipientName,
+          giftMessage, accessType, variant, storyType: giftStoryType,
+        } = session.metadata
+
+        const { data: giftRecord, error: giftError } = await supabaseAdmin
+          .from('gift_purchases')
+          .insert({
+            stripe_session_id: session.id,
+            product_key:       productKey,
+            buyer_email:       buyerEmail,
+            recipient_email:   recipientEmail,
+            recipient_name:    recipientName,
+            gift_message:      giftMessage,
+            access_type:       accessType,
+            variant,
+            story_type:        giftStoryType,
+          })
+          .select('token')
+          .single()
+
+        if (giftError) {
+          console.error('Gift record creation error:', giftError)
+        } else {
+          const redemptionUrl = `${FRONTEND_URL}/gift/redeem/${giftRecord.token}`
+          try {
+            await resend.emails.send({
+              from:    'Tell Me Your Story <gifts@tellmeyourstory.uk>',
+              to:      buyerEmail,
+              subject: `🎁 Your gift for ${recipientName} is ready`,
+              html: `
+                <div style="font-family: Georgia, serif; max-width: 600px; margin: 0 auto; padding: 40px 20px;">
+                  <h1 style="font-size: 28px; color: #1C1917;">Your gift is ready 🎁</h1>
+                  <p style="font-size: 15px; color: #5C534E; line-height: 1.7;">
+                    You've gifted <strong>${recipientName}</strong> access to Tell Me Your Story.
+                    Share the link below whenever you're ready.
+                  </p>
+                  <div style="background: #F5F0E8; border-radius: 16px; padding: 24px; margin: 24px 0; text-align: center;">
+                    <p style="font-size: 12px; color: #9C7C5C; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.1em;">Gift link</p>
+                    <a href="${redemptionUrl}" style="font-size: 14px; color: #7C5C3B; word-break: break-all;">${redemptionUrl}</a>
+                  </div>
+                  ${giftMessage ? `
+                  <div style="border-left: 3px solid #7C5C3B; padding: 12px 20px; margin: 24px 0; background: #FAF7F4; border-radius: 0 12px 12px 0;">
+                    <p style="font-size: 14px; color: #3C3530; font-style: italic;">"${giftMessage}"</p>
+                  </div>` : ''}
+                  <p style="font-size: 13px; color: #8C847E; line-height: 1.6;">
+                    ${recipientName} simply opens the link, creates a free account, and their access is unlocked automatically.
+                  </p>
+                  <p style="font-size: 12px; color: #A8A29E; margin-top: 32px;">
+                    Tell Me Your Story · <a href="https://tellmeyourstory.uk" style="color: #7C5C3B;">tellmeyourstory.uk</a>
+                  </p>
+                </div>
+              `,
+            })
+            console.log('Gift email sent to:', buyerEmail)
+          } catch (emailErr) {
+            console.error('Gift email error:', emailErr.message)
+          }
+        }
+      }
+
+      // ── Regular user purchase ──────────────────────────────────────────────
+      else if (userId) {
         let accessRows = []
 
         if (purchaseType === 'single_text') {
           accessRows = [
-            {
-              user_id: userId,
-              access_type: 'story',
-              story_type: storyType,
-            },
-            {
-              user_id: userId,
-              access_type: 'export',
-              variant: 'text_only',
-            },
+            { user_id: userId, access_type: 'story',  story_type: storyType },
+            { user_id: userId, access_type: 'export', variant: 'text_only' },
           ]
         } else if (purchaseType === 'single_images') {
           accessRows = [
-            {
-              user_id: userId,
-              access_type: 'story',
-              story_type: storyType,
-            },
-            {
-              user_id: userId,
-              access_type: 'export',
-              variant: 'with_images',
-            },
+            { user_id: userId, access_type: 'story',  story_type: storyType },
+            { user_id: userId, access_type: 'export', variant: 'with_images' },
           ]
         } else if (purchaseType === 'all_text') {
           accessRows = [
-            {
-              user_id: userId,
-              access_type: 'story',
-              story_type: 'all',
-            },
-            {
-              user_id: userId,
-              access_type: 'export',
-              variant: 'text_only',
-            },
+            { user_id: userId, access_type: 'story',  story_type: 'all' },
+            { user_id: userId, access_type: 'export', variant: 'text_only' },
           ]
         } else if (purchaseType === 'all_images') {
           accessRows = [
-            {
-              user_id: userId,
-              access_type: 'story',
-              story_type: 'all',
-            },
-            {
-              user_id: userId,
-              access_type: 'export',
-              variant: 'with_images',
-            },
-            {
-      user_id: userId,
-      access_type: 'print',
-      variant: 'premium',
-    },
+            { user_id: userId, access_type: 'story',  story_type: 'all' },
+            { user_id: userId, access_type: 'export', variant: 'with_images' },
+            { user_id: userId, access_type: 'print',  variant: 'premium' },
           ]
-         } else if (purchaseType === 'gift') 
-          
-          
-  const {
-    productKey, buyerEmail, recipientEmail, recipientName, giftMessage,
-    accessType, variant, storyType,
-  } = session.metadata
-
-  const { data: giftRecord, error: giftError } = await supabaseAdmin
-    .from('gift_purchases')
-    .insert({
-      stripe_session_id: session.id,
-      product_key:       productKey,
-      buyer_email:       buyerEmail,
-      recipient_email:   recipientEmail,
-      recipient_name:    recipientName,
-      gift_message:      giftMessage,
-      access_type:       accessType,
-      variant,
-      story_type:        storyType,
-    })
-    .select('token')
-    .single()
-
-  if (giftError) {
-    console.error('Gift record creation error:', giftError)
-  } else {
-    const redemptionUrl = `${FRONTEND_URL}/gift/redeem/${giftRecord.token}`
-    
-    const { Resend } = require('resend')
-    const resend = new Resend(process.env.RESEND_API_KEY)
-
-    await resend.emails.send({
-      from: 'Tell Me Your Story <gifts@tellmeyourstory.uk>',
-      to: buyerEmail,
-      subject: `🎁 Your gift for ${recipientName} is ready`,
-      html: `
-        <div style="font-family: Georgia, serif; max-width: 600px; margin: 0 auto; padding: 40px 20px;">
-          <h1 style="font-size: 28px; color: #1C1917;">Your gift is ready 🎁</h1>
-          <p style="font-size: 15px; color: #5C534E; line-height: 1.7;">
-            You've gifted <strong>${recipientName}</strong> access to Tell Me Your Story.
-            Share the link below whenever you're ready.
-          </p>
-          <div style="background: #F5F0E8; border-radius: 16px; padding: 24px; margin: 24px 0; text-align: center;">
-            <p style="font-size: 12px; color: #9C7C5C; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.1em;">Gift link</p>
-            <a href="${redemptionUrl}" style="font-size: 14px; color: #7C5C3B; word-break: break-all;">${redemptionUrl}</a>
-          </div>
-          ${giftMessage ? `
-          <div style="border-left: 3px solid #7C5C3B; padding: 12px 20px; margin: 24px 0; background: #FAF7F4; border-radius: 0 12px 12px 0;">
-            <p style="font-size: 14px; color: #3C3530; font-style: italic;">"${giftMessage}"</p>
-          </div>` : ''}
-          <p style="font-size: 13px; color: #8C847E; line-height: 1.6;">
-            ${recipientName} simply opens the link, creates a free account, and their access is unlocked automatically.
-          </p>
-          <p style="font-size: 12px; color: #A8A29E; margin-top: 32px;">
-            Tell Me Your Story · <a href="https://tellmeyourstory.uk" style="color: #7C5C3B;">tellmeyourstory.uk</a>
-          </p>
-        </div>
-      `,
-    })
-  }
-}
-
-
-
-          {
         }
 
-        const { error } = await supabaseAdmin.from('user_access').upsert(accessRows, {
-          onConflict: 'user_id,access_type,story_type,variant',
-        })
+        if (accessRows.length > 0) {
+          const { error } = await supabaseAdmin
+            .from('user_access')
+            .upsert(accessRows, { onConflict: 'user_id,access_type,story_type,variant' })
 
-        if (error) {
-          console.error('Supabase error:', error.message)
-        } else {
-          console.log('Access granted')
+          if (error) console.error('Supabase access error:', error.message)
+          else console.log('Access granted for user:', userId)
         }
       }
-      // Tribute video payment — no user account needed
-const product = session.metadata?.product
-if (product === 'tribute-video') {
-  console.log('Tribute video payment received for:', session.metadata?.subject_name)
-  // No database update needed — payment confirmation is handled client-side
-  // via the Stripe success URL redirect
-}
+
+      // ── Tribute video ──────────────────────────────────────────────────────
+      if (session.metadata?.product === 'tribute-video') {
+        console.log('Tribute video payment for:', session.metadata?.subject_name)
+      }
     }
 
     res.json({ received: true })
   }
 )
 
+// ─── JSON middleware (after webhook raw handler) ───────────────────────────────
 app.use(express.json())
 
-app.post('/verify-turnstile', express.json(), async (req, res) => {
+// ─── Transcribe ───────────────────────────────────────────────────────────────
+app.post('/transcribe', upload.single('audio'), async (req, res) => {
+  try {
+    if (!req.file) return res.status(400).json({ error: 'No audio file provided' })
+    if (!process.env.GROQ_API_KEY) return res.status(500).json({ error: 'Transcription not configured' })
+
+    const groq = new Groq({ apiKey: process.env.GROQ_API_KEY })
+    const ext  = req.file.mimetype.includes('webm') ? 'webm'
+      : req.file.mimetype.includes('ogg')  ? 'ogg'
+      : req.file.mimetype.includes('mp4')  ? 'mp4' : 'webm'
+
+    const file = new File([req.file.buffer], `recording.${ext}`, { type: req.file.mimetype })
+    const transcription = await groq.audio.transcriptions.create({
+      file, model: 'whisper-large-v3-turbo', language: 'en', response_format: 'json',
+    })
+
+    res.json({ transcript: transcription.text || '' })
+  } catch (err) {
+    console.error('Transcribe error:', err.message)
+    res.status(500).json({ error: 'Transcription failed' })
+  }
+})
+
+// ─── Writing assist ───────────────────────────────────────────────────────────
+app.post('/writing-assist', async (req, res) => {
+  try {
+    const { question, answer, mode } = req.body
+
+    if (!question) return res.status(400).json({ error: 'Question is required' })
+    if (mode !== 'start' && (!answer || answer.trim().length < 5)) {
+      return res.status(400).json({ error: 'Answer is required for expand mode' })
+    }
+    if (!process.env.GROQ_API_KEY) return res.status(500).json({ error: 'Writing assist not configured' })
+
+    const prompt = mode === 'start'
+      ? `You are a gentle, warm writing coach helping someone write their life story.
+They are answering this question in their keepsake book: "${question}"
+They haven't written anything yet. Give them 3 short, specific prompts to help them get started — but NOT to write it for them.
+Rules: Each prompt is a gentle question or memory jogger, 1 sentence max. Keep the tone warm and personal. Do NOT write their answer for them. Return ONLY a JSON array of 3 strings, no other text.`
+      : `You are a gentle, warm writing coach helping someone write their life story.
+The person is answering this question: "${question}"
+Their answer so far: "${answer}"
+Give them 3 short, specific prompts to help them add more in their own words. Reference something specific from their answer. Do NOT rewrite it for them.
+Rules: Each prompt is a gentle question or suggestion, 1 sentence max. Warm and personal tone. Return ONLY a JSON array of 3 strings, no other text.`
+
+    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${process.env.GROQ_API_KEY}` },
+      body: JSON.stringify({ model: 'llama-3.1-8b-instant', messages: [{ role: 'user', content: prompt }], temperature: 0.7, max_tokens: 300 }),
+    })
+
+    if (!response.ok) {
+      console.error('Groq error:', await response.text())
+      return res.status(500).json({ error: 'Writing assist failed' })
+    }
+
+    const data     = await response.json()
+    const raw      = data.choices?.[0]?.message?.content || '[]'
+    const cleaned  = raw.replace(/```json|```/g, '').trim()
+    const suggestions = JSON.parse(cleaned)
+
+    if (!Array.isArray(suggestions)) return res.status(500).json({ error: 'Unexpected response format' })
+    res.json({ suggestions })
+  } catch (err) {
+    console.error('Writing assist error:', err.message)
+    res.status(500).json({ error: err.message })
+  }
+})
+
+// ─── Turnstile ────────────────────────────────────────────────────────────────
+app.post('/verify-turnstile', async (req, res) => {
   try {
     const { token } = req.body
-
-    if (!token) {
-      return res.status(400).json({ success: false, error: 'Missing token' })
-    }
+    if (!token) return res.status(400).json({ success: false, error: 'Missing token' })
 
     const result = await verifyTurnstileToken(token, req.ip)
-    console.log('Turnstile siteverify result:', result)
-
     if (!result.success) {
-      return res.status(400).json({
-        success: false,
-        error: 'Turnstile verification failed',
-        details: result['error-codes'] || [],
-      })
+      return res.status(400).json({ success: false, error: 'Turnstile verification failed', details: result['error-codes'] || [] })
     }
-
-    return res.json({ success: true })
+    res.json({ success: true })
   } catch (error) {
-    console.error('Turnstile verification error:', error)
-    return res.status(500).json({ success: false, error: 'Verification failed' })
+    console.error('Turnstile error:', error)
+    res.status(500).json({ success: false, error: 'Verification failed' })
+  }
+})
+
+// ─── Checkout sessions ────────────────────────────────────────────────────────
+app.post('/create-checkout-session', async (req, res) => {
+  try {
+    const { priceId, userId, storyType, projectId, purchaseType } = req.body
+    if (!priceId || !userId || !projectId) return res.status(400).json({ error: 'Missing required checkout data' })
+
+    const session = await stripe.checkout.sessions.create({
+      mode: 'payment',
+      allow_promotion_codes: true,
+      line_items: [{ price: priceId, quantity: 1 }],
+      success_url: `${FRONTEND_URL}/story/${projectId}?payment=success`,
+      cancel_url:  `${FRONTEND_URL}/story/${projectId}?payment=cancelled`,
+      metadata: { userId, storyType: storyType || '', projectId: projectId || '', purchaseType: purchaseType || '' },
+    })
+
+    res.json({ url: session.url })
+  } catch (error) {
+    console.error('Checkout session error:', error)
+    res.status(500).json({ error: 'Failed to create checkout session' })
   }
 })
 
 app.post('/create-print-checkout', async (req, res) => {
   try {
     const { userId, storyId, storyTitle, quantity = 1 } = req.body
-
-    if (!userId || !storyId) {
-      return res.status(400).json({ error: 'Missing required fields' })
-    }
+    if (!userId || !storyId) return res.status(400).json({ error: 'Missing required fields' })
 
     const session = await stripe.checkout.sessions.create({
       mode: 'payment',
       payment_method_types: ['card'],
-       allow_promotion_codes: true,  // ← add this line
+      allow_promotion_codes: true,
       line_items: [
         {
           price_data: {
             currency: 'gbp',
-            product_data: {
-              name: `Keepsake Printed Book — ${storyTitle}`,
-              description: '6×9 softcover, printed and shipped by Lulu Press. Delivered in 10-14 days.',
-            },
+            product_data: { name: `Keepsake Printed Book — ${storyTitle}`, description: '6×9 softcover, printed and shipped by Lulu Press. Delivered in 10-14 days.' },
             unit_amount: 2499,
           },
           quantity,
@@ -377,9 +345,7 @@ app.post('/create-print-checkout', async (req, res) => {
         {
           price_data: {
             currency: 'gbp',
-            product_data: {
-              name: 'UK Shipping — Royal Mail 2nd Class',
-            },
+            product_data: { name: 'UK Shipping — Royal Mail 2nd Class' },
             unit_amount: 499,
           },
           quantity: 1,
@@ -387,12 +353,7 @@ app.post('/create-print-checkout', async (req, res) => {
       ],
       success_url: `${FRONTEND_URL}/dashboard?print=success&story=${storyId}&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url:  `${FRONTEND_URL}/dashboard?print=cancelled`,
-      metadata: {
-        userId,
-        storyId,
-        purchaseType: 'printed_book',
-        quantity:     String(quantity),
-      },
+      metadata: { userId, storyId, purchaseType: 'printed_book', quantity: String(quantity) },
     })
 
     res.json({ url: session.url })
@@ -402,123 +363,19 @@ app.post('/create-print-checkout', async (req, res) => {
   }
 })
 
-app.get('/list-models', async (req, res) => {
-  const response = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models?key=${process.env.GEMINI_API_KEY}`
-  )
-  const data = await response.json()
-  res.json(data)
-})
-// ─── ADD THIS BLOCK to server.js ──────────────────────────────────────────────
-// Place it just before the error handler at the bottom (before app.use((err...))
-// Also add GEMINI_API_KEY to your Render environment variables
-
-app.post('/writing-assist', async (req, res) => {
-  try {
-    const { question, answer, mode } = req.body
-
-    if (!question) {
-  return res.status(400).json({ error: 'Question and answer are required' })
-}
-
-if (mode !== 'start' && (!answer || answer.trim().length < 5)) {
-  return res.status(400).json({ error: 'Question and answer are required' })
-}
-
-    if (!process.env.GROQ_API_KEY) {
-      return res.status(500).json({ error: 'Writing assist not configured' })
-    }
-
-   const prompt = mode === 'start'
-  ? `You are a gentle, warm writing coach helping someone write their life story.
-
-They are answering this question in their keepsake book:
-"${question}"
-
-They haven't written anything yet. Give them 3 short, specific prompts to help them get started — but NOT to write it for them.
-
-Rules:
-- Each prompt is a gentle question or memory jogger, 1 sentence max
-- Keep the tone warm and personal, like a caring friend helping them think
-- Do NOT write their answer for them
-- Return ONLY a JSON array of 3 strings, no other text`
-
-  : `You are a gentle, warm writing coach helping someone write their life story.
-
-The person is answering this question in their keepsake book:
-"${question}"
-
-Their answer so far:
-"${answer}"
-
-Give them 3 short, specific prompts to help them add more in their own words. Reference something specific from their answer. Do NOT rewrite it for them.
-
-Rules:
-- Each prompt is a gentle question or suggestion, 1 sentence max
-- Warm and personal tone
-- Return ONLY a JSON array of 3 strings, no other text`
-
-    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json',
-    'Authorization': `Bearer ${process.env.GROQ_API_KEY}`,
-  },
-  body: JSON.stringify({
-    model: 'llama-3.1-8b-instant',
-    messages: [{ role: 'user', content: prompt }],
-    temperature: 0.7,
-    max_tokens: 300,
-  }),
-})
-
-if (!response.ok) {
-  const err = await response.text()
-  console.error('Groq error:', err)
-  return res.status(500).json({ error: 'Writing assist failed' })
-}
-
-const data = await response.json()
-const raw = data.choices?.[0]?.message?.content || '[]'
-const cleaned = raw.replace(/```json|```/g, '').trim()
-const suggestions = JSON.parse(cleaned)
-
-if (!Array.isArray(suggestions)) {
-  return res.status(500).json({ error: 'Unexpected response format' })
-}
-
-res.json({ suggestions })
-
- } catch (err) {
-  console.error('Writing assist error:', err.message, err.stack)
-  res.status(500).json({ error: err.message }) // return real error temporarily
-}
-})
-
 app.post('/create-tribute-checkout', async (req, res) => {
   try {
     const { name, successUrl, cancelUrl } = req.body
-
-    if (!name || !successUrl || !cancelUrl) {
-      return res.status(400).json({ error: 'Missing required fields' })
-    }
+    if (!name || !successUrl || !cancelUrl) return res.status(400).json({ error: 'Missing required fields' })
 
     const session = await stripe.checkout.sessions.create({
       mode: 'payment',
       payment_method_types: ['card'],
-        allow_promotion_codes: true,  // ← add this line
-      line_items: [
-        {
-          price: 'price_1TUCM6R13CJL70CC423pQvkK',
-          quantity: 1,
-        },
-      ],
+      allow_promotion_codes: true,
+      line_items: [{ price: 'price_1TUCM6R13CJL70CC423pQvkK', quantity: 1 }],
       success_url: `${successUrl}&session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: cancelUrl,
-      metadata: {
-        product: 'tribute-video',
-        subject_name: name,
-      },
+      cancel_url:  cancelUrl,
+      metadata: { product: 'tribute-video', subject_name: name },
     })
 
     res.json({ url: session.url })
@@ -531,54 +388,140 @@ app.post('/create-tribute-checkout', async (req, res) => {
 app.post('/verify-tribute-payment', async (req, res) => {
   try {
     const { sessionId } = req.body
-
-    if (!sessionId) {
-      return res.status(400).json({ verified: false, error: 'Missing session ID' })
-    }
+    if (!sessionId) return res.status(400).json({ verified: false, error: 'Missing session ID' })
 
     const session = await stripe.checkout.sessions.retrieve(sessionId)
-
-    // Check payment is complete and it's a tribute video
-    if (
-      session.payment_status === 'paid' &&
-      session.metadata?.product === 'tribute-video'
-    ) {
+    if (session.payment_status === 'paid' && session.metadata?.product === 'tribute-video') {
       return res.json({ verified: true })
     }
-
-    return res.json({ verified: false })
-
+    res.json({ verified: false })
   } catch (error) {
     console.error('Payment verification error:', error)
-    return res.status(500).json({ verified: false, error: 'Verification failed' })
+    res.status(500).json({ verified: false, error: 'Verification failed' })
   }
 })
 
-app.post('/lulu-shipping-cost', async (req, res) => {
+// ─── Gift endpoints ───────────────────────────────────────────────────────────
+app.post('/create-gift-checkout', async (req, res) => {
   try {
-    const token = await getLuluAccessToken()
+    const { productKey, buyerEmail, recipientEmail, recipientName, giftMessage, discountPercent } = req.body
 
-    const response = await fetch(`${LULU_API_URL}/print-job-cost-calculations/`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type':  'application/json',
-      },
-      body: JSON.stringify(req.body),
-    })
+    if (!productKey || !GIFT_PRODUCTS[productKey]) return res.status(400).json({ error: 'Invalid product' })
 
-    const text = await response.text()
-    console.log('Lulu shipping cost response:', response.status, text.slice(0, 300))
-
-    let data
-    try {
-      data = JSON.parse(text)
-    } catch {
-      throw new Error(`Lulu shipping cost non-JSON: ${text.slice(0, 200)}`)
+    const product    = GIFT_PRODUCTS[productKey]
+    let unitAmount   = product.amount
+    if (discountPercent && discountPercent > 0 && discountPercent <= 100) {
+      unitAmount = Math.round(product.amount * (1 - discountPercent / 100))
     }
 
-    res.status(response.status).json(data)
+    const session = await stripe.checkout.sessions.create({
+      mode: 'payment',
+      payment_method_types: ['card'],
+      allow_promotion_codes: true,
+      customer_email: buyerEmail || undefined,
+      line_items: [{
+        price_data: {
+          currency: 'gbp',
+          product_data: {
+            name:        `🎁 Gift: ${product.label}`,
+            description: `A gift for ${recipientName || 'your loved one'} — ${product.description}`,
+          },
+          unit_amount: unitAmount,
+        },
+        quantity: 1,
+      }],
+      success_url: `${FRONTEND_URL}/gift?success=true&session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url:  `${FRONTEND_URL}/gift?cancelled=true`,
+      metadata: {
+        purchaseType:    'gift',
+        productKey,
+        buyerEmail:      buyerEmail || '',
+        recipientEmail:  recipientEmail || '',
+        recipientName:   recipientName || '',
+        giftMessage:     giftMessage || '',
+        accessType:      product.accessType,
+        variant:         product.variant,
+        storyType:       product.storyType,
+        discountPercent: String(discountPercent || 0),
+      },
+    })
 
+    res.json({ url: session.url })
+  } catch (err) {
+    console.error('Gift checkout error:', err)
+    res.status(500).json({ error: 'Failed to create gift checkout' })
+  }
+})
+
+app.get('/gift/:token', async (req, res) => {
+  try {
+    const { data, error } = await supabaseAdmin
+      .from('gift_purchases')
+      .select('*')
+      .eq('token', req.params.token)
+      .maybeSingle()
+
+    if (error || !data) return res.status(404).json({ error: 'Gift not found' })
+    if (data.redeemed_at) return res.status(400).json({ error: 'Gift already redeemed' })
+
+    res.json({ valid: true, productKey: data.product_key, recipientName: data.recipient_name, giftMessage: data.gift_message, buyerEmail: data.buyer_email })
+  } catch (err) {
+    console.error('Gift validation error:', err)
+    res.status(500).json({ error: 'Validation failed' })
+  }
+})
+
+app.post('/redeem-gift', async (req, res) => {
+  try {
+    const { token, userId } = req.body
+    if (!token || !userId) return res.status(400).json({ error: 'Missing token or userId' })
+
+    const { data: gift, error: giftError } = await supabaseAdmin
+      .from('gift_purchases')
+      .select('*')
+      .eq('token', token)
+      .maybeSingle()
+
+    if (giftError || !gift) return res.status(404).json({ error: 'Gift not found' })
+    if (gift.redeemed_at) return res.status(400).json({ error: 'Gift already redeemed' })
+
+    const accessRows = [
+      { user_id: userId, access_type: 'story',  story_type: gift.story_type, variant: null },
+      { user_id: userId, access_type: 'export', story_type: gift.story_type, variant: gift.variant },
+    ]
+
+    const { error: accessError } = await supabaseAdmin
+      .from('user_access')
+      .upsert(accessRows, { onConflict: 'user_id,access_type,story_type' })
+
+    if (accessError) {
+      console.error('Access grant error:', accessError)
+      return res.status(500).json({ error: 'Failed to grant access' })
+    }
+
+    await supabaseAdmin
+      .from('gift_purchases')
+      .update({ redeemed_by: userId, redeemed_at: new Date().toISOString() })
+      .eq('token', token)
+
+    res.json({ success: true, storyType: gift.story_type })
+  } catch (err) {
+    console.error('Gift redemption error:', err)
+    res.status(500).json({ error: 'Redemption failed' })
+  }
+})
+
+// ─── Lulu endpoints ───────────────────────────────────────────────────────────
+app.post('/lulu-shipping-cost', async (req, res) => {
+  try {
+    const token    = await getLuluAccessToken()
+    const response = await fetch(`${LULU_API_URL}/print-job-cost-calculations/`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify(req.body),
+    })
+    const text = await response.text()
+    res.status(response.status).json(JSON.parse(text))
   } catch (err) {
     console.error('Lulu shipping cost error:', err.message)
     res.status(500).json({ error: err.message })
@@ -587,29 +530,14 @@ app.post('/lulu-shipping-cost', async (req, res) => {
 
 app.post('/lulu-shipping-options', async (req, res) => {
   try {
-    const token = await getLuluAccessToken()
-
+    const token    = await getLuluAccessToken()
     const response = await fetch(`${LULU_API_URL}/shipping-options/`, {
       method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
       body: JSON.stringify(req.body),
     })
-
     const text = await response.text()
-    console.log('Shipping options response:', response.status, text.slice(0, 500))
-
-    let data
-    try {
-      data = JSON.parse(text)
-    } catch {
-      throw new Error(`Shipping options non-JSON: ${text.slice(0, 200)}`)
-    }
-
-    res.status(response.status).json(data)
-
+    res.status(response.status).json(JSON.parse(text))
   } catch (err) {
     console.error('Shipping options error:', err.message)
     res.status(500).json({ error: err.message })
@@ -619,9 +547,7 @@ app.post('/lulu-shipping-options', async (req, res) => {
 app.post('/lulu-print-job', async (req, res) => {
   try {
     const token = await getLuluAccessToken()
-
-    // Transform to Lulu's expected format
-    const body = req.body
+    const body  = req.body
     const transformedBody = {
       contact_email:    body.contact_email,
       external_id:      body.external_id,
@@ -641,47 +567,26 @@ app.post('/lulu-print-job', async (req, res) => {
 
     const response = await fetch(`${LULU_API_URL}/print-jobs/`, {
       method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type':  'application/json',
-      },
+      headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
       body: JSON.stringify(transformedBody),
     })
-
     const text = await response.text()
-    console.log('Lulu print job raw response:', response.status, text.slice(0, 500))
-
-    let data
-    try {
-      data = JSON.parse(text)
-    } catch {
-      throw new Error(`Lulu returned non-JSON: ${text.slice(0, 200)}`)
-    }
-
-    if (!response.ok) {
-      console.error('Lulu print job rejected:', JSON.stringify(data))
-    } else {
-      console.log('Lulu print job created:', data.id)
-    }
-
+    const data = JSON.parse(text)
+    if (!response.ok) console.error('Lulu print job rejected:', JSON.stringify(data))
+    else console.log('Lulu print job created:', data.id)
     res.status(response.status).json(data)
-
   } catch (err) {
     console.error('Lulu print job error:', err.message)
     res.status(500).json({ error: err.message })
   }
 })
- 
-// ─── Get print job status ─────────────────────────────────────────────────────
- 
+
 app.get('/lulu-print-job-status/:id', async (req, res) => {
   try {
-    const token = await getLuluAccessToken()
- 
+    const token    = await getLuluAccessToken()
     const response = await fetch(`${LULU_API_URL}/print-jobs/${req.params.id}/`, {
       headers: { 'Authorization': `Bearer ${token}` },
     })
- 
     const data = await response.json()
     res.status(response.status).json({
       status:                  data.status?.name || 'UNKNOWN',
@@ -689,444 +594,129 @@ app.get('/lulu-print-job-status/:id', async (req, res) => {
       tracking_url:            data.tracking_url,
       estimated_shipping_date: data.estimated_shipping_date,
     })
- 
   } catch (err) {
     console.error('Lulu status error:', err.message)
     res.status(500).json({ error: 'Failed to get print job status' })
   }
 })
- 
-// ─── Cancel print job ─────────────────────────────────────────────────────────
- 
-app.post('/lulu-test-job', async (req, res) => {
-  try {
-    const token = await getLuluAccessToken()
-
-    // Test with Lulu's own sample PDF
-    const testPayload = {
-      contact_email: 'mark@tellmeyourstory.uk',
-      external_id: 'test-001',
-      line_items: [
-        {
-          title: 'Test Book',
-          interior: {
-            source_url: 'https://jeyybcdnmezivjuvmmcu.supabase.co/storage/v1/object/public/story-exports/print-orders/1b595e55-7fe9-429c-ab0e-0e761e3d718c/0411757e-8df2-40d0-904d-f8432f148237-interior-1778379201693.pdf'
-          },
-          cover: {
-            source_url: 'https://jeyybcdnmezivjuvmmcu.supabase.co/storage/v1/object/public/story-exports/print-orders/1b595e55-7fe9-429c-ab0e-0e761e3d718c/0411757e-8df2-40d0-904d-f8432f148237-interior-1778379201693.pdf'
-          },
-          pod_package_id: '0600X0900.FC.STD.PB.060UW444.MXX',
-          page_count: 28,
-          quantity: 1,
-        },
-      ],
-      production_delay: 120,
-      shipping_address: {
-        name: 'Mark Griffiths',
-        street1: '38 Botley Gardens',
-        street2: '',
-        city: 'Southampton',
-        state_code: '',
-        postcode: 'SO19 0SW',
-        country_code: 'GB',
-        phone_number: '07720617444',
-        email: 'mark@tellmeyourstory.uk',
-      },
-      shipping_level: 'GROUND',
-    }
-
-    const response = await fetch(`${LULU_API_URL}/print-jobs/`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(testPayload),
-    })
-
-    const text = await response.text()
-    console.log('Test job response:', response.status, text.slice(0, 1000))
-    res.status(response.status).send(text)
-
-  } catch (err) {
-    console.error('Test job error:', err.message)
-    res.status(500).json({ error: err.message })
-  }
-})
-
-app.post('/lulu-validate-interior', async (req, res) => {
-  try {
-    const token = await getLuluAccessToken()
-
-    // Step 1 — submit for validation
-    const submitResponse = await fetch(`${LULU_API_URL}/validate-interior/`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        source_url: 'https://jeyybcdnmezivjuvmmcu.supabase.co/storage/v1/object/public/story-exports/print-orders/1b595e55-7fe9-429c-ab0e-0e761e3d718c/0411757e-8df2-40d0-904d-f8432f148237-interior-1778379201693.pdf',
-      }),
-    })
-
-    const submitText = await submitResponse.text()
-    console.log('Validation submit:', submitResponse.status, submitText)
-
-    if (!submitResponse.ok) {
-      return res.status(submitResponse.status).send(submitText)
-    }
-
-    const submitData = JSON.parse(submitText)
-    const validationId = submitData.id
-
-    // Step 2 — wait 8 seconds then poll result
-    await new Promise(resolve => setTimeout(resolve, 8000))
-
-    const resultResponse = await fetch(
-      `${LULU_API_URL}/validate-interior/${validationId}/`,
-      {
-        headers: { 'Authorization': `Bearer ${token}` },
-      }
-    )
-
-    const resultText = await resultResponse.text()
-    console.log('Validation result:', resultResponse.status, resultText)
-    res.status(resultResponse.status).send(resultText)
-
-  } catch (err) {
-    console.error('Validation error:', err.message)
-    res.status(500).json({ error: err.message })
-  }
-})
-
-app.post('/lulu-cover-dimensions', async (req, res) => {
-  try {
-    const token = await getLuluAccessToken()
-    const { interior_page_count = 28, pod_package_id = '0600X0900.FC.STD.PB.060UW444.MXX' } = req.body
-
-    const response = await fetch(`${LULU_API_URL}/cover-dimensions/`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        pod_package_id: '0600X0900.FC.STD.PB.060UW444.MXX',
-        interior_page_count: 28,
-        unit: 'mm',
-      }),
-    })
-
-    const text = await response.text()
-    console.log('Cover dimensions:', response.status, text)
-    res.status(response.status).send(text)
-
-  } catch (err) {
-    console.error('Cover dimensions error:', err.message)
-    res.status(500).json({ error: err.message })
-  }
-})
-
-app.post('/lulu-validate-cover', async (req, res) => {
-  try {
-    const token = await getLuluAccessToken()
-
-    const { source_url, interior_page_count = 36 } = req.body
-
-    const submitResponse = await fetch(`${LULU_API_URL}/validate-cover/`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        source_url,
-        pod_package_id: '0600X0900.FC.STD.PB.060UW444.MXX',
-        interior_page_count,
-      }),
-    })
-
-    const submitText = await submitResponse.text()
-    console.log('Cover validation submit:', submitResponse.status, submitText)
-    if (!submitResponse.ok) return res.status(submitResponse.status).send(submitText)
-
-    const { id } = JSON.parse(submitText)
-
-    await new Promise(resolve => setTimeout(resolve, 15000))
-
-    const resultResponse = await fetch(`${LULU_API_URL}/validate-cover/${id}/`, {
-      headers: { 'Authorization': `Bearer ${token}` },
-    })
-
-    const resultText = await resultResponse.text()
-    console.log('Cover validation result:', resultText)
-    res.status(resultResponse.status).send(resultText)
-
-  } catch (err) {
-    res.status(500).json({ error: err.message })
-  }
-})
 
 app.post('/lulu-print-job-cancel/:id', async (req, res) => {
   try {
-    const token = await getLuluAccessToken()
- 
+    const token    = await getLuluAccessToken()
     const response = await fetch(`${LULU_API_URL}/print-jobs/${req.params.id}/`, {
-      method:  'DELETE',
-      headers: { 'Authorization': `Bearer ${token}` },
+      method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` },
     })
- 
     res.status(response.status).json({ cancelled: response.ok })
- 
   } catch (err) {
     console.error('Lulu cancel error:', err.message)
     res.status(500).json({ error: 'Failed to cancel print job' })
   }
 })
 
-// ── Create gift checkout session ───────────────────────────────────────────────
-app.post('/create-gift-checkout', async (req, res) => {
+app.post('/lulu-cover-dimensions', async (req, res) => {
   try {
-    const { productKey, buyerEmail, recipientEmail, recipientName, giftMessage, discountPercent } = req.body
- 
-    if (!productKey || !GIFT_PRODUCTS[productKey]) {
-      return res.status(400).json({ error: 'Invalid product' })
-    }
- 
-    const product = GIFT_PRODUCTS[productKey]
- 
-    // Apply discount if provided (e.g. 50 for 50% off)
-    let unitAmount = product.amount
-    if (discountPercent && discountPercent > 0 && discountPercent <= 100) {
-      unitAmount = Math.round(product.amount * (1 - discountPercent / 100))
-    }
- 
-    const session = await stripe.checkout.sessions.create({
-      mode: 'payment',
-      payment_method_types: ['card'],
-      allow_promotion_codes: true,
-      customer_email: buyerEmail || undefined,
-      line_items: [
-        {
-          price_data: {
-            currency: 'gbp',
-            product_data: {
-              name: `🎁 Gift: ${product.label}`,
-              description: `A gift for ${recipientName || 'your loved one'} — ${product.description}`,
-            },
-            unit_amount: unitAmount,
-          },
-          quantity: 1,
-        },
-      ],
-      success_url: `${FRONTEND_URL}/gift?success=true&session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url:  `${FRONTEND_URL}/gift?cancelled=true`,
-      metadata: {
-        purchaseType:    'gift',
-        productKey,
-        buyerEmail:      buyerEmail || '',
-        recipientEmail:  recipientEmail || '',
-        recipientName:   recipientName || '',
-        giftMessage:     giftMessage || '',
-        accessType:      product.accessType,
-        variant:         product.variant,
-        storyType:       product.storyType,
-        discountPercent: String(discountPercent || 0),
-      },
+    const token    = await getLuluAccessToken()
+    const response = await fetch(`${LULU_API_URL}/cover-dimensions/`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        pod_package_id:      req.body.pod_package_id || '0600X0900.FC.STD.PB.060UW444.MXX',
+        interior_page_count: req.body.interior_page_count || 28,
+        unit:                req.body.unit || 'mm',
+      }),
     })
- 
-    res.json({ url: session.url })
+    const text = await response.text()
+    res.status(response.status).send(text)
   } catch (err) {
-    console.error('Gift checkout error:', err)
-    res.status(500).json({ error: 'Failed to create gift checkout' })
+    console.error('Cover dimensions error:', err.message)
+    res.status(500).json({ error: err.message })
   }
 })
- 
-// ── Validate gift token (called by redemption page) ───────────────────────────
-app.get('/gift/:token', async (req, res) => {
+
+app.post('/lulu-validate-interior', async (req, res) => {
   try {
-    const { token } = req.params
- 
-    const { data, error } = await supabaseAdmin
-      .from('gift_purchases')
-      .select('*')
-      .eq('token', token)
-      .maybeSingle()
- 
-    if (error || !data) {
-      return res.status(404).json({ error: 'Gift not found' })
-    }
- 
-    if (data.redeemed_at) {
-      return res.status(400).json({ error: 'Gift already redeemed' })
-    }
- 
-    res.json({
-      valid:         true,
-      productKey:    data.product_key,
-      recipientName: data.recipient_name,
-      giftMessage:   data.gift_message,
-      buyerEmail:    data.buyer_email,
+    const token          = await getLuluAccessToken()
+    const submitResponse = await fetch(`${LULU_API_URL}/validate-interior/`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ source_url: req.body.source_url }),
     })
+    const submitText = await submitResponse.text()
+    if (!submitResponse.ok) return res.status(submitResponse.status).send(submitText)
+
+    const { id } = JSON.parse(submitText)
+    await new Promise(resolve => setTimeout(resolve, 8000))
+
+    const resultResponse = await fetch(`${LULU_API_URL}/validate-interior/${id}/`, {
+      headers: { 'Authorization': `Bearer ${token}` },
+    })
+    res.status(resultResponse.status).send(await resultResponse.text())
   } catch (err) {
-    console.error('Gift validation error:', err)
-    res.status(500).json({ error: 'Validation failed' })
+    console.error('Validation error:', err.message)
+    res.status(500).json({ error: err.message })
   }
 })
- 
-// ── Redeem gift (called after recipient signs up/logs in) ─────────────────────
-app.post('/redeem-gift', async (req, res) => {
+
+app.post('/lulu-validate-cover', async (req, res) => {
   try {
-    const { token, userId } = req.body
- 
-    if (!token || !userId) {
-      return res.status(400).json({ error: 'Missing token or userId' })
-    }
- 
-    // Get gift record
-    const { data: gift, error: giftError } = await supabaseAdmin
-      .from('gift_purchases')
-      .select('*')
-      .eq('token', token)
-      .maybeSingle()
- 
-    if (giftError || !gift) {
-      return res.status(404).json({ error: 'Gift not found' })
-    }
- 
-    if (gift.redeemed_at) {
-      return res.status(400).json({ error: 'Gift already redeemed' })
-    }
- 
-    // Grant access to the recipient
-    const accessRows = []
- 
-    // Story access
-    accessRows.push({
-      user_id:    userId,
-      access_type: 'story',
-      story_type: gift.story_type,
-      variant:    null,
+    const token          = await getLuluAccessToken()
+    const { source_url, interior_page_count = 36 } = req.body
+    const submitResponse = await fetch(`${LULU_API_URL}/validate-cover/`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ source_url, pod_package_id: '0600X0900.FC.STD.PB.060UW444.MXX', interior_page_count }),
     })
- 
-    // Export access
-    accessRows.push({
-      user_id:    userId,
-      access_type: 'export',
-      story_type: gift.story_type,
-      variant:    gift.variant,
+    const submitText = await submitResponse.text()
+    if (!submitResponse.ok) return res.status(submitResponse.status).send(submitText)
+
+    const { id } = JSON.parse(submitText)
+    await new Promise(resolve => setTimeout(resolve, 15000))
+
+    const resultResponse = await fetch(`${LULU_API_URL}/validate-cover/${id}/`, {
+      headers: { 'Authorization': `Bearer ${token}` },
     })
- 
-    const { error: accessError } = await supabaseAdmin
-      .from('user_access')
-      .upsert(accessRows, { onConflict: 'user_id,access_type,story_type' })
- 
-    if (accessError) {
-      console.error('Access grant error:', accessError)
-      return res.status(500).json({ error: 'Failed to grant access' })
-    }
- 
-    // Mark gift as redeemed
-    await supabaseAdmin
-      .from('gift_purchases')
-      .update({ redeemed_by: userId, redeemed_at: new Date().toISOString() })
-      .eq('token', token)
- 
-    res.json({ success: true, storyType: gift.story_type })
- 
+    res.status(resultResponse.status).send(await resultResponse.text())
   } catch (err) {
-    console.error('Gift redemption error:', err)
-    res.status(500).json({ error: 'Redemption failed' })
+    res.status(500).json({ error: err.message })
   }
 })
 
-app.post('/create-checkout-session', async (req, res) => {
-  try {
-    const { priceId, userId, storyType, projectId, purchaseType } = req.body
-
-    if (!priceId || !userId || !projectId) {
-      return res.status(400).json({ error: 'Missing required checkout data' })
-    }
-
-    const session = await stripe.checkout.sessions.create({
-      mode: 'payment',
-        allow_promotion_codes: true,  // ← add this line
-      line_items: [
-        {
-          price: priceId,
-          quantity: 1,
-        },
-      ],
-      success_url: `${FRONTEND_URL}/story/${projectId}?payment=success`,
-      cancel_url: `${FRONTEND_URL}/story/${projectId}?payment=cancelled`,
-      metadata: {
-        userId,
-        storyType: storyType || '',
-        projectId: projectId || '',
-        purchaseType: purchaseType || '',
-      },
-    })
-
-    res.json({ url: session.url })
-  } catch (error) {
-    console.error('Checkout session error:', error)
-    res.status(500).json({ error: 'Failed to create checkout session' })
-  }
-})
-
+// ─── Error handler ────────────────────────────────────────────────────────────
 app.use((err, req, res, next) => {
   console.error('Express error:', err.message)
   res.status(500).json({ error: err.message })
 })
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`)
-})
+// ─── Start ────────────────────────────────────────────────────────────────────
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`))
 
+// ─── Helpers ──────────────────────────────────────────────────────────────────
 async function verifyTurnstileToken(token, remoteIp) {
   const formData = new URLSearchParams()
   formData.append('secret', process.env.TURNSTILE_SECRET_KEY)
   formData.append('response', token)
-
-  if (remoteIp) {
-    formData.append('remoteip', remoteIp)
-  }
+  if (remoteIp) formData.append('remoteip', remoteIp)
 
   const response = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
-    },
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: formData.toString(),
   })
-
   return response.json()
 }
 
 async function getLuluAccessToken() {
-  const response = await fetch(
-    'https://api.lulu.com/auth/realms/glasstree/protocol/openid-connect/token',
-    {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: new URLSearchParams({
-        grant_type: 'client_credentials',
-        client_id: process.env.LULU_CLIENT_KEY,
-        client_secret: process.env.LULU_CLIENT_SECRET,
-      }).toString(),
-    }
-  )
+  const response = await fetch('https://api.lulu.com/auth/realms/glasstree/protocol/openid-connect/token', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({
+      grant_type:    'client_credentials',
+      client_id:     process.env.LULU_CLIENT_KEY,
+      client_secret: process.env.LULU_CLIENT_SECRET,
+    }).toString(),
+  })
 
   const text = await response.text()
-  console.log('Lulu auth response:', response.status, text.slice(0, 200))
-
-  if (!response.ok) {
-    throw new Error(`Lulu auth failed: ${response.status} ${text.slice(0, 200)}`)
-  }
-
-  const data = JSON.parse(text)
-  return data.access_token
+  if (!response.ok) throw new Error(`Lulu auth failed: ${response.status} ${text.slice(0, 200)}`)
+  return JSON.parse(text).access_token
 }
