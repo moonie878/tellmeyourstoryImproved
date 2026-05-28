@@ -131,6 +131,9 @@ const routes = [
   { path: '/subscriptions', redirect: '/pricing' },
   { path: '/billing', redirect: '/pricing' },
   { path: '/listen/:id', name: 'listen', component: () => import('../views/ListenView.vue') },
+  { path: '/gift', component: () => import('../views/GiftView.vue') },
+{ path: '/gift/redeem/:token', component: () => import('../views/GiftRedeemView.vue') },
+{ path: '/fathers-day', component: () => import('../views/FathersDayView.vue') },
 
   // ── SEO landing pages ─────────────────────────────────────────────────────
   {

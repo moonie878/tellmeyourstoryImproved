@@ -11,6 +11,51 @@ const FRONTEND_URL = process.env.FRONTEND_URL
 const LULU_API_URL  = 'https://api.lulu.com'
 const LULU_AUTH_URL = 'https://api.lulu.com/auth/realms/glasstree/protocol/openid-connect/token'
 
+// ─── GIFT PURCHASE SYSTEM ─────────────────────────────────────────────────────
+// Add these endpoints to server.js before the error handler
+// Also add to Stripe dashboard: a new webhook event for checkout.session.completed
+// with metadata.purchaseType === 'gift'
+ 
+// ── Price config ──────────────────────────────────────────────────────────────
+const GIFT_PRODUCTS = {
+  'single-story': {
+    priceId:     'price_1TJvcYR13CJL70CCXAigFPLP',
+    label:       "Dad's Story — Keepsake Book",
+    description: 'PDF keepsake export for one story',
+    accessType:  'story',
+    variant:     'text_only',
+    storyType:   'dad',
+    amount:      399,
+  },
+  'single-story-images': {
+    priceId:     'price_1TJvd3R13CJL70CCmOGoDDVT',
+    label:       "Dad's Story — Story + Photos",
+    description: 'PDF keepsake with photos for one story',
+    accessType:  'export',
+    variant:     'with_images',
+    storyType:   'dad',
+    amount:      799,
+  },
+  'all-stories': {
+    priceId:     'price_1TJvdJR13CJL70CCrdpt1bg0',
+    label:       'All Stories — Keepsake Book',
+    description: 'PDF keepsake export for all story types',
+    accessType:  'story',
+    variant:     'all',
+    storyType:   'all',
+    amount:      1199,
+  },
+  'premium': {
+    priceId:     'price_1TJvdiR13CJL70CCqAqRBjZq',
+    label:       'Premium Keepsake',
+    description: 'Photos, premium layouts, all story types',
+    accessType:  'export',
+    variant:     'premium',
+    storyType:   'all',
+    amount:      1799,
+  },
+}
+
 if (!process.env.STRIPE_SECRET_KEY) {
   throw new Error('Missing STRIPE_SECRET_KEY')
 }
@@ -768,6 +813,162 @@ app.post('/lulu-print-job-cancel/:id', async (req, res) => {
   } catch (err) {
     console.error('Lulu cancel error:', err.message)
     res.status(500).json({ error: 'Failed to cancel print job' })
+  }
+})
+
+// ── Create gift checkout session ───────────────────────────────────────────────
+app.post('/create-gift-checkout', async (req, res) => {
+  try {
+    const { productKey, buyerEmail, recipientEmail, recipientName, giftMessage, discountPercent } = req.body
+ 
+    if (!productKey || !GIFT_PRODUCTS[productKey]) {
+      return res.status(400).json({ error: 'Invalid product' })
+    }
+ 
+    const product = GIFT_PRODUCTS[productKey]
+ 
+    // Apply discount if provided (e.g. 50 for 50% off)
+    let unitAmount = product.amount
+    if (discountPercent && discountPercent > 0 && discountPercent <= 100) {
+      unitAmount = Math.round(product.amount * (1 - discountPercent / 100))
+    }
+ 
+    const session = await stripe.checkout.sessions.create({
+      mode: 'payment',
+      payment_method_types: ['card'],
+      allow_promotion_codes: true,
+      customer_email: buyerEmail || undefined,
+      line_items: [
+        {
+          price_data: {
+            currency: 'gbp',
+            product_data: {
+              name: `🎁 Gift: ${product.label}`,
+              description: `A gift for ${recipientName || 'your loved one'} — ${product.description}`,
+            },
+            unit_amount: unitAmount,
+          },
+          quantity: 1,
+        },
+      ],
+      success_url: `${FRONTEND_URL}/gift/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url:  `${FRONTEND_URL}/gift?cancelled=true`,
+      metadata: {
+        purchaseType:    'gift',
+        productKey,
+        buyerEmail:      buyerEmail || '',
+        recipientEmail:  recipientEmail || '',
+        recipientName:   recipientName || '',
+        giftMessage:     giftMessage || '',
+        accessType:      product.accessType,
+        variant:         product.variant,
+        storyType:       product.storyType,
+        discountPercent: String(discountPercent || 0),
+      },
+    })
+ 
+    res.json({ url: session.url })
+  } catch (err) {
+    console.error('Gift checkout error:', err)
+    res.status(500).json({ error: 'Failed to create gift checkout' })
+  }
+})
+ 
+// ── Validate gift token (called by redemption page) ───────────────────────────
+app.get('/gift/:token', async (req, res) => {
+  try {
+    const { token } = req.params
+ 
+    const { data, error } = await supabaseAdmin
+      .from('gift_purchases')
+      .select('*')
+      .eq('token', token)
+      .maybeSingle()
+ 
+    if (error || !data) {
+      return res.status(404).json({ error: 'Gift not found' })
+    }
+ 
+    if (data.redeemed_at) {
+      return res.status(400).json({ error: 'Gift already redeemed' })
+    }
+ 
+    res.json({
+      valid:         true,
+      productKey:    data.product_key,
+      recipientName: data.recipient_name,
+      giftMessage:   data.gift_message,
+      buyerEmail:    data.buyer_email,
+    })
+  } catch (err) {
+    console.error('Gift validation error:', err)
+    res.status(500).json({ error: 'Validation failed' })
+  }
+})
+ 
+// ── Redeem gift (called after recipient signs up/logs in) ─────────────────────
+app.post('/redeem-gift', async (req, res) => {
+  try {
+    const { token, userId } = req.body
+ 
+    if (!token || !userId) {
+      return res.status(400).json({ error: 'Missing token or userId' })
+    }
+ 
+    // Get gift record
+    const { data: gift, error: giftError } = await supabaseAdmin
+      .from('gift_purchases')
+      .select('*')
+      .eq('token', token)
+      .maybeSingle()
+ 
+    if (giftError || !gift) {
+      return res.status(404).json({ error: 'Gift not found' })
+    }
+ 
+    if (gift.redeemed_at) {
+      return res.status(400).json({ error: 'Gift already redeemed' })
+    }
+ 
+    // Grant access to the recipient
+    const accessRows = []
+ 
+    // Story access
+    accessRows.push({
+      user_id:    userId,
+      access_type: 'story',
+      story_type: gift.story_type,
+      variant:    null,
+    })
+ 
+    // Export access
+    accessRows.push({
+      user_id:    userId,
+      access_type: 'export',
+      story_type: gift.story_type,
+      variant:    gift.variant,
+    })
+ 
+    const { error: accessError } = await supabaseAdmin
+      .from('user_access')
+      .upsert(accessRows, { onConflict: 'user_id,access_type,story_type' })
+ 
+    if (accessError) {
+      console.error('Access grant error:', accessError)
+      return res.status(500).json({ error: 'Failed to grant access' })
+    }
+ 
+    // Mark gift as redeemed
+    await supabaseAdmin
+      .from('gift_purchases')
+      .update({ redeemed_by: userId, redeemed_at: new Date().toISOString() })
+      .eq('token', token)
+ 
+    res.json({ success: true, storyType: gift.story_type })
+ 
+  } catch (err) {
+    console.error('Gift redemption error:', err)
+    res.status(500).json({ error: 'Redemption failed' })
   }
 })
 
