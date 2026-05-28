@@ -3,6 +3,8 @@ const Stripe = require('stripe')
 const cors = require('cors')
 const { createClient } = require('@supabase/supabase-js')
 require('dotenv').config()
+const { Resend } = require('resend')
+const resend = new Resend(process.env.RESEND_API_KEY)
 
 const app = express()
 
@@ -10,6 +12,7 @@ const PORT = process.env.PORT || 3000
 const FRONTEND_URL = process.env.FRONTEND_URL
 const LULU_API_URL  = 'https://api.lulu.com'
 const LULU_AUTH_URL = 'https://api.lulu.com/auth/realms/glasstree/protocol/openid-connect/token'
+
 
 // ─── GIFT PURCHASE SYSTEM ─────────────────────────────────────────────────────
 // Add these endpoints to server.js before the error handler
@@ -228,6 +231,72 @@ app.post(
       variant: 'premium',
     },
           ]
+         } else if (purchaseType === 'gift') 
+          
+          
+  const {
+    productKey, buyerEmail, recipientEmail, recipientName, giftMessage,
+    accessType, variant, storyType,
+  } = session.metadata
+
+  const { data: giftRecord, error: giftError } = await supabaseAdmin
+    .from('gift_purchases')
+    .insert({
+      stripe_session_id: session.id,
+      product_key:       productKey,
+      buyer_email:       buyerEmail,
+      recipient_email:   recipientEmail,
+      recipient_name:    recipientName,
+      gift_message:      giftMessage,
+      access_type:       accessType,
+      variant,
+      story_type:        storyType,
+    })
+    .select('token')
+    .single()
+
+  if (giftError) {
+    console.error('Gift record creation error:', giftError)
+  } else {
+    const redemptionUrl = `${FRONTEND_URL}/gift/redeem/${giftRecord.token}`
+    
+    const { Resend } = require('resend')
+    const resend = new Resend(process.env.RESEND_API_KEY)
+
+    await resend.emails.send({
+      from: 'Tell Me Your Story <gifts@tellmeyourstory.uk>',
+      to: buyerEmail,
+      subject: `🎁 Your gift for ${recipientName} is ready`,
+      html: `
+        <div style="font-family: Georgia, serif; max-width: 600px; margin: 0 auto; padding: 40px 20px;">
+          <h1 style="font-size: 28px; color: #1C1917;">Your gift is ready 🎁</h1>
+          <p style="font-size: 15px; color: #5C534E; line-height: 1.7;">
+            You've gifted <strong>${recipientName}</strong> access to Tell Me Your Story.
+            Share the link below whenever you're ready.
+          </p>
+          <div style="background: #F5F0E8; border-radius: 16px; padding: 24px; margin: 24px 0; text-align: center;">
+            <p style="font-size: 12px; color: #9C7C5C; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.1em;">Gift link</p>
+            <a href="${redemptionUrl}" style="font-size: 14px; color: #7C5C3B; word-break: break-all;">${redemptionUrl}</a>
+          </div>
+          ${giftMessage ? `
+          <div style="border-left: 3px solid #7C5C3B; padding: 12px 20px; margin: 24px 0; background: #FAF7F4; border-radius: 0 12px 12px 0;">
+            <p style="font-size: 14px; color: #3C3530; font-style: italic;">"${giftMessage}"</p>
+          </div>` : ''}
+          <p style="font-size: 13px; color: #8C847E; line-height: 1.6;">
+            ${recipientName} simply opens the link, creates a free account, and their access is unlocked automatically.
+          </p>
+          <p style="font-size: 12px; color: #A8A29E; margin-top: 32px;">
+            Tell Me Your Story · <a href="https://tellmeyourstory.uk" style="color: #7C5C3B;">tellmeyourstory.uk</a>
+          </p>
+        </div>
+      `,
+    })
+  }
+}
+
+
+
+          {
         }
 
         const { error } = await supabaseAdmin.from('user_access').upsert(accessRows, {
@@ -851,7 +920,7 @@ app.post('/create-gift-checkout', async (req, res) => {
           quantity: 1,
         },
       ],
-      success_url: `${FRONTEND_URL}/gift/success?session_id={CHECKOUT_SESSION_ID}`,
+      success_url: `${FRONTEND_URL}/gift?success=true&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url:  `${FRONTEND_URL}/gift?cancelled=true`,
       metadata: {
         purchaseType:    'gift',

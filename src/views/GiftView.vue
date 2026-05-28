@@ -1,4 +1,15 @@
 <template>
+    <!-- Success state -->
+<div v-if="route.query.success" class="min-h-screen bg-[#F5F0E8] flex items-center justify-center px-5">
+  <div class="w-full max-w-md rounded-3xl bg-white p-8 text-center shadow-sm">
+    <p class="text-5xl">🎁</p>
+    <h1 class="mt-4 font-display text-2xl font-bold text-stone-900">Gift purchased!</h1>
+    <p class="mt-3 text-sm leading-6 text-stone-600">
+      We're sending your gift link to your email now. Forward it to Dad whenever you're ready.
+    </p>
+    <p class="mt-3 text-xs text-stone-400">Can't find the email? Check your spam folder or contact hello@tellmeyourstory.uk</p>
+  </div>
+</div>
   <div class="min-h-screen bg-[#F5F0E8]">
 
     <!-- Hero -->
