@@ -42,6 +42,12 @@
           </template>
 
           <template v-else>
+             <router-link
+  to="/fathers-day"
+  class="rounded-full bg-[#C4A882] px-4 py-1.5 text-xs font-semibold text-[#1C1917] transition hover:opacity-90"
+>
+  🎁 Father's Day — 50% off
+</router-link>
             <router-link to="/example" class="text-stone-600 transition hover:text-stone-900">
               Example story
             </router-link>
