@@ -71,9 +71,14 @@
           <p v-if="errorMessage" class="text-sm text-red-600">{{ errorMessage }}</p>
 
           <div v-if="success" class="rounded-2xl bg-[#F5F0E8] px-5 py-4 text-center">
-            <p class="text-sm font-medium text-[#1C1917]">✓ Account created</p>
-            <p class="mt-1 text-xs text-[#5C534E]">Check your email to confirm your account, then you're good to go.</p>
-          </div>
+  <p class="text-sm font-medium text-[#1C1917]">✓ Account created</p>
+  <p v-if="giftToken" class="mt-1 text-xs text-[#5C534E]">
+    Redirecting you to redeem your gift…
+  </p>
+  <p v-else class="mt-1 text-xs text-[#5C534E]">
+    Check your email to confirm your account, then you're good to go.
+  </p>
+</div>
 
           <button
             v-if="!success"
@@ -86,10 +91,13 @@
         </div>
       </div>
 
-      <p class="mt-5 text-center text-sm text-[#8C847E]">
-        Already have an account?
-        <router-link to="/login" class="font-medium text-[#1C1917] hover:underline">Log in</router-link>
-      </p>
+      <p class="mt-6 text-center text-sm text-[#5C534E]">
+  Already have an account?
+  <router-link
+    :to="giftToken ? `/login?gift=${giftToken}` : '/login'"
+    class="font-medium text-[#1C1917] hover:underline"
+  >Log in</router-link>
+</p>
 
       <div class="mt-6 flex flex-wrap justify-center gap-x-5 gap-y-2 text-xs text-[#A89880]">
         <span>✦ No subscription</span>
@@ -108,6 +116,7 @@ import TurnstileWidget from '../components/legal/TurnstileWidget.vue'
 import { verifyTurnstile } from '../lib/turnstile'
 import { track } from '../lib/analytics'
 import { getCurrentUtmData } from '../lib/utm'
+import { useRoute, useRouter } from 'vue-router'  // add useRoute and useRouter
 
 const email = ref('')
 const password = ref('')
@@ -119,14 +128,20 @@ const success = ref(false)
 const turnstileToken = ref('')
 const turnstileError = ref('')
 const utmData = getCurrentUtmData()
+const route  = useRoute()
+const router = useRouter()
+const giftToken = route.query.gift as string | undefined
+
 
 async function handleGoogleLogin() {
   googleLoading.value = true
+  const redirectTo = giftToken
+    ? `https://tellmeyourstory.uk/gift/redeem/${giftToken}`
+    : 'https://tellmeyourstory.uk/dashboard'
+
   const { error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
-    options: {
-      redirectTo: 'https://tellmeyourstory.uk/dashboard',
-    },
+    options: { redirectTo },
   })
   if (error) {
     errorMessage.value = error.message
@@ -159,14 +174,18 @@ async function handleRegister() {
     })
 
     if (error) {
-      errorMessage.value = error.message
-    } else {
-      success.value = true
-      track('signup_completed', {
-        source: 'register_page',
-        ...utmData,
-      })
-    }
+  errorMessage.value = error.message
+} else {
+  success.value = true
+  track('signup_completed', { source: 'register_page', ...utmData })
+
+  // If registering via a gift link, redirect to redemption page after short delay
+  if (giftToken) {
+    setTimeout(() => {
+      router.push(`/gift/redeem/${giftToken}`)
+    }, 2000)
+  }
+}
   } catch (err) {
     console.error(err)
     errorMessage.value = 'Something went wrong. Please try again.'

@@ -106,6 +106,13 @@
       >
         <nav class="flex flex-col gap-2 text-sm font-medium">
           <template v-if="user">
+            <!-- Father's Day gift link — add to nav links -->
+<router-link
+  to="/fathers-day"
+  class="rounded-full bg-[#C4A882] px-4 py-1.5 text-xs font-semibold text-[#1C1917] transition hover:opacity-90"
+>
+  🎁 Father's Day — 50% off
+</router-link>
             <router-link
               to="/dashboard"
               class="rounded-2xl px-4 py-3 text-stone-700 transition hover:bg-stone-100"

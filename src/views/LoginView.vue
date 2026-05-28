@@ -88,9 +88,12 @@
       </div>
 
       <p class="mt-5 text-center text-sm text-[#8C847E]">
-        Don't have an account?
-        <router-link to="/register" class="font-medium text-[#1C1917] hover:underline">Sign up free</router-link>
-      </p>
+  Don't have an account?
+  <router-link
+    :to="giftToken ? `/register?gift=${giftToken}` : '/register'"
+    class="font-medium text-[#1C1917] hover:underline"
+  >Sign up free</router-link>
+</p>
 
     </div>
   </div>
@@ -99,17 +102,20 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { supabase } from '../lib/supabase'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 
 import { track } from '../lib/analytics'
 import { posthog } from '../lib/posthog'
+
 
 const email = ref('')
 const password = ref('')
 const loading = ref(false)
 const googleLoading = ref(false)
 const errorMessage = ref('')
-const router = useRouter()
+const route     = useRoute()
+const router    = useRouter()
+const giftToken = route.query.gift as string | undefined
 
 const slowConnection = ref(false)
 
@@ -117,11 +123,13 @@ let slowTimer: ReturnType<typeof setTimeout> | null = null
 
 async function handleGoogleLogin() {
   googleLoading.value = true
+  const redirectTo = giftToken
+    ? `https://tellmeyourstory.uk/gift/redeem/${giftToken}`
+    : 'https://tellmeyourstory.uk/dashboard'
+
   const { error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
-    options: {
-      redirectTo: 'https://tellmeyourstory.uk/dashboard',
-    },
+    options: { redirectTo },
   })
   if (error) {
     errorMessage.value = error.message
@@ -157,7 +165,11 @@ async function handleLogin() {
         posthog.identify(user.id, { email: user.email })
       }
 
-      router.push('/dashboard')
+      if (giftToken) {
+  router.push(`/gift/redeem/${giftToken}`)
+} else {
+  router.push('/dashboard')
+}
     }
   } catch (err) {
     errorMessage.value = 'Something went wrong. Please try again.'

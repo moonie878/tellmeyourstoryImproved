@@ -1,6 +1,15 @@
 <template>
   <main class="home bg-[#F5F0E8] text-[#1C1917]">
 
+    <!-- Father's Day banner — remove after 15 June 2026 -->
+<div class="bg-[#1C1917] px-4 py-3 text-center">
+  <p class="text-sm text-[#C4A882]">
+    🎁 Father's Day — 50% off all gift tiers ·
+    <router-link to="/fathers-day" class="font-semibold text-white underline hover:no-underline">
+      Give Dad the gift of his story →
+    </router-link>
+  </p>
+</div>
     <!-- ═══════════════════════════════════════ -->
     <!-- HERO                                    -->
     <!-- ═══════════════════════════════════════ -->
