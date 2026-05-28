@@ -486,13 +486,13 @@ app.post('/redeem-gift', async (req, res) => {
     if (gift.redeemed_at) return res.status(400).json({ error: 'Gift already redeemed' })
 
     const accessRows = [
-      { user_id: userId, access_type: 'story',  story_type: gift.story_type, variant: null },
-      { user_id: userId, access_type: 'export', story_type: gift.story_type, variant: gift.variant },
-    ]
+  { user_id: userId, access_type: 'story',  story_type: gift.story_type, variant: gift.story_type },
+  { user_id: userId, access_type: 'export', story_type: gift.story_type, variant: gift.variant },
+]
 
     const { error: accessError } = await supabaseAdmin
       .from('user_access')
-      .upsert(accessRows, { onConflict: 'user_id,access_type,story_type' })
+      .upsert(accessRows, { onConflict: 'user_id,access_type,story_type,variant' })
 
     if (accessError) {
       console.error('Access grant error:', accessError)
