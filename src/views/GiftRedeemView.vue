@@ -18,6 +18,18 @@
         </router-link>
       </div>
 
+       <!-- Success -->
+      <div v-else-if="redeemed" class="rounded-3xl bg-white p-8 text-center shadow-sm">
+        <p class="text-5xl">🎉</p>
+        <h1 class="mt-4 font-display text-2xl font-bold text-stone-900">Gift redeemed!</h1>
+        <p class="mt-3 text-sm leading-6 text-stone-600">
+          Your access has been unlocked. Head to the dashboard to start capturing your story.
+        </p>
+        <router-link to="/dashboard" class="mt-6 inline-block rounded-full bg-[#7C5C3B] px-6 py-3 text-sm font-medium text-white transition hover:opacity-90">
+          Start your story →
+        </router-link>
+      </div>
+
       <!-- Gift ready to redeem -->
       <div v-else-if="gift" class="rounded-3xl bg-white p-8 shadow-sm">
         <div class="text-center">
@@ -66,17 +78,7 @@
         </div>
       </div>
 
-      <!-- Success -->
-      <div v-else-if="redeemed" class="rounded-3xl bg-white p-8 text-center shadow-sm">
-        <p class="text-5xl">🎉</p>
-        <h1 class="mt-4 font-display text-2xl font-bold text-stone-900">Gift redeemed!</h1>
-        <p class="mt-3 text-sm leading-6 text-stone-600">
-          Your access has been unlocked. Head to the dashboard to start capturing your story.
-        </p>
-        <router-link to="/dashboard" class="mt-6 inline-block rounded-full bg-[#7C5C3B] px-6 py-3 text-sm font-medium text-white transition hover:opacity-90">
-          Start your story →
-        </router-link>
-      </div>
+     
 
     </div>
   </div>
@@ -137,6 +139,7 @@ async function redeemGift() {
     const data = await response.json()
 
     if (data.success) {
+        gift.value = null  // ← add this
       redeemed.value = true
     } else {
       redeemError.value = data.error || 'Redemption failed. Please try again.'
