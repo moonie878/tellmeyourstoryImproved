@@ -9,6 +9,7 @@ import type {
   StorySection,
 } from '../types/story'
 import { getPdfDesign, getPageMetrics } from '../utils/pdfDesign'
+import { supabase } from '../lib/supabase'
 
 type ExportPdfArgs = {
   project: StoryProject
@@ -34,6 +35,22 @@ export function useStoryExport() {
       .trim()
       .replace(/\s+/g, '-')
   }
+
+  async function fetchVoiceRecordings(projectId: string): Promise<Map<string, string>> {
+  const { data } = await supabase
+    .from('voice_recordings')
+    .select('id, section_id, show_qr')
+    .eq('project_id', projectId)
+    .eq('show_qr', true)
+
+  const map = new Map<string, string>()
+  if (data) {
+    for (const rec of data) {
+      map.set(rec.section_id, `https://tellmeyourstory.uk/listen/${rec.id}`)
+    }
+  }
+  return map
+}
 
   function applyPageBackground(
     doc: jsPDF,
@@ -910,14 +927,15 @@ export function useStoryExport() {
   }
 
   async function renderPortraitSection(
-    doc: jsPDF,
-    section: StorySection,
-    settings: PdfSettings,
-    images: StoryImage[],
-    yState: { y: number },
-    hasImageExportAccess: boolean,
-    loadImageAsBase64: (url: string) => Promise<string>
-  ) {
+  doc: jsPDF,
+  section: StorySection,
+  settings: PdfSettings,
+  images: StoryImage[],
+  yState: { y: number },
+  hasImageExportAccess: boolean,
+  loadImageAsBase64: (url: string) => Promise<string>,
+  qrUrl?: string
+) {
     const design = getPdfDesign(settings)
     const metrics = getPageMetrics(settings)
 
@@ -1090,6 +1108,38 @@ export function useStoryExport() {
       }
     }
 
+    // ── QR code — only if this section has a voice recording ─────────
+    if (qrUrl) {
+      try {
+        const QR_SIZE = 18
+        const qrDataUrl = await generateQRDataUrl(qrUrl)
+        const qrX = metrics.marginLeft + metrics.contentWidth - QR_SIZE
+        let qrY = yState.y
+
+        if (qrY + QR_SIZE + 10 > metrics.maxY) {
+          doc.addPage()
+          applyPageBackground(doc, design.theme.pageBg, metrics.pageWidth, metrics.pageHeight)
+          if (settings.layout === 'elegant') {
+            drawPageBorder(doc, settings, metrics.pageWidth, metrics.pageHeight, design.theme.border)
+          }
+          qrY = metrics.marginTop
+          yState.y = qrY
+        }
+
+        doc.addImage(qrDataUrl, 'PNG', qrX, qrY, QR_SIZE, QR_SIZE)
+
+        doc.setFont(design.font.body, 'normal')
+        doc.setFontSize(6)
+        setTextColor(doc, design.theme.textMuted)
+        doc.text('Scan to hear', qrX + QR_SIZE / 2, qrY + QR_SIZE + 3, { align: 'center' })
+        doc.text('this memory', qrX + QR_SIZE / 2, qrY + QR_SIZE + 6.5, { align: 'center' })
+
+        yState.y = Math.max(yState.y, qrY + QR_SIZE + 10)
+      } catch (err) {
+        console.error('QR render error:', err)
+      }
+    }
+
     if (
       design.layout.showSectionDividers &&
       settings.layout !== 'elegant' &&
@@ -1099,7 +1149,6 @@ export function useStoryExport() {
       doc.line(metrics.marginLeft, yState.y, metrics.pageWidth - metrics.marginRight, yState.y)
       yState.y += design.layout.sectionSpacing + 6
     } else if (settings.layout === 'elegant' && yState.y < metrics.maxY - 20) {
-      // For elegant layout, add a subtle divider between sections that share a page
       drawElegantDivider(doc, settings, metrics.centerX, yState.y, 40, design)
       yState.y += design.layout.sectionSpacing + 12
     } else {
@@ -1512,7 +1561,8 @@ export function useStoryExport() {
       renderDedicationPage(doc, activeSettings)
     }
 
-    const images = await getAllImagesForExport()
+    const images = await getAllImagesForExport()    
+    const voiceMap = project?.id ? await fetchVoiceRecordings(project.id) : new Map<string, string>()
 
     let currentChapter = ''
     let chapterIndex = -1
@@ -1563,15 +1613,16 @@ export function useStoryExport() {
           yState.y = metrics.marginTop
         }
 
-        await renderPortraitSection(
-          doc,
-          section,
-          activeSettings,
-          images,
-          yState,
-          hasImageExportAccess,
-          loadImageAsBase64
-        )
+       await renderPortraitSection(
+        doc,
+        section,
+        activeSettings,
+        images,
+        yState,
+        hasImageExportAccess,
+        loadImageAsBase64,
+        voiceMap.get(section.id)
+      )
       }
     } else {
       for (let index = 0; index < printableSections.length; index++) {
@@ -1606,55 +1657,7 @@ export function useStoryExport() {
     }
 
     renderClosingPage(doc, activeSettings)
-
-    // ── QR code page ──────────────────────────────────────────────────
-    const storyQrUrl = project?.id
-      ? `https://tellmeyourstory.uk/story/${project.id}`
-      : null
-
-    if (storyQrUrl) {
-      try {
-        const qrDataUrl = await generateQRDataUrl(storyQrUrl)
-        const QR_SIZE = 40
-
-        doc.addPage()
-        applyPageBackground(doc, design.theme.secondaryBg, metrics.pageWidth, metrics.pageHeight)
-
-        if (activeSettings.layout === 'elegant') {
-          drawPageBorder(
-            doc,
-            activeSettings,
-            metrics.pageWidth,
-            metrics.pageHeight,
-            design.theme.border
-          )
-        }
-
-        const qrX = (metrics.pageWidth - QR_SIZE) / 2
-        const maxQrY = metrics.pageHeight - metrics.marginBottom - QR_SIZE - 20
-        const qrY = Math.min(metrics.pageHeight / 2 - QR_SIZE / 2 - 10, maxQrY)
-
-        doc.setFont(design.font.body, 'normal')
-        doc.setFontSize(10)
-        setTextColor(doc, design.theme.textMuted)
-        doc.text('Listen to this story', metrics.centerX, qrY - 12, { align: 'center' })
-
-        drawElegantDivider(doc, activeSettings, metrics.centerX, qrY - 6, 36, design)
-
-        doc.addImage(qrDataUrl, 'PNG', qrX, qrY, QR_SIZE, QR_SIZE)
-
-        doc.setFontSize(8)
-        setTextColor(doc, design.theme.textMuted)
-        doc.text(storyQrUrl, metrics.centerX, qrY + QR_SIZE + 8, {
-          align: 'center',
-          maxWidth: 120,
-        })
-
-        pagesWithoutFooter.add(doc.getNumberOfPages())
-      } catch (err) {
-        console.error('QR render error:', err)
-      }
-    }
+    
 
     // ── Footer pass ───────────────────────────────────────────────────
     const totalPages = doc.getNumberOfPages()
