@@ -719,35 +719,34 @@ async function renderSection(
 
   // ── QR code — only if this section has a voice recording ─────────
   if (qrUrl) {
-  try {
-    const QR_SIZE   = 18
-    const maxY      = PH - RECTO_BOTTOM - 14
-    const qrDataUrl = await generateQRDataUrl(qrUrl)
-    const qrX = contentX(pageNum.n) + contentWidth(pageNum.n) - QR_SIZE
-    let qrY = y.val
+    try {
+      const QR_SIZE = 18
+      const qrMaxY = PH - RECTO_BOTTOM - 14
+      const qrDataUrl = await generateQRDataUrl(qrUrl)
+      const qrX = contentX(pageNum.n) + contentWidth(pageNum.n) - QR_SIZE
+      let qrY = y.val + 4  // small gap below answer
 
-    // If QR doesn't fit on current page, add a new page
-    if (qrY + QR_SIZE + 10 > maxY) {
-      doc.addPage()
-      pageNum.n++
-      pageBg(doc)
-      qrY = isRecto(pageNum.n) ? RECTO_TOP + 4 : VERSO_TOP + 4
-      y.val = qrY
+      if (qrY + QR_SIZE + 8 > qrMaxY) {
+        doc.addPage()
+        pageNum.n++
+        pageBg(doc)
+        qrY = isRecto(pageNum.n) ? RECTO_TOP + 4 : VERSO_TOP + 4
+        y.val = qrY
+      }
+
+      doc.addImage(qrDataUrl, 'PNG', qrX, qrY, QR_SIZE, QR_SIZE)
+
+      doc.setFont('EBGaramond', 'normal')
+      doc.setFontSize(6)
+      setTxt(doc, C_MUTED)
+      doc.text('Scan to hear', qrX + QR_SIZE / 2, qrY + QR_SIZE + 3, { align: 'center' })
+      doc.text('this memory', qrX + QR_SIZE / 2, qrY + QR_SIZE + 6.5, { align: 'center' })
+
+      y.val = Math.max(y.val, qrY + QR_SIZE + 10)
+    } catch (err) {
+      console.error('QR render error:', err)
     }
-
-    doc.addImage(qrDataUrl, 'PNG', qrX, qrY, QR_SIZE, QR_SIZE)
-
-    doc.setFont('EBGaramond', 'normal')
-    doc.setFontSize(6)
-    setTxt(doc, C_MUTED)
-    doc.text('Scan to hear', qrX + QR_SIZE / 2, qrY + QR_SIZE + 3, { align: 'center' })
-    doc.text('this memory',  qrX + QR_SIZE / 2, qrY + QR_SIZE + 6.5, { align: 'center' })
-
-    y.val = Math.max(y.val, qrY + QR_SIZE + 10)
-  } catch (err) {
-    console.error('QR render error:', err)
   }
-}
 
   y.val += SECTION_GAP
 }
@@ -911,12 +910,23 @@ const voiceMap = await fetchVoiceRecordings(project.id)
       }
     }
 
-    if (section.is_highlighted && section.answer && !usedQuotes.has(section.answer.trim())) {
+    if (
+      section.is_highlighted &&
+      section.answer &&
+      !usedQuotes.has(section.answer.trim()) &&
+      !voiceMap.has(section.id)   // ← don't pull into a quote page if it has a QR
+    ) {
       const quote = section.answer.trim()
       if (quote.length >= 40) {
         usedQuotes.add(quote)
         renderQuotePage(doc, quote, pageNum, skipHeader)
-        y.val = isRecto(pageNum.n) ? RECTO_TOP : VERSO_TOP
+
+        // Add a fresh content page after the quote page so renderSection
+        // lands on a proper page, not the quote page itself
+        doc.addPage()
+        pageNum.n++
+        pageBg(doc)
+        y.val = isRecto(pageNum.n) ? RECTO_TOP + 4 : VERSO_TOP + 4
       }
     }
 
