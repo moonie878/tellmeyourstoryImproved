@@ -311,7 +311,7 @@
       :story-id="printModalData.storyId"
       :user-id="printModalData.userId"
       :user-email="printModalData.userEmail"
-      :print-cost="29.99"
+      :print-cost="24.99"
       :stripe-payment-id="printModalData.stripePaymentId"
       @close="printModalOpen = false"
       @ordered="onOrdered"

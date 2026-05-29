@@ -1114,9 +1114,12 @@ export function useStoryExport() {
         const QR_SIZE = 18
         const qrDataUrl = await generateQRDataUrl(qrUrl)
         const qrX = metrics.marginLeft + metrics.contentWidth - QR_SIZE
-        let qrY = yState.y
 
-        if (qrY + QR_SIZE + 10 > metrics.maxY) {
+        let qrY = yState.y + 4
+
+        // If content is already past the anchor point, page break
+        // Otherwise snap QR to bottom of content area
+        if (qrY + QR_SIZE + 10 > metrics.pageHeight - metrics.marginBottom) {
           doc.addPage()
           applyPageBackground(doc, design.theme.pageBg, metrics.pageWidth, metrics.pageHeight)
           if (settings.layout === 'elegant') {
@@ -1125,7 +1128,6 @@ export function useStoryExport() {
           qrY = metrics.marginTop
           yState.y = qrY
         }
-
         doc.addImage(qrDataUrl, 'PNG', qrX, qrY, QR_SIZE, QR_SIZE)
 
         doc.setFont(design.font.body, 'normal')
