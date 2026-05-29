@@ -18,7 +18,7 @@ export type VideoOptions = {
 export type VideoSlide =
   | { type: 'title'; title: string; subtitle: string; coverImageUrl?: string }
   | { type: 'chapter'; chapter: string; intro: string; chapterIndex: number }
-  | { type: 'answer'; question: string; answer: string; imageUrl?: string; chapter: string }
+  | { type: 'answer'; question: string; answer: string; imageUrl?: string; chapter: string; qrUrl?: string }
   | { type: 'closing' }
 
 // Canvas dimensions — 1080p landscape
@@ -56,7 +56,8 @@ const THEMES = {
 function buildSlides(
   project: StoryProject,
   sections: StorySection[],
-  images: StoryImage[]
+  images: StoryImage[],
+  voiceMap: Map<string, string>
 ): VideoSlide[] {
   const slides: VideoSlide[] = []
   const imageMap = new Map(images.map((img) => [img.section_id, img.image_url]))
@@ -72,20 +73,28 @@ function buildSlides(
   let currentChapter = ''
   let chapterIndex = 0
 
+  // Pre-compute which chapters have at least one answered section
+  const answeredChapters = new Set(
+    sections
+      .filter((s) => s.answer?.trim() && s.chapter)
+      .map((s) => s.chapter as string)
+  )
+
   for (const section of sections) {
-    // Chapter intro slide on chapter change
     if (section.chapter && section.chapter !== currentChapter) {
       currentChapter = section.chapter
-      chapterIndex++
-      slides.push({
-        type: 'chapter',
-        chapter: currentChapter,
-        intro: getChapterIntro(currentChapter),
-        chapterIndex,
-      })
+      // Only add chapter slide if this chapter has answered sections
+      if (answeredChapters.has(currentChapter)) {
+        chapterIndex++
+        slides.push({
+          type: 'chapter',
+          chapter: currentChapter,
+          intro: getChapterIntro(currentChapter),
+          chapterIndex,
+        })
+      }
     }
 
-    // Only include answered questions
     if (section.answer?.trim()) {
       slides.push({
         type: 'answer',
@@ -93,6 +102,7 @@ function buildSlides(
         answer: section.answer.trim(),
         imageUrl: imageMap.get(section.id) ?? undefined,
         chapter: section.chapter ?? '',
+        qrUrl: voiceMap.get(section.id),   // ← add this
       })
     }
   }
@@ -402,6 +412,27 @@ async function drawSlide(
       }
     }
 
+    // QR code — bottom right if voice recording available
+    if (slide.type === 'answer' && slide.qrUrl) {
+      try {
+        const qrImg = await loadImage(
+          `https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(slide.qrUrl)}`
+        )
+        if (qrImg) {
+          const QR = 120
+          const qrX = W - pad - QR
+          const qrY = H - 60 - QR - 20
+          ctx.drawImage(qrImg, qrX, qrY, QR, QR)
+          ctx.font = `300 18px Georgia, serif`
+          ctx.fillStyle = colors.textMuted
+          ctx.textAlign = 'center'
+          ctx.fillText('Scan to hear this memory', qrX + QR / 2, qrY + QR + 22)
+        }
+      } catch {
+        // QR failed silently
+      }
+    }
+
     // Bottom divider
     ctx.strokeStyle = colors.divider
     ctx.lineWidth = 1
@@ -471,7 +502,23 @@ export function useStoryVideo() {
       })
 
       // Build slides
-      const slides = buildSlides(project, sections, images)
+      const { supabase } = await import('../lib/supabase')
+      const { data: voiceData } = await supabase
+        .from('voice_recordings')
+        .select('id, section_id, show_qr')
+        .eq('project_id', project.id)
+        .eq('show_qr', true)
+
+      const voiceMap = new Map<string, string>()
+      if (voiceData) {
+        for (const rec of voiceData) {
+          voiceMap.set(rec.section_id, `https://tellmeyourstory.uk/listen/${rec.id}`)
+        }
+      }
+
+      const slides = buildSlides(project, sections, images, voiceMap)
+           
+      
 
       // Draw each slide to canvas and capture as PNG
       const canvas = document.createElement('canvas')
