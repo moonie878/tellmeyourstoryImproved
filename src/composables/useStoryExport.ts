@@ -1,6 +1,7 @@
 import jsPDF from 'jspdf'
 import { Document, Packer, Paragraph, TextRun } from 'docx'
 import { saveAs } from 'file-saver'
+import { generateQRDataUrl } from '../utils/qrUtils'  // ← add this
 import type {
   PdfSettings,
   StoryImage,
@@ -984,17 +985,15 @@ export function useStoryExport() {
       return
     }
 
+    
     doc.setFont(design.font.body, 'italic')
-    doc.setFontSize(
-      settings.layout === 'elegant'
-        ? design.layout.questionSize
-        : design.layout.questionSize - 0.5
-    )
+    doc.setFontSize(design.layout.questionSize)
+    
     setTextColor(doc, design.theme.textSecondary)
 
     const splitQuestion = doc.splitTextToSize(questionText, safeWidth)
 
-    const questionGap = settings.printReady ? 8 : 6
+    const questionGap =  8 
     doc.text(splitQuestion, answerX, yState.y)
     yState.y += splitQuestion.length * design.layout.lineHeight + questionGap
 
@@ -1608,6 +1607,56 @@ export function useStoryExport() {
 
     renderClosingPage(doc, activeSettings)
 
+    // ── QR code page ──────────────────────────────────────────────────
+    const storyQrUrl = project?.id
+      ? `https://tellmeyourstory.uk/story/${project.id}`
+      : null
+
+    if (storyQrUrl) {
+      try {
+        const qrDataUrl = await generateQRDataUrl(storyQrUrl)
+        const QR_SIZE = 40
+
+        doc.addPage()
+        applyPageBackground(doc, design.theme.secondaryBg, metrics.pageWidth, metrics.pageHeight)
+
+        if (activeSettings.layout === 'elegant') {
+          drawPageBorder(
+            doc,
+            activeSettings,
+            metrics.pageWidth,
+            metrics.pageHeight,
+            design.theme.border
+          )
+        }
+
+        const qrX = (metrics.pageWidth - QR_SIZE) / 2
+        const maxQrY = metrics.pageHeight - metrics.marginBottom - QR_SIZE - 20
+        const qrY = Math.min(metrics.pageHeight / 2 - QR_SIZE / 2 - 10, maxQrY)
+
+        doc.setFont(design.font.body, 'normal')
+        doc.setFontSize(10)
+        setTextColor(doc, design.theme.textMuted)
+        doc.text('Listen to this story', metrics.centerX, qrY - 12, { align: 'center' })
+
+        drawElegantDivider(doc, activeSettings, metrics.centerX, qrY - 6, 36, design)
+
+        doc.addImage(qrDataUrl, 'PNG', qrX, qrY, QR_SIZE, QR_SIZE)
+
+        doc.setFontSize(8)
+        setTextColor(doc, design.theme.textMuted)
+        doc.text(storyQrUrl, metrics.centerX, qrY + QR_SIZE + 8, {
+          align: 'center',
+          maxWidth: 120,
+        })
+
+        pagesWithoutFooter.add(doc.getNumberOfPages())
+      } catch (err) {
+        console.error('QR render error:', err)
+      }
+    }
+
+    // ── Footer pass ───────────────────────────────────────────────────
     const totalPages = doc.getNumberOfPages()
 
     for (let i = 1; i <= totalPages; i++) {

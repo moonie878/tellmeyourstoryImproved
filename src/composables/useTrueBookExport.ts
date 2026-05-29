@@ -5,7 +5,7 @@ import { EBGaramondRegular } from '../fonts/EBGaramond-Regular'
 import { EBGaramondItalic } from '../fonts/EBGaramond-Italic'
 import { EBGaramondBold } from '../fonts/EBGaramond-Bold'
 import { EBGaramondBoldItalic } from '../fonts/EBGaramond-BoldItalic'
-import QRCode from 'qrcode'
+import { generateQRDataUrl } from '../utils/qrUtils'
 import { supabase } from '../lib/supabase'
 
 // ─── Bleed ────────────────────────────────────────────────────────────
@@ -94,14 +94,7 @@ function pageBg(doc: jsPDF) {
   doc.rect(0, 0, PW, PH, 'F')
 }
 
-// ─── Generate QR code as base64 image ────────────────────────────
-async function generateQRDataUrl(url: string): Promise<string> {
-  return QRCode.toDataURL(url, {
-    width: 120,
-    margin: 1,
-    color: { dark: '#1C1917', light: '#F8F4EF' },
-  })
-}
+
 
 // ─── Fetch voice recordings that have show_qr enabled ────────────
 async function fetchVoiceRecordings(projectId: string): Promise<Map<string, string>> {
@@ -672,9 +665,14 @@ async function renderSection(
   }
 
   if (imgData) {
-    const imgX = currentX + textWFinal + 4
-    const imgY = y.val - aH - QUESTION_GAP - textHeight(qLinesFinal)
+  // Place image BESIDE the question and answer, aligned to top of section
+  const sectionStartY = y.val - textHeight(aLines) - QUESTION_GAP - textHeight(qLinesFinal)
+  const imgX = currentX + textWFinal + 4
+  const imgY = Math.max(sectionStartY, isRecto(pageNum.n) ? RECTO_TOP + 4 : VERSO_TOP + 4)
 
+  // Only draw if image fits on page
+  const maxY = PH - RECTO_BOTTOM - 10
+  if (imgY + imgH <= maxY) {
     setDraw(doc, C_DIVIDER)
     doc.setLineWidth(0.25)
     doc.roundedRect(imgX - 1, imgY - 1, imgW + 2, imgH + 2, 2, 2)
@@ -684,39 +682,39 @@ async function renderSection(
       y.val = imgY + imgH + 4
     }
   }
+}
 
   // ── QR code — only if this section has a voice recording ─────────
   if (qrUrl) {
-    try {
-      const QR_SIZE   = 18  // mm
-      const qrDataUrl = await generateQRDataUrl(qrUrl)
-      const currentX  = contentX(pageNum.n)
-      const currentW  = contentWidth(pageNum.n)
+  try {
+    const QR_SIZE   = 18
+    const maxY      = PH - RECTO_BOTTOM - 14
+    const qrDataUrl = await generateQRDataUrl(qrUrl)
+    const qrX = contentX(pageNum.n) + contentWidth(pageNum.n) - QR_SIZE
+    let qrY = y.val
 
-      // Position QR at right edge of content area
-      const qrX = currentX + currentW - QR_SIZE
-      const qrY = y.val
-
-      // Check if QR fits on this page — if not, let it overflow naturally
-      doc.addImage(qrDataUrl, 'PNG', qrX, qrY, QR_SIZE, QR_SIZE)
-
-      // Caption below QR
-      doc.setFont('EBGaramond', 'normal')
-      doc.setFontSize(6)
-      setTxt(doc, C_MUTED)
-      doc.text('Scan to hear', qrX + QR_SIZE / 2, qrY + QR_SIZE + 3, { align: 'center' })
-      doc.text('this memory', qrX + QR_SIZE / 2, qrY + QR_SIZE + 6.5, { align: 'center' })
-
-      // Small mic icon hint
-      doc.setFontSize(7)
-      setTxt(doc, C_ACCENT)
-      doc.text('🎙️', qrX + QR_SIZE / 2 - 2, qrY + QR_SIZE + 10.5)
-
-      y.val = Math.max(y.val, qrY + QR_SIZE + 14)
-    } catch (err) {
-      console.error('QR render error:', err)
+    // If QR doesn't fit on current page, add a new page
+    if (qrY + QR_SIZE + 10 > maxY) {
+      doc.addPage()
+      pageNum.n++
+      pageBg(doc)
+      qrY = isRecto(pageNum.n) ? RECTO_TOP + 4 : VERSO_TOP + 4
+      y.val = qrY
     }
+
+    doc.addImage(qrDataUrl, 'PNG', qrX, qrY, QR_SIZE, QR_SIZE)
+
+    doc.setFont('EBGaramond', 'normal')
+    doc.setFontSize(6)
+    setTxt(doc, C_MUTED)
+    doc.text('Scan to hear', qrX + QR_SIZE / 2, qrY + QR_SIZE + 3, { align: 'center' })
+    doc.text('this memory',  qrX + QR_SIZE / 2, qrY + QR_SIZE + 6.5, { align: 'center' })
+
+    y.val = Math.max(y.val, qrY + QR_SIZE + 10)
+  } catch (err) {
+    console.error('QR render error:', err)
   }
+}
 
   y.val += SECTION_GAP
 }
@@ -834,7 +832,7 @@ const voiceMap = await fetchVoiceRecordings(project.id)
   let isFirstInChapter = false
   const usedQuotes = new Set<string>()
 
-  const y = { val: RECTO_TOP }
+  const y = { val: RECTO_TOP + 4 }
 
   onProgress(20, 'Typesetting chapters…')
 
@@ -865,7 +863,7 @@ const voiceMap = await fetchVoiceRecordings(project.id)
       pageNum.n++
       pageBg(doc)
 
-      y.val = isRecto(pageNum.n) ? RECTO_TOP : VERSO_TOP
+      y.val = isRecto(pageNum.n) ? RECTO_TOP + 4 : VERSO_TOP + 4
 
     } else {
       isFirstInChapter = false
@@ -876,7 +874,7 @@ const voiceMap = await fetchVoiceRecordings(project.id)
       if (quote.length >= 40 && !usedQuotes.has(quote)) {
         usedQuotes.add(quote)
         renderQuotePage(doc, quote, pageNum, skipHeader)
-        y.val = isRecto(pageNum.n) ? RECTO_TOP : VERSO_TOP
+        y.val = isRecto(pageNum.n) ? RECTO_TOP + 4 : VERSO_TOP + 4
       }
     }
 
