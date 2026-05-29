@@ -60,22 +60,22 @@
               </div>
             </div>
 
-            <!-- Print teaser -->
-            <div class="mt-4 rounded-2xl border border-stone-200 bg-white p-4">
-              <div class="flex items-start gap-3">
-                <span class="text-2xl flex-shrink-0">📦</span>
-                <div>
-                  <p class="text-sm font-semibold text-stone-900">
-                    Order a printed copy — coming soon
-                  </p>
-                  <p class="mt-1 text-xs leading-5 text-stone-500">
-                    We're integrating with a print partner so you'll be able to order
-                    a professionally printed and bound hardcover or softcover book
-                    delivered to your door — directly from this screen.
-                  </p>
-                </div>
-              </div>
-            </div>
+           <!-- Print option -->
+<div class="mt-4 rounded-2xl border border-[#E8DDD4] bg-[#FAF7F4] p-4">
+  <div class="flex items-start gap-3">
+    <span class="text-2xl flex-shrink-0">📦</span>
+    <div>
+      <p class="text-sm font-semibold text-stone-900">
+        Order a professionally printed copy
+      </p>
+      <p class="mt-1 text-xs leading-5 text-stone-500">
+        Once you've downloaded your True Book PDF, you can order a professionally
+        printed and bound hardcover or softcover book delivered to your door.
+        Available from the dashboard after export.
+      </p>
+    </div>
+  </div>
+</div>
 
             <!-- Progress -->
             <div v-if="isExporting" class="mt-5">
@@ -153,6 +153,7 @@ const features = [
   'Drop caps on the first answer of every chapter',
   'Quote pages woven throughout from highlighted answers',
   'Colour photos alongside answers',
+  'QR codes linking to voice recordings — scan to hear the memory read aloud',
   'Page numbers in the outside margin',
   'Closing page — ready to print or take to a printer',
 ]
