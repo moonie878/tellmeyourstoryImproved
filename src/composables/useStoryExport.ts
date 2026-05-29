@@ -1163,7 +1163,8 @@ export function useStoryExport() {
   images: StoryImage[],
   hasImageExportAccess: boolean,
   loadImageAsBase64: (url: string) => Promise<string>,
-  pagesWithoutFooter: Set<number>
+  pagesWithoutFooter: Set<number>,
+  qrUrl?: string
 ) {
   const design = getPdfDesign(settings)
   const metrics = getPageMetrics(settings)
@@ -1400,6 +1401,25 @@ export function useStoryExport() {
 
     if (remainingAnswerLines.length > 0) {
       doc.addPage()
+    }
+  }
+  // ── QR code — only if this section has a voice recording ─────────
+  if (qrUrl) {
+    try {
+      const QR_SIZE = 18
+      const qrDataUrl = await generateQRDataUrl(qrUrl)
+      const qrX = metrics.pageWidth - metrics.marginRight - QR_SIZE
+      const qrY = metrics.pageHeight - metrics.marginBottom - QR_SIZE - 10
+
+      doc.addImage(qrDataUrl, 'PNG', qrX, qrY, QR_SIZE, QR_SIZE)
+
+      doc.setFont(design.font.body, 'normal')
+      doc.setFontSize(6)
+      setTextColor(doc, design.theme.textMuted)
+      doc.text('Scan to hear', qrX + QR_SIZE / 2, qrY + QR_SIZE + 3, { align: 'center' })
+      doc.text('this memory', qrX + QR_SIZE / 2, qrY + QR_SIZE + 6.5, { align: 'center' })
+    } catch (err) {
+      console.error('QR render error:', err)
     }
   }
 }
@@ -1644,15 +1664,16 @@ export function useStoryExport() {
         }
 
         doc.addPage()
-        await renderSpreadSection(
-          doc,
-          section,
-          activeSettings,
-          images,
-          hasImageExportAccess,
-          loadImageAsBase64,
-          pagesWithoutFooter
-        )
+await renderSpreadSection(
+  doc,
+  section,
+  activeSettings,
+  images,
+  hasImageExportAccess,
+  loadImageAsBase64,
+  pagesWithoutFooter,
+  voiceMap.get(section.id)
+)
       }
     }
 
