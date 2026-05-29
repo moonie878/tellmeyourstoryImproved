@@ -612,7 +612,7 @@ async function renderSection(
 
   const aH = textHeight(aLines)
 
-  if (y.val + qH + QUESTION_GAP + Math.min(aH, 30) > maxY) {
+  if (y.val + qH + QUESTION_GAP + aH > maxY) {
     doc.addPage()
     pageNum.n++
     pageBg(doc)
@@ -635,6 +635,7 @@ async function renderSection(
 
   if (answerText) {
     if (isFirstInChapter) {
+      // Drop cap for first letter
       const firstLetter = answerText.charAt(0)
       const rest = answerText.slice(1)
 
@@ -647,20 +648,52 @@ async function renderSection(
       doc.setFont('EBGaramond', 'normal')
       doc.setFontSize(ANSWER_SIZE)
       setTxt(doc, C_PRIMARY)
-      const restLines = splitText(doc, rest, textWFinal - dcW)
-      restLines.forEach((ln, i) => {
-        doc.text(ln, currentX + dcW, y.val + i * LINE_HEIGHT)
-      })
-      y.val += textHeight(restLines)
+
+      let restLines = splitText(doc, rest, textWFinal - dcW)
+
+      while (restLines.length > 0) {
+        const pageMaxY = PH - RECTO_BOTTOM - 10
+        const linesPerPage = Math.max(1, Math.floor((pageMaxY - y.val) / LINE_HEIGHT))
+        const chunk = restLines.slice(0, linesPerPage)
+        restLines = restLines.slice(linesPerPage)
+
+        chunk.forEach((ln, i) => {
+          doc.text(ln, currentX + dcW, y.val + i * LINE_HEIGHT)
+        })
+        y.val += chunk.length * LINE_HEIGHT
+
+        if (restLines.length > 0) {
+          doc.addPage()
+          pageNum.n++
+          pageBg(doc)
+          y.val = isRecto(pageNum.n) ? RECTO_TOP + 4 : VERSO_TOP + 4
+        }
+      }
     } else {
       doc.setFont('EBGaramond', 'normal')
       doc.setFontSize(ANSWER_SIZE)
       setTxt(doc, C_PRIMARY)
-      const aLinesFinal = splitText(doc, answerText, textWFinal)
-      aLinesFinal.forEach((ln, i) => {
-        doc.text(ln, currentX, y.val + i * LINE_HEIGHT)
-      })
-      y.val += textHeight(aLinesFinal)
+
+      let aLinesFinal = splitText(doc, answerText, textWFinal)
+
+      while (aLinesFinal.length > 0) {
+        const pageMaxY = PH - RECTO_BOTTOM - 10
+        const linesPerPage = Math.max(1, Math.floor((pageMaxY - y.val) / LINE_HEIGHT))
+        const chunk = aLinesFinal.slice(0, linesPerPage)
+        aLinesFinal = aLinesFinal.slice(linesPerPage)
+
+        chunk.forEach((ln, i) => {
+          doc.text(ln, currentX, y.val + i * LINE_HEIGHT)
+        })
+        y.val += chunk.length * LINE_HEIGHT
+
+        if (aLinesFinal.length > 0) {
+          doc.addPage()
+          pageNum.n++
+          pageBg(doc)
+          y.val = isRecto(pageNum.n) ? RECTO_TOP + 4 : VERSO_TOP + 4
+        }
+      }
     }
   }
 
