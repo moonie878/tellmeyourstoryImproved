@@ -334,23 +334,15 @@ app.post('/create-print-checkout', async (req, res) => {
       payment_method_types: ['card'],
       allow_promotion_codes: true,
       line_items: [
-        {
-          price_data: {
-            currency: 'gbp',
-            product_data: { name: `Keepsake Printed Book — ${storyTitle}`, description: '6×9 softcover, printed and shipped by Lulu Press. Delivered in 10-14 days.' },
-            unit_amount: 2499,
-          },
-          quantity,
-        },
-        {
-          price_data: {
-            currency: 'gbp',
-            product_data: { name: 'UK Shipping — Royal Mail 2nd Class' },
-            unit_amount: 499,
-          },
-          quantity: 1,
-        },
-      ],
+  {
+    price: 'price_1TVdJBR13CJL70CCRQymMJVQ',
+    quantity,
+  },
+  {
+    price: 'price_1TcRV0R13CJL70CCEjYDYgPg',
+    quantity: 1,
+  },
+],
       success_url: `${FRONTEND_URL}/dashboard?print=success&story=${storyId}&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url:  `${FRONTEND_URL}/dashboard?print=cancelled`,
       metadata: { userId, storyId, purchaseType: 'printed_book', quantity: String(quantity) },
