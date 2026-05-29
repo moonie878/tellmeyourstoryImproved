@@ -372,7 +372,7 @@ app.post('/create-tribute-checkout', async (req, res) => {
       mode: 'payment',
       payment_method_types: ['card'],
       allow_promotion_codes: true,
-      line_items: [{ price: 'price_1TUCM6R13CJL70CC423pQvkK', quantity: 1 }],
+      line_items: [{ price: 'price_1TcFVLR13CJL70CChO5OTcSJ', quantity: 1 }],
       success_url: `${successUrl}&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url:  cancelUrl,
       metadata: { product: 'tribute-video', subject_name: name },

@@ -16,7 +16,7 @@
         <div class="hero-trust">
           <span>✦ No account needed</span>
           <span>✦ Preview free</span>
-          <span>✦ Download for £9.99</span>
+          <span>✦ Download for £19.99</span>
         </div>
       </div>
     </section>
@@ -458,7 +458,7 @@ useSeo({
         },
         offers: {
           '@type': 'Offer',
-          price: '9.99',
+          price: '19.99',
           priceCurrency: 'GBP',
           availability: 'https://schema.org/InStock',
           description: 'Full HD tribute video download. Free watermarked preview available.',

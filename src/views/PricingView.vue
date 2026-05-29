@@ -270,7 +270,7 @@
                   Create a tribute video
                 </router-link>
                 <div>
-                  <p class="text-2xl font-bold text-[#1C1917]">£9.99</p>
+                  <p class="text-2xl font-bold text-[#1C1917]">£19.99</p>
                   <p class="text-xs text-[#8C847E]">Preview free · Pay to download</p>
                 </div>
               </div>
