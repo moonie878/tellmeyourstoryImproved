@@ -596,7 +596,7 @@ export function useTributeVideo() {
         '-pix_fmt', 'yuv420p',
         '-vf', `scale=${W}:${H}`,
         '-r', '25',
-        '-preset', 'fast',
+        '-preset', 'ultrafast',
         'output.mp4'
       )
 
