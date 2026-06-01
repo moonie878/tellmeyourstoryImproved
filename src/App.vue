@@ -26,6 +26,9 @@
             <router-link to="/dashboard" class="text-stone-600 transition hover:text-stone-900">
               Dashboard
             </router-link>
+            <router-link to="/account" class="text-stone-600 transition hover:text-stone-900">
+  Account
+</router-link>
 <router-link to="/tribute" class="text-stone-600 transition hover:text-stone-900">
   Tribute Video
 </router-link>
@@ -132,6 +135,13 @@
             >
               Dashboard
             </router-link>
+            <router-link
+  to="/account"
+  class="rounded-2xl px-4 py-3 text-stone-700 transition hover:bg-stone-100"
+  @click="mobileMenuOpen = false"
+>
+  Account
+</router-link>
 <router-link to="/tribute"
 class="rounded-2xl px-4 py-3 text-stone-700 transition hover:bg-stone-100"
               @click="mobileMenuOpen = false">

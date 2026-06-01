@@ -52,6 +52,13 @@ const routes = [
    name: 'blog-funeral-slideshow-ideas',
     component: () => import('../views/BlogFuneralSlideshowIdeasView.vue') 
   },
+  {
+  path: '/account',
+  name: 'account',
+  component: () => import('../views/AccountView.vue'),
+  meta: { requiresAuth: true }
+},
+
 { 
   path: '/blog/celebration-of-life-video',
    name: 'blog-celebration-of-life-video',
