@@ -59,6 +59,16 @@ const routes = [
   meta: { requiresAuth: true }
 },
 {
+  path: '/storyworth-alternative',
+  name: 'storyworth-alternative',
+  component: () => import('../views/StoryworthAlternativeView.vue')
+},
+{
+  path: '/remento-alternative',
+  name: 'remento-alternative',
+  component: () => import('../views/RementoAlternativeView.vue')
+},
+{
   path: '/christmas',
   name: 'christmas',
   component: () => import('../views/ChristmasView.vue')
