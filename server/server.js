@@ -326,37 +326,6 @@ app.post('/create-checkout-session', async (req, res) => {
 
 app.post('/create-print-checkout', async (req, res) => {
   try {
-    const { userId, storyId, storyTitle, quantity = 1 } = req.body
-    if (!userId || !storyId) return res.status(400).json({ error: 'Missing required fields' })
-
-    const session = await stripe.checkout.sessions.create({
-      mode: 'payment',
-      payment_method_types: ['card'],
-      allow_promotion_codes: true,
-      line_items: [
-  {
-    price: 'price_1TVdJBR13CJL70CCRQymMJVQ',
-    quantity,
-  },
-  {
-    price: 'price_1TcRV0R13CJL70CCEjYDYgPg',
-    quantity: 1,
-  },
-],
-      success_url: `${FRONTEND_URL}/dashboard?print=success&story=${storyId}&session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url:  `${FRONTEND_URL}/dashboard?print=cancelled`,
-      metadata: { userId, storyId, purchaseType: 'printed_book', quantity: String(quantity) },
-    })
-
-    res.json({ url: session.url })
-  } catch (err) {
-    console.error('Print checkout error:', err)
-    res.status(500).json({ error: 'Failed to create checkout' })
-  }
-})
-
-app.post('/create-print-checkout', async (req, res) => {
-  try {
     const { userId, storyId, storyTitle, quantity = 1, amount, podId, binding } = req.body
     if (!userId || !storyId) return res.status(400).json({ error: 'Missing required fields' })
 

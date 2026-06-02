@@ -45,23 +45,6 @@
   </div>
 </div>
 
-        <!-- Binding type selector -->
-<div class="mt-4 space-y-2">
-  <label class="label">Book type</label>
-  <div class="grid grid-cols-3 gap-2">
-    <button
-      v-for="b in bindingOptions"
-      :key="b.id"
-      @click="selectedBinding = b.id"
-      class="rounded-2xl border p-3 text-left transition"
-      :class="selectedBinding === b.id ? 'border-[#7C5C3B] bg-[#FAF7F4]' : 'border-stone-200 bg-white hover:bg-stone-50'"
-    >
-      <p class="text-xs font-semibold text-stone-900">{{ b.label }}</p>
-      <p class="mt-0.5 text-xs text-stone-500">£{{ (b.cost + 4.99).toFixed(2) }} inc. shipping</p>
-    </button>
-  </div>
-</div>
-
         <!-- Address form -->
         <div class="mt-5 space-y-3">
           <div>

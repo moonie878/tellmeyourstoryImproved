@@ -171,13 +171,13 @@
     </button>
 
     <button
-      v-if="hasPrintAccess()"
-      @click="startPrintOrder(story)"
-      :disabled="generatingPrintId === story.id"
-      class="rounded-full border border-[#7C5C3B] bg-white px-5 py-2.5 text-sm font-medium text-[#7C5C3B] transition hover:bg-[#F5F0E8] disabled:opacity-50"
-    >
-      {{ generatingPrintId === story.id ? 'Preparing…' : '📖 Order Printed Book — £29.98' }}
-    </button>
+  v-if="hasPrintAccess()"
+  @click="openBindingModal(story)"
+  :disabled="generatingPrintId === story.id"
+  class="rounded-full border border-[#7C5C3B] bg-white px-5 py-2.5 text-sm font-medium text-[#7C5C3B] transition hover:bg-[#F5F0E8] disabled:opacity-50"
+>
+  {{ generatingPrintId === story.id ? 'Preparing…' : '📖 Order Printed Book' }}
+</button>
   </div>
 
   <p v-if="hasPrintAccess()" class="mt-1.5 text-xs text-stone-400">
@@ -311,7 +311,7 @@
       :story-id="printModalData.storyId"
       :user-id="printModalData.userId"
       :user-email="printModalData.userEmail"
-      :print-cost="24.99"
+      :print-cost="printModalData.printCost"
       :stripe-payment-id="printModalData.stripePaymentId"
       @close="printModalOpen = false"
       @ordered="onOrdered"
@@ -389,6 +389,7 @@ const printModalData    = ref<{
   userId: string
   userEmail: string
   stripePaymentId: string
+  printCost: number
 } | null>(null)
 
 const router     = useRouter()
@@ -422,6 +423,12 @@ async function handleShare() {
     shareResult.value = 'Link copied to clipboard!'
     setTimeout(() => shareResult.value = '', 3000)
   }
+}
+
+function openBindingModal(story: any) {
+  selectedBindingId.value = 'softcover'
+  bindingModalStory.value = story
+  bindingModalOpen.value  = true
 }
 
 async function generateShareLink(storyId: string) {
@@ -633,11 +640,11 @@ const amountCharged   = parseInt(sessionData.metadata?.amount || '2998') / 100
 const dimsResponse = await fetch(`${API_BASE}/lulu-cover-dimensions`, {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({
-    pod_package_id:      POD_PACKAGE_ID,
-    interior_page_count: actualPageCount,
-    unit:                'mm',
-  }),
+ body: JSON.stringify({
+  pod_package_id:      podId,
+  interior_page_count: actualPageCount,
+  unit:                'mm',
+}),
 })
     const dims = await dimsResponse.json()
     console.log('Cover dims from Lulu:', dims.width, dims.height)
@@ -662,6 +669,7 @@ const dimsResponse = await fetch(`${API_BASE}/lulu-cover-dimensions`, {
       userId:          user.id,
       userEmail:       user.email || '',
       stripePaymentId: sessionId,
+      printCost:  amountCharged,
     }
     printModalOpen.value = true
 
