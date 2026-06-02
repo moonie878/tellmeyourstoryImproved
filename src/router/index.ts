@@ -63,7 +63,6 @@ const routes = [
   name: 'christmas',
   component: () => import('../views/ChristmasView.vue')
 },
-
 { 
   path: '/blog/celebration-of-life-video',
    name: 'blog-celebration-of-life-video',
