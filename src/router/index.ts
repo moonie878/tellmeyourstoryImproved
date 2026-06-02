@@ -63,6 +63,10 @@ const routes = [
   name: 'storyworth-alternative',
   component: () => import('../views/StoryworthAlternativeView.vue')
 },
+{ path: '/life-story-book',                    name: 'life-story-book',                    component: () => import('../views/LifeStoryBookView.vue') },
+{ path: '/memorial-book',                      name: 'memorial-book',                      component: () => import('../views/MemorialBookView.vue') },
+{ path: '/christmas-gift-ideas-for-grandparents', name: 'christmas-gift-grandparents',     component: () => import('../views/ChristmasGiftGrandparentsView.vue') },
+{ path: '/unique-gift-for-elderly-parents',    name: 'unique-gift-elderly-parents',        component: () => import('../views/UniqueGiftElderlyParentsView.vue') },
 {
   path: '/remento-alternative',
   name: 'remento-alternative',

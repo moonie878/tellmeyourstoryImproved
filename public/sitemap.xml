@@ -110,4 +110,34 @@
     <priority>0.2</priority>
     <changefreq>yearly</changefreq>
   </url>
+  <url>
+    <loc>https://tellmeyourstory.uk/life-story-book</loc>
+    <priority>0.9</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://tellmeyourstory.uk/memorial-book</loc>
+    <priority>0.9</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://tellmeyourstory.uk/unique-gift-for-elderly-parents</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://tellmeyourstory.uk/storyworth-alternative</loc>
+    <priority>0.9</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://tellmeyourstory.uk/remento-alternative</loc>
+    <priority>0.9</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://tellmeyourstory.uk/blog/tribute-video</loc>
+    <priority>0.9</priority>
+    <changefreq>monthly</changefreq>
+  </url>
 </urlset>
