@@ -355,27 +355,55 @@ app.post('/create-print-checkout', async (req, res) => {
   }
 })
 
-app.post('/create-tribute-checkout', async (req, res) => {
+app.post('/create-print-checkout', async (req, res) => {
   try {
-    const { name, successUrl, cancelUrl } = req.body
-    if (!name || !successUrl || !cancelUrl) return res.status(400).json({ error: 'Missing required fields' })
+    const { userId, storyId, storyTitle, quantity = 1, amount, podId, binding } = req.body
+    if (!userId || !storyId) return res.status(400).json({ error: 'Missing required fields' })
+
+    // amount is in pence from the frontend (binding cost + shipping * 100)
+    // Fall back to softcover price if not provided
+    const bookAmount     = amount || 2998  // £29.98 default (£24.99 + £4.99)
+    const selectedPodId  = podId || '0600X0900.FC.STD.PB.060UW444.MXX'
+    const selectedBinding = binding || 'Softcover'
 
     const session = await stripe.checkout.sessions.create({
       mode: 'payment',
       payment_method_types: ['card'],
       allow_promotion_codes: true,
-      line_items: [{ price: 'price_1TcFVLR13CJL70CChO5OTcSJ', quantity: 1 }],
-      success_url: `${successUrl}&session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url:  cancelUrl,
-      metadata: { product: 'tribute-video', subject_name: name },
+      line_items: [
+        {
+          price_data: {
+            currency: 'gbp',
+            unit_amount: bookAmount,
+            product_data: {
+              name: `${storyTitle || 'Keepsake Book'} — ${selectedBinding}`,
+              description: 'Professionally printed and bound · UK shipping included',
+            },
+          },
+          quantity,
+        },
+      ],
+      success_url: `${FRONTEND_URL}/dashboard?print=success&story=${storyId}&session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url:  `${FRONTEND_URL}/dashboard?print=cancelled`,
+      metadata: {
+        userId,
+        storyId,
+        purchaseType: 'printed_book',
+        quantity:     String(quantity),
+        podId:        selectedPodId,
+        binding:      selectedBinding,
+        amount:       String(bookAmount),
+      },
     })
 
     res.json({ url: session.url })
-  } catch (error) {
-    console.error('Tribute checkout error:', error)
-    res.status(500).json({ error: 'Failed to create checkout session' })
+  } catch (err) {
+    console.error('Print checkout error:', err)
+    res.status(500).json({ error: 'Failed to create checkout' })
   }
 })
+
+
 
 app.post('/verify-tribute-payment', async (req, res) => {
   try {
@@ -390,6 +418,16 @@ app.post('/verify-tribute-payment', async (req, res) => {
   } catch (error) {
     console.error('Payment verification error:', error)
     res.status(500).json({ verified: false, error: 'Verification failed' })
+  }
+})
+
+app.get('/stripe-session/:sessionId', async (req, res) => {
+  try {
+    const session = await stripe.checkout.sessions.retrieve(req.params.sessionId)
+    res.json({ metadata: session.metadata })
+  } catch (err) {
+    console.error('Session fetch error:', err)
+    res.status(500).json({ error: 'Failed to fetch session' })
   }
 })
 

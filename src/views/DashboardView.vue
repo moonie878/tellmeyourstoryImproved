@@ -316,11 +316,53 @@
       @close="printModalOpen = false"
       @ordered="onOrdered"
     />
+
+    <!-- Binding select modal -->
+<div v-if="bindingModalOpen && bindingModalStory" class="fixed inset-0 z-50 flex items-center justify-center px-4">
+  <div class="absolute inset-0 bg-black/50" @click="bindingModalOpen = false" />
+  <div class="relative w-full max-w-sm rounded-3xl bg-white px-8 py-8 shadow-2xl">
+    <h2 class="text-xl font-bold text-stone-900">Choose your book type</h2>
+    <p class="mt-2 text-sm text-stone-500">Select a binding before checkout. Price includes UK shipping.</p>
+
+    <div class="mt-5 space-y-2">
+      <button
+        v-for="b in bindingOptions"
+        :key="b.id"
+        @click="selectedBindingId = b.id"
+        class="w-full rounded-2xl border p-4 text-left transition"
+        :class="selectedBindingId === b.id ? 'border-[#7C5C3B] bg-[#FAF7F4]' : 'border-stone-200 hover:bg-stone-50'"
+      >
+        <div class="flex items-center justify-between">
+          <p class="text-sm font-semibold text-stone-900">{{ b.label }}</p>
+          <p class="text-sm font-bold text-stone-900">£{{ (b.cost + 4.99).toFixed(2) }}</p>
+        </div>
+        <p class="mt-0.5 text-xs text-stone-500">{{ b.desc }}</p>
+      </button>
+    </div>
+
+    <div class="mt-6 flex gap-3">
+      <button
+        @click="bindingModalOpen = false"
+        class="flex-1 rounded-full border border-stone-300 py-2.5 text-sm font-medium text-stone-700 hover:bg-stone-50"
+      >
+        Cancel
+      </button>
+      <button
+        @click="startPrintOrder(bindingModalStory)"
+        class="flex-1 rounded-full bg-[#7C5C3B] py-2.5 text-sm font-semibold text-white hover:opacity-90"
+      >
+        Continue to payment →
+      </button>
+    </div>
+  </div>
+</div>
+
+
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, nextTick } from 'vue'
+import { ref, onMounted, nextTick, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { supabase } from '../lib/supabase'
 import { track } from '../lib/analytics'
@@ -363,6 +405,16 @@ const shareLinks       = ref<Record<string, string>>({})
 const shareCopied      = ref<string | null>(null)
 
 const { share, shareWhatsApp, shareEmail } = useShare()
+
+const bindingModalOpen  = ref(false)
+const bindingModalStory = ref<any>(null)
+const selectedBindingId = ref('softcover')
+
+const bindingOptions = [
+  { id: 'softcover',  label: 'Softcover',              desc: 'Perfect bound · standard quality',    cost: 24.99, podId: '0600X0900.FC.STD.PB.060UW444.MXX' },
+  { id: 'hardcover',  label: 'Hardcover Case Wrap',    desc: 'Hardcover · premium colour interior', cost: 29.99, podId: '0600X0900.FC.PRE.CW.080CW444.GXX' },
+  { id: 'dustjacket', label: 'Hardcover + Dust Jacket', desc: 'Linen wrap · foil spine · premium',  cost: 34.99, podId: '0600X0900.FC.PRE.LW.080CW444.GNG' },
+]
 
 async function handleShare() {
   const result = await share('dashboard')
@@ -423,6 +475,10 @@ async function shareStoryWhatsApp(storyId: string, storyTitle: string) {
   const text = encodeURIComponent(`Come and read ${storyTitle} — a keepsake story being written on Tell Me Your Story 🤍\n\n${link}`)
   window.open(`https://wa.me/?text=${text}`, '_blank')
 }
+
+const selectedBinding = computed(() =>
+  bindingOptions.find(b => b.id === selectedBindingId.value) ?? bindingOptions[0]
+)
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -495,9 +551,13 @@ async function loadImageAsBase64(url: string): Promise<string> {
 // Step 1 — redirect to Stripe checkout
 async function startPrintOrder(story: any) {
   generatingPrintId.value = story.id
+  bindingModalOpen.value  = false
+
   try {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return
+
+    const binding = selectedBinding.value
 
     const response = await fetch(`${API_BASE}/create-print-checkout`, {
       method: 'POST',
@@ -506,6 +566,9 @@ async function startPrintOrder(story: any) {
         userId:     user.id,
         storyId:    story.id,
         storyTitle: story.title || 'My Story',
+        amount:     Math.round((binding.cost + 4.99) * 100), // pence
+        podId:      binding.podId,
+        binding:    binding.label,
       }),
     })
 
@@ -560,16 +623,22 @@ async function openPrintModal(story: any, sessionId: string) {
 
     console.log('Actual page count:', actualPageCount)
 
+    // Get session metadata to retrieve selected binding
+const sessionResponse = await fetch(`${API_BASE}/stripe-session/${sessionId}`)
+const sessionData     = await sessionResponse.json()
+const podId           = sessionData.metadata?.podId || POD_PACKAGE_ID
+const amountCharged   = parseInt(sessionData.metadata?.amount || '2998') / 100
     // Get exact cover dimensions from Lulu for this page count
-    const dimsResponse = await fetch(`${API_BASE}/lulu-cover-dimensions`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        pod_package_id:      POD_PACKAGE_ID,
-        interior_page_count: actualPageCount,
-        unit:                'mm',
-      }),
-    })
+    // Get exact cover dimensions from Lulu for this page count
+const dimsResponse = await fetch(`${API_BASE}/lulu-cover-dimensions`, {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    pod_package_id:      POD_PACKAGE_ID,
+    interior_page_count: actualPageCount,
+    unit:                'mm',
+  }),
+})
     const dims = await dimsResponse.json()
     console.log('Cover dims from Lulu:', dims.width, dims.height)
 
