@@ -58,6 +58,11 @@ const routes = [
   component: () => import('../views/AccountView.vue'),
   meta: { requiresAuth: true }
 },
+{
+  path: '/christmas',
+  name: 'christmas',
+  component: () => import('../views/ChristmasView.vue')
+},
 
 { 
   path: '/blog/celebration-of-life-video',

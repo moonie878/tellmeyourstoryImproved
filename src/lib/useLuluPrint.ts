@@ -43,18 +43,19 @@ export function useLuluPrint() {
   const printJobId  = ref('')
 
   async function orderPrintedBook(
-    interiorBlob: Blob,
-    coverBlob: Blob,
-    pageCount: number,
-    storyTitle: string,
-    storyId: string,
-    userId: string,
-    shippingAddress: ShippingAddress,
-    stripePaymentId: string,
-    shippingLevel = 'MAIL',
-    quantity = 1,
-    amountCharged = 0
-  ): Promise<PrintOrderResult> {
+  interiorBlob: Blob,
+  coverBlob: Blob,
+  pageCount: number,
+  storyTitle: string,
+  storyId: string,
+  userId: string,
+  shippingAddress: ShippingAddress,
+  stripePaymentId: string,
+  shippingLevel = 'MAIL',
+  quantity = 1,
+  amountCharged = 0,
+  podPackageId = POD_PACKAGE_ID   // ← add this, defaults to softcover
+): Promise<PrintOrderResult> {
 
     isOrdering.value  = true
     orderStatus.value = 'Uploading your book…'
@@ -88,7 +89,7 @@ export function useLuluPrint() {
               title:          storyTitle,
               interior:       { source_url: interiorUrl },
               cover:          { source_url: coverUrl },
-              pod_package_id: POD_PACKAGE_ID,
+              pod_package_id: podPackageId,
               page_count:     pageCount,
               quantity,
             },

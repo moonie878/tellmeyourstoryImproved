@@ -30,20 +30,37 @@
         </p>
 
         <!-- Price summary -->
-        <div class="mt-4 rounded-2xl bg-[#F5F0E8] px-5 py-4">
-          <div class="flex justify-between text-sm">
-            <span class="text-[#5C534E]">Printed keepsake book</span>
-            <span class="font-medium text-[#1C1917]">£{{ printCost.toFixed(2) }}</span>
-          </div>
-          <div class="flex justify-between text-sm mt-1">
-            <span class="text-[#5C534E]">UK shipping — Royal Mail 2nd Class</span>
-            <span class="font-medium text-[#1C1917]">£4.99</span>
-          </div>
-          <div class="mt-2 border-t border-[#E8DDD0] pt-2 flex justify-between text-sm font-semibold">
-            <span class="text-[#1C1917]">Total paid</span>
-            <span class="text-[#1C1917]">£{{ (printCost + 4.99).toFixed(2) }}</span>
-          </div>
-        </div>
+<div class="mt-4 rounded-2xl bg-[#F5F0E8] px-5 py-4">
+  <div class="flex justify-between text-sm">
+    <span class="text-[#5C534E]">{{ selectedBindingOption.label }} keepsake book</span>
+    <span class="font-medium text-[#1C1917]">£{{ selectedBindingOption.cost.toFixed(2) }}</span>
+  </div>
+  <div class="flex justify-between text-sm mt-1">
+    <span class="text-[#5C534E]">UK shipping — Royal Mail 2nd Class</span>
+    <span class="font-medium text-[#1C1917]">£4.99</span>
+  </div>
+  <div class="mt-2 border-t border-[#E8DDD0] pt-2 flex justify-between text-sm font-semibold">
+    <span class="text-[#1C1917]">Total paid</span>
+    <span class="text-[#1C1917]">£{{ (selectedBindingOption.cost + 4.99).toFixed(2) }}</span>
+  </div>
+</div>
+
+        <!-- Binding type selector -->
+<div class="mt-4 space-y-2">
+  <label class="label">Book type</label>
+  <div class="grid grid-cols-3 gap-2">
+    <button
+      v-for="b in bindingOptions"
+      :key="b.id"
+      @click="selectedBinding = b.id"
+      class="rounded-2xl border p-3 text-left transition"
+      :class="selectedBinding === b.id ? 'border-[#7C5C3B] bg-[#FAF7F4]' : 'border-stone-200 bg-white hover:bg-stone-50'"
+    >
+      <p class="text-xs font-semibold text-stone-900">{{ b.label }}</p>
+      <p class="mt-0.5 text-xs text-stone-500">£{{ (b.cost + 4.99).toFixed(2) }} inc. shipping</p>
+    </button>
+  </div>
+</div>
 
         <!-- Address form -->
         <div class="mt-5 space-y-3">
@@ -145,6 +162,37 @@ const emit = defineEmits<{ close: []; ordered: [printJobId: string] }>()
 
 const { isOrdering, orderStatus, orderPrintedBook } = useLuluPrint()
 
+// ─── Binding options ──────────────────────────────────────────────────────────
+
+const bindingOptions = [
+  {
+    id:         'softcover',
+    label:      'Softcover',
+    podId:      '0600X0900.FC.STD.PB.060UW444.MXX',
+    cost:       props.printCost,
+  },
+  {
+    id:         'hardcover',
+    label:      'Hardcover',
+    podId:      '0600X0900.FC.PRE.CW.080CW444.GXX',
+    cost:       29.99,
+  },
+  {
+    id:         'dustjacket',
+    label:      'Dust Jacket',
+    podId:      '0600X0900.FC.PRE.LW.080CW444.GNG',
+    cost:       34.99,
+  },
+]
+
+const selectedBinding = ref('softcover')
+
+const selectedBindingOption = computed(() =>
+  bindingOptions.find(b => b.id === selectedBinding.value) ?? bindingOptions[0]
+)
+
+// ─── Form ─────────────────────────────────────────────────────────────────────
+
 const form = ref({
   name: '', street1: '', street2: '', city: '', postcode: '', phone: '',
 })
@@ -181,6 +229,8 @@ async function handleOrder() {
     email:        props.userEmail,
   }
 
+  const binding = selectedBindingOption.value
+
   const result = await orderPrintedBook(
     props.interiorPdfBlob,
     props.coverPdfBlob,
@@ -192,7 +242,8 @@ async function handleOrder() {
     props.stripePaymentId,
     'MAIL',
     quantity.value,
-    props.printCost + 4.99
+    binding.cost + 4.99,
+    binding.podId
   )
 
   if (result.success && result.lulu_print_job_id) {
