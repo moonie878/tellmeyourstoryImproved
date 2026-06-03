@@ -93,6 +93,14 @@
                   🎬 Create video
                 </button>
                 <button
+  v-if="hasTier4Access"
+  @click="exportPhotoBookHandler()"
+  :disabled="generatingPhotoBookId === 'current'"
+  class="w-full px-4 py-2.5 text-left text-sm text-stone-700 hover:bg-stone-50 disabled:opacity-50"
+>
+  {{ generatingPhotoBookId === 'current' ? 'Generating…' : '📸 Export Photo Book' }}
+</button>
+                <button
                   @click="exportWordHandler(); showMoreActions = false"
                   :disabled="!isPaidUser || isExportingWord"
                   class="w-full px-4 py-2.5 text-left text-sm text-stone-700 hover:bg-stone-50 disabled:opacity-50"
@@ -320,6 +328,7 @@ import { ref, onMounted, onUnmounted, computed, nextTick, watch } from 'vue'
 import { supabase } from '../lib/supabase'
 import { useRoute, useRouter } from 'vue-router'
 import { track } from '../lib/analytics'
+import { usePhotoBookExport } from '../composables/usePhotoBookExport'
 
 import type { PdfSettings, StoryProject, StorySection, StoryChapterGroup } from '../types/story'
 
@@ -399,10 +408,12 @@ const lastSavedAt    = ref<Date | null>(null)
 const answerTextarea = ref<HTMLTextAreaElement | null>(null)
 const shareResult    = ref('')
 let saveTimeout: ReturnType<typeof setTimeout> | null = null
+const generatingPhotoBookId = ref<string | null>(null)
 
 // ── Composables ────────────────────────────────────────────────────────────────
 const { share, shareWhatsApp, shareEmail } = useShare()
 const { exportPdf: runPdfExport, exportWord: runWordExport } = useStoryExport()
+const { exportPhotoBookAsBlob } = usePhotoBookExport()
 
 const {
   isGenerating: videoGenerating,
@@ -564,6 +575,35 @@ onUnmounted(() => {
 function handleClickOutside(e: MouseEvent) {
   const target = e.target as HTMLElement
   if (!target.closest('[data-more-actions]')) showMoreActions.value = false
+}
+
+async function exportPhotoBookHandler() {
+  if (!project.value) return
+  generatingPhotoBookId.value = 'current'
+  showMoreActions.value = false
+
+  try {
+    const blob = await exportPhotoBookAsBlob(
+      project.value.story_type,
+      project.value.cover_image_url || '',
+      getAllImagesForExport
+    )
+
+    const url = URL.createObjectURL(blob)
+    const a   = document.createElement('a')
+    a.href     = url
+    a.download = `${(project.value.title || 'photo-book').replace(/\s+/g, '-').toLowerCase()}-photos.pdf`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    setTimeout(() => URL.revokeObjectURL(url), 5000)
+
+  } catch (err) {
+    console.error('Photo book export error:', err)
+    alert('Something went wrong. Please try again.')
+  } finally {
+    generatingPhotoBookId.value = null
+  }
 }
 
 async function handleShare() {
