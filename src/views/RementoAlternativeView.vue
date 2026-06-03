@@ -138,6 +138,11 @@
             <p class="mt-3 text-sm font-semibold text-stone-900">No time pressure</p>
             <p class="mt-2 text-xs leading-5 text-stone-500">Answer one question or a hundred — at their own pace, whenever they feel like it. No weekly prompts, no subscription running down.</p>
           </div>
+          <div class="rounded-2xl border border-stone-200 p-6">
+  <p class="text-2xl">🎬</p>
+  <p class="mt-3 text-sm font-semibold text-stone-900">Story video export</p>
+  <p class="mt-2 text-xs leading-5 text-stone-500">Export the whole story as a beautiful 1080p video with photos and music — ready to share or play at a family gathering.</p>
+</div>
         </div>
       </div>
     </section>
@@ -239,6 +244,7 @@ const comparison = [
   { feature: 'Content ownership',    them: 'Read-only if lapsed',   us: '✓ Yours forever',        themNegative: true,  usPositive: true  },
   { feature: 'No renewal needed',    them: '✗ Annual fee',          us: '✓ One-time payment',     themNegative: true,  usPositive: true  },
   { feature: 'Answer at own pace',   them: 'Weekly prompts',        us: '✓ Any time',             themNegative: false, usPositive: true  },
+  { feature: 'Video export',          them: '✗ No',                 us: '✓ £19.99 one-time',      themNegative: true,  usPositive: true  },
 ]
 
 useSeo({

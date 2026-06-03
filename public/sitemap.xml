@@ -140,4 +140,9 @@
     <priority>0.9</priority>
     <changefreq>monthly</changefreq>
   </url>
+  <url>
+  <loc>https://tellmeyourstory.uk/life-story-video</loc>
+  <priority>0.9</priority>
+  <changefreq>monthly</changefreq>
+</url>
 </urlset>

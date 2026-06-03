@@ -117,6 +117,11 @@
             <p class="mt-3 text-sm font-semibold text-stone-900">Family can read along</p>
             <p class="mt-2 text-xs leading-5 text-stone-500">Share a link so the whole family can read the story as it grows. No extra charge per person.</p>
           </div>
+          <div class="rounded-2xl border border-stone-200 p-6">
+  <p class="text-2xl">🎬</p>
+  <p class="mt-3 text-sm font-semibold text-stone-900">Story video export</p>
+  <p class="mt-2 text-xs leading-5 text-stone-500">Export the whole story as a beautiful 1080p video with photos and music — ready to share or play at a family gathering.</p>
+</div>
         </div>
       </div>
     </section>
@@ -219,6 +224,7 @@ const comparison = [
   { feature: 'International ship',   them: '$20–40 extra',         us: '✓ UK shipping included', themNegative: true,  usPositive: true  },
   { feature: 'PDF export',           them: 'Not included',         us: '✓ Included',             themNegative: true,  usPositive: true  },
   { feature: 'AI writing assist',    them: '✗ No',                 us: '✓ Yes',                  themNegative: true,  usPositive: true  },
+  { feature: 'Video export',          them: '✗ No',                 us: '✓ £17.99 one-time',      themNegative: true,  usPositive: true  },
 ]
 
 useSeo({

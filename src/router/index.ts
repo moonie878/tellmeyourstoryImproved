@@ -67,6 +67,7 @@ const routes = [
 { path: '/memorial-book',                      name: 'memorial-book',                      component: () => import('../views/MemorialBookView.vue') },
 { path: '/christmas-gift-ideas-for-grandparents', name: 'christmas-gift-grandparents',     component: () => import('../views/ChristmasGiftGrandparentsView.vue') },
 { path: '/unique-gift-for-elderly-parents',    name: 'unique-gift-elderly-parents',        component: () => import('../views/UniqueGiftElderlyParentsView.vue') },
+{ path: '/life-story-video', name: 'life-story-video', component: () => import('../views/LifeStoryVideoView.vue') },
 {
   path: '/remento-alternative',
   name: 'remento-alternative',
