@@ -54,7 +54,8 @@ export function useLuluPrint() {
   shippingLevel = 'MAIL',
   quantity = 1,
   amountCharged = 0,
-  podPackageId = POD_PACKAGE_ID   // ← add this, defaults to softcover
+  podPackageId = POD_PACKAGE_ID,   // ← add this, defaults to softcover
+   photoBookBlob: Blob | null = null   // ← add this
 ): Promise<PrintOrderResult> {
 
     isOrdering.value  = true
@@ -70,11 +71,46 @@ export function useLuluPrint() {
         `print-orders/${userId}/${storyId}-interior-${ts}.pdf`
       )
 
+      
+
       orderStatus.value = 'Uploading cover…'
       const coverUrl = await uploadBlob(
         coverBlob,
         `print-orders/${userId}/${storyId}-cover-${ts}.pdf`
       )
+
+      // Upload photo book interior if bundle
+let photoBookUrl: string | null = null
+if (photoBookBlob) {
+  orderStatus.value = 'Uploading photo book…'
+  photoBookUrl = await uploadBlob(
+    photoBookBlob,
+    `print-orders/${userId}/${storyId}-photobook-${ts}.pdf`
+  )
+}
+
+// Build line items
+const lineItems: any[] = [
+  {
+    title:          storyTitle,
+    interior:       { source_url: interiorUrl },
+    cover:          { source_url: coverUrl },
+    pod_package_id: podPackageId,
+    page_count:     pageCount,
+    quantity,
+  },
+]
+
+if (photoBookUrl) {
+  lineItems.push({
+    title:          `${storyTitle} — Photo Book`,
+    interior:       { source_url: photoBookUrl },
+    cover:          { source_url: coverUrl },   // reuse same cover
+    pod_package_id: POD_PACKAGE_ID,             // softcover for photo book
+    page_count:     pageCount,                  // approximate — Lulu will validate
+    quantity,
+  })
+}
 
       orderStatus.value = 'Sending to print…'
 
@@ -84,16 +120,7 @@ export function useLuluPrint() {
         body: JSON.stringify({
           contact_email: shippingAddress.email,
           external_id:   stripePaymentId,
-          line_items: [
-            {
-              title:          storyTitle,
-              interior:       { source_url: interiorUrl },
-              cover:          { source_url: coverUrl },
-              pod_package_id: podPackageId,
-              page_count:     pageCount,
-              quantity,
-            },
-          ],
+          line_items: lineItems,
           production_delay: 120,
           shipping_address: {
             name:         shippingAddress.name,

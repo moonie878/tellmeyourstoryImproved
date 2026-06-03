@@ -303,19 +303,20 @@
 
     <!-- Print Order Modal -->
     <PrintOrderModal
-      v-if="printModalOpen && printModalData"
-      :interior-pdf-blob="printModalData.interiorBlob"
-      :cover-pdf-blob="printModalData.coverBlob"
-      :page-count="printModalData.pageCount"
-      :story-title="printModalData.storyTitle"
-      :story-id="printModalData.storyId"
-      :user-id="printModalData.userId"
-      :user-email="printModalData.userEmail"
-      :print-cost="printModalData.printCost"
-      :stripe-payment-id="printModalData.stripePaymentId"
-      @close="printModalOpen = false"
-      @ordered="onOrdered"
-    />
+  v-if="printModalOpen && printModalData"
+  :interior-pdf-blob="printModalData.interiorBlob"
+  :cover-pdf-blob="printModalData.coverBlob"
+  :photo-book-blob="printModalData.photoBookBlob"
+  :page-count="printModalData.pageCount"
+  :story-title="printModalData.storyTitle"
+  :story-id="printModalData.storyId"
+  :user-id="printModalData.userId"
+  :user-email="printModalData.userEmail"
+  :print-cost="printModalData.printCost"
+  :stripe-payment-id="printModalData.stripePaymentId"
+  @close="printModalOpen = false"
+  @ordered="onOrdered"
+/>
 
     <!-- Binding select modal -->
 <div v-if="bindingModalOpen && bindingModalStory" class="fixed inset-0 z-50 flex items-center justify-center px-4">
@@ -371,6 +372,7 @@ import { useStoryTrueBookExport } from '../composables/useTrueBookExport'
 import { generateCoverPDF } from '../lib/generateCoverPDF'
 import PrintOrderModal from '../components/print/PrintOrderModal.vue'
 import { useShare } from '../composables/useShare'
+import { usePhotoBookExport } from '../composables/usePhotoBookExport'
 
 // ─── State ────────────────────────────────────────────────────────────────────
 
@@ -383,6 +385,7 @@ const printModalOpen    = ref(false)
 const printModalData    = ref<{
   interiorBlob: Blob
   coverBlob: Blob
+  photoBookBlob: Blob | null   // ← add this
   pageCount: number
   storyTitle: string
   storyId: string
@@ -395,6 +398,7 @@ const printModalData    = ref<{
 const router     = useRouter()
 const storyTypes = STORY_TYPES
 const { exportTrueBookAsBlob } = useStoryTrueBookExport()
+const { exportPhotoBookAsBlob } = usePhotoBookExport()
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL as string
 const POD_PACKAGE_ID = '0600X0900.FC.STD.PB.060UW444.MXX'
@@ -412,9 +416,10 @@ const bindingModalStory = ref<any>(null)
 const selectedBindingId = ref('softcover')
 
 const bindingOptions = [
-  { id: 'softcover',  label: 'Softcover',              desc: 'Perfect bound · standard quality',    cost: 24.99, podId: '0600X0900.FC.STD.PB.060UW444.MXX' },
-  { id: 'hardcover',  label: 'Hardcover Case Wrap',    desc: 'Hardcover · premium colour interior', cost: 29.99, podId: '0600X0900.FC.PRE.CW.080CW444.GXX' },
-  { id: 'dustjacket', label: 'Hardcover + Dust Jacket', desc: 'Linen wrap · foil spine · premium',  cost: 34.99, podId: '0600X0900.FC.PRE.LW.080CW444.GNG' },
+  { id: 'softcover',  label: 'Softcover',              desc: 'Perfect bound · standard quality',    cost: 24.99, podId: '0600X0900.FC.STD.PB.060UW444.MXX', includesPhotoBook: false },
+  { id: 'hardcover',  label: 'Hardcover Case Wrap',    desc: 'Hardcover · premium colour interior', cost: 29.99, podId: '0600X0900.FC.PRE.CW.080CW444.GXX', includesPhotoBook: false },
+  { id: 'dustjacket', label: 'Hardcover + Dust Jacket', desc: 'Linen wrap · foil spine · premium',  cost: 34.99, podId: '0600X0900.FC.PRE.LW.080CW444.GNG', includesPhotoBook: false },
+  { id: 'bundle',     label: 'Story + Photo Book',     desc: 'Softcover story book AND a separate photo-only book · both delivered together', cost: 44.99, podId: '0600X0900.FC.STD.PB.060UW444.MXX', includesPhotoBook: true },
 ]
 
 async function handleShare() {
@@ -576,6 +581,7 @@ async function startPrintOrder(story: any) {
         amount:     Math.round((binding.cost + 4.99) * 100), // pence
         podId:      binding.podId,
         binding:    binding.label,
+        includesPhotoBook:  binding.includesPhotoBook,
       }),
     })
 
@@ -628,6 +634,8 @@ async function openPrintModal(story: any, sessionId: string) {
       story, mergedSections, getAllImagesForExport, loadImageAsBase64, story.cover_image_url || ''
     )
 
+
+
     console.log('Actual page count:', actualPageCount)
 
     // Get session metadata to retrieve selected binding
@@ -635,6 +643,12 @@ const sessionResponse = await fetch(`${API_BASE}/stripe-session/${sessionId}`)
 const sessionData     = await sessionResponse.json()
 const podId           = sessionData.metadata?.podId || POD_PACKAGE_ID
 const amountCharged   = parseInt(sessionData.metadata?.amount || '2998') / 100
+
+// Only generate photo book if they purchased the bundle
+const includesPhotoBook = sessionData.metadata?.includesPhotoBook === 'true'
+const photoBookBlob = includesPhotoBook
+  ? await exportPhotoBookAsBlob(story.story_type, story.cover_image_url || '', getAllImagesForExport)
+  : null
     // Get exact cover dimensions from Lulu for this page count
     // Get exact cover dimensions from Lulu for this page count
 const dimsResponse = await fetch(`${API_BASE}/lulu-cover-dimensions`, {
@@ -663,6 +677,7 @@ const dimsResponse = await fetch(`${API_BASE}/lulu-cover-dimensions`, {
     printModalData.value = {
       interiorBlob,
       coverBlob,
+      photoBookBlob,        // ← add this
       pageCount:       actualPageCount,
       storyTitle,
       storyId:         story.id,

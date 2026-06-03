@@ -43,6 +43,10 @@
     <span class="text-[#1C1917]">Total paid</span>
     <span class="text-[#1C1917]">£{{ (selectedBindingOption.cost + 4.99).toFixed(2) }}</span>
   </div>
+  <div v-if="props.photoBookBlob" class="mt-2 flex justify-between text-xs text-stone-500">
+  <span>Includes photo book</span>
+  <span>✓</span>
+</div>
 </div>
 
         <!-- Address form -->
@@ -132,6 +136,7 @@ import type { ShippingAddress } from '../../lib/useLuluPrint'
 const props = defineProps<{
   interiorPdfBlob: Blob
   coverPdfBlob: Blob
+   photoBookBlob: Blob | null    // ← add this
   pageCount: number
   storyTitle: string
   storyId: string
