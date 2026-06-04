@@ -223,9 +223,10 @@
           <div v-if="form.musicTrack === 'custom'" class="field-group">
             <label class="field-label">Upload your music (MP3)</label>
             <label class="music-upload-btn">
-              <input type="file" accept="audio/mp3,audio/*" class="hidden" @change="onMusicUpload" />
-              {{ form.musicFile ? `✓ ${form.musicFile.name}` : '+ Upload MP3' }}
-            </label>
+  <input type="file" accept=".mp3,.m4a,.wav,.aac,audio/*" class="hidden" @change="onMusicUpload" />
+  {{ form.musicFile ? `✓ ${form.musicFile.name}` : '+ Upload MP3' }}
+</label>
+<p style="font-size: 11px; color: #A8A29E; margin-top: 6px;">Supports MP3, M4A, WAV · Max 25MB</p>
           </div>
 
           <div class="field-group">
@@ -826,6 +827,7 @@ function onMusicUpload(event: Event) {
   const target = event.target as HTMLInputElement
   const file = target.files?.[0]
   if (file) form.value.musicFile = file
+  target.value = ''  // ← reset so same or different file can be selected again
 }
 
 // ── Build options ─────────────────────────────────────────────────────────────
