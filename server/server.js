@@ -326,7 +326,7 @@ app.post('/create-checkout-session', async (req, res) => {
 
 app.post('/create-print-checkout', async (req, res) => {
   try {
-    const { userId, storyId, storyTitle, quantity = 1, amount, podId, includesPhotoBook, } = req.body
+    const { userId, storyId, storyTitle, quantity = 1, amount, podId, binding, includesPhotoBook, } = req.body
     if (!userId || !storyId) return res.status(400).json({ error: 'Missing required fields' })
 
     // amount is in pence from the frontend (binding cost + shipping * 100)
