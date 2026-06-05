@@ -32,18 +32,18 @@ const TITLE_SIZE       = 22
 const SUBTITLE_SIZE    = 10
 const CHAPTER_SIZE     = 18
 const CHAPTER_NUM_SIZE = 9
-const QUESTION_SIZE    = 9.5
+const QUESTION_SIZE    = 10.5
 const ANSWER_SIZE      = 10
 const RUNNING_SIZE     = 7.5
 const PAGE_NUM_SIZE    = 8
 const LINE_HEIGHT      = 5.8
-const QUESTION_GAP     = 5
+const QUESTION_GAP     = 7
 const SECTION_GAP      = 10
 
 // ─── Colours ──────────────────────────────────────────────────────────
 const C_PAGE_BG   = [248, 244, 239] as const
 const C_PRIMARY   = [38, 34, 32]    as const
-const C_SECONDARY = [92, 84, 78]    as const
+const C_SECONDARY = [148, 116, 74]  as const
 const C_MUTED     = [140, 132, 126] as const
 const C_ACCENT    = [148, 116, 74]  as const
 const C_DIVIDER   = [221, 214, 206] as const
@@ -590,7 +590,7 @@ async function renderSection(
 
   const textW = imgData ? contentWidth(pageNum.n) - imgW - 6 : contentWidth(pageNum.n)
 
-  doc.setFont('EBGaramond', 'italic')
+  doc.setFont('EBGaramond', 'bolditalic')
   doc.setFontSize(QUESTION_SIZE)
   setTxt(doc, C_SECONDARY)
   const qLines = splitText(doc, section.question, textW)
@@ -623,7 +623,7 @@ async function renderSection(
   const currentW = contentWidth(pageNum.n)
   const textWFinal = imgData ? currentW - imgW - 6 : currentW
 
-  doc.setFont('EBGaramond', 'italic')
+  doc.setFont('EBGaramond', 'bolditalic')
   doc.setFontSize(QUESTION_SIZE)
   setTxt(doc, C_SECONDARY)
   const qLinesFinal = splitText(doc, section.question, textWFinal)
