@@ -663,6 +663,7 @@ const dimsResponse = await fetch(`${API_BASE}/lulu-cover-dimensions`, {
   const dims = await dimsResponse.json()
 console.log('Raw dims response:', JSON.stringify(dims))
 console.log('Cover dims from Lulu:', dims.width, dims.height)
+console.log('Pod ID being sent to dims:', podId)
 
   // Convert from inches to mm
 const luluWidth  = parseFloat(dims.width)  * 25.4
