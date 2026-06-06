@@ -657,11 +657,17 @@ const dimsResponse = await fetch(`${API_BASE}/lulu-cover-dimensions`, {
  body: JSON.stringify({
   pod_package_id:      podId,
   interior_page_count: actualPageCount,
-  unit:                'mm',
+  unit:                'inch',
 }),
 })
     const dims = await dimsResponse.json()
     console.log('Cover dims from Lulu:', dims.width, dims.height)
+
+  // Convert from inches to mm
+const luluWidth  = parseFloat(dims.width)  * 25.4
+const luluHeight = parseFloat(dims.height) * 25.4
+
+console.log('Converted dims mm:', luluWidth, luluHeight)
 
     // Generate cover PDF using Lulu's exact dimensions
     const coverBlob = await generateCoverPDF({
@@ -670,8 +676,8 @@ const dimsResponse = await fetch(`${API_BASE}/lulu-cover-dimensions`, {
       pageCount:     actualPageCount,
       coverImageUrl: story.cover_image_url || '',
       loadImageAsBase64,
-      luluWidth:     parseFloat(dims.width),
-      luluHeight:    parseFloat(dims.height),
+      luluWidth,    // ← now in mm
+  luluHeight,   // ← now in mm
     })
 
     printModalData.value = {
