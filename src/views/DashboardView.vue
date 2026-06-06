@@ -644,30 +644,42 @@ const sessionData     = await sessionResponse.json()
 const podId           = sessionData.metadata?.podId || POD_PACKAGE_ID
 const amountCharged   = parseInt(sessionData.metadata?.amount || '2998') / 100
 
+const HARDCOVER_POD_IDS = [
+  '0600X0900.FC.PRE.CW.080CW444.GXX',
+  '0600X0900.FC.PRE.LW.080CW444.GNG',
+]
+const isHardcover = HARDCOVER_POD_IDS.includes(podId)
+
 // Only generate photo book if they purchased the bundle
 const includesPhotoBook = sessionData.metadata?.includesPhotoBook === 'true'
 const photoBookBlob = includesPhotoBook
   ? await exportPhotoBookAsBlob(story.story_type, story.cover_image_url || '', getAllImagesForExport)
   : null
     // Get exact cover dimensions from Lulu for this page count
-    // Get exact cover dimensions from Lulu for this page count
-const dimsResponse = await fetch(`${API_BASE}/lulu-cover-dimensions`, {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
- body: JSON.stringify({
-  pod_package_id:      podId,
-  interior_page_count: actualPageCount,
-  unit:                'mm',
-}),
-})
-  const dims = await dimsResponse.json()
-console.log('Raw dims response:', JSON.stringify(dims))
-console.log('Cover dims from Lulu:', dims.width, dims.height)
-console.log('Pod ID being sent to dims:', podId)
 
-  // Convert from inches to mm
-const luluWidth  = parseFloat(dims.width)  * 25.4
-const luluHeight = parseFloat(dims.height) * 25.4
+let luluWidth: number
+let luluHeight: number
+
+if (isHardcover) {
+  luluWidth  = 316.33
+  luluHeight = 234.95
+  console.log('Using hardcover dimensions:', luluWidth, luluHeight)
+} else {
+  const dimsResponse = await fetch(`${API_BASE}/lulu-cover-dimensions`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      pod_package_id:      podId,
+      interior_page_count: actualPageCount,
+      unit:                'mm',
+    }),
+  })
+  const dims = await dimsResponse.json()
+  console.log('Raw dims response:', JSON.stringify(dims))
+  luluWidth  = parseFloat(dims.width)
+  luluHeight = parseFloat(dims.height)
+  console.log('Cover dims from Lulu:', luluWidth, luluHeight)
+}
 
 console.log('Converted dims mm:', luluWidth, luluHeight)
 
@@ -678,8 +690,8 @@ console.log('Converted dims mm:', luluWidth, luluHeight)
       pageCount:     actualPageCount,
       coverImageUrl: story.cover_image_url || '',
       loadImageAsBase64,
-      luluWidth:     parseFloat(dims.width),
-      luluHeight:    parseFloat(dims.height),
+      luluWidth:     luluWidth,
+      luluHeight:    luluHeight,
     })
 
     printModalData.value = {
