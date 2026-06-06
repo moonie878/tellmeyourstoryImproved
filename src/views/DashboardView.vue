@@ -571,6 +571,13 @@ async function startPrintOrder(story: any) {
 
     const binding = selectedBinding.value
 
+     console.log('Sending to checkout:', {  // ← add this
+      amount: Math.round((binding.cost + 4.99) * 100),
+      podId: binding.podId,
+      binding: binding.label,
+    })
+
+
     const response = await fetch(`${API_BASE}/create-print-checkout`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
