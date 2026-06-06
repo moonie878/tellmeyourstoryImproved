@@ -622,7 +622,7 @@ app.post('/lulu-cover-dimensions', async (req, res) => {
       body: JSON.stringify({
         pod_package_id:      req.body.pod_package_id || '0600X0900.FC.STD.PB.060UW444.MXX',
         interior_page_count: req.body.interior_page_count || 28,
-        unit:                'inch',
+        unit:                'mm',
       }),
     })
     const text = await response.text()

@@ -657,11 +657,12 @@ const dimsResponse = await fetch(`${API_BASE}/lulu-cover-dimensions`, {
  body: JSON.stringify({
   pod_package_id:      podId,
   interior_page_count: actualPageCount,
-  unit:                'inch',
+  unit:                'mm',
 }),
 })
-    const dims = await dimsResponse.json()
-    console.log('Cover dims from Lulu:', dims.width, dims.height)
+  const dims = await dimsResponse.json()
+console.log('Raw dims response:', JSON.stringify(dims))
+console.log('Cover dims from Lulu:', dims.width, dims.height)
 
   // Convert from inches to mm
 const luluWidth  = parseFloat(dims.width)  * 25.4
@@ -676,8 +677,8 @@ console.log('Converted dims mm:', luluWidth, luluHeight)
       pageCount:     actualPageCount,
       coverImageUrl: story.cover_image_url || '',
       loadImageAsBase64,
-      luluWidth,    // ← now in mm
-  luluHeight,   // ← now in mm
+      luluWidth:     parseFloat(dims.width),
+      luluHeight:    parseFloat(dims.height),
     })
 
     printModalData.value = {
