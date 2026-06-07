@@ -7,6 +7,9 @@ const PAGE_WIDTH  = 210
 const PAGE_HEIGHT = 297
 const MARGIN      = 12
 
+// Lulu minimum page count for premium color perfect bound
+const MIN_PAGES = 32
+
 export function usePhotoBookExport() {
 
   async function loadImageAsBase64(url: string): Promise<string> {
@@ -27,7 +30,6 @@ export function usePhotoBookExport() {
     })
   }
 
-  // Fetch sections ordered by order_index so images appear in story order
   async function getSectionOrder(storyType: string): Promise<Map<string, number>> {
     const { data, error } = await supabase
       .from('story_sections')
@@ -39,7 +41,7 @@ export function usePhotoBookExport() {
     return new Map(data.map((s: any) => [s.id, s.order_index]))
   }
 
-  async function exportPhotoBookAsBlob(   
+  async function exportPhotoBookAsBlob(
     storyType: string,
     coverImageUrl: string,
     getAllImagesForExport: () => Promise<StoryImage[]>
@@ -51,29 +53,23 @@ export function usePhotoBookExport() {
       format:      'a4',
     })
 
-    const images      = await getAllImagesForExport()
+    const images       = await getAllImagesForExport()
     const sectionOrder = await getSectionOrder(storyType)
 
-    // Sort images by section order_index — unsectioned images go last
     const sorted = [...images].sort((a, b) => {
       const aIdx = a.section_id ? (sectionOrder.get(a.section_id) ?? 9999) : 9999
       const bIdx = b.section_id ? (sectionOrder.get(b.section_id) ?? 9999) : 9999
       return aIdx - bIdx
     })
 
-    // Build ordered list — cover image first if present
     const orderedUrls: string[] = []
     if (coverImageUrl) orderedUrls.push(coverImageUrl)
     for (const img of sorted) {
       if (img.image_url) orderedUrls.push(img.image_url)
     }
 
-    if (orderedUrls.length === 0) {
-      // Return a minimal valid PDF if no images
-      return doc.output('blob')
-    }
-
-    let isFirstPage = true
+    let renderedPages = 0
+    let isFirstPage   = true
 
     for (const url of orderedUrls) {
       try {
@@ -90,11 +86,9 @@ export function usePhotoBookExport() {
         if (!isFirstPage) doc.addPage()
         isFirstPage = false
 
-        // Fill page background white
         doc.setFillColor(255, 255, 255)
         doc.rect(0, 0, PAGE_WIDTH, PAGE_HEIGHT, 'F')
 
-        // Calculate image dimensions to fit within the page with margin
         const maxW = PAGE_WIDTH  - MARGIN * 2
         const maxH = PAGE_HEIGHT - MARGIN * 2
 
@@ -105,17 +99,36 @@ export function usePhotoBookExport() {
         imgW *= ratio
         imgH *= ratio
 
-        // Centre on page
         const x = (PAGE_WIDTH  - imgW) / 2
         const y = (PAGE_HEIGHT - imgH) / 2
 
         doc.addImage(imgData, 'PNG', x, y, imgW, imgH)
+        renderedPages++
 
       } catch (err) {
         console.error('Photo book image render error:', err)
-        // Skip failed images silently
       }
     }
+
+    // Pad to Lulu minimum 32 pages
+    if (renderedPages < MIN_PAGES) {
+      const pagesToAdd = MIN_PAGES - renderedPages
+
+      for (let i = 0; i < pagesToAdd; i++) {
+        if (renderedPages === 0 && i === 0) {
+          doc.setFillColor(255, 255, 255)
+          doc.rect(0, 0, PAGE_WIDTH, PAGE_HEIGHT, 'F')
+        } else {
+          doc.addPage()
+          doc.setFillColor(255, 255, 255)
+          doc.rect(0, 0, PAGE_WIDTH, PAGE_HEIGHT, 'F')
+        }
+      }
+
+      console.log(`Photo book: added ${pagesToAdd} blank pages to reach Lulu minimum of ${MIN_PAGES}`)
+    }
+
+    console.log(`Photo book: ${renderedPages} image pages, ${Math.max(renderedPages, MIN_PAGES)} total`)
 
     return doc.output('blob')
   }
