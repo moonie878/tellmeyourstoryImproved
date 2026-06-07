@@ -651,6 +651,8 @@ const sessionData     = await sessionResponse.json()
 const podId           = sessionData.metadata?.podId || POD_PACKAGE_ID
 const amountCharged   = parseInt(sessionData.metadata?.amount || '2998') / 100
 
+console.log('Session metadata:', JSON.stringify(sessionData.metadata))
+
 const HARDCOVER_POD_IDS = [
   '0600X0900.FC.PRE.CW.080CW444.GXX',
   '0600X0900.FC.PRE.LW.080CW444.GNG',
