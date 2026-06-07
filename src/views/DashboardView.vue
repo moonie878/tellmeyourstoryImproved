@@ -706,6 +706,9 @@ console.log('Converted dims mm:', luluWidth, luluHeight)
       loadImageAsBase64,
       luluWidth:     luluWidth,
       luluHeight:    luluHeight,
+      bindingType: podId === '0600X0900.FC.PRE.LW.080CW444.GNG' ? 'dustjacket' 
+             : podId === '0600X0900.FC.PRE.CW.080CW444.GXX' ? 'hardcover' 
+             : 'softcover',
     })
 
     printModalData.value = {

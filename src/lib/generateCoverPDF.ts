@@ -7,16 +7,20 @@ import { EBGaramondBoldItalic } from '../fonts/EBGaramond-BoldItalic'
 // ─── Lulu cover spec ──────────────────────────────────────────────────────────
 //
 // Dimensions come from Lulu's /cover-dimensions/ endpoint — always use those.
-// Default fallback values are for a 28-page 6x9 book.
+// Default fallback values are for a 28-page 6x9 softcover book.
 //
-// Layout (left to right):
+// Softcover/Hardcover layout (left to right):
 //   [bleed] [back cover: 152.4mm] [spine] [front cover: 152.4mm] [bleed]
+//
+// Dust jacket layout (left to right):
+//   [bleed] [front flap] [back cover: 152.4mm] [spine] [front cover: 152.4mm] [back flap] [bleed]
 //
 // Bleed is 3.175mm (0.125 inches) on all sides.
 
 const BLEED       = 3.175   // mm — fixed for all Lulu 6x9 books
 const TRIM_W      = 152.4   // mm — 6 inches per side
 const TRIM_H      = 228.6   // mm — 9 inches
+const FLAP_W      = 76.2    // mm — standard 3 inch dust jacket flap
 
 const IMG_QUALITY = 0.85
 
@@ -70,40 +74,63 @@ export interface CoverOptions {
   pageCount: number
   coverImageUrl?: string
   loadImageAsBase64?: (url: string) => Promise<string>
-  luluWidth?: number    // exact width from Lulu /cover-dimensions/ endpoint
-  luluHeight?: number   // exact height from Lulu /cover-dimensions/ endpoint
+  luluWidth?: number
+  luluHeight?: number
+  bindingType?: 'softcover' | 'hardcover' | 'dustjacket'
 }
 
 // ─── Main cover generator ─────────────────────────────────────────────────────
 
 export async function generateCoverPDF(options: CoverOptions): Promise<Blob> {
-  const { title, subtitle, coverImageUrl, loadImageAsBase64, luluWidth, luluHeight } = options
+  const {
+    title,
+    subtitle,
+    coverImageUrl,
+    loadImageAsBase64,
+    luluWidth,
+    luluHeight,
+    bindingType = 'softcover',
+  } = options
 
-  // Use Lulu's exact dimensions — critical for validation to pass
-  const totalW = luluWidth  || 314.280   // default for 28-page 6x9
-  const totalH = luluHeight || 234.950
+  const isDustJacket = bindingType === 'dustjacket'
 
-  // Derive spine width from total — spine = totalW - 2×trimW - 2×bleed
-  const spine      = totalW - TRIM_W * 2 - BLEED * 2
-  const spineLeft  = BLEED + TRIM_W          // where spine starts
-  const frontLeft  = spineLeft + spine        // where front cover starts
-  const frontRight = totalW                   // right edge including bleed
+  // Use Lulu's exact dimensions
+  const totalW = luluWidth  || (isDustJacket ? 508.00 : 314.280)
+  const totalH = luluHeight || (isDustJacket ? 247.65 : 234.950)
 
-  // Vertical bounds
- // const contentTop = BLEED + 20
+  // ── Layout calculations ────────────────────────────────────────────────────
+
+  let backLeft:  number
+  let spineLeft: number
+  let frontLeft: number
+  let spine:     number
+
+  if (isDustJacket) {
+    // Dust jacket: [bleed][front flap][back][spine][front][back flap][bleed]
+    // Total = bleed*2 + flap*2 + trim*2 + spine
+    spine     = totalW - BLEED * 2 - FLAP_W * 2 - TRIM_W * 2
+    backLeft  = BLEED + FLAP_W
+    spineLeft = backLeft + TRIM_W
+    frontLeft = spineLeft + spine
+  } else {
+    // Softcover/Hardcover: [bleed][back][spine][front][bleed]
+    spine     = totalW - TRIM_W * 2 - BLEED * 2
+    backLeft  = BLEED
+    spineLeft = backLeft + TRIM_W
+    frontLeft = spineLeft + spine
+  }
+
   const contentBot = totalH - BLEED - 18
+  const backCX     = backLeft  + TRIM_W / 2
+  const frontCX    = frontLeft + TRIM_W / 2
+  const spineCX    = spineLeft + spine / 2
 
-  // Panel centres
-  const backCX  = BLEED + TRIM_W / 2
-  const frontCX = frontLeft + TRIM_W / 2
-  const spineCX = spineLeft + spine / 2
+  console.log(`Cover PDF (${bindingType}): ${totalW.toFixed(3)}×${totalH.toFixed(3)}mm, spine: ${spine.toFixed(3)}mm`)
 
-  console.log(`Cover PDF: ${totalW.toFixed(3)}×${totalH.toFixed(3)}mm, spine: ${spine.toFixed(3)}mm`)
-
-  // Create doc — landscape orientation since width > height
+  // Create doc
   const doc = new jsPDF({
-    unit: 'mm',
-    format: [totalW, totalH],
+    unit:        'mm',
+    format:      [totalW, totalH],
     orientation: totalW > totalH ? 'landscape' : 'portrait',
   })
 
@@ -117,18 +144,60 @@ export async function generateCoverPDF(options: CoverOptions): Promise<Blob> {
   doc.addFileToVFS('EBGaramond-BoldItalic.ttf', EBGaramondBoldItalic)
   doc.addFont('EBGaramond-BoldItalic.ttf', 'EBGaramond', 'bolditalic')
 
-  // ── Full background ──────────────────────────────────────────────────────────
+  // ── Full background ────────────────────────────────────────────────────────
   setFill(doc, C_PAGE_BG)
   doc.rect(0, 0, totalW, totalH, 'F')
 
-  // ── FRONT COVER ─────────────────────────────────────────────────────────────
+  // ── DUST JACKET FLAPS ──────────────────────────────────────────────────────
+  if (isDustJacket) {
+    // Front flap (left side) — subtle tint
+    setFill(doc, [242, 237, 230])
+    doc.rect(BLEED, BLEED, FLAP_W, totalH - BLEED * 2, 'F')
+
+    // Back flap (right side)
+    setFill(doc, [242, 237, 230])
+    doc.rect(frontLeft + TRIM_W, BLEED, FLAP_W, totalH - BLEED * 2, 'F')
+
+    // Fold lines
+    setDraw(doc, C_DIVIDER)
+    doc.setLineWidth(0.3)
+    doc.line(BLEED + FLAP_W,           BLEED, BLEED + FLAP_W,           totalH - BLEED)
+    doc.line(frontLeft + TRIM_W,       BLEED, frontLeft + TRIM_W,       totalH - BLEED)
+
+    // Front flap text — "Tell Me Your Story"
+    doc.setFont('EBGaramond', 'italic')
+    doc.setFontSize(9)
+    setTxt(doc, C_MUTED)
+    doc.text(
+      'Tell Me Your Story',
+      BLEED + FLAP_W / 2,
+      totalH / 2,
+      { align: 'center', maxWidth: FLAP_W - 12 }
+    )
+
+    // Back flap — website
+    doc.setFont('EBGaramond', 'normal')
+    doc.setFontSize(8)
+    setTxt(doc, C_MUTED)
+    doc.text(
+      'tellmeyourstory.uk',
+      frontLeft + TRIM_W + FLAP_W / 2,
+      totalH / 2,
+      { align: 'center' }
+    )
+  }
+
+  // ── FRONT COVER ───────────────────────────────────────────────────────────
 
   if (coverImageUrl && loadImageAsBase64) {
     try {
       const rawImg = await loadImageAsBase64(coverImageUrl)
       const img    = new Image()
       img.src      = rawImg
-      await new Promise<void>((resolve, reject) => { img.onload = () => resolve(); img.onerror = reject })
+      await new Promise<void>((resolve, reject) => {
+        img.onload  = () => resolve()
+        img.onerror = reject
+      })
 
       const maxIW  = TRIM_W - 24
       const maxIH  = TRIM_H * 0.42
@@ -169,26 +238,22 @@ export async function generateCoverPDF(options: CoverOptions): Promise<Blob> {
   // Front footer
   setDraw(doc, C_DIVIDER)
   doc.setLineWidth(0.2)
-  doc.line(frontLeft + 12, contentBot + 6, frontRight - 12, contentBot + 6)
-
+  doc.line(frontLeft + 12, contentBot + 6, frontLeft + TRIM_W - 12, contentBot + 6)
   doc.setFont('EBGaramond', 'normal')
   doc.setFontSize(7.5)
   setTxt(doc, C_MUTED)
   doc.text('Tell Me Your Story · tellmeyourstory.uk', frontCX, contentBot + 12, { align: 'center' })
 
-  // ── SPINE ────────────────────────────────────────────────────────────────────
+  // ── SPINE ─────────────────────────────────────────────────────────────────
 
-  // Spine background
   setFill(doc, [240, 235, 228])
   doc.rect(spineLeft, 0, spine, totalH, 'F')
 
-  // Spine divider lines
   setDraw(doc, C_DIVIDER)
   doc.setLineWidth(0.3)
-  doc.line(spineLeft,        BLEED,         spineLeft,         totalH - BLEED)
-  doc.line(spineLeft + spine, BLEED,         spineLeft + spine,  totalH - BLEED)
+  doc.line(spineLeft,        BLEED, spineLeft,        totalH - BLEED)
+  doc.line(spineLeft + spine, BLEED, spineLeft + spine, totalH - BLEED)
 
-  // Spine text — only if spine is wide enough
   if (spine >= 6) {
     doc.setFont('EBGaramond', 'bold')
     doc.setFontSize(Math.min(8, spine * 2.5))
@@ -200,28 +265,23 @@ export async function generateCoverPDF(options: CoverOptions): Promise<Blob> {
     })
   }
 
-  // ── BACK COVER ───────────────────────────────────────────────────────────────
+  // ── BACK COVER ────────────────────────────────────────────────────────────
 
-  // Dark header strip
   setFill(doc, C_DARK)
-  doc.rect(0, 0, BLEED + TRIM_W, totalH * 0.12, 'F')
+  doc.rect(backLeft, 0, TRIM_W, totalH * 0.12, 'F')
 
-  // Brand in header
   doc.setFont('EBGaramond', 'normal')
   doc.setFontSize(8)
   setTxt(doc, [198, 168, 130])
   doc.text('TELL ME YOUR STORY', backCX, BLEED + totalH * 0.06, { align: 'center' })
 
-  // Ornament
   ornament(doc, backCX, BLEED + totalH * 0.12 + 16)
 
-  // Title quote
   doc.setFont('EBGaramond', 'italic')
   doc.setFontSize(11)
   setTxt(doc, C_SECONDARY)
   doc.text(`"${title}"`, backCX, BLEED + totalH * 0.12 + 30, { align: 'center', maxWidth: TRIM_W - 24 })
 
-  // Description
   doc.setFont('EBGaramond', 'normal')
   doc.setFontSize(9)
   setTxt(doc, C_SECONDARY)
@@ -231,7 +291,6 @@ export async function generateCoverPDF(options: CoverOptions): Promise<Blob> {
     doc.text(ln, backCX, BLEED + totalH * 0.12 + 46 + i * 6, { align: 'center' })
   })
 
-  // Ornament + URL
   ornament(doc, backCX, totalH / 2 + 20)
   doc.setFont('EBGaramond', 'normal')
   doc.setFontSize(8)
@@ -241,7 +300,7 @@ export async function generateCoverPDF(options: CoverOptions): Promise<Blob> {
   // Back footer
   setDraw(doc, C_DIVIDER)
   doc.setLineWidth(0.2)
-  doc.line(BLEED + 12, contentBot + 6, BLEED + TRIM_W - 12, contentBot + 6)
+  doc.line(backLeft + 12, contentBot + 6, backLeft + TRIM_W - 12, contentBot + 6)
   doc.setFont('EBGaramond', 'normal')
   doc.setFontSize(7)
   setTxt(doc, C_MUTED)
