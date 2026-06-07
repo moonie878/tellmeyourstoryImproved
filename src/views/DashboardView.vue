@@ -675,8 +675,8 @@ let luluWidth: number
 let luluHeight: number
 
 if (isHardcover) {
-  luluWidth  = 316.33
-  luluHeight = 234.95
+  luluWidth  = 355.60
+  luluHeight = 273.05
   console.log('Using hardcover dimensions:', luluWidth, luluHeight)
 } else {
   const dimsResponse = await fetch(`${API_BASE}/lulu-cover-dimensions`, {
