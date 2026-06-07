@@ -658,6 +658,7 @@ const HARDCOVER_POD_IDS = [
   '0600X0900.FC.PRE.LW.080CW444.GNG',
 ]
 const isHardcover = HARDCOVER_POD_IDS.includes(podId)
+console.log('podId:', podId, 'isHardcover:', isHardcover)
 
 // Only generate photo book if they purchased the bundle
 const includesPhotoBook = sessionData.metadata?.includesPhotoBook === 'true'
