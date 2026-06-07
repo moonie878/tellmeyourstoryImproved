@@ -106,7 +106,7 @@ if (photoBookUrl) {
     title:          `${storyTitle} — Photo Book`,
     interior:       { source_url: photoBookUrl },
     cover:          { source_url: coverUrl },   // reuse same cover
-    pod_package_id: POD_PACKAGE_ID,             // softcover for photo book
+   pod_package_id: '0600X0900.FC.PRE.PB.060UW444.MXX',
     page_count:     pageCount,                  // approximate — Lulu will validate
     quantity,
   })
