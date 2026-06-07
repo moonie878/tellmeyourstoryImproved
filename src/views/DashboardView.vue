@@ -657,13 +657,6 @@ const amountCharged   = parseInt(sessionData.metadata?.amount || '2998') / 100
 
 console.log('Session metadata:', JSON.stringify(sessionData.metadata))
 
-const HARDCOVER_POD_IDS = [
-  '0600X0900.FC.PRE.CW.080CW444.GXX',
-  '0600X0900.FC.PRE.LW.080CW444.GNG',
-]
-const isHardcover = HARDCOVER_POD_IDS.includes(podId)
-console.log('podId:', podId, 'isHardcover:', isHardcover)
-
 // Only generate photo book if they purchased the bundle
 const includesPhotoBook = sessionData.metadata?.includesPhotoBook === 'true'
 const photoBookBlob = includesPhotoBook
@@ -674,11 +667,18 @@ const photoBookBlob = includesPhotoBook
 let luluWidth: number
 let luluHeight: number
 
-if (isHardcover) {
+if (podId === '0600X0900.FC.PRE.CW.080CW444.GXX') {
+  // Hardcover case wrap
   luluWidth  = 355.60
   luluHeight = 273.05
-  console.log('Using hardcover dimensions:', luluWidth, luluHeight)
+  console.log('Using hardcover case wrap dimensions:', luluWidth, luluHeight)
+} else if (podId === '0600X0900.FC.PRE.LW.080CW444.GNG') {
+  // Dust jacket — much wider due to flaps
+  luluWidth  = 508.00
+  luluHeight = 247.65
+  console.log('Using dust jacket dimensions:', luluWidth, luluHeight)
 } else {
+  // Softcover — fetch from Lulu API
   const dimsResponse = await fetch(`${API_BASE}/lulu-cover-dimensions`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
