@@ -136,7 +136,8 @@ import type { ShippingAddress } from '../../lib/useLuluPrint'
 const props = defineProps<{
   interiorPdfBlob: Blob
   coverPdfBlob: Blob
-   photoBookBlob: Blob | null    // ← add this
+  photoBookBlob: Blob | null
+  photoBookCoverBlob: Blob | null  // ← add
   pageCount: number
   storyTitle: string
   storyId: string
@@ -144,9 +145,8 @@ const props = defineProps<{
   userEmail: string
   printCost: number
   stripePaymentId: string
-   podId?: string          // ← add
-  bindingLabel?: string   // ← add
-  
+  podId?: string
+  bindingLabel?: string
 }>()
 
 const emit = defineEmits<{ close: []; ordered: [printJobId: string] }>()
@@ -195,21 +195,22 @@ async function handleOrder() {
     email:        props.userEmail,
   }
 
-  const result = await orderPrintedBook(
-    props.interiorPdfBlob,
-    props.coverPdfBlob,
-    props.pageCount,
-    props.storyTitle,
-    props.storyId,
-    props.userId,
-    address,
-    props.stripePaymentId,
-    'MAIL',
-    quantity.value,
-    props.printCost,
-    props.podId || '0600X0900.FC.STD.PB.060UW444.MXX',
-    props.photoBookBlob ?? null
-  )
+ const result = await orderPrintedBook(
+  props.interiorPdfBlob,
+  props.coverPdfBlob,
+  props.pageCount,
+  props.storyTitle,
+  props.storyId,
+  props.userId,
+  address,
+  props.stripePaymentId,
+  'MAIL',
+  quantity.value,
+  props.printCost,
+  props.podId || '0600X0900.FC.STD.PB.060UW444.MXX',
+  props.photoBookBlob ?? null,
+  props.photoBookCoverBlob ?? null  // ← add
+)
 
   if (result.success && result.lulu_print_job_id) {
     success.value     = true

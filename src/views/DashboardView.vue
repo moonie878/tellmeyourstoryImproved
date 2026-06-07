@@ -302,11 +302,12 @@
     </div>
 
     <!-- Print Order Modal -->
-   <PrintOrderModal
+  <PrintOrderModal
   v-if="printModalOpen && printModalData"
   :interior-pdf-blob="printModalData.interiorBlob"
   :cover-pdf-blob="printModalData.coverBlob"
   :photo-book-blob="printModalData.photoBookBlob"
+  :photo-book-cover-blob="printModalData.photoBookCoverBlob"
   :page-count="printModalData.pageCount"
   :story-title="printModalData.storyTitle"
   :story-id="printModalData.storyId"
@@ -387,6 +388,7 @@ const printModalOpen    = ref(false)
 const printModalData    = ref<{
   interiorBlob: Blob
   coverBlob: Blob
+  photoBookCoverBlob: Blob | null  // ← add
   photoBookBlob: Blob | null   // ← add this
   pageCount: number
   storyTitle: string
@@ -711,10 +713,27 @@ console.log('Converted dims mm:', luluWidth, luluHeight)
              : 'softcover',
     })
 
+    // Generate separate cover for photo book — premium softcover dimensions
+let photoBookCoverBlob: Blob | null = null
+if (includesPhotoBook) {
+  photoBookCoverBlob = await generateCoverPDF({
+    title:         `${storyTitle} — Photo Book`,
+    subtitle:      'A collection of memories and moments',
+    pageCount:     32,
+    coverImageUrl: story.cover_image_url || '',
+    loadImageAsBase64,
+    luluWidth:     314.5,
+    luluHeight:    234.95,
+    bindingType:   'softcover',
+  })
+}
+
+
     printModalData.value = {
       interiorBlob,
       coverBlob,
       photoBookBlob,        // ← add this
+       photoBookCoverBlob,   // ← add
       pageCount:       actualPageCount,
       storyTitle,
       storyId:         story.id,

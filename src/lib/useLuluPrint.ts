@@ -55,7 +55,8 @@ export function useLuluPrint() {
   quantity = 1,
   amountCharged = 0,
   podPackageId = POD_PACKAGE_ID,   // ← add this, defaults to softcover
-   photoBookBlob: Blob | null = null   // ← add this
+   photoBookBlob: Blob | null = null,   // ← add this
+   photoBookCoverBlob: Blob | null = null  // ← add this
 ): Promise<PrintOrderResult> {
 
     isOrdering.value  = true
@@ -71,14 +72,6 @@ export function useLuluPrint() {
         `print-orders/${userId}/${storyId}-interior-${ts}.pdf`
       )
 
-      
-
-      orderStatus.value = 'Uploading cover…'
-      const coverUrl = await uploadBlob(
-        coverBlob,
-        `print-orders/${userId}/${storyId}-cover-${ts}.pdf`
-      )
-
       // Upload photo book interior if bundle
 let photoBookUrl: string | null = null
 if (photoBookBlob) {
@@ -88,6 +81,23 @@ if (photoBookBlob) {
     `print-orders/${userId}/${storyId}-photobook-${ts}.pdf`
   )
 }
+
+      let photoBookCoverUrl: string | null = null
+if (photoBookBlob && photoBookCoverBlob) {
+  orderStatus.value = 'Uploading photo book cover…'
+  photoBookCoverUrl = await uploadBlob(
+    photoBookCoverBlob,
+    `print-orders/${userId}/${storyId}-photobook-cover-${ts}.pdf`
+  )
+}
+
+      orderStatus.value = 'Uploading cover…'
+      const coverUrl = await uploadBlob(
+        coverBlob,
+        `print-orders/${userId}/${storyId}-cover-${ts}.pdf`
+      )
+
+
 
 // Build line items
 const lineItems: any[] = [
@@ -105,8 +115,8 @@ if (photoBookUrl) {
   lineItems.push({
     title:          `${storyTitle} — Photo Book`,
     interior:       { source_url: photoBookUrl },
-    cover:          { source_url: coverUrl },   // reuse same cover
-   pod_package_id: '0600X0900.FC.PRE.PB.060UW444.MXX',
+    cover:          { source_url: photoBookCoverUrl || coverUrl },
+    pod_package_id: '0600X0900.FC.PRE.PB.080CW444.MXX',  // ← correct premium coated
     page_count:     pageCount,                  // approximate — Lulu will validate
     quantity,
   })
