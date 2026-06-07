@@ -32,8 +32,8 @@
         <!-- Price summary -->
 <div class="mt-4 rounded-2xl bg-[#F5F0E8] px-5 py-4">
   <div class="flex justify-between text-sm">
-    <span class="text-[#5C534E]">{{ selectedBindingOption.label }} keepsake book</span>
-    <span class="font-medium text-[#1C1917]">£{{ selectedBindingOption.cost.toFixed(2) }}</span>
+    <span class="text-[#5C534E]">{{ props.bindingLabel || 'Softcover' }} keepsake book</span>
+    <span class="font-medium text-[#1C1917]">£{{ (props.printCost - 4.99).toFixed(2) }}</span>
   </div>
   <div class="flex justify-between text-sm mt-1">
     <span class="text-[#5C534E]">UK shipping — Royal Mail 2nd Class</span>
@@ -41,12 +41,12 @@
   </div>
   <div class="mt-2 border-t border-[#E8DDD0] pt-2 flex justify-between text-sm font-semibold">
     <span class="text-[#1C1917]">Total paid</span>
-    <span class="text-[#1C1917]">£{{ (selectedBindingOption.cost + 4.99).toFixed(2) }}</span>
+    <span class="text-[#1C1917]">£{{ props.printCost.toFixed(2) }}</span>
   </div>
   <div v-if="props.photoBookBlob" class="mt-2 flex justify-between text-xs text-stone-500">
-  <span>Includes photo book</span>
-  <span>✓</span>
-</div>
+    <span>Includes photo book</span>
+    <span>✓</span>
+  </div>
 </div>
 
         <!-- Address form -->
@@ -144,40 +144,18 @@ const props = defineProps<{
   userEmail: string
   printCost: number
   stripePaymentId: string
+   podId?: string          // ← add
+  bindingLabel?: string   // ← add
+  
 }>()
 
 const emit = defineEmits<{ close: []; ordered: [printJobId: string] }>()
 
 const { isOrdering, orderStatus, orderPrintedBook } = useLuluPrint()
 
-// ─── Binding options ──────────────────────────────────────────────────────────
 
-const bindingOptions = [
-  {
-    id:         'softcover',
-    label:      'Softcover',
-    podId:      '0600X0900.FC.STD.PB.060UW444.MXX',
-    cost:       props.printCost,
-  },
-  {
-    id:         'hardcover',
-    label:      'Hardcover',
-    podId:      '0600X0900.FC.PRE.CW.080CW444.GXX',
-    cost:       29.99,
-  },
-  {
-    id:         'dustjacket',
-    label:      'Dust Jacket',
-    podId:      '0600X0900.FC.PRE.LW.080CW444.GNG',
-    cost:       34.99,
-  },
-]
 
-const selectedBinding = ref('softcover')
 
-const selectedBindingOption = computed(() =>
-  bindingOptions.find(b => b.id === selectedBinding.value) ?? bindingOptions[0]
-)
 
 // ─── Form ─────────────────────────────────────────────────────────────────────
 
@@ -217,8 +195,6 @@ async function handleOrder() {
     email:        props.userEmail,
   }
 
-  const binding = selectedBindingOption.value
-
   const result = await orderPrintedBook(
     props.interiorPdfBlob,
     props.coverPdfBlob,
@@ -230,8 +206,9 @@ async function handleOrder() {
     props.stripePaymentId,
     'MAIL',
     quantity.value,
-    binding.cost + 4.99,
-    binding.podId
+    props.printCost,
+    props.podId || '0600X0900.FC.STD.PB.060UW444.MXX',
+    props.photoBookBlob ?? null
   )
 
   if (result.success && result.lulu_print_job_id) {

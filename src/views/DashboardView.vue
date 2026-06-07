@@ -302,7 +302,7 @@
     </div>
 
     <!-- Print Order Modal -->
-    <PrintOrderModal
+   <PrintOrderModal
   v-if="printModalOpen && printModalData"
   :interior-pdf-blob="printModalData.interiorBlob"
   :cover-pdf-blob="printModalData.coverBlob"
@@ -314,6 +314,8 @@
   :user-email="printModalData.userEmail"
   :print-cost="printModalData.printCost"
   :stripe-payment-id="printModalData.stripePaymentId"
+  :pod-id="printModalData.podId"
+  :binding-label="printModalData.bindingLabel"
   @close="printModalOpen = false"
   @ordered="onOrdered"
 />
@@ -393,6 +395,8 @@ const printModalData    = ref<{
   userEmail: string
   stripePaymentId: string
   printCost: number
+   podId: string        // ← add
+  bindingLabel: string // ← add
 } | null>(null)
 
 const router     = useRouter()
@@ -715,6 +719,8 @@ console.log('Converted dims mm:', luluWidth, luluHeight)
       userEmail:       user.email || '',
       stripePaymentId: sessionId,
       printCost:  amountCharged,
+      podId:           podId,                                    // ← add
+  bindingLabel:    sessionData.metadata?.binding || 'Softcover', // ← add
     }
     printModalOpen.value = true
 
