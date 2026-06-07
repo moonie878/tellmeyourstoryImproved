@@ -3,9 +3,10 @@ import { supabase } from '../lib/supabase'
 import type { StoryImage } from '../types/story'
 
 // A4 portrait dimensions in mm
-const PAGE_WIDTH  = 210
-const PAGE_HEIGHT = 297
-const MARGIN      = 12
+// Change these constants
+const PAGE_WIDTH  = 152.4  // 6 inches in mm
+const PAGE_HEIGHT = 228.6  // 9 inches in mm
+const MARGIN      = 10
 
 // Lulu minimum page count for premium color perfect bound
 const MIN_PAGES = 32
@@ -47,11 +48,11 @@ export function usePhotoBookExport() {
     getAllImagesForExport: () => Promise<StoryImage[]>
   ): Promise<Blob> {
 
-    const doc = new jsPDF({
-      orientation: 'portrait',
-      unit:        'mm',
-      format:      'a4',
-    })
+const doc = new jsPDF({
+  orientation: 'portrait',
+  unit:        'mm',
+  format:      [PAGE_WIDTH, PAGE_HEIGHT],  // ← custom 6x9 format
+})
 
     const images       = await getAllImagesForExport()
     const sectionOrder = await getSectionOrder(storyType)
