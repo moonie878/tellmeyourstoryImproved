@@ -1,7 +1,7 @@
 <template>
   <LegalPageLayout
     title="Terms of Service"
-    last-updated="8 April 2026"
+    last-updated="06 June 2026"
   >
     <h2>1. Overview</h2>
     <p>
@@ -69,6 +69,19 @@
       If you have any questions about these terms, contact us at
       <a href="mailto:hello@tellmeyourstory.uk">hello@tellmeyourstory.uk</a>.
     </p>
+    <h2>12. Marketing communications</h2>
+<p>
+  By creating an account, you agree that we may send you occasional product updates,
+  story prompts, and reminders by email. You can unsubscribe at any time by clicking
+  the unsubscribe link in any email we send. We will never sell your email address to
+  third parties.
+</p>
+
+<h2>13. Contact</h2>
+<p>
+  If you have any questions about these terms, contact us at
+  <a href="mailto:hello@tellmeyourstory.uk">hello@tellmeyourstory.uk</a>.
+</p>
   </LegalPageLayout>
 </template>
 

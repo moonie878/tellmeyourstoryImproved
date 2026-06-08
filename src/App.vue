@@ -268,13 +268,26 @@ async function handleMobileLogout() {
 onMounted(() => {
   getUser()
 
- supabase.auth.onAuthStateChange((_event, session) => {
+supabase.auth.onAuthStateChange(async (_event, session) => {
   user.value = session?.user || null
 
   if (session?.user) {
     posthog.identify(session.user.id, {
       email: session.user.email,
     })
+
+    // Add to Resend contacts on first Google sign in
+    if (_event === 'SIGNED_IN' && session.user.app_metadata?.provider === 'google') {
+      try {
+        await fetch(`${import.meta.env.VITE_API_BASE_URL}/register-contact`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: session.user.email, firstName: '' }),
+        })
+      } catch {
+        // Non-critical
+      }
+    }
   } else {
     posthog.reset()
   }

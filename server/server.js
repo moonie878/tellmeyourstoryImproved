@@ -29,6 +29,20 @@ const supabaseAdmin = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY
 )
 
+async function addToResendContacts(email, firstName = '') {
+  try {
+    await resend.contacts.create({
+      email,
+      firstName,
+      unsubscribed: false,
+    })
+    console.log('Added to Resend contacts:', email)
+  } catch (err) {
+    // Contact may already exist — that's fine
+    console.log('Resend contact note:', err.message)
+  }
+}
+
 // ─── Gift products config ─────────────────────────────────────────────────────
 const GIFT_PRODUCTS = {
   'single-story': {
@@ -160,6 +174,7 @@ app.post(
               `,
             })
             console.log('Gift email sent to:', buyerEmail)
+            await addToResendContacts(buyerEmail)  // ← add this
           } catch (emailErr) {
             console.error('Gift email error:', emailErr.message)
           }
@@ -193,6 +208,12 @@ app.post(
           ]
         }
 
+        // Add to Resend contacts
+  const { data: { user: purchaseUser } } = await supabaseAdmin.auth.admin.getUserById(userId)
+  if (purchaseUser?.email) {
+    await addToResendContacts(purchaseUser.email)
+  }
+
         if (accessRows.length > 0) {
           const { error } = await supabaseAdmin
             .from('user_access')
@@ -215,6 +236,18 @@ app.post(
 
 // ─── JSON middleware (after webhook raw handler) ───────────────────────────────
 app.use(express.json())
+
+app.post('/register-contact', async (req, res) => {
+  try {
+    const { email, firstName } = req.body
+    if (!email) return res.status(400).json({ error: 'Email required' })
+    await addToResendContacts(email, firstName || '')
+    res.json({ success: true })
+  } catch (err) {
+    console.error('Register contact error:', err.message)
+    res.status(500).json({ error: err.message })
+  }
+})
 
 // ─── Transcribe ───────────────────────────────────────────────────────────────
 app.post('/transcribe', upload.single('audio'), async (req, res) => {
@@ -447,7 +480,10 @@ app.post('/create-gift-checkout', async (req, res) => {
       },
     })
 
+        // After gift record is created
+await addToResendContacts(buyerEmail)
     res.json({ url: session.url })
+
   } catch (err) {
     console.error('Gift checkout error:', err)
     res.status(500).json({ error: 'Failed to create gift checkout' })
@@ -504,6 +540,9 @@ app.post('/redeem-gift', async (req, res) => {
       .from('gift_purchases')
       .update({ redeemed_by: userId, redeemed_at: new Date().toISOString() })
       .eq('token', token)
+
+      // After successful redemption
+await addToResendContacts(gift.recipient_email, gift.recipient_name)
 
     res.json({ success: true, storyType: gift.story_type })
   } catch (err) {

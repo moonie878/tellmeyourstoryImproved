@@ -26,6 +26,11 @@
           </svg>
           {{ googleLoading ? 'Redirecting...' : 'Continue with Google' }}
         </button>
+        <p class="mt-2 text-center text-xs text-stone-400">
+  By continuing you agree to our
+  <router-link to="/privacy" class="underline hover:text-stone-600">privacy policy</router-link>
+  and may receive occasional product updates.
+</p>
 
         <!-- Divider -->
         <div class="my-5 flex items-center gap-3">
@@ -173,11 +178,26 @@ async function handleRegister() {
       },
     })
 
-    if (error) {
+    
+
+   if (error) {
   errorMessage.value = error.message
 } else {
   success.value = true
   track('signup_completed', { source: 'register_page', ...utmData })
+
+  // Add to Resend contacts — only if they opted in
+  if (emailOptIn.value) {
+    try {
+      await fetch(`${import.meta.env.VITE_API_BASE_URL}/register-contact`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email.value, firstName: '' }),
+      })
+    } catch {
+      // Non-critical — don't block registration
+    }
+  }
 
   // If registering via a gift link, redirect to redemption page after short delay
   if (giftToken) {
