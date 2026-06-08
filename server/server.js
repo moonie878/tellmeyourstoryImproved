@@ -31,14 +31,21 @@ const supabaseAdmin = createClient(
 
 async function addToResendContacts(email, firstName = '') {
   try {
-    await resend.contacts.create({
-      email,
-      firstName,
-      unsubscribed: false,
+    const response = await fetch('https://api.resend.com/contacts', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        email,
+        first_name: firstName,
+        unsubscribed: false,
+      }),
     })
-    console.log('Added to Resend contacts:', email)
+    const data = await response.json()
+    console.log('Added to Resend contacts:', email, data)
   } catch (err) {
-    // Contact may already exist — that's fine
     console.log('Resend contact note:', err.message)
   }
 }
