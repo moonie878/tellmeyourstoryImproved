@@ -145,4 +145,34 @@
   <priority>0.9</priority>
   <changefreq>monthly</changefreq>
 </url>
+<url>
+  <loc>https://tellmeyourstory.uk/questions-to-ask-elderly-parents</loc>
+  <priority>0.9</priority>
+  <changefreq>monthly</changefreq>
+</url>
+<url>
+  <loc>https://tellmeyourstory.uk/70th-birthday-gift-ideas</loc>
+  <priority>0.8</priority>
+  <changefreq>monthly</changefreq>
+</url>
+<url>
+  <loc>https://tellmeyourstory.uk/80th-birthday-gift-ideas</loc>
+  <priority>0.8</priority>
+  <changefreq>monthly</changefreq>
+</url>
+<url>
+  <loc>https://tellmeyourstory.uk/dementia-life-story-book</loc>
+  <priority>0.9</priority>
+  <changefreq>monthly</changefreq>
+</url>
+<url>
+  <loc>https://tellmeyourstory.uk/end-of-life-gift</loc>
+  <priority>0.8</priority>
+  <changefreq>monthly</changefreq>
+</url>
+<url>
+  <loc>https://tellmeyourstory.uk/family-history-book</loc>
+  <priority>0.9</priority>
+  <changefreq>monthly</changefreq>
+</url>
 </urlset>

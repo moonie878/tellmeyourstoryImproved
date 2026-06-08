@@ -68,6 +68,12 @@ const routes = [
 { path: '/christmas-gift-ideas-for-grandparents', name: 'christmas-gift-grandparents',     component: () => import('../views/ChristmasGiftGrandparentsView.vue') },
 { path: '/unique-gift-for-elderly-parents',    name: 'unique-gift-elderly-parents',        component: () => import('../views/UniqueGiftElderlyParentsView.vue') },
 { path: '/life-story-video', name: 'life-story-video', component: () => import('../views/LifeStoryVideoView.vue') },
+{ path: '/questions-to-ask-elderly-parents', name: 'questions-elderly-parents',  component: () => import('../views/QuestionsToAskElderlyParentsView.vue') },
+{ path: '/70th-birthday-gift-ideas',         name: '70th-birthday-gift',          component: () => import('../views/SeventyBirthdayGiftView.vue') },
+{ path: '/80th-birthday-gift-ideas',         name: '80th-birthday-gift',          component: () => import('../views/EightyBirthdayGiftView.vue') },
+{ path: '/dementia-life-story-book',         name: 'dementia-life-story-book',    component: () => import('../views/DementiaLifeStoryBookView.vue') },
+{ path: '/end-of-life-gift',                 name: 'end-of-life-gift',            component: () => import('../views/EndOfLifeGiftView.vue') },
+{ path: '/family-history-book',              name: 'family-history-book',         component: () => import('../views/FamilyHistoryBookView.vue') },
 {
   path: '/remento-alternative',
   name: 'remento-alternative',
