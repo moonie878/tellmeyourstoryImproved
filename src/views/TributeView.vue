@@ -11,7 +11,7 @@
         </h1>
         <p class="hero-sub">
           Upload photos and video clips, add music, 
-          and create a beautiful memorial video in minutes — free to preview, £9.99 to download.
+          and create a beautiful memorial video in minutes — free to preview, £19.99 to download.
         </p>
         <div class="hero-trust">
           <span>✦ No account needed</span>
@@ -270,7 +270,7 @@
           <h2 class="card-title">Your tribute is ready</h2>
           <p class="card-sub">
             Preview your tribute with a watermark for free, or download
-            the full clean version for £9.99.
+            the full clean version for £19.99.
           </p>
 
           <!-- Summary -->
@@ -359,7 +359,7 @@
   <span class="btn-icon">⬇</span>
   <div>
     <p class="btn-main-label">
-      {{ isTier4 || hasPaid ? 'Download full video' : 'Download full video — £9.99' }}
+      {{ isTier4 || hasPaid ? 'Download full video' : 'Download full video — £19.99' }}
     </p>
     <p class="btn-sub-label">
       {{ isTier4 ? 'Included in your Full Collection plan ✦'
@@ -431,7 +431,7 @@ import { useSeo } from '../composables/useSeo'
 
 useSeo({
   title: 'Create a Memorial Tribute Video | Tell Me Your Story',
-  description: 'Create a beautiful memorial tribute video in minutes. Upload photos, add music, and honour a loved one\'s life. Free to preview — £9.99 to download.',
+  description: 'Create a beautiful memorial tribute video in minutes. Upload photos, add music, and honour a loved one\'s life. Free to preview — £19.99 to download.',
   canonical: 'https://tellmeyourstory.uk/tribute',
   schema: {
     '@context': 'https://schema.org',
@@ -439,7 +439,7 @@ useSeo({
       {
         '@type': 'WebPage',
         name: 'Memorial Tribute Video Creator',
-        description: 'Create a beautiful memorial tribute video with photos and music. Free to preview, £9.99 to download.',
+        description: 'Create a beautiful memorial tribute video with photos and music. Free to preview, £19.99 to download.',
         url: 'https://tellmeyourstory.uk/tribute',
         publisher: {
           '@type': 'Organization',
@@ -473,7 +473,7 @@ useSeo({
             name: 'How do I create a memorial tribute video?',
             acceptedAnswer: {
               '@type': 'Answer',
-              text: 'Upload up to 30 photos, add a tribute message, choose background music, and preview your video for free. Download the full HD version without watermark for £9.99.',
+              text: 'Upload up to 30 photos, add a tribute message, choose background music, and preview your video for free. Download the full HD version without watermark for £19.99.',
             },
           },
           {
@@ -481,7 +481,7 @@ useSeo({
             name: 'How much does a tribute video cost?',
             acceptedAnswer: {
               '@type': 'Answer',
-              text: 'Previewing your tribute video is completely free. Downloading the full HD version without a watermark costs £9.99 — a one-time payment with no account required.',
+              text: 'Previewing your tribute video is completely free. Downloading the full HD version without a watermark costs £19.99 — a one-time payment with no account required.',
             },
           },
           {
