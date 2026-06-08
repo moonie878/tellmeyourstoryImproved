@@ -45,7 +45,7 @@ export const MUSIC_TRACKS: Record<TributeMusicTrack, { label: string; descriptio
 
 // ─── Canvas dimensions ────────────────────────────────────────────────────────
 // ─── Frame rates ──────────────────────────────────────────────────────────────
-const SLIDE_FPS = 12   // photo/title/text slides — fast generation
+const SLIDE_FPS = 25   // photo/title/text slides — fast generation
 const VIDEO_FPS = 25   // user video clips — keeps motion smooth
 
 const W = 1920
@@ -609,7 +609,7 @@ export function useTributeVideo() {
         '-pix_fmt', 'yuv420p',
         '-vf', `scale=${W}:${H}`,
         '-r', '25',
-        '-preset', 'ultrafast',
+        '-preset', 'veryfast',
         'output.mp4'
       )
 
