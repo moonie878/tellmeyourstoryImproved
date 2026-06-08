@@ -74,6 +74,13 @@ const routes = [
 { path: '/dementia-life-story-book',         name: 'dementia-life-story-book',    component: () => import('../views/DementiaLifeStoryBookView.vue') },
 { path: '/end-of-life-gift',                 name: 'end-of-life-gift',            component: () => import('../views/EndOfLifeGiftView.vue') },
 { path: '/family-history-book',              name: 'family-history-book',         component: () => import('../views/FamilyHistoryBookView.vue') },
+{ path: '/questions-to-ask-your-grandad',          component: () => import('../views/QuestionsToAskGrandadView.vue') },
+{ path: '/gifts-for-parents-who-have-everything',   component: () => import('../views/GiftsForParentsWhoHaveEverythingView.vue') },
+{ path: '/90th-birthday-gift-ideas',               component: () => import('../views/NinetyBirthdayGiftView.vue') },
+{ path: '/mothers-day-gift-ideas',                 component: () => import('../views/MothersDayGiftView.vue') },
+{ path: '/keepsake-book',                          component: () => import('../views/KeepsakeBookView.vue') },
+{ path: '/how-to-write-a-life-story',              component: () => import('../views/HowToWriteALifeStoryView.vue') },
+{ path: '/life-story-questions',                   component: () => import('../views/LifeStoryQuestionsView.vue') },
 {
   path: '/remento-alternative',
   name: 'remento-alternative',

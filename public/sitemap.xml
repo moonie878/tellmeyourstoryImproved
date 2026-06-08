@@ -175,4 +175,39 @@
   <priority>0.9</priority>
   <changefreq>monthly</changefreq>
 </url>
+<url>
+  <loc>https://tellmeyourstory.uk/questions-to-ask-your-grandad</loc>
+  <priority>0.9</priority>
+  <changefreq>monthly</changefreq>
+</url>
+<url>
+  <loc>https://tellmeyourstory.uk/gifts-for-parents-who-have-everything</loc>
+  <priority>0.8</priority>
+  <changefreq>monthly</changefreq>
+</url>
+<url>
+  <loc>https://tellmeyourstory.uk/90th-birthday-gift-ideas</loc>
+  <priority>0.8</priority>
+  <changefreq>monthly</changefreq>
+</url>
+<url>
+  <loc>https://tellmeyourstory.uk/mothers-day-gift-ideas</loc>
+  <priority>0.7</priority>
+  <changefreq>monthly</changefreq>
+</url>
+<url>
+  <loc>https://tellmeyourstory.uk/keepsake-book</loc>
+  <priority>0.9</priority>
+  <changefreq>monthly</changefreq>
+</url>
+<url>
+  <loc>https://tellmeyourstory.uk/how-to-write-a-life-story</loc>
+  <priority>0.9</priority>
+  <changefreq>monthly</changefreq>
+</url>
+<url>
+  <loc>https://tellmeyourstory.uk/life-story-questions</loc>
+  <priority>0.9</priority>
+  <changefreq>monthly</changefreq>
+</url>
 </urlset>
