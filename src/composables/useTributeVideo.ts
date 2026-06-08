@@ -186,11 +186,22 @@ async function drawPhotoSlide(
   ctx.fillRect(photoX - 6, photoY - 6, photoW + 12, photoH + 12)
   ctx.restore()
   ctx.save()
-  ctx.beginPath()
-  ctx.rect(photoX, photoY, photoW, photoH)
-  ctx.clip()
-  drawCoverImage(ctx, img, photoX, photoY, photoW, photoH)
-  ctx.restore()
+ctx.beginPath()
+ctx.rect(photoX, photoY, photoW, photoH)
+ctx.clip()
+
+// Contain fit — show whole image, letterbox if needed
+const scale = Math.min(photoW / img.width, photoH / img.height)
+const dw = img.width * scale
+const dh = img.height * scale
+const dx = photoX + (photoW - dw) / 2
+const dy = photoY + (photoH - dh) / 2
+
+// Fill letterbox areas with a subtle dark background
+ctx.fillStyle = '#F0EBE4'
+ctx.fillRect(photoX, photoY, photoW, photoH)
+ctx.drawImage(img, dx, dy, dw, dh)
+ctx.restore()
   ctx.strokeStyle = '#E8DDD0'
   ctx.lineWidth = 1.5
   ctx.strokeRect(photoX, photoY, photoW, photoH)
@@ -309,11 +320,13 @@ async function extractVideoFrames(
         const time = f / fps
         video.currentTime = time
         await new Promise<void>((r) => { video.onseeked = () => r() })
+       
+        // Contain fit for video — letterbox rather than crop
+const scale = Math.min(W / video.videoWidth, H / video.videoHeight)
 
-        // Draw video frame cover-fitted to canvas
-        ctx.fillStyle = DARK
-        ctx.fillRect(0, 0, W, H)
-        const scale = Math.max(W / video.videoWidth, H / video.videoHeight)
+// Fill background before drawing video
+ctx.fillStyle = DARK
+ctx.fillRect(0, 0, W, H)
         const dw = video.videoWidth * scale
         const dh = video.videoHeight * scale
         ctx.drawImage(video, (W - dw) / 2, (H - dh) / 2, dw, dh)
