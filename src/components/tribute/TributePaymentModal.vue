@@ -37,7 +37,7 @@
             <!-- Price -->
             <div class="price-row">
               <span class="price-label">Tribute video — full HD</span>
-              <span class="price-amount">£9.99</span>
+              <span class="price-amount">£19.99</span>
             </div>
 
             <!-- Error -->
@@ -59,7 +59,7 @@
               class="pay-btn"
             >
               <span v-if="isLoading">Opening checkout…</span>
-              <span v-else>Pay £9.99 — download tribute</span>
+              <span v-else>Pay £19.99 — download tribute</span>
             </button>
             <div class="security-row">
               <span>🔒 Secured by Stripe</span>
