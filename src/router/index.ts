@@ -81,6 +81,11 @@ const routes = [
 { path: '/keepsake-book',                          component: () => import('../views/KeepsakeBookView.vue') },
 { path: '/how-to-write-a-life-story',              component: () => import('../views/HowToWriteALifeStoryView.vue') },
 { path: '/life-story-questions',                   component: () => import('../views/LifeStoryQuestionsView.vue') },
+{ path: '/storyworth-review',                component: () => import('../views/StoryworthReviewView.vue') },
+{ path: '/remento-review',                   component: () => import('../views/RementoReviewView.vue') },
+{ path: '/how-to-capture-parents-life-story', component: () => import('../views/HowToCaptureParentsLifeStoryView.vue') },
+{ path: '/fathers-day-gift-for-grandad',     component: () => import('../views/FathersDayGiftGrandadView.vue') },
+{ path: '/life-story-interview-questions',   component: () => import('../views/LifeStoryInterviewQuestionsView.vue') },
 {
   path: '/remento-alternative',
   name: 'remento-alternative',
