@@ -201,18 +201,14 @@
               </ul>
               <div class="new-badge">Now available</div>
             </div>
-            <div class="format-preview bg-[#F0E8DC] flex items-center justify-center p-8">
-              <div class="text-center">
-                <div class="mx-auto flex h-20 w-16 items-center justify-center rounded-lg bg-[#1C1917] shadow-lg">
-                  <div class="text-center px-2">
-                    <p class="text-[7px] text-[#9C7C5C] uppercase tracking-widest">Tell Me Your Story</p>
-                    <p class="mt-1 text-[9px] font-bold text-white leading-tight">Mum's Story</p>
-                  </div>
-                </div>
-                <p class="mt-3 text-xs text-[#7C5C3B] font-medium">Printed & shipped</p>
-                <p class="text-xs text-[#9C7C5C]">10–14 days</p>
-              </div>
-            </div>
+            <div class="format-preview bg-[#F0E8DC]">
+  <img
+    src="/images/example-story-hero-cover.jpg"
+    alt="Printed keepsake book"
+    class="format-preview-img"
+    loading="lazy"
+  />
+</div>
           </div>
 
           <!-- Format 3 — Video -->
@@ -529,7 +525,7 @@ useSeo({
           { '@type': 'Offer', name: 'Single Story', price: '3.99', priceCurrency: 'GBP' },
           { '@type': 'Offer', name: 'Story + Photos', price: '5.99', priceCurrency: 'GBP' },
           { '@type': 'Offer', name: 'Full Collection', price: '11.99', priceCurrency: 'GBP' },
-          { '@type': 'Offer', name: 'Printed Book', price: '34.98', priceCurrency: 'GBP', description: 'Professionally printed 6x9 softcover with QR voice codes, shipped UK-wide.' },
+          { '@type': 'Offer', name: 'Printed Book', price: '29.98', priceCurrency: 'GBP', description: 'Professionally printed 6x9 softcover with QR voice codes, shipped UK-wide.' },
         ],
       },
     ],
