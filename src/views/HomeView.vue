@@ -177,7 +177,7 @@
             </div>
             <div class="format-preview bg-[#F5F0E8]">
               <img
-                src="/images/example-story-memory-page.jpg"
+                src="/images/example-story-memory-page.png"
                 alt="Keepsake book preview"
                 class="format-preview-img"
                 loading="lazy"
