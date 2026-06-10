@@ -56,7 +56,7 @@
           <div class="hero-image-wrap flex justify-center md:justify-end">
             <div class="hero-image-frame">
               <img
-                src="/images/example-story-hero-cover.png"
+                src="/images/example-story-hero-cover.jpg"
                 alt="Tell Me Your Story keepsake preview"
                 class="hero-img"
                 loading="eager"
