@@ -41,6 +41,11 @@
           <p class="mt-4">Unlike a photo album, a life story book captures the <em>meaning</em> behind the memories. Unlike a diary, it's guided by questions designed to unlock stories people never thought to tell.</p>
           <p class="mt-4">For families, a life story book becomes one of the most treasured possessions they own — especially after a loved one is gone.</p>
         </div>
+        <div class="mt-6 flex flex-wrap justify-center gap-3">
+          <router-link to="/what-is-a-life-story-book" class="text-xs text-[#7C5C3B] underline hover:no-underline">What is a life story book? Full guide →</router-link>
+          <span class="text-xs text-stone-300">·</span>
+          <router-link to="/how-to-write-a-life-story" class="text-xs text-[#7C5C3B] underline hover:no-underline">How to write a life story →</router-link>
+        </div>
       </div>
     </section>
 
@@ -57,6 +62,9 @@
             <p class="mt-3 text-sm font-semibold text-stone-900">{{ chapter.title }}</p>
             <p class="mt-1 text-xs leading-5 text-stone-500">{{ chapter.desc }}</p>
           </div>
+        </div>
+        <div class="mt-8 text-center">
+          <router-link to="/life-story-questions" class="text-xs text-[#7C5C3B] underline hover:no-underline">See all 150 life story questions →</router-link>
         </div>
       </div>
     </section>
@@ -161,6 +169,27 @@
       </div>
     </section>
 
+    <!-- Related pages -->
+    <section class="px-5 py-12 sm:px-8">
+      <div class="mx-auto max-w-3xl">
+        <p class="text-xs font-medium uppercase tracking-[0.22em] text-[#9C7C5C] mb-6">Related reading</p>
+        <div class="grid gap-4 sm:grid-cols-3">
+          <router-link to="/what-is-a-life-story-book" class="rounded-2xl border border-stone-200 p-4 hover:border-[#7C5C3B] transition group">
+            <p class="text-sm font-semibold text-stone-900 group-hover:text-[#7C5C3B]">What Is a Life Story Book?</p>
+            <p class="mt-1 text-xs text-stone-500">A complete guide to life story books</p>
+          </router-link>
+          <router-link to="/life-story-questions" class="rounded-2xl border border-stone-200 p-4 hover:border-[#7C5C3B] transition group">
+            <p class="text-sm font-semibold text-stone-900 group-hover:text-[#7C5C3B]">150 Life Story Questions</p>
+            <p class="mt-1 text-xs text-stone-500">The questions inside every life story book</p>
+          </router-link>
+          <router-link to="/keepsake-book" class="rounded-2xl border border-stone-200 p-4 hover:border-[#7C5C3B] transition group">
+            <p class="text-sm font-semibold text-stone-900 group-hover:text-[#7C5C3B]">Keepsake Book</p>
+            <p class="mt-1 text-xs text-stone-500">More about the finished keepsake book</p>
+          </router-link>
+        </div>
+      </div>
+    </section>
+
     <!-- CTA -->
     <section class="bg-[#1C1917] px-5 py-16 text-center sm:px-8 sm:py-20">
       <p class="text-xs font-medium uppercase tracking-[0.22em] text-[#9C7C5C]">Start today</p>
@@ -206,7 +235,7 @@ const tiers = [
 
 useSeo({
   title: 'Create a Life Story Book — Capture Their Story in Their Own Words | Tell Me Your Story',
-  description: 'Create a life story book for a parent or grandparent. 100 guided questions, voice recordings, and a beautifully printed hardcover book. Free to start — UK delivery from £29.98.',
+  description: 'Create a life story book for a parent or grandparent. 100 guided questions, voice recordings, and a beautifully printed hardcover book. Free to start — UK delivery from £34.98.',
   canonical: 'https://tellmeyourstory.uk/life-story-book',
 })
 </script>

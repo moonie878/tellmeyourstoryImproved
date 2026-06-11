@@ -431,7 +431,7 @@ import { useSeo } from '../composables/useSeo'
 
 useSeo({
   title: 'Create a Memorial Tribute Video | Tell Me Your Story',
-  description: 'Create a beautiful memorial tribute video in minutes. Upload photos, add music, and honour a loved one\'s life. Free to preview — £19.99 to download.',
+  description: 'Create a beautiful memorial tribute video in minutes. Upload photos, Videos add music, and honour a loved one\'s life. Free to preview — £19.99 to download.',
   canonical: 'https://tellmeyourstory.uk/tribute',
   schema: {
     '@context': 'https://schema.org',

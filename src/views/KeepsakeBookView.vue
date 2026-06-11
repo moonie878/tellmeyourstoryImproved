@@ -25,6 +25,11 @@
         <p class="text-xs font-medium uppercase tracking-[0.22em] text-[#9C7C5C]">What is a keepsake book?</p>
         <h2 class="mt-3 font-display text-2xl font-bold text-stone-900 sm:text-3xl">More than a photo album</h2>
         <p class="mx-auto mt-4 max-w-xl text-sm leading-7 text-stone-500">A keepsake book is a structured record of someone's life — told in their own words. Not just photos, but the stories behind them. Not just dates, but what those moments actually felt like. Something a grandchild will read in 30 years and feel like they really knew their grandparent.</p>
+        <div class="mt-6 flex flex-wrap justify-center gap-3">
+          <router-link to="/what-is-a-life-story-book" class="text-xs text-[#7C5C3B] underline hover:no-underline">What is a life story book? →</router-link>
+          <span class="text-xs text-stone-300">·</span>
+          <router-link to="/life-story-questions" class="text-xs text-[#7C5C3B] underline hover:no-underline">See the 150 questions inside →</router-link>
+        </div>
       </div>
     </section>
 
@@ -87,6 +92,27 @@
           </div>
         </div>
         <p class="mt-4 text-xs text-stone-400">One-time payment · No subscription · Printed book from £34.98</p>
+      </div>
+    </section>
+
+    <!-- Related pages -->
+    <section class="px-5 py-12 sm:px-8">
+      <div class="mx-auto max-w-3xl">
+        <p class="text-xs font-medium uppercase tracking-[0.22em] text-[#9C7C5C] mb-6">Related reading</p>
+        <div class="grid gap-4 sm:grid-cols-3">
+          <router-link to="/what-is-a-life-story-book" class="rounded-2xl border border-stone-200 p-4 hover:border-[#7C5C3B] transition group">
+            <p class="text-sm font-semibold text-stone-900 group-hover:text-[#7C5C3B]">What Is a Life Story Book?</p>
+            <p class="mt-1 text-xs text-stone-500">Everything you need to know</p>
+          </router-link>
+          <router-link to="/life-story-questions" class="rounded-2xl border border-stone-200 p-4 hover:border-[#7C5C3B] transition group">
+            <p class="text-sm font-semibold text-stone-900 group-hover:text-[#7C5C3B]">150 Life Story Questions</p>
+            <p class="mt-1 text-xs text-stone-500">The questions inside every keepsake book</p>
+          </router-link>
+          <router-link to="/gifts-for-parents-who-have-everything" class="rounded-2xl border border-stone-200 p-4 hover:border-[#7C5C3B] transition group">
+            <p class="text-sm font-semibold text-stone-900 group-hover:text-[#7C5C3B]">Gifts for Parents Who Have Everything</p>
+            <p class="mt-1 text-xs text-stone-500">The most meaningful gift you can give</p>
+          </router-link>
+        </div>
       </div>
     </section>
 
