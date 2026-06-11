@@ -24,7 +24,7 @@
         </div>
         <div class="mt-8 text-sm leading-7 text-stone-600 max-w-xl mx-auto">
           <p>Storyworth was one of the first platforms to tackle the idea of capturing a parent or grandparent's life story through guided questions. Founded in the US in 2012, it works by sending one question per week by email — the recipient replies, and their answers are collected into a book at the end of the year.</p>
-          <p class="mt-4">It's a genuinely good idea, and for many American families it has worked well. But a lot has changed since 2012 — and for UK families in particular, there are some significant limitations worth knowing about before you pay.</p>
+          <p class="mt-4">It's a genuinely good idea, and for many American families it has worked well. But a lot has changed since 2012 — and for UK families in particular, there are some significant limitations worth knowing about before you pay. If you're also considering Remento, read our <router-link to="/remento-review" class="text-[#7C5C3B] underline hover:no-underline">Remento review</router-link> for a direct comparison.</p>
         </div>
       </div>
     </section>
@@ -132,7 +132,29 @@
               <li>✓ Want UK printing without extra shipping</li>
               <li>✓ Don't want weekly email pressure</li>
             </ul>
+            <router-link to="/storyworth-alternative" class="mt-4 inline-block text-xs text-[#7C5C3B] underline hover:no-underline">See the best Storyworth alternatives for UK families →</router-link>
           </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Related pages -->
+    <section class="px-5 py-12 sm:px-8">
+      <div class="mx-auto max-w-3xl">
+        <p class="text-xs font-medium uppercase tracking-[0.22em] text-[#9C7C5C] mb-6">Related reading</p>
+        <div class="grid gap-4 sm:grid-cols-3">
+          <router-link to="/remento-review" class="rounded-2xl border border-stone-200 p-4 hover:border-[#7C5C3B] transition group">
+            <p class="text-sm font-semibold text-stone-900 group-hover:text-[#7C5C3B]">Remento Review 2026</p>
+            <p class="mt-1 text-xs text-stone-500">Does the AI rewriting preserve their voice?</p>
+          </router-link>
+          <router-link to="/storyworth-alternative" class="rounded-2xl border border-stone-200 p-4 hover:border-[#7C5C3B] transition group">
+            <p class="text-sm font-semibold text-stone-900 group-hover:text-[#7C5C3B]">Storyworth Alternatives</p>
+            <p class="mt-1 text-xs text-stone-500">The best UK alternatives to Storyworth</p>
+          </router-link>
+          <router-link to="/life-story-questions" class="rounded-2xl border border-stone-200 p-4 hover:border-[#7C5C3B] transition group">
+            <p class="text-sm font-semibold text-stone-900 group-hover:text-[#7C5C3B]">150 Life Story Questions</p>
+            <p class="mt-1 text-xs text-stone-500">The questions that unlock real stories</p>
+          </router-link>
         </div>
       </div>
     </section>

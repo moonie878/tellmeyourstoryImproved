@@ -31,6 +31,11 @@
         <p class="mx-auto mt-4 max-w-xl text-sm leading-7 text-stone-500">
           Most elderly parents have lived through extraordinary things — wartime childhoods, hard choices, quiet sacrifices. But they rarely volunteer these stories unprompted. The right question, asked at the right moment, can unlock a lifetime of memories your family would never otherwise hear.
         </p>
+        <div class="mx-auto mt-6 max-w-xl flex flex-wrap justify-center gap-3">
+          <router-link to="/how-to-capture-parents-life-story" class="text-xs text-[#7C5C3B] underline hover:no-underline">How to capture your parents' life story →</router-link>
+          <span class="text-xs text-stone-300">·</span>
+          <router-link to="/dementia-life-story-book" class="text-xs text-[#7C5C3B] underline hover:no-underline">Life story books for dementia →</router-link>
+        </div>
       </div>
     </section>
 
@@ -84,6 +89,27 @@
           "He told me about a motorbike he saved up for two years to buy. I never knew that about him."
         </p>
         <p class="mt-4 text-sm text-[#9C7C5C]">— From a Tell Me Your Story keepsake</p>
+      </div>
+    </section>
+
+    <!-- Related pages -->
+    <section class="px-5 py-12 sm:px-8">
+      <div class="mx-auto max-w-3xl">
+        <p class="text-xs font-medium uppercase tracking-[0.22em] text-[#9C7C5C] mb-6">Related reading</p>
+        <div class="grid gap-4 sm:grid-cols-3">
+          <router-link to="/blog/questions-to-ask-your-parents" class="rounded-2xl border border-stone-200 p-4 hover:border-[#7C5C3B] transition group">
+            <p class="text-sm font-semibold text-stone-900 group-hover:text-[#7C5C3B]">100 Questions to Ask Your Parents</p>
+            <p class="mt-1 text-xs text-stone-500">The full list across 10 chapters of life</p>
+          </router-link>
+          <router-link to="/dementia-life-story-book" class="rounded-2xl border border-stone-200 p-4 hover:border-[#7C5C3B] transition group">
+            <p class="text-sm font-semibold text-stone-900 group-hover:text-[#7C5C3B]">Dementia Life Story Book</p>
+            <p class="mt-1 text-xs text-stone-500">Capture their story before memories fade</p>
+          </router-link>
+          <router-link to="/gifts-for-parents-who-have-everything" class="rounded-2xl border border-stone-200 p-4 hover:border-[#7C5C3B] transition group">
+            <p class="text-sm font-semibold text-stone-900 group-hover:text-[#7C5C3B]">Gifts for Elderly Parents</p>
+            <p class="mt-1 text-xs text-stone-500">The most meaningful gift you can give</p>
+          </router-link>
+        </div>
       </div>
     </section>
 
