@@ -96,6 +96,7 @@ const routes = [
 { path: '/questions-to-ask-your-grandma',   component: () => import('../views/QuestionsToAskGrandmaView.vue') },
 { path: '/questions-to-ask-dying-parent',   component: () => import('../views/QuestionsToAskDyingParentView.vue') },
 { path: '/questions-about-childhood',       component: () => import('../views/QuestionsAboutChildhoodView.vue') },
+{ path: '/resources/50-questions-printable', component: () => import('../views/FreeQuestionsDownloadView.vue') },
 {
   path: '/remento-alternative',
   name: 'remento-alternative',

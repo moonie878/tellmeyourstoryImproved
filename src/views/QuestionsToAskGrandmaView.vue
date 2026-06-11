@@ -65,6 +65,24 @@
       </div>
     </section>
 
+    <!-- Printable CTA -->
+<section class="px-5 pb-4 sm:px-8">
+  <div class="mx-auto max-w-3xl text-center">
+    <div class="rounded-2xl bg-[#F5F0E8] px-6 py-5 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="text-left">
+        <p class="text-sm font-semibold text-stone-900">Free printable version</p>
+        <p class="text-xs text-stone-500 mt-0.5">Download a beautifully designed PDF to print and take with you</p>
+      </div>
+      <router-link
+        to="/resources/50-questions-printable"
+        class="flex-shrink-0 rounded-full bg-[#7C5C3B] px-5 py-2.5 text-xs font-semibold text-white transition hover:opacity-90"
+      >
+        Download free PDF →
+      </router-link>
+    </div>
+  </div>
+</section>
+
     <!-- Related pages -->
     <section class="px-5 py-12 sm:px-8">
       <div class="mx-auto max-w-3xl">
