@@ -26,6 +26,11 @@
         <h2 class="mt-3 font-display text-2xl font-bold text-stone-900 sm:text-3xl">Sixty years of stories worth keeping</h2>
         <p class="mx-auto mt-4 max-w-xl text-sm leading-7 text-stone-500">A 60th birthday is often the moment people start thinking seriously about legacy — what they've built, who they've loved, what they want to be remembered for. It's also the perfect moment for their family to make sure those stories are properly captured.</p>
         <p class="mx-auto mt-4 max-w-xl text-sm leading-7 text-stone-500">The best 60th birthday gift isn't another experience or a trip. It's something that lasts — a record of a remarkable life, in their own words.</p>
+        <div class="mx-auto mt-6 max-w-xl flex flex-wrap justify-center gap-3">
+          <router-link to="/70th-birthday-gift-ideas" class="text-xs text-[#7C5C3B] underline hover:no-underline">70th birthday gift ideas →</router-link>
+          <span class="text-xs text-stone-300">·</span>
+          <router-link to="/gifts-for-parents-who-have-everything" class="text-xs text-[#7C5C3B] underline hover:no-underline">More gift ideas for parents →</router-link>
+        </div>
       </div>
     </section>
 
@@ -94,6 +99,27 @@
           </div>
         </div>
         <p class="mt-4 text-xs text-stone-400">Add a printed hardcover from £34.98 — delivered to their door</p>
+      </div>
+    </section>
+
+    <!-- Related pages -->
+    <section class="px-5 py-12 sm:px-8">
+      <div class="mx-auto max-w-3xl">
+        <p class="text-xs font-medium uppercase tracking-[0.22em] text-[#9C7C5C] mb-6">Related reading</p>
+        <div class="grid gap-4 sm:grid-cols-3">
+          <router-link to="/70th-birthday-gift-ideas" class="rounded-2xl border border-stone-200 p-4 hover:border-[#7C5C3B] transition group">
+            <p class="text-sm font-semibold text-stone-900 group-hover:text-[#7C5C3B]">70th Birthday Gift Ideas</p>
+            <p class="mt-1 text-xs text-stone-500">Seventy years of stories worth capturing</p>
+          </router-link>
+          <router-link to="/anniversary-gift-ideas" class="rounded-2xl border border-stone-200 p-4 hover:border-[#7C5C3B] transition group">
+            <p class="text-sm font-semibold text-stone-900 group-hover:text-[#7C5C3B]">Anniversary Gift Ideas</p>
+            <p class="mt-1 text-xs text-stone-500">A love story captured forever</p>
+          </router-link>
+          <router-link to="/gifts-for-parents-who-have-everything" class="rounded-2xl border border-stone-200 p-4 hover:border-[#7C5C3B] transition group">
+            <p class="text-sm font-semibold text-stone-900 group-hover:text-[#7C5C3B]">Gifts for Parents Who Have Everything</p>
+            <p class="mt-1 text-xs text-stone-500">The gift no one else can give</p>
+          </router-link>
+        </div>
       </div>
     </section>
 

@@ -30,6 +30,11 @@
           <p>A life story book is a structured written record of a person's life — told in their own words. Unlike a biography (which is written by someone else) or a diary (which captures daily events), a life story book captures the big picture: the chapters, the turning points, the relationships, and the wisdom accumulated over a lifetime.</p>
           <p class="mt-4">Life story books have been used in care settings for decades — particularly in dementia care, where they help carers understand who a resident is beyond their diagnosis. But they're increasingly being created by families simply because they don't want the stories of their parents and grandparents to be lost.</p>
         </div>
+        <div class="mt-6 flex flex-wrap justify-center gap-3">
+          <router-link to="/dementia-life-story-book" class="text-xs text-[#7C5C3B] underline hover:no-underline">Dementia life story books →</router-link>
+          <span class="text-xs text-stone-300">·</span>
+          <router-link to="/how-to-write-a-life-story" class="text-xs text-[#7C5C3B] underline hover:no-underline">How to write a life story →</router-link>
+        </div>
 
         <!-- Comparison -->
         <div class="mt-10 grid gap-4 sm:grid-cols-3">
@@ -107,6 +112,27 @@
       <div class="mx-auto max-w-2xl text-center">
         <p class="font-display text-xl italic leading-relaxed text-stone-700 sm:text-2xl">"He told me about a motorbike he saved up for two years to buy. I never knew that about him."</p>
         <p class="mt-4 text-sm text-[#9C7C5C]">— From a Tell Me Your Story life story book</p>
+      </div>
+    </section>
+
+    <!-- Related pages -->
+    <section class="px-5 py-12 sm:px-8">
+      <div class="mx-auto max-w-3xl">
+        <p class="text-xs font-medium uppercase tracking-[0.22em] text-[#9C7C5C] mb-6">Related reading</p>
+        <div class="grid gap-4 sm:grid-cols-3">
+          <router-link to="/how-to-write-a-life-story" class="rounded-2xl border border-stone-200 p-4 hover:border-[#7C5C3B] transition group">
+            <p class="text-sm font-semibold text-stone-900 group-hover:text-[#7C5C3B]">How to Write a Life Story</p>
+            <p class="mt-1 text-xs text-stone-500">A complete guide from start to keepsake</p>
+          </router-link>
+          <router-link to="/life-story-questions" class="rounded-2xl border border-stone-200 p-4 hover:border-[#7C5C3B] transition group">
+            <p class="text-sm font-semibold text-stone-900 group-hover:text-[#7C5C3B]">150 Life Story Questions</p>
+            <p class="mt-1 text-xs text-stone-500">The questions that unlock real stories</p>
+          </router-link>
+          <router-link to="/keepsake-book" class="rounded-2xl border border-stone-200 p-4 hover:border-[#7C5C3B] transition group">
+            <p class="text-sm font-semibold text-stone-900 group-hover:text-[#7C5C3B]">Keepsake Book</p>
+            <p class="mt-1 text-xs text-stone-500">Create a keepsake book from their story</p>
+          </router-link>
+        </div>
       </div>
     </section>
 

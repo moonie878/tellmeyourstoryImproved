@@ -31,6 +31,11 @@
         <p class="mx-auto mt-4 max-w-xl text-sm leading-7 text-stone-500">
           Genealogy research tells you who your ancestors were. A family history book tells you what they were like. The stories behind the births, marriages, and deaths. The people who shaped the family — in their own voices, not just their vital records.
         </p>
+        <div class="mt-6 flex flex-wrap justify-center gap-3">
+          <router-link to="/life-story-questions" class="text-xs text-[#7C5C3B] underline hover:no-underline">150 life story questions to ask →</router-link>
+          <span class="text-xs text-stone-300">·</span>
+          <router-link to="/how-to-capture-parents-life-story" class="text-xs text-[#7C5C3B] underline hover:no-underline">How to capture a life story →</router-link>
+        </div>
         <div class="mt-8 grid gap-5 sm:grid-cols-2">
           <div class="rounded-2xl bg-stone-50 p-6 text-left">
             <p class="text-xs font-semibold uppercase tracking-wider text-stone-400">Family tree research</p>
@@ -99,6 +104,27 @@
           "He told me about a motorbike he saved up for two years to buy. I never knew that about him."
         </p>
         <p class="mt-4 text-sm text-[#9C7C5C]">— From a Tell Me Your Story family history book</p>
+      </div>
+    </section>
+
+    <!-- Related pages -->
+    <section class="px-5 py-12 sm:px-8">
+      <div class="mx-auto max-w-3xl">
+        <p class="text-xs font-medium uppercase tracking-[0.22em] text-[#9C7C5C] mb-6">Related reading</p>
+        <div class="grid gap-4 sm:grid-cols-3">
+          <router-link to="/life-story-questions" class="rounded-2xl border border-stone-200 p-4 hover:border-[#7C5C3B] transition group">
+            <p class="text-sm font-semibold text-stone-900 group-hover:text-[#7C5C3B]">150 Life Story Questions</p>
+            <p class="mt-1 text-xs text-stone-500">The questions that unlock family stories</p>
+          </router-link>
+          <router-link to="/how-to-write-a-life-story" class="rounded-2xl border border-stone-200 p-4 hover:border-[#7C5C3B] transition group">
+            <p class="text-sm font-semibold text-stone-900 group-hover:text-[#7C5C3B]">How to Write a Life Story</p>
+            <p class="mt-1 text-xs text-stone-500">A complete guide from start to keepsake</p>
+          </router-link>
+          <router-link to="/keepsake-book" class="rounded-2xl border border-stone-200 p-4 hover:border-[#7C5C3B] transition group">
+            <p class="text-sm font-semibold text-stone-900 group-hover:text-[#7C5C3B]">Keepsake Book</p>
+            <p class="mt-1 text-xs text-stone-500">Everything that goes inside a keepsake book</p>
+          </router-link>
+        </div>
       </div>
     </section>
 

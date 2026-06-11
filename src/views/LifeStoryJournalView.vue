@@ -52,6 +52,11 @@
             </ul>
           </div>
         </div>
+        <div class="mt-8 flex flex-wrap justify-center gap-3">
+          <router-link to="/life-story-questions" class="text-xs text-[#7C5C3B] underline hover:no-underline">See the 150 life story questions inside →</router-link>
+          <span class="text-xs text-stone-300">·</span>
+          <router-link to="/keepsake-book" class="text-xs text-[#7C5C3B] underline hover:no-underline">What goes inside a keepsake book →</router-link>
+        </div>
       </div>
     </section>
 
@@ -112,6 +117,27 @@
           </div>
         </div>
         <p class="mt-4 text-xs text-stone-400">One-time payment · No subscription · Printed book from £34.98</p>
+      </div>
+    </section>
+
+    <!-- Related pages -->
+    <section class="px-5 py-12 sm:px-8">
+      <div class="mx-auto max-w-3xl">
+        <p class="text-xs font-medium uppercase tracking-[0.22em] text-[#9C7C5C] mb-6">Related reading</p>
+        <div class="grid gap-4 sm:grid-cols-3">
+          <router-link to="/life-story-questions" class="rounded-2xl border border-stone-200 p-4 hover:border-[#7C5C3B] transition group">
+            <p class="text-sm font-semibold text-stone-900 group-hover:text-[#7C5C3B]">150 Life Story Questions</p>
+            <p class="mt-1 text-xs text-stone-500">The questions inside every journal</p>
+          </router-link>
+          <router-link to="/keepsake-book" class="rounded-2xl border border-stone-200 p-4 hover:border-[#7C5C3B] transition group">
+            <p class="text-sm font-semibold text-stone-900 group-hover:text-[#7C5C3B]">Keepsake Book</p>
+            <p class="mt-1 text-xs text-stone-500">Turn the journal into a printed book</p>
+          </router-link>
+          <router-link to="/how-to-write-a-life-story" class="rounded-2xl border border-stone-200 p-4 hover:border-[#7C5C3B] transition group">
+            <p class="text-sm font-semibold text-stone-900 group-hover:text-[#7C5C3B]">How to Write a Life Story</p>
+            <p class="mt-1 text-xs text-stone-500">A complete guide from start to finish</p>
+          </router-link>
+        </div>
       </div>
     </section>
 

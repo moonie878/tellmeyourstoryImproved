@@ -24,7 +24,7 @@
         </div>
         <div class="mt-8 text-sm leading-7 text-stone-600 max-w-xl mx-auto">
           <p>Remento is a US-based app that records your loved one answering prompted questions by voice, then uses AI to transcribe and rewrite those answers into polished prose. The result is printed as a book.</p>
-          <p class="mt-4">It raised $3.3M in funding and appeared on Shark Tank in 2025, which gave it significant media attention. For many families, it looks like the perfect solution. But there's a significant question worth asking before you subscribe: do you want your loved one's actual words — or an AI's version of them?</p>
+          <p class="mt-4">It raised $3.3M in funding and appeared on Shark Tank in 2025, which gave it significant media attention. For many families, it looks like the perfect solution. But there's a significant question worth asking before you subscribe: do you want your loved one's actual words — or an AI's version of them? If you're also considering Storyworth, read our <router-link to="/storyworth-review" class="text-[#7C5C3B] underline hover:no-underline">Storyworth review</router-link> for a direct comparison.</p>
         </div>
       </div>
     </section>
@@ -51,6 +51,7 @@
             <p class="text-xs font-semibold uppercase tracking-wider text-[#7C5C3B] mb-3">Why this matters</p>
             <p class="text-xs leading-6 text-stone-600">In 20 years, when your grandchildren read their great-grandparent's book, they'll be reading an AI's version of what was said — not the actual voice, phrasing, and personality of the person they loved.</p>
             <p class="mt-3 text-xs leading-6 text-stone-600">The specific words someone chooses, their turns of phrase, their digressions — these are what make a life story feel real. Polishing them away loses something irreplaceable.</p>
+            <router-link to="/remento-alternative" class="mt-4 inline-block text-xs text-[#7C5C3B] underline hover:no-underline">See the best Remento alternatives for UK families →</router-link>
           </div>
         </div>
       </div>
@@ -121,6 +122,27 @@
             </div>
             <p class="text-sm font-semibold flex-shrink-0" :class="cost.highlight ? 'text-red-600' : 'text-stone-900'">{{ cost.price }}</p>
           </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Related pages -->
+    <section class="px-5 py-12 sm:px-8">
+      <div class="mx-auto max-w-3xl">
+        <p class="text-xs font-medium uppercase tracking-[0.22em] text-[#9C7C5C] mb-6">Related reading</p>
+        <div class="grid gap-4 sm:grid-cols-3">
+          <router-link to="/storyworth-review" class="rounded-2xl border border-stone-200 p-4 hover:border-[#7C5C3B] transition group">
+            <p class="text-sm font-semibold text-stone-900 group-hover:text-[#7C5C3B]">Storyworth Review 2026</p>
+            <p class="mt-1 text-xs text-stone-500">Is Storyworth worth it for UK families?</p>
+          </router-link>
+          <router-link to="/remento-alternative" class="rounded-2xl border border-stone-200 p-4 hover:border-[#7C5C3B] transition group">
+            <p class="text-sm font-semibold text-stone-900 group-hover:text-[#7C5C3B]">Remento Alternatives</p>
+            <p class="mt-1 text-xs text-stone-500">The best UK alternatives to Remento</p>
+          </router-link>
+          <router-link to="/life-story-questions" class="rounded-2xl border border-stone-200 p-4 hover:border-[#7C5C3B] transition group">
+            <p class="text-sm font-semibold text-stone-900 group-hover:text-[#7C5C3B]">150 Life Story Questions</p>
+            <p class="mt-1 text-xs text-stone-500">The questions that unlock real stories</p>
+          </router-link>
         </div>
       </div>
     </section>

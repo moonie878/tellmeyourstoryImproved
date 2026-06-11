@@ -34,6 +34,11 @@
         <p class="mx-auto mt-4 max-w-xl text-sm leading-7 text-stone-500">
           Most families assume these stories will always be there. They won't — unless someone thinks to ask. An 80th birthday is the moment to do that.
         </p>
+        <div class="mx-auto mt-6 max-w-xl flex flex-wrap justify-center gap-3">
+          <router-link to="/questions-to-ask-elderly-parents" class="text-xs text-[#7C5C3B] underline hover:no-underline">100 questions to ask elderly parents →</router-link>
+          <span class="text-xs text-stone-300">·</span>
+          <router-link to="/70th-birthday-gift-ideas" class="text-xs text-[#7C5C3B] underline hover:no-underline">70th birthday gift ideas →</router-link>
+        </div>
       </div>
     </section>
 
@@ -103,6 +108,27 @@
           </div>
         </div>
         <p class="mt-4 text-xs text-stone-400">Add a printed hardcover book from £34.98 — delivered to their door</p>
+      </div>
+    </section>
+
+    <!-- Related pages -->
+    <section class="px-5 py-12 sm:px-8">
+      <div class="mx-auto max-w-3xl">
+        <p class="text-xs font-medium uppercase tracking-[0.22em] text-[#9C7C5C] mb-6">Related reading</p>
+        <div class="grid gap-4 sm:grid-cols-3">
+          <router-link to="/70th-birthday-gift-ideas" class="rounded-2xl border border-stone-200 p-4 hover:border-[#7C5C3B] transition group">
+            <p class="text-sm font-semibold text-stone-900 group-hover:text-[#7C5C3B]">70th Birthday Gift Ideas</p>
+            <p class="mt-1 text-xs text-stone-500">Seventy years of stories worth capturing</p>
+          </router-link>
+          <router-link to="/90th-birthday-gift-ideas" class="rounded-2xl border border-stone-200 p-4 hover:border-[#7C5C3B] transition group">
+            <p class="text-sm font-semibold text-stone-900 group-hover:text-[#7C5C3B]">90th Birthday Gift Ideas</p>
+            <p class="mt-1 text-xs text-stone-500">Nine decades of stories deserve keeping</p>
+          </router-link>
+          <router-link to="/gifts-for-parents-who-have-everything" class="rounded-2xl border border-stone-200 p-4 hover:border-[#7C5C3B] transition group">
+            <p class="text-sm font-semibold text-stone-900 group-hover:text-[#7C5C3B]">Gifts for Parents Who Have Everything</p>
+            <p class="mt-1 text-xs text-stone-500">The gift no one else can give</p>
+          </router-link>
+        </div>
       </div>
     </section>
 

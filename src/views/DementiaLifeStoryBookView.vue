@@ -34,6 +34,11 @@
           <p>Life story work is well established in dementia care. Research shows that knowing a person's history, preferences, and memories helps carers provide more personalised, dignified support. It also helps the person with dementia feel seen and valued — not defined by their diagnosis.</p>
           <p class="mt-4">But beyond its use in care settings, a life story book is something the family will treasure forever. A record of who they were before the illness. Their voice, their humour, their memories — captured while they could still share them.</p>
         </div>
+        <div class="mt-6 flex flex-wrap justify-center gap-3">
+          <router-link to="/questions-to-ask-elderly-parents" class="text-xs text-[#7C5C3B] underline hover:no-underline">Questions to ask elderly parents →</router-link>
+          <span class="text-xs text-stone-300">·</span>
+          <router-link to="/end-of-life-gift" class="text-xs text-[#7C5C3B] underline hover:no-underline">End of life gifts →</router-link>
+        </div>
       </div>
     </section>
 
@@ -105,6 +110,27 @@
           "He told me about a motorbike he saved up for two years to buy. I never knew that about him."
         </p>
         <p class="mt-4 text-sm text-[#9C7C5C]">— From a Tell Me Your Story keepsake</p>
+      </div>
+    </section>
+
+    <!-- Related pages -->
+    <section class="px-5 py-12 sm:px-8">
+      <div class="mx-auto max-w-3xl">
+        <p class="text-xs font-medium uppercase tracking-[0.22em] text-[#9C7C5C] mb-6">Related reading</p>
+        <div class="grid gap-4 sm:grid-cols-3">
+          <router-link to="/questions-to-ask-elderly-parents" class="rounded-2xl border border-stone-200 p-4 hover:border-[#7C5C3B] transition group">
+            <p class="text-sm font-semibold text-stone-900 group-hover:text-[#7C5C3B]">Questions to Ask Elderly Parents</p>
+            <p class="mt-1 text-xs text-stone-500">100 questions to capture their memories</p>
+          </router-link>
+          <router-link to="/end-of-life-gift" class="rounded-2xl border border-stone-200 p-4 hover:border-[#7C5C3B] transition group">
+            <p class="text-sm font-semibold text-stone-900 group-hover:text-[#7C5C3B]">End of Life Gift</p>
+            <p class="mt-1 text-xs text-stone-500">A meaningful gift for someone nearing end of life</p>
+          </router-link>
+          <router-link to="/how-to-capture-parents-life-story" class="rounded-2xl border border-stone-200 p-4 hover:border-[#7C5C3B] transition group">
+            <p class="text-sm font-semibold text-stone-900 group-hover:text-[#7C5C3B]">How to Capture a Life Story</p>
+            <p class="mt-1 text-xs text-stone-500">A practical step-by-step guide</p>
+          </router-link>
+        </div>
       </div>
     </section>
 

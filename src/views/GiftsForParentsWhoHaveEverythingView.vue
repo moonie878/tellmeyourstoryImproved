@@ -30,6 +30,11 @@
         <h2 class="mt-3 font-display text-2xl font-bold text-stone-900 sm:text-3xl">They don't need more things</h2>
         <p class="mx-auto mt-4 max-w-xl text-sm leading-7 text-stone-500">Parents who have everything have usually spent a lifetime accumulating what they need. More things isn't the answer. The jumper goes unworn, the vouchers go unused, the chocolates sit in a drawer.</p>
         <p class="mx-auto mt-4 max-w-xl text-sm leading-7 text-stone-500">What they do have — that no one else in the world has — is a lifetime of stories. And most of those stories will never be told unless someone asks.</p>
+        <div class="mx-auto mt-6 max-w-xl flex flex-wrap justify-center gap-3">
+          <router-link to="/questions-to-ask-elderly-parents" class="text-xs text-[#7C5C3B] underline hover:no-underline">100 questions to ask elderly parents →</router-link>
+          <span class="text-xs text-stone-300">·</span>
+          <router-link to="/gift-for-someone-who-has-everything" class="text-xs text-[#7C5C3B] underline hover:no-underline">Gift for someone who has everything →</router-link>
+        </div>
       </div>
     </section>
 
@@ -124,6 +129,27 @@
       <div class="mx-auto max-w-2xl text-center">
         <p class="font-display text-xl italic leading-relaxed text-stone-700 sm:text-2xl">"He told me about a motorbike he saved up for two years to buy. I never knew that about him."</p>
         <p class="mt-4 text-sm text-[#9C7C5C]">— From a Tell Me Your Story keepsake</p>
+      </div>
+    </section>
+
+    <!-- Related pages -->
+    <section class="px-5 py-12 sm:px-8">
+      <div class="mx-auto max-w-3xl">
+        <p class="text-xs font-medium uppercase tracking-[0.22em] text-[#9C7C5C] mb-6">Related reading</p>
+        <div class="grid gap-4 sm:grid-cols-3">
+          <router-link to="/70th-birthday-gift-ideas" class="rounded-2xl border border-stone-200 p-4 hover:border-[#7C5C3B] transition group">
+            <p class="text-sm font-semibold text-stone-900 group-hover:text-[#7C5C3B]">70th Birthday Gift Ideas</p>
+            <p class="mt-1 text-xs text-stone-500">The most meaningful milestone birthday gift</p>
+          </router-link>
+          <router-link to="/questions-to-ask-elderly-parents" class="rounded-2xl border border-stone-200 p-4 hover:border-[#7C5C3B] transition group">
+            <p class="text-sm font-semibold text-stone-900 group-hover:text-[#7C5C3B]">Questions to Ask Elderly Parents</p>
+            <p class="mt-1 text-xs text-stone-500">100 questions to draw out their stories</p>
+          </router-link>
+          <router-link to="/gift-for-someone-who-has-everything" class="rounded-2xl border border-stone-200 p-4 hover:border-[#7C5C3B] transition group">
+            <p class="text-sm font-semibold text-stone-900 group-hover:text-[#7C5C3B]">Gift for Someone Who Has Everything</p>
+            <p class="mt-1 text-xs text-stone-500">The broader gift guide for any occasion</p>
+          </router-link>
+        </div>
       </div>
     </section>
 

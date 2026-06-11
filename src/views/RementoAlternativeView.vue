@@ -10,7 +10,7 @@
           <em class="text-[#C4A882] italic">Same idea. No subscription. Built for the UK.</em>
         </h1>
         <p class="mx-auto mt-5 max-w-xl text-sm leading-7 text-[#A8A29E]">
-          Remento costs $99/year and rewrites your loved one's words with AI. Tell Me Your Story keeps their voice exactly as it is — with actual voice recordings, UK printing, and a one-time payment.
+          Remento costs $99/year and rewrites your loved one's words with AI. Tell Me Your Story keeps their voice exactly as it is — with actual voice recordings, UK printing, and a one-time payment. Read our full <router-link to="/remento-review" class="text-[#C4A882] underline hover:no-underline">Remento review</router-link> for a detailed breakdown.
         </p>
         <div class="mt-8 flex flex-wrap justify-center gap-3">
           <router-link
@@ -95,7 +95,7 @@
             <p class="mt-3 text-sm leading-6 text-stone-700">Records their voice and preserves it exactly. The printed book contains their actual answers — typos, personality, and all. A QR code lets family scan and hear their real voice any time.</p>
           </div>
         </div>
-        <p class="mt-6 text-center text-sm text-stone-500">For a memory keepsake, authenticity matters. In 20 years, your family will want to read <em>their</em> words — not a polished AI summary.</p>
+        <p class="mt-6 text-center text-sm text-stone-500">For a memory keepsake, authenticity matters. In 20 years, your family will want to read <em>their</em> words — not a polished AI summary. <router-link to="/remento-review" class="text-[#7C5C3B] underline hover:no-underline">Read our full Remento review →</router-link></p>
       </div>
     </section>
 
@@ -189,6 +189,27 @@
           "He told me about a motorbike he saved up for two years to buy. I never knew that about him."
         </p>
         <p class="mt-4 text-sm text-[#9C7C5C]">— From a Tell Me Your Story keepsake</p>
+      </div>
+    </section>
+
+    <!-- Related pages -->
+    <section class="px-5 py-12 sm:px-8">
+      <div class="mx-auto max-w-3xl">
+        <p class="text-xs font-medium uppercase tracking-[0.22em] text-[#9C7C5C] mb-6">Related reading</p>
+        <div class="grid gap-4 sm:grid-cols-3">
+          <router-link to="/remento-review" class="rounded-2xl border border-stone-200 p-4 hover:border-[#7C5C3B] transition group">
+            <p class="text-sm font-semibold text-stone-900 group-hover:text-[#7C5C3B]">Remento Review 2026</p>
+            <p class="mt-1 text-xs text-stone-500">Full honest review — does the AI rewriting work?</p>
+          </router-link>
+          <router-link to="/storyworth-alternative" class="rounded-2xl border border-stone-200 p-4 hover:border-[#7C5C3B] transition group">
+            <p class="text-sm font-semibold text-stone-900 group-hover:text-[#7C5C3B]">Storyworth Alternative</p>
+            <p class="mt-1 text-xs text-stone-500">Also comparing Storyworth? Read this first</p>
+          </router-link>
+          <router-link to="/life-story-questions" class="rounded-2xl border border-stone-200 p-4 hover:border-[#7C5C3B] transition group">
+            <p class="text-sm font-semibold text-stone-900 group-hover:text-[#7C5C3B]">150 Life Story Questions</p>
+            <p class="mt-1 text-xs text-stone-500">The questions that unlock real stories</p>
+          </router-link>
+        </div>
       </div>
     </section>
 

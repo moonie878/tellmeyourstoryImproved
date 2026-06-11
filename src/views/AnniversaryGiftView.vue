@@ -37,6 +37,11 @@
             </div>
           </div>
         </div>
+        <div class="mt-8 flex flex-wrap justify-center gap-3">
+          <router-link to="/gifts-for-parents-who-have-everything" class="text-xs text-[#7C5C3B] underline hover:no-underline">More gift ideas for parents who have everything →</router-link>
+          <span class="text-xs text-stone-300">·</span>
+          <router-link to="/60th-birthday-gift-ideas" class="text-xs text-[#7C5C3B] underline hover:no-underline">60th birthday gift ideas →</router-link>
+        </div>
       </div>
     </section>
 
@@ -98,6 +103,27 @@
           </div>
         </div>
         <p class="mt-4 text-xs text-stone-400">Add a printed hardcover from £34.98 — delivered to their door</p>
+      </div>
+    </section>
+
+    <!-- Related pages -->
+    <section class="px-5 py-12 sm:px-8">
+      <div class="mx-auto max-w-3xl">
+        <p class="text-xs font-medium uppercase tracking-[0.22em] text-[#9C7C5C] mb-6">Related reading</p>
+        <div class="grid gap-4 sm:grid-cols-3">
+          <router-link to="/60th-birthday-gift-ideas" class="rounded-2xl border border-stone-200 p-4 hover:border-[#7C5C3B] transition group">
+            <p class="text-sm font-semibold text-stone-900 group-hover:text-[#7C5C3B]">60th Birthday Gift Ideas</p>
+            <p class="mt-1 text-xs text-stone-500">Sixty years of stories worth keeping</p>
+          </router-link>
+          <router-link to="/gifts-for-parents-who-have-everything" class="rounded-2xl border border-stone-200 p-4 hover:border-[#7C5C3B] transition group">
+            <p class="text-sm font-semibold text-stone-900 group-hover:text-[#7C5C3B]">Gifts for Parents Who Have Everything</p>
+            <p class="mt-1 text-xs text-stone-500">The gift no one else can give</p>
+          </router-link>
+          <router-link to="/life-story-questions" class="rounded-2xl border border-stone-200 p-4 hover:border-[#7C5C3B] transition group">
+            <p class="text-sm font-semibold text-stone-900 group-hover:text-[#7C5C3B]">150 Life Story Questions</p>
+            <p class="mt-1 text-xs text-stone-500">Questions to ask about their love story</p>
+          </router-link>
+        </div>
       </div>
     </section>
 

@@ -34,6 +34,11 @@
         <p class="mx-auto mt-4 max-w-xl text-sm leading-7 text-stone-500">
           The stories are in there. They just need to be asked for.
         </p>
+        <div class="mx-auto mt-6 max-w-xl flex flex-wrap justify-center gap-3">
+          <router-link to="/questions-to-ask-elderly-parents" class="text-xs text-[#7C5C3B] underline hover:no-underline">100 questions to ask elderly parents →</router-link>
+          <span class="text-xs text-stone-300">·</span>
+          <router-link to="/fathers-day-gift-for-grandad" class="text-xs text-[#7C5C3B] underline hover:no-underline">Father's Day gift for Grandad →</router-link>
+        </div>
       </div>
     </section>
 
@@ -84,6 +89,27 @@
           "He told me about a motorbike he saved up for two years to buy. I never knew that about him."
         </p>
         <p class="mt-4 text-sm text-[#9C7C5C]">— From a Tell Me Your Story keepsake</p>
+      </div>
+    </section>
+
+    <!-- Related pages -->
+    <section class="px-5 py-12 sm:px-8">
+      <div class="mx-auto max-w-3xl">
+        <p class="text-xs font-medium uppercase tracking-[0.22em] text-[#9C7C5C] mb-6">Related reading</p>
+        <div class="grid gap-4 sm:grid-cols-3">
+          <router-link to="/questions-to-ask-elderly-parents" class="rounded-2xl border border-stone-200 p-4 hover:border-[#7C5C3B] transition group">
+            <p class="text-sm font-semibold text-stone-900 group-hover:text-[#7C5C3B]">Questions to Ask Elderly Parents</p>
+            <p class="mt-1 text-xs text-stone-500">100 questions for parents and grandparents</p>
+          </router-link>
+          <router-link to="/fathers-day-gift-for-grandad" class="rounded-2xl border border-stone-200 p-4 hover:border-[#7C5C3B] transition group">
+            <p class="text-sm font-semibold text-stone-900 group-hover:text-[#7C5C3B]">Father's Day Gift for Grandad</p>
+            <p class="mt-1 text-xs text-stone-500">The gift he'll never forget</p>
+          </router-link>
+          <router-link to="/how-to-capture-parents-life-story" class="rounded-2xl border border-stone-200 p-4 hover:border-[#7C5C3B] transition group">
+            <p class="text-sm font-semibold text-stone-900 group-hover:text-[#7C5C3B]">How to Capture a Life Story</p>
+            <p class="mt-1 text-xs text-stone-500">A practical step-by-step guide</p>
+          </router-link>
+        </div>
       </div>
     </section>
 

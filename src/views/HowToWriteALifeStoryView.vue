@@ -30,6 +30,11 @@
           <p>Most families know they should capture their parents' or grandparents' life story — but they never quite get around to it. The blank page feels overwhelming. Where do you even begin? What questions do you ask? How do you get someone to actually open up?</p>
           <p class="mt-4">This guide covers everything you need to know — whether you're starting from scratch with a notebook, using a recording device, or using a platform like Tell Me Your Story that does the heavy lifting for you.</p>
         </div>
+        <div class="mt-6 flex flex-wrap justify-center gap-3">
+          <router-link to="/life-story-questions" class="text-xs text-[#7C5C3B] underline hover:no-underline">150 life story questions to get started →</router-link>
+          <span class="text-xs text-stone-300">·</span>
+          <router-link to="/life-story-interview-questions" class="text-xs text-[#7C5C3B] underline hover:no-underline">How to run a life story interview →</router-link>
+        </div>
       </div>
     </section>
 
@@ -107,6 +112,27 @@
       <div class="mx-auto max-w-2xl text-center">
         <p class="font-display text-xl italic leading-relaxed text-stone-700 sm:text-2xl">"He told me about a motorbike he saved up for two years to buy. I never knew that about him."</p>
         <p class="mt-4 text-sm text-[#9C7C5C]">— From a Tell Me Your Story keepsake</p>
+      </div>
+    </section>
+
+    <!-- Related pages -->
+    <section class="px-5 py-12 sm:px-8">
+      <div class="mx-auto max-w-3xl">
+        <p class="text-xs font-medium uppercase tracking-[0.22em] text-[#9C7C5C] mb-6">Related reading</p>
+        <div class="grid gap-4 sm:grid-cols-3">
+          <router-link to="/life-story-questions" class="rounded-2xl border border-stone-200 p-4 hover:border-[#7C5C3B] transition group">
+            <p class="text-sm font-semibold text-stone-900 group-hover:text-[#7C5C3B]">150 Life Story Questions</p>
+            <p class="mt-1 text-xs text-stone-500">The questions that unlock real stories</p>
+          </router-link>
+          <router-link to="/life-story-interview-questions" class="rounded-2xl border border-stone-200 p-4 hover:border-[#7C5C3B] transition group">
+            <p class="text-sm font-semibold text-stone-900 group-hover:text-[#7C5C3B]">Life Story Interview Questions</p>
+            <p class="mt-1 text-xs text-stone-500">How to run a proper life story interview</p>
+          </router-link>
+          <router-link to="/keepsake-book" class="rounded-2xl border border-stone-200 p-4 hover:border-[#7C5C3B] transition group">
+            <p class="text-sm font-semibold text-stone-900 group-hover:text-[#7C5C3B]">Keepsake Book</p>
+            <p class="mt-1 text-xs text-stone-500">Turn a life story into a printed keepsake</p>
+          </router-link>
+        </div>
       </div>
     </section>
 

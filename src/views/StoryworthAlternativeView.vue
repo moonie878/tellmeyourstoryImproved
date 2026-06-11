@@ -10,7 +10,7 @@
           <em class="text-[#C4A882] italic">Here's why UK families choose us</em>
         </h1>
         <p class="mx-auto mt-5 max-w-xl text-sm leading-7 text-[#A8A29E]">
-          Storyworth costs $59–$199 per year and is built for the US market. Tell Me Your Story is a one-time payment, built for UK families, with voice recordings, QR codes, and printed books shipped from the UK.
+          Storyworth costs $59–$199 per year and is built for the US market. Tell Me Your Story is a one-time payment, built for UK families, with voice recordings, QR codes, and printed books shipped from the UK. Read our full <router-link to="/storyworth-review" class="text-[#C4A882] underline hover:no-underline">Storyworth review</router-link> for a detailed breakdown.
         </p>
         <div class="mt-8 flex flex-wrap justify-center gap-3">
           <router-link
@@ -132,7 +132,7 @@
         <p class="text-xs font-medium uppercase tracking-[0.22em] text-[#9C7C5C]">The honest price comparison</p>
         <h2 class="mt-3 font-display text-2xl font-bold text-stone-900 sm:text-3xl">What you actually pay</h2>
         <p class="mx-auto mt-3 max-w-xl text-sm leading-7 text-stone-500">
-          Storyworth's headline price is $59–$109 but most families end up paying significantly more once you add colour printing, extra copies, and international shipping.
+          Storyworth's headline price is $59–$109 but most families end up paying significantly more once you add colour printing, extra copies, and international shipping. See our <router-link to="/storyworth-review" class="text-[#7C5C3B] underline hover:no-underline">full Storyworth review</router-link> for the complete cost breakdown.
         </p>
 
         <div class="mt-10 grid gap-5 sm:grid-cols-2">
@@ -169,6 +169,27 @@
           "He told me about a motorbike he saved up for two years to buy. I never knew that about him."
         </p>
         <p class="mt-4 text-sm text-[#9C7C5C]">— From a Tell Me Your Story keepsake</p>
+      </div>
+    </section>
+
+    <!-- Related pages -->
+    <section class="px-5 py-12 sm:px-8">
+      <div class="mx-auto max-w-3xl">
+        <p class="text-xs font-medium uppercase tracking-[0.22em] text-[#9C7C5C] mb-6">Related reading</p>
+        <div class="grid gap-4 sm:grid-cols-3">
+          <router-link to="/storyworth-review" class="rounded-2xl border border-stone-200 p-4 hover:border-[#7C5C3B] transition group">
+            <p class="text-sm font-semibold text-stone-900 group-hover:text-[#7C5C3B]">Storyworth Review 2026</p>
+            <p class="mt-1 text-xs text-stone-500">Full honest review — pros, cons, real costs</p>
+          </router-link>
+          <router-link to="/remento-alternative" class="rounded-2xl border border-stone-200 p-4 hover:border-[#7C5C3B] transition group">
+            <p class="text-sm font-semibold text-stone-900 group-hover:text-[#7C5C3B]">Remento Alternative</p>
+            <p class="mt-1 text-xs text-stone-500">Also comparing Remento? Read this first</p>
+          </router-link>
+          <router-link to="/life-story-questions" class="rounded-2xl border border-stone-200 p-4 hover:border-[#7C5C3B] transition group">
+            <p class="text-sm font-semibold text-stone-900 group-hover:text-[#7C5C3B]">150 Life Story Questions</p>
+            <p class="mt-1 text-xs text-stone-500">The questions that unlock real stories</p>
+          </router-link>
+        </div>
       </div>
     </section>
 

@@ -34,6 +34,11 @@
         <p class="mx-auto mt-4 max-w-xl text-sm leading-7 text-stone-500">
           The best 70th birthday gift isn't something they'll put in a drawer. It's something that lasts for generations.
         </p>
+        <div class="mx-auto mt-6 max-w-xl flex flex-wrap justify-center gap-3">
+          <router-link to="/questions-to-ask-elderly-parents" class="text-xs text-[#7C5C3B] underline hover:no-underline">100 questions to ask elderly parents →</router-link>
+          <span class="text-xs text-stone-300">·</span>
+          <router-link to="/gifts-for-parents-who-have-everything" class="text-xs text-[#7C5C3B] underline hover:no-underline">More gift ideas for parents →</router-link>
+        </div>
       </div>
     </section>
 
@@ -132,6 +137,27 @@
           "He told me about a motorbike he saved up for two years to buy. I never knew that about him."
         </p>
         <p class="mt-4 text-sm text-[#9C7C5C]">— From a Tell Me Your Story keepsake</p>
+      </div>
+    </section>
+
+    <!-- Related pages -->
+    <section class="px-5 py-12 sm:px-8">
+      <div class="mx-auto max-w-3xl">
+        <p class="text-xs font-medium uppercase tracking-[0.22em] text-[#9C7C5C] mb-6">Related reading</p>
+        <div class="grid gap-4 sm:grid-cols-3">
+          <router-link to="/80th-birthday-gift-ideas" class="rounded-2xl border border-stone-200 p-4 hover:border-[#7C5C3B] transition group">
+            <p class="text-sm font-semibold text-stone-900 group-hover:text-[#7C5C3B]">80th Birthday Gift Ideas</p>
+            <p class="mt-1 text-xs text-stone-500">Eight decades of stories worth capturing</p>
+          </router-link>
+          <router-link to="/gifts-for-parents-who-have-everything" class="rounded-2xl border border-stone-200 p-4 hover:border-[#7C5C3B] transition group">
+            <p class="text-sm font-semibold text-stone-900 group-hover:text-[#7C5C3B]">Gifts for Parents Who Have Everything</p>
+            <p class="mt-1 text-xs text-stone-500">The gift no one else can give</p>
+          </router-link>
+          <router-link to="/questions-to-ask-elderly-parents" class="rounded-2xl border border-stone-200 p-4 hover:border-[#7C5C3B] transition group">
+            <p class="text-sm font-semibold text-stone-900 group-hover:text-[#7C5C3B]">Questions to Ask Elderly Parents</p>
+            <p class="mt-1 text-xs text-stone-500">100 questions to draw out their stories</p>
+          </router-link>
+        </div>
       </div>
     </section>
 

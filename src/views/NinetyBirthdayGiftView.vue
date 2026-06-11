@@ -26,6 +26,11 @@
         <h2 class="mt-3 font-display text-2xl font-bold text-stone-900 sm:text-3xl">Nine decades of living history</h2>
         <p class="mx-auto mt-4 max-w-xl text-sm leading-7 text-stone-500">Someone turning 90 was born in the 1930s or earlier. They've lived through the Second World War, the birth of the NHS, the moon landing, the internet, and everything in between. Their personal memories of those events are irreplaceable — and they're running out of time to share them.</p>
         <p class="mx-auto mt-4 max-w-xl text-sm leading-7 text-stone-500">A 90th birthday is not the time for another bouquet of flowers. It's the moment to capture something that will outlast all of you.</p>
+        <div class="mx-auto mt-6 max-w-xl flex flex-wrap justify-center gap-3">
+          <router-link to="/80th-birthday-gift-ideas" class="text-xs text-[#7C5C3B] underline hover:no-underline">80th birthday gift ideas →</router-link>
+          <span class="text-xs text-stone-300">·</span>
+          <router-link to="/questions-to-ask-elderly-parents" class="text-xs text-[#7C5C3B] underline hover:no-underline">100 questions to ask elderly parents →</router-link>
+        </div>
       </div>
     </section>
 
@@ -72,6 +77,27 @@
           </div>
         </div>
         <p class="mt-4 text-xs text-stone-400">Add a printed hardcover book from £34.98 — delivered to their door</p>
+      </div>
+    </section>
+
+    <!-- Related pages -->
+    <section class="px-5 py-12 sm:px-8">
+      <div class="mx-auto max-w-3xl">
+        <p class="text-xs font-medium uppercase tracking-[0.22em] text-[#9C7C5C] mb-6">Related reading</p>
+        <div class="grid gap-4 sm:grid-cols-3">
+          <router-link to="/80th-birthday-gift-ideas" class="rounded-2xl border border-stone-200 p-4 hover:border-[#7C5C3B] transition group">
+            <p class="text-sm font-semibold text-stone-900 group-hover:text-[#7C5C3B]">80th Birthday Gift Ideas</p>
+            <p class="mt-1 text-xs text-stone-500">Eight decades of stories worth keeping</p>
+          </router-link>
+          <router-link to="/gifts-for-parents-who-have-everything" class="rounded-2xl border border-stone-200 p-4 hover:border-[#7C5C3B] transition group">
+            <p class="text-sm font-semibold text-stone-900 group-hover:text-[#7C5C3B]">Gifts for Parents Who Have Everything</p>
+            <p class="mt-1 text-xs text-stone-500">The gift no one else can give</p>
+          </router-link>
+          <router-link to="/questions-to-ask-elderly-parents" class="rounded-2xl border border-stone-200 p-4 hover:border-[#7C5C3B] transition group">
+            <p class="text-sm font-semibold text-stone-900 group-hover:text-[#7C5C3B]">Questions to Ask Elderly Parents</p>
+            <p class="mt-1 text-xs text-stone-500">100 questions to draw out their stories</p>
+          </router-link>
+        </div>
       </div>
     </section>
 

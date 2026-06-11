@@ -33,6 +33,11 @@
             <p class="mt-1 text-xs leading-5 text-stone-500">{{ tip.desc }}</p>
           </div>
         </div>
+        <div class="mt-8 flex flex-wrap justify-center gap-3">
+          <router-link to="/how-to-capture-parents-life-story" class="text-xs text-[#7C5C3B] underline hover:no-underline">Full guide to capturing a life story →</router-link>
+          <span class="text-xs text-stone-300">·</span>
+          <router-link to="/life-story-questions" class="text-xs text-[#7C5C3B] underline hover:no-underline">150 life story questions →</router-link>
+        </div>
       </div>
     </section>
 
@@ -70,6 +75,27 @@
       <div class="mx-auto max-w-2xl text-center">
         <p class="font-display text-xl italic leading-relaxed text-stone-700 sm:text-2xl">"He told me about a motorbike he saved up for two years to buy. I never knew that about him."</p>
         <p class="mt-4 text-sm text-[#9C7C5C]">— From a Tell Me Your Story keepsake</p>
+      </div>
+    </section>
+
+    <!-- Related pages -->
+    <section class="px-5 py-12 sm:px-8">
+      <div class="mx-auto max-w-3xl">
+        <p class="text-xs font-medium uppercase tracking-[0.22em] text-[#9C7C5C] mb-6">Related reading</p>
+        <div class="grid gap-4 sm:grid-cols-3">
+          <router-link to="/life-story-questions" class="rounded-2xl border border-stone-200 p-4 hover:border-[#7C5C3B] transition group">
+            <p class="text-sm font-semibold text-stone-900 group-hover:text-[#7C5C3B]">150 Life Story Questions</p>
+            <p class="mt-1 text-xs text-stone-500">The expanded question list by chapter</p>
+          </router-link>
+          <router-link to="/how-to-capture-parents-life-story" class="rounded-2xl border border-stone-200 p-4 hover:border-[#7C5C3B] transition group">
+            <p class="text-sm font-semibold text-stone-900 group-hover:text-[#7C5C3B]">How to Capture a Life Story</p>
+            <p class="mt-1 text-xs text-stone-500">Tools, tips, and step-by-step guidance</p>
+          </router-link>
+          <router-link to="/questions-to-ask-elderly-parents" class="rounded-2xl border border-stone-200 p-4 hover:border-[#7C5C3B] transition group">
+            <p class="text-sm font-semibold text-stone-900 group-hover:text-[#7C5C3B]">Questions for Elderly Parents</p>
+            <p class="mt-1 text-xs text-stone-500">100 questions tailored for older parents</p>
+          </router-link>
+        </div>
       </div>
     </section>
 
