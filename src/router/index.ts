@@ -97,6 +97,8 @@ const routes = [
 { path: '/questions-to-ask-dying-parent',   component: () => import('../views/QuestionsToAskDyingParentView.vue') },
 { path: '/questions-about-childhood',       component: () => import('../views/QuestionsAboutChildhoodView.vue') },
 { path: '/resources/50-questions-printable', component: () => import('../views/FreeQuestionsDownloadView.vue') },
+{ path: '/storykeeper-review',      component: () => import('../views/StorykeeperReviewView.vue') },
+{ path: '/storykeeper-alternative', component: () => import('../views/StorykeeperAlternativeView.vue') },
 {
   path: '/remento-alternative',
   name: 'remento-alternative',
