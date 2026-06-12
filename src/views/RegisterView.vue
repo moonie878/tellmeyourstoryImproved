@@ -26,11 +26,12 @@
           </svg>
           {{ googleLoading ? 'Redirecting...' : 'Continue with Google' }}
         </button>
+
         <p class="mt-2 text-center text-xs text-stone-400">
-  By continuing you agree to our
-  <router-link to="/privacy" class="underline hover:text-stone-600">privacy policy</router-link>
-  and may receive occasional product updates.
-</p>
+          By continuing you agree to our
+          <router-link to="/privacy" class="underline hover:text-stone-600">privacy policy</router-link>
+          and may receive occasional product updates.
+        </p>
 
         <!-- Divider -->
         <div class="my-5 flex items-center gap-3">
@@ -41,26 +42,50 @@
 
         <!-- Email/password form -->
         <div class="space-y-4">
+
           <div>
             <label class="text-sm font-medium text-[#1C1917]">Email</label>
             <input
               v-model="email"
               type="email"
-              required
+              autocomplete="email"
               placeholder="your@email.com"
-              class="mt-1 w-full rounded-xl border border-stone-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#7C5C3B]"
+              @blur="validateEmail"
+              class="mt-1 w-full rounded-xl border px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#7C5C3B]"
+              :class="fieldErrors.email ? 'border-red-400' : 'border-stone-200'"
             />
+            <p v-if="fieldErrors.email" class="mt-1 text-xs text-red-500">{{ fieldErrors.email }}</p>
           </div>
 
           <div>
             <label class="text-sm font-medium text-[#1C1917]">Password</label>
-            <input
-              v-model="password"
-              type="password"
-              required
-              placeholder="At least 8 characters"
-              class="mt-1 w-full rounded-xl border border-stone-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#7C5C3B]"
-            />
+            <div class="relative mt-1">
+              <input
+                v-model="password"
+                :type="showPassword ? 'text' : 'password'"
+                autocomplete="new-password"
+                placeholder="At least 8 characters"
+                @blur="validatePassword"
+                class="w-full rounded-xl border px-4 py-3 pr-11 text-sm focus:outline-none focus:ring-2 focus:ring-[#7C5C3B]"
+                :class="fieldErrors.password ? 'border-red-400' : 'border-stone-200'"
+              />
+              <button
+                type="button"
+                @click="showPassword = !showPassword"
+                class="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600"
+                tabindex="-1"
+              >
+                <!-- Eye / eye-off icon -->
+                <svg v-if="!showPassword" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                </svg>
+                <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.477 0-8.268-2.943-9.542-7a9.956 9.956 0 012.293-3.95M6.634 6.634A9.956 9.956 0 0112 5c4.477 0 8.268 2.943 9.542 7a9.97 9.97 0 01-4.177 5.191M3 3l18 18" />
+                </svg>
+              </button>
+            </div>
+            <p v-if="fieldErrors.password" class="mt-1 text-xs text-red-500">{{ fieldErrors.password }}</p>
           </div>
 
           <label class="flex items-start gap-3 text-sm text-stone-500 cursor-pointer">
@@ -68,41 +93,54 @@
             <span>Send me story prompts and reminders so I don't forget to capture these moments (optional)</span>
           </label>
 
+          <!-- Turnstile hidden — token watched to set turnstileReady -->
           <div class="invisible h-0 overflow-hidden">
             <TurnstileWidget v-model="turnstileToken" />
           </div>
 
+          <!-- Errors -->
           <p v-if="turnstileError" class="text-sm text-red-600">{{ turnstileError }}</p>
           <p v-if="errorMessage" class="text-sm text-red-600">{{ errorMessage }}</p>
 
+          <!-- Success state -->
           <div v-if="success" class="rounded-2xl bg-[#F5F0E8] px-5 py-4 text-center">
-  <p class="text-sm font-medium text-[#1C1917]">✓ Account created</p>
-  <p v-if="giftToken" class="mt-1 text-xs text-[#5C534E]">
-    Redirecting you to redeem your gift…
-  </p>
-  <p v-else class="mt-1 text-xs text-[#5C534E]">
-    Check your email to confirm your account, then you're good to go.
-  </p>
-</div>
+            <p class="text-sm font-medium text-[#1C1917]">✓ Account created</p>
+            <p v-if="giftToken" class="mt-1 text-xs text-[#5C534E]">
+              Redirecting you to redeem your gift…
+            </p>
+            <p v-else class="mt-1 text-xs text-[#5C534E]">
+              Check your email to confirm your account, then you're good to go.
+            </p>
+          </div>
 
+          <!-- Submit button -->
           <button
             v-if="!success"
             @click="handleRegister"
-            :disabled="loading"
-            class="w-full rounded-full bg-[#7C5C3B] px-4 py-3 text-sm font-semibold text-white transition hover:opacity-90 disabled:opacity-60"
+            :disabled="loading || !turnstileReady"
+            class="w-full rounded-full bg-[#7C5C3B] px-4 py-3 text-sm font-semibold text-white transition hover:opacity-90 disabled:opacity-60 disabled:cursor-not-allowed"
           >
-            {{ loading ? 'Creating your account...' : 'Create account — it\'s free' }}
+            <span v-if="loading" class="flex items-center justify-center gap-2">
+              <svg class="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/>
+              </svg>
+              Creating your account…
+            </span>
+            <span v-else-if="!turnstileReady">Just a moment…</span>
+            <span v-else>Create account — it's free</span>
           </button>
+
         </div>
       </div>
 
       <p class="mt-6 text-center text-sm text-[#5C534E]">
-  Already have an account?
-  <router-link
-    :to="giftToken ? `/login?gift=${giftToken}` : '/login'"
-    class="font-medium text-[#1C1917] hover:underline"
-  >Log in</router-link>
-</p>
+        Already have an account?
+        <router-link
+          :to="giftToken ? `/login?gift=${giftToken}` : '/login'"
+          class="font-medium text-[#1C1917] hover:underline"
+        >Log in</router-link>
+      </p>
 
       <div class="mt-6 flex flex-wrap justify-center gap-x-5 gap-y-2 text-xs text-[#A89880]">
         <span>✦ No subscription</span>
@@ -115,13 +153,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import { supabase } from '../lib/supabase'
 import TurnstileWidget from '../components/legal/TurnstileWidget.vue'
 import { verifyTurnstile } from '../lib/turnstile'
 import { track } from '../lib/analytics'
 import { getCurrentUtmData } from '../lib/utm'
-import { useRoute, useRouter } from 'vue-router'  // add useRoute and useRouter
+import { useRoute, useRouter } from 'vue-router'
 
 const email = ref('')
 const password = ref('')
@@ -130,13 +168,50 @@ const googleLoading = ref(false)
 const errorMessage = ref('')
 const emailOptIn = ref(false)
 const success = ref(false)
+const showPassword = ref(false)
 const turnstileToken = ref('')
+const turnstileReady = ref(false)
 const turnstileError = ref('')
 const utmData = getCurrentUtmData()
-const route  = useRoute()
+const route = useRoute()
 const router = useRouter()
 const giftToken = route.query.gift as string | undefined
 
+const fieldErrors = ref<{ email: string; password: string }>({
+  email: '',
+  password: '',
+})
+
+// Mark Turnstile as ready as soon as it resolves a token
+watch(turnstileToken, (val) => {
+  if (val) turnstileReady.value = true
+})
+
+function validateEmail() {
+  if (!email.value) {
+    fieldErrors.value.email = 'Email is required.'
+  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value)) {
+    fieldErrors.value.email = 'Please enter a valid email address.'
+  } else {
+    fieldErrors.value.email = ''
+  }
+}
+
+function validatePassword() {
+  if (!password.value) {
+    fieldErrors.value.password = 'Password is required.'
+  } else if (password.value.length < 8) {
+    fieldErrors.value.password = 'Password must be at least 8 characters.'
+  } else {
+    fieldErrors.value.password = ''
+  }
+}
+
+function validateAll(): boolean {
+  validateEmail()
+  validatePassword()
+  return !fieldErrors.value.email && !fieldErrors.value.password
+}
 
 async function handleGoogleLogin() {
   googleLoading.value = true
@@ -155,15 +230,19 @@ async function handleGoogleLogin() {
 }
 
 async function handleRegister() {
-  loading.value = true
   errorMessage.value = ''
   turnstileError.value = ''
+
+  // Validate fields first — before touching Turnstile
+  if (!validateAll()) return
+
+  loading.value = true
 
   try {
     const isHuman = await verifyTurnstile(turnstileToken.value)
 
     if (!isHuman) {
-      turnstileError.value = 'Please try again — verification failed.'
+      turnstileError.value = 'Security check failed — please refresh the page and try again.'
       loading.value = false
       return
     }
@@ -178,34 +257,32 @@ async function handleRegister() {
       },
     })
 
-    
+    if (error) {
+      errorMessage.value = error.message
+    } else {
+      success.value = true
+      track('signup_completed', { source: 'register_page', ...utmData })
 
-   if (error) {
-  errorMessage.value = error.message
-} else {
-  success.value = true
-  track('signup_completed', { source: 'register_page', ...utmData })
+      // Add to Resend contacts — only if they opted in
+      if (emailOptIn.value) {
+        try {
+          await fetch(`${import.meta.env.VITE_API_BASE_URL}/register-contact`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: email.value, firstName: '' }),
+          })
+        } catch {
+          // Non-critical — don't block registration
+        }
+      }
 
-  // Add to Resend contacts — only if they opted in
-  if (emailOptIn.value) {
-    try {
-      await fetch(`${import.meta.env.VITE_API_BASE_URL}/register-contact`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email.value, firstName: '' }),
-      })
-    } catch {
-      // Non-critical — don't block registration
+      // If registering via a gift link, redirect after short delay
+      if (giftToken) {
+        setTimeout(() => {
+          router.push(`/gift/redeem/${giftToken}`)
+        }, 2000)
+      }
     }
-  }
-
-  // If registering via a gift link, redirect to redemption page after short delay
-  if (giftToken) {
-    setTimeout(() => {
-      router.push(`/gift/redeem/${giftToken}`)
-    }, 2000)
-  }
-}
   } catch (err) {
     console.error(err)
     errorMessage.value = 'Something went wrong. Please try again.'
