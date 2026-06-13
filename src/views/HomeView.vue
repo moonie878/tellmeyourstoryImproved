@@ -48,7 +48,7 @@
             <div class="mt-6 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs text-[#8C847E] md:justify-start">
               <span class="flex items-center gap-1.5"><span class="check">✓</span> Free to start</span>
               <span class="flex items-center gap-1.5"><span class="check">✓</span> No subscription</span>
-              <span class="flex items-center gap-1.5"><span class="check">✓</span> Printed book from £34.98</span>
+              <span class="flex items-center gap-1.5"><span class="check">✓</span> Printed book from £29.98</span>
             </div>
           </div>
 
@@ -64,10 +64,10 @@
               <!-- Floating badge — updated to voice -->
               <div class="hero-badge">
   <span class="hero-badge-icon">🎙️</span>
-  <div>
+  <!-- <div>
     <p class="hero-badge-title">Nan's voice playing</p>
     <p class="hero-badge-sub">Scan the QR in the book</p>
-  </div>
+  </div> -->
 </div>
             </div>
           </div>
