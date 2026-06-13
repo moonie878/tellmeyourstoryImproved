@@ -24,21 +24,21 @@
           <div class="hero-text pb-12 text-center md:text-left">
             <div class="eyebrow">
               <span class="eyebrow-dot"></span>
-              Preserve a loved one's story
+              Capture their story before it's too late
             </div>
 
             <h1 class="mt-5 font-display text-[2.6rem] font-bold leading-[1.1] tracking-[-0.02em] text-[#1C1917] sm:text-5xl md:text-[3.6rem]">
-              Turn memories into a keepsake
-              <em class="italic text-[#7C5C3B]">worth holding forever</em>
+              Their story deserves
+              <em class="italic text-[#7C5C3B]">to be kept.</em>
             </h1>
 
-            <p class="mx-auto mt-6 max-w-lg text-base leading-[1.8] text-[#5C534E] sm:text-lg md:mx-0">
-              Answer guided questions about someone you love — by typing or speaking. Add photos, capture their voice, and create a beautiful keepsake book with QR codes that let family hear their stories aloud.
+            <p class="mx-auto mt-5 max-w-md text-lg leading-[1.7] text-[#5C534E] md:mx-0">
+              Guided questions. Voice recordings. A real printed book — delivered to your door.
             </p>
 
             <div class="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center md:justify-start">
               <router-link to="/register" @click="trackStart" class="btn-primary">
-                Start your story — it's free
+                Start for free — no card needed
               </router-link>
               <router-link to="/example" @click="trackExampleStory" class="btn-secondary">
                 See an example
@@ -46,9 +46,9 @@
             </div>
 
             <div class="mt-6 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs text-[#8C847E] md:justify-start">
-              <span class="flex items-center gap-1.5"><span class="check">✓</span> No subscription</span>
               <span class="flex items-center gap-1.5"><span class="check">✓</span> Free to start</span>
-              <span class="flex items-center gap-1.5"><span class="check">✓</span> Voice answers supported</span>
+              <span class="flex items-center gap-1.5"><span class="check">✓</span> No subscription</span>
+              <span class="flex items-center gap-1.5"><span class="check">✓</span> Printed book from £34.98</span>
             </div>
           </div>
 

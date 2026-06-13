@@ -1,5 +1,5 @@
 <template>
-  <aside class="rounded-2xl border border-stone-200 bg-white p-4 lg:max-h-[calc(100vh-100px)] lg:overflow-y-auto">
+  <aside class="rounded-2xl border border-stone-200 bg-white p-4 lg:max-h-[calc(100vh-100px)] lg:overflow-y-auto overscroll-contain">
     <!-- Mobile / compact header -->
     <button
       type="button"
@@ -32,7 +32,8 @@
     <!-- Content -->
     <div
       v-show="isMobileOpen || isDesktop"
-      class="mt-4 space-y-3"
+      class="mt-4 space-y-3 max-h-[60vh] overflow-y-auto overscroll-contain lg:max-h-none lg:overflow-visible"
+      @touchmove.stop
     >
       <div
         v-for="chapterGroup in chapterTree"
