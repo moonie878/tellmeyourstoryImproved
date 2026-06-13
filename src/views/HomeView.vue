@@ -488,7 +488,7 @@ import { useSeo } from '../composables/useSeo'
 import PricingTable from '../components/pricing/PricingTable.vue'
 
 useSeo({
-  title: 'Tell Me Your Story | Voice-recorded life story keepsake books',
+  title: 'Tell Me Your Story | Life Story Keepsake Books | Free to Start',
   description:
     'Answer guided questions about someone you love — by typing or speaking. Voice recordings are saved with QR codes in your printed keepsake book, so family can hear their stories forever.',
   canonical: 'https://tellmeyourstory.uk', 

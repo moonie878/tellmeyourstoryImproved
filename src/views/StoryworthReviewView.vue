@@ -215,7 +215,7 @@ const costs = [
 ]
 
 useSeo({
-  title: 'Storyworth Review 2026 — Is It Worth It for UK Families? | Tell Me Your Story',
+  title: 'Storyworth UK Review 2026 — Is It Worth It? | Tell Me Your Story',
   description: 'An honest Storyworth review for UK families in 2026. Pros, cons, real costs, and whether there\'s a better UK alternative. Updated June 2026.',
   canonical: 'https://tellmeyourstory.uk/storyworth-review',
 })

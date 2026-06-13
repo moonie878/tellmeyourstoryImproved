@@ -206,7 +206,7 @@ const reasons = [
 ]
 
 useSeo({
-  title: 'Questions to Ask About Childhood — 50 Questions to Unlock Family Memories | Tell Me Your Story',
+  title: 'Questions About Childhood Memories — 50 Prompts to Ask | Tell Me Your Story',
   description: 'The best questions to ask about someone\'s childhood. 50 questions covering home, school, friends, food, and formative moments — and a way to capture the answers forever.',
   canonical: 'https://tellmeyourstory.uk/questions-about-childhood',
 })

@@ -201,7 +201,7 @@ const categories = [
 ]
 
 useSeo({
-  title: 'Questions to Ask Your Grandma — 100 Questions Before It\'s Too Late | Tell Me Your Story',
+  title: '100 Questions to Ask Your Grandma — Capture Her Story | Tell Me Your Story',
   description: 'The best questions to ask your grandma about her life, childhood, and memories. 100 questions designed to capture her stories before they\'re lost — and keep them forever.',
   canonical: 'https://tellmeyourstory.uk/questions-to-ask-your-grandma',
 })

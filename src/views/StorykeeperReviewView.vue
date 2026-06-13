@@ -221,7 +221,7 @@ const comparisonRows = [
 ]
 
 useSeo({
-  title: 'StoryKeeper Review 2026 — Is It Worth It for UK Families? | Tell Me Your Story',
+  title: 'StoryKeeper Review 2026 — Honest Look Before You Buy | Tell Me Your Story',
   description: 'An honest review of StoryKeeper for UK families. How it works, what it costs, the AI rewriting question, and how it compares to Tell Me Your Story — free to start, UK printed.',
   canonical: 'https://tellmeyourstory.uk/storykeeper-review',
 })
