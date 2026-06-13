@@ -59,13 +59,13 @@
                 loading="eager"
               />
               <!-- Floating badge — updated to voice -->
-              <div class="hero-badge">
+  <!--             <div class="hero-badge">
   <span class="hero-badge-icon">🎙️</span>
   <div>
     <p class="hero-badge-title">Nan's voice playing</p>
     <p class="hero-badge-sub">Scan the QR in the book</p>
   </div>
-</div>
+</div> -->
             </div>
           </div>
 
