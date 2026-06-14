@@ -215,7 +215,7 @@
             <div class="mt-8 border-t border-[#2C2420] pt-6">
               <p class="text-xs text-[#5C534E]">
                 No account required. Preview with watermark for free —
-                pay £9.99 to download the full HD version.
+                pay £19.99 to download the full HD version.
                 Included free with Premium Keepsake.
               </p>
             </div>
