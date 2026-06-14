@@ -362,7 +362,7 @@ const printedBookSteps = [
   { icon: '📖', title: 'Beautiful typeset layout', desc: 'The same design as your digital PDF — chapters, drop caps, quote pages, and photos.' },
   { icon: '🎙️', title: 'QR codes for voice recordings', desc: 'Each voice answer gets a QR code printed next to it. Family scan to hear their loved one speak.' },
   { icon: '📦', title: 'Printed and shipped', desc: 'Professionally printed by Lulu Press and shipped directly to your door in 10–14 days.' },
-  { icon: '💷', title: 'From £34.98 including delivery', desc: 'One copy or multiple — £29.99 per book plus £4.99 UK shipping.' },
+  { icon: '💷', title: 'From £29.98 including delivery', desc: 'One copy or multiple — £29.99 per book plus £4.99 UK shipping.' },
 ]
 
 const writingRows = [
@@ -389,7 +389,7 @@ const extrasRows = [
   { label: 'All story types unlocked', free: false, book: false, photos: false, all: true, premium: true },
   { label: 'Video export (MP4)', free: false, book: false, photos: false, all: false, premium: true },
   { label: 'Tribute video creator', free: false, book: false, photos: false, all: false, premium: true },
-  { label: 'Order printed book (£34.98)', free: false, book: true, photos: true, all: true, premium: true },
+  { label: 'Order printed book (£29.98)', free: false, book: true, photos: true, all: true, premium: true },
 ]
 
 const mobilePlans = [
