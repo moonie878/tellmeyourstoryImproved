@@ -380,7 +380,21 @@
 
     <div class="mt-12 grid gap-5 md:grid-cols-3 md:gap-6">
 
-      <div class="testimonial-card testimonial-card-accent">
+      <div class="testimonial-card">
+  <div class="testimonial-stars">★★★★★</div>
+  <p class="testimonial-quote">
+    "I wasn't sure what to expect at first, but I found the app really easy to use. It guides you through everything step by step. I loved being able to add memories and stories in my own way, and seeing it all come together was really special."
+  </p>
+  <div class="testimonial-author">
+    <div class="testimonial-avatar">S</div>
+    <div>
+      <p class="testimonial-name">Suzanne-May G.</p>
+      <p class="testimonial-detail">Verified Trustpilot review</p>
+    </div>
+  </div>
+</div>
+
+<div class="testimonial-card testimonial-card-accent">
   <div class="testimonial-stars" style="color:#C4A882;">★★★★★</div>
   <p class="testimonial-quote" style="color:#E8E0D8;">
     "An amazing app to use to record your memories and make stories for your family to cherish! It's made to what you want and how you want to tell them. We absolutely love the ones we have made!"
@@ -397,30 +411,16 @@
 <div class="testimonial-card">
   <div class="testimonial-stars">★★★★★</div>
   <p class="testimonial-quote">
-    "Very easy to use and full of memories. A brilliant way to capture the stories that matter most to your family."
+    "This app takes you through every step to create lovely memories and tributes. Such a lovely idea to create something truly special for family and friends to look back on."
   </p>
   <div class="testimonial-author">
-    <div class="testimonial-avatar">E</div>
+    <div class="testimonial-avatar">J</div>
     <div>
-      <p class="testimonial-name">Emma G.</p>
+      <p class="testimonial-name">Jayne B.</p>
       <p class="testimonial-detail">Verified Trustpilot review</p>
     </div>
   </div>
 </div>
-
-      <div class="testimonial-card">
-        <div class="testimonial-stars">★★★★★</div>
-        <p class="testimonial-quote">
-          "My nan is 87 and doesn't use technology. She just spoke her answers and I typed along. The finished book made her cry. It made all of us cry."
-        </p>
-        <div class="testimonial-author">
-          <div class="testimonial-avatar">R</div>
-          <div>
-            <p class="testimonial-name">Rachel</p>
-            <p class="testimonial-detail">Created Grandma's Story</p>
-          </div>
-        </div>
-      </div>
 
     </div>
 
