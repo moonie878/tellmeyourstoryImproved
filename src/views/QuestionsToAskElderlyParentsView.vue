@@ -38,6 +38,8 @@
           <router-link to="/dementia-life-story-book" class="text-xs text-[#7C5C3B] underline hover:no-underline">Life story books for dementia →</router-link>
           <span class="text-xs text-stone-300">·</span>
           <router-link to="/questions-to-ask-dying-parent" class="text-xs text-[#7C5C3B] underline hover:no-underline">Questions for a dying parent →</router-link>
+          <span class="text-xs text-stone-300">·</span>
+          <router-link to="/life-story-work-in-care-homes" class="text-xs text-[#7C5C3B] underline hover:no-underline">Life story work in care homes →</router-link>
         </div>
       </div>
     </section>

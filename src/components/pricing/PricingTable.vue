@@ -346,7 +346,7 @@ const tributeSteps = [
   { icon: '📸', title: 'Upload their photos', desc: 'Add up to 30 photos and arrange them in any order you like.' },
   { icon: '🎵', title: 'Choose music', desc: 'Pick a curated gentle track or upload a song that was meaningful to them.' },
   { icon: '👁', title: 'Preview free', desc: 'Generate a watermarked preview instantly to see how it looks.' },
-  { icon: '⬇', title: 'Download for £9.99', desc: 'Pay once to download the full HD clean version — yours to keep forever.' },
+  { icon: '⬇', title: 'Download for £19.99', desc: 'Pay once to download the full HD clean version — yours to keep forever.' },
 ]
 </script>
 

@@ -52,6 +52,10 @@
           <router-link to="/end-of-life-gift" class="text-xs text-[#7C5C3B] underline hover:no-underline">End of life gift ideas →</router-link>
           <span class="text-xs text-stone-300">·</span>
           <router-link to="/dementia-life-story-book" class="text-xs text-[#7C5C3B] underline hover:no-underline">Life story books for dementia →</router-link>
+          <span class="text-xs text-stone-300">·</span>
+          <router-link to="/bereavement-gift-ideas" class="text-xs text-[#7C5C3B] underline hover:no-underline">Bereavement gift ideas →</router-link>
+          <span class="text-xs text-stone-300">·</span>
+          <router-link to="/legacy-letter-to-children" class="text-xs text-[#7C5C3B] underline hover:no-underline">Legacy letter to children →</router-link>
         </div>
       </div>
     </section>
@@ -146,17 +150,17 @@
       <div class="mx-auto max-w-3xl">
         <p class="text-xs font-medium uppercase tracking-[0.22em] text-[#9C7C5C] mb-6">Related reading</p>
         <div class="grid gap-4 sm:grid-cols-3">
+          <router-link to="/bereavement-gift-ideas" class="rounded-2xl border border-stone-200 p-4 hover:border-[#7C5C3B] transition group">
+            <p class="text-sm font-semibold text-stone-900 group-hover:text-[#7C5C3B]">Bereavement Gift Ideas</p>
+            <p class="mt-1 text-xs text-stone-500">Meaningful gifts for someone who is grieving</p>
+          </router-link>
+          <router-link to="/legacy-letter-to-children" class="rounded-2xl border border-stone-200 p-4 hover:border-[#7C5C3B] transition group">
+            <p class="text-sm font-semibold text-stone-900 group-hover:text-[#7C5C3B]">Legacy Letter to Children</p>
+            <p class="mt-1 text-xs text-stone-500">Pass on wisdom, values and love in writing</p>
+          </router-link>
           <router-link to="/end-of-life-gift" class="rounded-2xl border border-stone-200 p-4 hover:border-[#7C5C3B] transition group">
             <p class="text-sm font-semibold text-stone-900 group-hover:text-[#7C5C3B]">End of Life Gift</p>
             <p class="mt-1 text-xs text-stone-500">A meaningful gift for someone nearing end of life</p>
-          </router-link>
-          <router-link to="/dementia-life-story-book" class="rounded-2xl border border-stone-200 p-4 hover:border-[#7C5C3B] transition group">
-            <p class="text-sm font-semibold text-stone-900 group-hover:text-[#7C5C3B]">Dementia Life Story Book</p>
-            <p class="mt-1 text-xs text-stone-500">Capture memories before they fade</p>
-          </router-link>
-          <router-link to="/questions-to-ask-elderly-parents" class="rounded-2xl border border-stone-200 p-4 hover:border-[#7C5C3B] transition group">
-            <p class="text-sm font-semibold text-stone-900 group-hover:text-[#7C5C3B]">Questions to Ask Elderly Parents</p>
-            <p class="mt-1 text-xs text-stone-500">100 questions to capture their memories</p>
           </router-link>
         </div>
       </div>

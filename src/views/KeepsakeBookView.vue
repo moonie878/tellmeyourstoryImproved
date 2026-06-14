@@ -39,6 +39,8 @@
           <router-link to="/life-story-questions" class="text-xs text-[#7C5C3B] underline hover:no-underline">See the questions inside →</router-link>
           <span class="text-xs text-stone-300">·</span>
           <router-link to="/how-to-write-a-life-story" class="text-xs text-[#7C5C3B] underline hover:no-underline">How to write a life story →</router-link>
+          <span class="text-xs text-stone-300">·</span>
+          <router-link to="/life-story-work-in-care-homes" class="text-xs text-[#7C5C3B] underline hover:no-underline">Life story work in care homes →</router-link>
         </div>
       </div>
     </section>

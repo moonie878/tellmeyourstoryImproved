@@ -281,6 +281,21 @@
         >
           Read: 100 questions to ask your parents before it's too late →
         </router-link>
+
+        <div class="mt-4 flex flex-wrap gap-x-6 gap-y-2">
+          <router-link to="/life-story-work-in-care-homes" class="text-sm text-[#7C5C3B] hover:underline">
+            Life story work in care homes →
+          </router-link>
+          <router-link to="/legacy-letter-to-children" class="text-sm text-[#7C5C3B] hover:underline">
+            How to write a legacy letter →
+          </router-link>
+          <router-link to="/reminiscence-therapy-life-story" class="text-sm text-[#7C5C3B] hover:underline">
+            Reminiscence therapy →
+          </router-link>
+          <router-link to="/bereavement-gift-ideas" class="text-sm text-[#7C5C3B] hover:underline">
+            Bereavement gift ideas →
+          </router-link>
+        </div>
       </div>
     </section>
 

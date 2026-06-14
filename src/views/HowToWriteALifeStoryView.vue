@@ -38,6 +38,10 @@
           <router-link to="/life-story-interview-questions" class="text-xs text-[#7C5C3B] underline hover:no-underline">How to run a life story interview →</router-link>
           <span class="text-xs text-stone-300">·</span>
           <router-link to="/questions-to-ask-elderly-parents" class="text-xs text-[#7C5C3B] underline hover:no-underline">Questions to ask elderly parents →</router-link>
+          <span class="text-xs text-stone-300">·</span>
+          <router-link to="/legacy-letter-to-children" class="text-xs text-[#7C5C3B] underline hover:no-underline">How to write a legacy letter →</router-link>
+          <span class="text-xs text-stone-300">·</span>
+          <router-link to="/reminiscence-therapy-life-story" class="text-xs text-[#7C5C3B] underline hover:no-underline">Reminiscence therapy →</router-link>
         </div>
       </div>
     </section>

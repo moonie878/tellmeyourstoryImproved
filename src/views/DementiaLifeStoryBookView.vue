@@ -39,6 +39,10 @@
           <router-link to="/questions-to-ask-dying-parent" class="text-xs text-[#7C5C3B] underline hover:no-underline">Questions for a dying parent →</router-link>
           <span class="text-xs text-stone-300">·</span>
           <router-link to="/end-of-life-gift" class="text-xs text-[#7C5C3B] underline hover:no-underline">End of life gifts →</router-link>
+          <span class="text-xs text-stone-300">·</span>
+          <router-link to="/life-story-work-in-care-homes" class="text-xs text-[#7C5C3B] underline hover:no-underline">Life story work in care homes →</router-link>
+          <span class="text-xs text-stone-300">·</span>
+          <router-link to="/reminiscence-therapy-life-story" class="text-xs text-[#7C5C3B] underline hover:no-underline">Reminiscence therapy →</router-link>
         </div>
       </div>
     </section>
@@ -188,17 +192,17 @@
       <div class="mx-auto max-w-3xl">
         <p class="text-xs font-medium uppercase tracking-[0.22em] text-[#9C7C5C] mb-6">Related reading</p>
         <div class="grid gap-4 sm:grid-cols-3">
-          <router-link to="/questions-to-ask-elderly-parents" class="rounded-2xl border border-stone-200 p-4 hover:border-[#7C5C3B] transition group">
-            <p class="text-sm font-semibold text-stone-900 group-hover:text-[#7C5C3B]">Questions to Ask Elderly Parents</p>
-            <p class="mt-1 text-xs text-stone-500">100 questions to capture their memories</p>
+          <router-link to="/life-story-work-in-care-homes" class="rounded-2xl border border-stone-200 p-4 hover:border-[#7C5C3B] transition group">
+            <p class="text-sm font-semibold text-stone-900 group-hover:text-[#7C5C3B]">Life Story Work in Care Homes</p>
+            <p class="mt-1 text-xs text-stone-500">A guide for families and care teams</p>
+          </router-link>
+          <router-link to="/reminiscence-therapy-life-story" class="rounded-2xl border border-stone-200 p-4 hover:border-[#7C5C3B] transition group">
+            <p class="text-sm font-semibold text-stone-900 group-hover:text-[#7C5C3B]">Reminiscence Therapy</p>
+            <p class="mt-1 text-xs text-stone-500">How life stories support wellbeing</p>
           </router-link>
           <router-link to="/questions-to-ask-dying-parent" class="rounded-2xl border border-stone-200 p-4 hover:border-[#7C5C3B] transition group">
             <p class="text-sm font-semibold text-stone-900 group-hover:text-[#7C5C3B]">Questions for a Dying Parent</p>
             <p class="mt-1 text-xs text-stone-500">A gentle guide to final conversations</p>
-          </router-link>
-          <router-link to="/how-to-capture-parents-life-story" class="rounded-2xl border border-stone-200 p-4 hover:border-[#7C5C3B] transition group">
-            <p class="text-sm font-semibold text-stone-900 group-hover:text-[#7C5C3B]">How to Capture a Life Story</p>
-            <p class="mt-1 text-xs text-stone-500">A practical step-by-step guide</p>
           </router-link>
         </div>
       </div>
