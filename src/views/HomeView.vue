@@ -380,33 +380,33 @@
 
     <div class="mt-12 grid gap-5 md:grid-cols-3 md:gap-6">
 
-      <div class="testimonial-card">
-        <div class="testimonial-stars">★★★★★</div>
-        <p class="testimonial-quote">
-          "I did this with my mum last Christmas. She spoke her answers out loud and hearing her voice come back through the book is something I'll treasure forever."
-        </p>
-        <div class="testimonial-author">
-          <div class="testimonial-avatar">S</div>
-          <div>
-            <p class="testimonial-name">Sarah</p>
-            <p class="testimonial-detail">Created Mum's Story</p>
-          </div>
-        </div>
-      </div>
-
       <div class="testimonial-card testimonial-card-accent">
-        <div class="testimonial-stars" style="color:#C4A882;">★★★★★</div>
-        <p class="testimonial-quote" style="color:#E8E0D8;">
-          "My dad passed six months after we did this. I scan the QR codes in the book whenever I miss him. I can hear him laugh. Nothing could replace that."
-        </p>
-        <div class="testimonial-author">
-          <div class="testimonial-avatar" style="background:#7C5C3B;">J</div>
-          <div>
-            <p class="testimonial-name" style="color:white;">James</p>
-            <p class="testimonial-detail" style="color:#8C847E;">Created Dad's Story</p>
-          </div>
-        </div>
-      </div>
+  <div class="testimonial-stars" style="color:#C4A882;">★★★★★</div>
+  <p class="testimonial-quote" style="color:#E8E0D8;">
+    "An amazing app to use to record your memories and make stories for your family to cherish! It's made to what you want and how you want to tell them. We absolutely love the ones we have made!"
+  </p>
+  <div class="testimonial-author">
+    <div class="testimonial-avatar" style="background:#7C5C3B;">H</div>
+    <div>
+      <p class="testimonial-name" style="color:white;">Hollie</p>
+      <p class="testimonial-detail" style="color:#8C847E;">Verified Trustpilot review</p>
+    </div>
+  </div>
+</div>
+
+<div class="testimonial-card">
+  <div class="testimonial-stars">★★★★★</div>
+  <p class="testimonial-quote">
+    "Very easy to use and full of memories. A brilliant way to capture the stories that matter most to your family."
+  </p>
+  <div class="testimonial-author">
+    <div class="testimonial-avatar">E</div>
+    <div>
+      <p class="testimonial-name">Emma G.</p>
+      <p class="testimonial-detail">Verified Trustpilot review</p>
+    </div>
+  </div>
+</div>
 
       <div class="testimonial-card">
         <div class="testimonial-stars">★★★★★</div>
