@@ -99,6 +99,10 @@ const routes = [
 { path: '/resources/50-questions-printable', component: () => import('../views/FreeQuestionsDownloadView.vue') },
 { path: '/storykeeper-review',      component: () => import('../views/StorykeeperReviewView.vue') },
 { path: '/storykeeper-alternative', component: () => import('../views/StorykeeperAlternativeView.vue') },
+{ path: '/life-story-work-in-care-homes',   component: () => import('../views/LifeStoryWorkInCareHomesView.vue') },
+{ path: '/reminiscence-therapy-life-story', component: () => import('../views/ReminiscenceTherapyLifeStoryView.vue') },
+{ path: '/bereavement-gift-ideas',          component: () => import('../views/BereavementGiftIdeasView.vue') },
+{ path: '/legacy-letter-to-children',       component: () => import('../views/LegacyLetterToChildrenView.vue') },
 {
   path: '/remento-alternative',
   name: 'remento-alternative',

@@ -16,7 +16,7 @@
     <changefreq>monthly</changefreq>
   </url>
   <url>
-    <loc>https://tellmeyourstory.uk/questions-to-ask-grandparents</loc>
+    <loc>https://tellmeyourstory.uk/questions-to-ask-your-grandparents</loc>
     <priority>0.8</priority>
     <changefreq>monthly</changefreq>
   </url>
@@ -26,7 +26,7 @@
   <changefreq>monthly</changefreq>
 </url>
   <url>
-    <loc>https://tellmeyourstory.uk/questions-to-ask-grandma</loc>
+    <loc>https://tellmeyourstory.uk/questions-to-ask-your-grandma</loc>
     <priority>0.8</priority>
     <changefreq>monthly</changefreq>
   </url>
@@ -136,7 +136,7 @@
     <changefreq>monthly</changefreq>
   </url>
   <url>
-    <loc>https://tellmeyourstory.uk/blog/tribute-video</loc>
+    <loc>https://tellmeyourstory.uk//blog/how-to-make-a-memorial-tribute-video</loc>
     <priority>0.9</priority>
     <changefreq>monthly</changefreq>
   </url>
@@ -228,5 +228,9 @@
 <url><loc>https://tellmeyourstory.uk/resources/50-questions-printable</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
 <url><loc>https://tellmeyourstory.uk/storykeeper-review</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
 <url><loc>https://tellmeyourstory.uk/storykeeper-alternative</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
+<url><loc>https://tellmeyourstory.uk/life-story-work-in-care-homes</loc><priority>0.9</priority><changefreq>monthly</changefreq></url>
+<url><loc>https://tellmeyourstory.uk/reminiscence-therapy-life-story</loc><priority>0.9</priority><changefreq>monthly</changefreq></url>
+<url><loc>https://tellmeyourstory.uk/bereavement-gift-ideas</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
+<url><loc>https://tellmeyourstory.uk/legacy-letter-to-children</loc><priority>0.9</priority><changefreq>monthly</changefreq></url>
 
 </urlset>
