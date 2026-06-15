@@ -42,6 +42,28 @@
       </div>
     </section>
 
+    <!-- Add this block after the opening intro section -->
+<section class="px-5 py-10 sm:px-8">
+  <div class="mx-auto max-w-3xl">
+    <h2 class="font-display text-2xl font-bold text-stone-900 sm:text-3xl">
+      End of life questions for parents
+    </h2>
+    <p class="mt-4 text-sm leading-7 text-stone-600">
+      End of life questions for parents are different from ordinary life story questions. They need to be gentler, more patient, and more attuned to what the person is ready to share. The questions below are designed specifically for conversations with a parent who is nearing the end of their life — not as an interview, but as a way of being present with them and drawing out the things that matter most before it's too late.
+    </p>
+    <p class="mt-4 text-sm leading-7 text-stone-600">
+      You don't need to ask all of them. One good question on a good day is worth more than an hour of forced conversation. Start with whichever feels most natural and follow wherever the conversation leads.
+    </p>
+    <div class="mt-6 flex flex-wrap gap-3">
+      <router-link to="/questions-to-ask-elderly-parents" class="text-xs text-[#7C5C3B] underline hover:no-underline">Questions for elderly parents →</router-link>
+      <span class="text-xs text-stone-300">·</span>
+      <router-link to="/bereavement-gift-ideas" class="text-xs text-[#7C5C3B] underline hover:no-underline">Bereavement gift ideas →</router-link>
+      <span class="text-xs text-stone-300">·</span>
+      <router-link to="/end-of-life-gift" class="text-xs text-[#7C5C3B] underline hover:no-underline">End of life gift ideas →</router-link>
+    </div>
+  </div>
+</section>
+
     <!-- How to have these conversations -->
     <section class="bg-[#F5F0E8] px-5 py-16 sm:px-8 sm:py-20">
       <div class="mx-auto max-w-3xl">
@@ -308,7 +330,7 @@ const faqs = [
 
 useSeo({
   title: 'Questions to Ask a Dying Parent — Gentle Guide to Final Conversations | Tell Me Your Story',
-  description: 'A gentle guide to the questions worth asking a parent nearing the end of their life. What to ask, how to have the conversation, and how to capture what they share. Free to start.',
+ description: 'End of life questions for parents — a gentle guide to the conversations worth having before it\'s too late. What to ask, how to approach it, and how to capture what they share.',
   canonical: 'https://tellmeyourstory.uk/questions-to-ask-dying-parent',
   schema: {
     '@context': 'https://schema.org',
