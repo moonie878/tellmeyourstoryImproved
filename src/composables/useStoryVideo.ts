@@ -470,242 +470,206 @@ export function useStoryVideo() {
   const error = ref('')
 
   async function generateVideo(
-    project: StoryProject,
-    sections: StorySection[],
-    images: StoryImage[],
-    options: VideoOptions
-  ): Promise<void> {
-    isGenerating.value = true
-    progress.value = 0
-    progressLabel.value = 'Setting up...'
-    error.value = ''
+  project: StoryProject,
+  sections: StorySection[],
+  images: StoryImage[],
+  options: VideoOptions
+): Promise<void> {
+  isGenerating.value = true
+  progress.value = 0
+  progressLabel.value = 'Setting up...'
+  error.value = ''
 
-    try {
-      // Dynamically import ffmpeg to keep bundle size down
-      const { FFmpeg } = await import('@ffmpeg/ffmpeg')
-      const { fetchFile, toBlobURL } = await import('@ffmpeg/util')
+  try {
+    const { FFmpeg } = await import('@ffmpeg/ffmpeg')
+    const { fetchFile, toBlobURL } = await import('@ffmpeg/util')
 
-      const ffmpeg = new FFmpeg()
+    const ffmpeg = new FFmpeg()
 
-      progressLabel.value = 'Loading video engine...'
+    progressLabel.value = 'Loading video engine...'
+    const baseURL = 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/esm'
+    await ffmpeg.load({
+      coreURL: await toBlobURL(`${baseURL}/ffmpeg-core.js`, 'text/javascript'),
+      wasmURL: await toBlobURL(`${baseURL}/ffmpeg-core.wasm`, 'application/wasm'),
+    })
 
-      // Load ffmpeg core from CDN
-      const baseURL = 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/esm'
-      await ffmpeg.load({
-        coreURL: await toBlobURL(`${baseURL}/ffmpeg-core.js`, 'text/javascript'),
-        wasmURL: await toBlobURL(`${baseURL}/ffmpeg-core.wasm`, 'application/wasm'),
-      })
+    ffmpeg.on('progress', ({ progress: p }) => {
+      progress.value = Math.round(50 + p * 45)
+      progressLabel.value = `Encoding video... ${progress.value}%`
+    })
 
-      ffmpeg.on('progress', ({ progress: p }) => {
-        progress.value = Math.round(40 + p * 55)
-        progressLabel.value = `Encoding video... ${progress.value}%`
-      })
+    const { supabase } = await import('../lib/supabase')
+    const { data: voiceData } = await supabase
+      .from('voice_recordings')
+      .select('id, section_id, show_qr')
+      .eq('project_id', project.id)
+      .eq('show_qr', true)
 
-      // Build slides
-      const { supabase } = await import('../lib/supabase')
-      const { data: voiceData } = await supabase
-        .from('voice_recordings')
-        .select('id, section_id, show_qr')
-        .eq('project_id', project.id)
-        .eq('show_qr', true)
-
-      const voiceMap = new Map<string, string>()
-      if (voiceData) {
-        for (const rec of voiceData) {
-          voiceMap.set(rec.section_id, `https://tellmeyourstory.uk/listen/${rec.id}`)
-        }
+    const voiceMap = new Map<string, string>()
+    if (voiceData) {
+      for (const rec of voiceData) {
+        voiceMap.set(rec.section_id, `https://tellmeyourstory.uk/listen/${rec.id}`)
       }
+    }
 
-      const slides = buildSlides(project, sections, images, voiceMap)
-           
-      
+    const slides = buildSlides(project, sections, images, voiceMap)
 
-      // Draw each slide to canvas and capture as PNG
-      const canvas = document.createElement('canvas')
-      canvas.width = W
-      canvas.height = H
-      const ctx = canvas.getContext('2d')!
+    const canvas = document.createElement('canvas')
+    canvas.width = W
+    canvas.height = H
+    const ctx = canvas.getContext('2d')!
 
-      const fps = 25  // render at 25fps for smooth transitions
-      const frameDuration = options.slideDuration
+    const fps = 25
+    const frameDuration = options.slideDuration
+    const transitionSecs = options.transition === 'cut' ? 0
+      : options.transition === 'fade' ? 1
+      : 2
+    const transitionFrameCount = transitionSecs * fps
 
-      // Transition duration in seconds
-      const transitionSecs = options.transition === 'cut' ? 0
-        : options.transition === 'fade' ? 1
-        : 2 // slow-fade
-      const transitionFrameCount = transitionSecs * fps
+    // Helper — capture current canvas as Uint8Array without holding onto ArrayBuffer
+    async function captureFrame(): Promise<Uint8Array> {
+      const blob: Blob = await new Promise((resolve) =>
+        canvas.toBlob((b) => resolve(b!), 'image/png')
+      )
+      const ab = await blob.arrayBuffer()
+      return new Uint8Array(ab)
+    }
 
-      progressLabel.value = 'Drawing slides...'
+    let frameIndex = 0
 
-      let frameIndex = 0
+    async function writeFrames(data: Uint8Array, count: number) {
+      for (let f = 0; f < count; f++) {
+        await ffmpeg.writeFile(`frame${String(frameIndex).padStart(5, '0')}.png`, data)
+        frameIndex++
+      }
+    }
 
-      // Helper — write N identical frames from a buffer
-      async function writeFrames(buf: ArrayBuffer, count: number) {
-        for (let f = 0; f < count; f++) {
-          const copy = new Uint8Array(buf.byteLength)
-          copy.set(new Uint8Array(buf))
-          await ffmpeg.writeFile(`frame${String(frameIndex).padStart(5, '0')}.png`, copy)
+    // Render and write frames one slide at a time — never hold more than 2 slides in memory
+    progressLabel.value = 'Rendering slides...'
+
+    let prevFrameData: Uint8Array | null = null
+
+    for (let s = 0; s < slides.length; s++) {
+      progress.value = Math.round((s / slides.length) * 45)
+      progressLabel.value = `Rendering slide ${s + 1} of ${slides.length}...`
+
+      await drawSlide(ctx, slides[s], options.theme)
+      const currFrameData = await captureFrame()
+
+      // Transition from previous slide
+      if (transitionFrameCount > 0 && prevFrameData && s > 0) {
+        const prevBlob = new Blob([new Uint8Array(prevFrameData)], { type: 'image/png' })
+        const prevImg = new Image()
+        prevImg.src = URL.createObjectURL(prevBlob)
+        await new Promise((r) => { prevImg.onload = r })
+
+        const currBlob = new Blob([new Uint8Array(currFrameData)], { type: 'image/png' })
+        const currImg = new Image()
+        currImg.src = URL.createObjectURL(currBlob)
+        await new Promise((r) => { currImg.onload = r })
+
+        for (let t = 0; t < transitionFrameCount; t++) {
+          const alpha = t / (transitionFrameCount - 1)
+          ctx.clearRect(0, 0, W, H)
+          ctx.globalAlpha = 1
+          ctx.drawImage(prevImg, 0, 0)
+          ctx.globalAlpha = alpha
+          ctx.drawImage(currImg, 0, 0)
+          ctx.globalAlpha = 1
+          const blendData = await captureFrame()
+          await ffmpeg.writeFile(`frame${String(frameIndex).padStart(5, '0')}.png`, blendData)
           frameIndex++
         }
+
+        URL.revokeObjectURL(prevImg.src)
+        URL.revokeObjectURL(currImg.src)
       }
 
-      // Helper — capture current canvas as ArrayBuffer
-      async function captureCanvas(): Promise<ArrayBuffer> {
-        const blob: Blob = await new Promise((resolve) => canvas.toBlob((b) => resolve(b!), 'image/png'))
-        return blob.arrayBuffer()
-      }
+      // Static frames for this slide
+      const isFirst = s === 0
+      const isLast = s === slides.length - 1
+      const leadIn  = isFirst ? 0 : Math.floor(transitionFrameCount / 2)
+      const leadOut = isLast  ? 0 : Math.floor(transitionFrameCount / 2)
+      const staticFrames = Math.max(1, (frameDuration * fps) - leadIn - leadOut)
+      await writeFrames(currFrameData, staticFrames)
 
-      // Pre-render all slides as image buffers
-      progressLabel.value = 'Rendering slides...'
-      const slideBuffers: ArrayBuffer[] = []
-      for (let s = 0; s < slides.length; s++) {
-        await drawSlide(ctx, slides[s], options.theme)
-        progress.value = Math.round((s / slides.length) * 30)
-        progressLabel.value = `Rendering slide ${s + 1} of ${slides.length}...`
-        slideBuffers.push(await captureCanvas())
-      }
-
-      // Write frames with transitions between slides
-      progressLabel.value = 'Writing frames...'
-      for (let s = 0; s < slideBuffers.length; s++) {
-        const buf = slideBuffers[s]
-
-        // How many static frames for this slide
-        // Subtract half the transition from each side (except first and last)
-        const isFirst = s === 0
-        const isLast = s === slideBuffers.length - 1
-        const leadIn  = isFirst ? 0 : Math.floor(transitionFrameCount / 2)
-        const leadOut = isLast  ? 0 : Math.floor(transitionFrameCount / 2)
-        const staticFrames = (frameDuration * fps) - leadIn - leadOut
-
-        // Write static frames
-        await writeFrames(buf, Math.max(1, staticFrames))
-
-        progress.value = 30 + Math.round((s / slideBuffers.length) * 10)
-
-        // Write cross-fade transition to next slide
-        if (transitionFrameCount > 0 && s < slideBuffers.length - 1) {
-          const nextBuf = slideBuffers[s + 1]
-
-          // Load current slide as Image for blending
-          const currBlob = new Blob([buf], { type: 'image/png' })
-          const currImg = new Image()
-          currImg.src = URL.createObjectURL(currBlob)
-          await new Promise((r) => { currImg.onload = r })
-
-          const nextBlob = new Blob([nextBuf], { type: 'image/png' })
-          const nextImg = new Image()
-          nextImg.src = URL.createObjectURL(nextBlob)
-          await new Promise((r) => { nextImg.onload = r })
-
-          for (let t = 0; t < transitionFrameCount; t++) {
-            const alpha = t / (transitionFrameCount - 1) // 0 → 1
-
-            ctx.clearRect(0, 0, W, H)
-            ctx.globalAlpha = 1
-            ctx.drawImage(currImg, 0, 0)
-            ctx.globalAlpha = alpha
-            ctx.drawImage(nextImg, 0, 0)
-            ctx.globalAlpha = 1
-
-            const blendBuf = await captureCanvas()
-            const copy = new Uint8Array(blendBuf.byteLength)
-            copy.set(new Uint8Array(blendBuf))
-            await ffmpeg.writeFile(`frame${String(frameIndex).padStart(5, '0')}.png`, copy)
-            frameIndex++
-          }
-
-          URL.revokeObjectURL(currImg.src)
-          URL.revokeObjectURL(nextImg.src)
-        }
-      }
-
-      progress.value = 38
-      progressLabel.value = 'Assembling video...'
-
-      // Build ffmpeg command
-      const ffmpegArgs: string[] = [
-        '-framerate', String(fps),
-        '-i', 'frame%05d.png',
-      ]
-
-      // Add music if provided
-      if (options.musicFile) {
-        const musicData = await fetchFile(options.musicFile)
-        await ffmpeg.writeFile('music.mp3', musicData)
-        const transitionSecs = options.transition === 'cut' ? 0
-          : options.transition === 'fade' ? 1 : 2
-        const totalDuration = slides.length * frameDuration + (slides.length - 1) * transitionSecs
-        ffmpegArgs.push('-i', 'music.mp3')
-        ffmpegArgs.push('-c:v', 'libx264')
-        ffmpegArgs.push('-c:a', 'aac')
-        ffmpegArgs.push('-filter_complex', `[1:a]aloop=loop=-1:size=2147483647,atrim=duration=${totalDuration}[aout]`)
-        ffmpegArgs.push('-map', '0:v:0')
-        ffmpegArgs.push('-map', '[aout]')
-      } else {
-        ffmpegArgs.push('-c:v', 'libx264')
-      }
-
-      ffmpegArgs.push(
-        '-pix_fmt', 'yuv420p',
-        '-vf', `scale=${W}:${H}`,
-        '-r', '25',
-        '-preset', 'ultrafast',
-        'output.mp4'
-      )
-
-      await ffmpeg.exec(ffmpegArgs)
-
-      progress.value = 95
-      progressLabel.value = 'Preparing download...'
-
-      const rawData = await ffmpeg.readFile('output.mp4')
-const uint8Data = rawData instanceof Uint8Array ? rawData : new Uint8Array(rawData as unknown as ArrayBuffer)
-const safeData = new Uint8Array(uint8Data.byteLength)
-safeData.set(uint8Data)
-const blob = new Blob([safeData], { type: 'video/mp4' })
-      const url = URL.createObjectURL(blob)
-
-      // Trigger download
-      const a = document.createElement('a')
-      a.href = url
-      a.download = `${project.title.replace(/\s+/g, '-').toLowerCase()}-story.mp4`
-      document.body.appendChild(a)
-      a.click()
-      document.body.removeChild(a)
-
-      // Cleanup
-      setTimeout(() => URL.revokeObjectURL(url), 10000)
-
-      progress.value = 100
-      progressLabel.value = 'Done! Your video is downloading.'
-
-      // Clean up ffmpeg files
-      for (let i = 0; i < frameIndex; i++) {
-        const name = `frame${String(i).padStart(5, '0')}.png`
-        await ffmpeg.deleteFile(name).catch(() => null)
-      }
-      await ffmpeg.deleteFile('output.mp4').catch(() => null)
-      if (options.musicFile) {
-        await ffmpeg.deleteFile('music.mp3').catch(() => null)
-      }
-
-    } catch (err) {
-      console.error('Video generation error:', err)
-      error.value =
-        err instanceof Error
-          ? err.message
-          : 'Something went wrong generating the video. Please try again.'
-    } finally {
-      isGenerating.value = false
-      setTimeout(() => {
-        if (progress.value === 100) {
-          progress.value = 0
-          progressLabel.value = ''
-        }
-      }, 4000)
+      prevFrameData = currFrameData
     }
+
+    progress.value = 48
+    progressLabel.value = 'Assembling video...'
+
+    const ffmpegArgs: string[] = [
+      '-framerate', String(fps),
+      '-i', 'frame%05d.png',
+    ]
+
+    if (options.musicFile) {
+      const musicData = await fetchFile(options.musicFile)
+      await ffmpeg.writeFile('music.mp3', musicData)
+      const totalDuration = slides.length * frameDuration + (slides.length - 1) * transitionSecs
+      ffmpegArgs.push('-i', 'music.mp3')
+      ffmpegArgs.push('-c:v', 'libx264')
+      ffmpegArgs.push('-c:a', 'aac')
+      ffmpegArgs.push('-filter_complex', `[1:a]aloop=loop=-1:size=2147483647,atrim=duration=${totalDuration}[aout]`)
+      ffmpegArgs.push('-map', '0:v:0')
+      ffmpegArgs.push('-map', '[aout]')
+    } else {
+      ffmpegArgs.push('-c:v', 'libx264')
+    }
+
+    ffmpegArgs.push(
+      '-pix_fmt', 'yuv420p',
+      '-vf', `scale=${W}:${H}`,
+      '-r', '25',
+      '-preset', 'ultrafast',
+      'output.mp4'
+    )
+
+    await ffmpeg.exec(ffmpegArgs)
+
+    progress.value = 95
+    progressLabel.value = 'Preparing download...'
+
+    const rawData = await ffmpeg.readFile('output.mp4')
+    const uint8Data = rawData instanceof Uint8Array ? rawData : new Uint8Array(rawData as unknown as ArrayBuffer)
+    const blob = new Blob([new Uint8Array(uint8Data)], { type: 'video/mp4' })
+    const url = URL.createObjectURL(blob)
+
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `${project.title.replace(/\s+/g, '-').toLowerCase()}-story.mp4`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    setTimeout(() => URL.revokeObjectURL(url), 10000)
+
+    progress.value = 100
+    progressLabel.value = 'Done! Your video is downloading.'
+
+    for (let i = 0; i < frameIndex; i++) {
+      await ffmpeg.deleteFile(`frame${String(i).padStart(5, '0')}.png`).catch(() => null)
+    }
+    await ffmpeg.deleteFile('output.mp4').catch(() => null)
+    if (options.musicFile) {
+      await ffmpeg.deleteFile('music.mp3').catch(() => null)
+    }
+
+  } catch (err) {
+    console.error('Video generation error:', err)
+    error.value = err instanceof Error
+      ? err.message
+      : 'Something went wrong generating the video. Please try again.'
+  } finally {
+    isGenerating.value = false
+    setTimeout(() => {
+      if (progress.value === 100) {
+        progress.value = 0
+        progressLabel.value = ''
+      }
+    }, 4000)
   }
+}
 
   return {
     isGenerating,
