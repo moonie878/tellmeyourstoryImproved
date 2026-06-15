@@ -103,6 +103,12 @@ const routes = [
 { path: '/reminiscence-therapy-life-story', component: () => import('../views/ReminiscenceTherapyLifeStoryView.vue') },
 { path: '/bereavement-gift-ideas',          component: () => import('../views/BereavementGiftIdeasView.vue') },
 { path: '/legacy-letter-to-children',       component: () => import('../views/LegacyLetterToChildrenView.vue') },
+{ path: '/oral-history-questions',           component: () => import('../views/OralHistoryQuestionsView.vue') },
+{ path: '/how-to-record-grandparents-story', component: () => import('../views/HowToRecordGrandparentsStoryView.vue') },
+{ path: '/storyworth-vs-remento',            component: () => import('../views/StoryworthVsRementoView.vue') },
+{ path: '/storykeeper-vs-storyworth',        component: () => import('../views/StorykeeperVsStoryworthView.vue') },
+{ path: '/personalised-gift-for-grandparents', component: () => import('../views/PersonalisedGiftForGrandparentsView.vue') },
+{ path: '/questions-about-family-history',   component: () => import('../views/QuestionsAboutFamilyHistoryView.vue') },
 {
   path: '/remento-alternative',
   name: 'remento-alternative',
