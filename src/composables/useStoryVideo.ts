@@ -537,12 +537,13 @@ export function useStoryVideo() {
 
     let frameIndex = 0
 
-    async function writeFrames(data: Uint8Array, count: number) {
-      for (let f = 0; f < count; f++) {
-        await ffmpeg.writeFile(`frame${String(frameIndex).padStart(5, '0')}.png`, data)
-        frameIndex++
-      }
-    }
+   async function writeFrames(data: Uint8Array, count: number) {
+  for (let f = 0; f < count; f++) {
+    // Fresh copy each time — ffmpeg detaches the buffer on write
+    await ffmpeg.writeFile(`frame${String(frameIndex).padStart(5, '0')}.png`, new Uint8Array(data))
+    frameIndex++
+  }
+}
 
     // Render and write frames one slide at a time — never hold more than 2 slides in memory
     progressLabel.value = 'Rendering slides...'
@@ -577,8 +578,8 @@ export function useStoryVideo() {
           ctx.drawImage(currImg, 0, 0)
           ctx.globalAlpha = 1
           const blendData = await captureFrame()
-          await ffmpeg.writeFile(`frame${String(frameIndex).padStart(5, '0')}.png`, blendData)
-          frameIndex++
+await ffmpeg.writeFile(`frame${String(frameIndex).padStart(5, '0')}.png`, new Uint8Array(blendData))
+frameIndex++
         }
 
         URL.revokeObjectURL(prevImg.src)
