@@ -565,28 +565,32 @@ async function renderSection(
   let imgW = 0
   let imgH = 0
 
-  if (imageUrl) {
-    try {
-      const rawImgData = await loadImageAsBase64(imageUrl)
-      const img = new Image()
-      img.src = rawImgData
-      await new Promise((resolve, reject) => {
-        img.onload = resolve
-        img.onerror = reject
-      })
+ if (imageUrl) {
+  try {
+    const rawImgData = await loadImageAsBase64(imageUrl)
+    const img = new Image()
+    img.src = rawImgData
+    await new Promise((resolve, reject) => {
+      img.onload = resolve
+      img.onerror = reject
+    })
 
-      // Image sits below text at full content width, capped at a sensible height
-      const maxIW = contentWidth(pageNum.n)
-      const maxIH = 70
-      const ratio = Math.min(maxIW / img.width, maxIH / img.height, 1)
-      imgW = img.width * ratio
-      imgH = img.height * ratio
+    // img.width/height are in px — convert to mm at 96dpi (1px = 0.2646mm)
+    const PX_TO_MM = 0.2646
+    const naturalW = img.width * PX_TO_MM
+    const naturalH = img.height * PX_TO_MM
 
-      imgData = await compressImage(rawImgData, imgW, imgH)
-    } catch {
-      imgData = null
-    }
+    const maxIW = contentWidth(pageNum.n)
+    const maxIH = 70
+    const ratio = Math.min(maxIW / naturalW, maxIH / naturalH, 1)
+    imgW = naturalW * ratio
+    imgH = naturalH * ratio
+
+    imgData = await compressImage(rawImgData, imgW, imgH)
+  } catch {
+    imgData = null
   }
+}
 
   // Always use full content width — image goes below, not beside
   const currentX = contentX(pageNum.n)
