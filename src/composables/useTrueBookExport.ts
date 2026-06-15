@@ -575,26 +575,28 @@ async function renderSection(
         img.onerror = reject
       })
 
-      const maxIW = contentWidth(pageNum.n) * 0.45
-      const maxIH = 55
-      const ratio = Math.min(maxIW / img.width, maxIH / img.height)
+      // Image sits below text at full content width, capped at a sensible height
+      const maxIW = contentWidth(pageNum.n)
+      const maxIH = 70
+      const ratio = Math.min(maxIW / img.width, maxIH / img.height, 1)
       imgW = img.width * ratio
       imgH = img.height * ratio
 
-      // Compress image to JPEG at print quality
       imgData = await compressImage(rawImgData, imgW, imgH)
     } catch {
       imgData = null
     }
   }
 
-  const textW = imgData ? contentWidth(pageNum.n) - imgW - 6 : contentWidth(pageNum.n)
+  // Always use full content width — image goes below, not beside
+  const currentX = contentX(pageNum.n)
+  const currentW = contentWidth(pageNum.n)
 
   doc.setFont('EBGaramond', 'bolditalic')
   doc.setFontSize(QUESTION_SIZE)
   setTxt(doc, C_SECONDARY)
-  const qLines = splitText(doc, section.question, textW)
-  const qH = textHeight(qLines)
+  const qLinesFinal = splitText(doc, section.question, currentW)
+  const qH = textHeight(qLinesFinal)
 
   doc.setFont('EBGaramond', 'normal')
   doc.setFontSize(ANSWER_SIZE)
@@ -605,37 +607,34 @@ async function renderSection(
 
   if (isFirstInChapter && answerText) {
     const rest = answerText.slice(1)
-    aLines = splitText(doc, rest, textW - 6)
+    aLines = splitText(doc, rest, currentW - 6)
   } else {
-    aLines = splitText(doc, answerText, textW)
+    aLines = splitText(doc, answerText, currentW)
   }
 
   const aH = textHeight(aLines)
+  const imgBlockH = imgData ? imgH + 6 : 0 // 6 = gap above image
 
-  if (y.val + qH + QUESTION_GAP + aH > maxY) {
+  // Check if everything (question + answer + image) fits; if not, new page
+  if (y.val + qH + QUESTION_GAP + aH + imgBlockH > maxY) {
     doc.addPage()
     pageNum.n++
     pageBg(doc)
-    y.val = isRecto(pageNum.n) ? RECTO_TOP : VERSO_TOP
+    y.val = isRecto(pageNum.n) ? RECTO_TOP + 4 : VERSO_TOP + 4
   }
 
-  const currentX = contentX(pageNum.n)
-  const currentW = contentWidth(pageNum.n)
-  const textWFinal = imgData ? currentW - imgW - 6 : currentW
-
+  // ── Question ──────────────────────────────────────────────────────
   doc.setFont('EBGaramond', 'bolditalic')
   doc.setFontSize(QUESTION_SIZE)
   setTxt(doc, C_SECONDARY)
-  const qLinesFinal = splitText(doc, section.question, textWFinal)
   qLinesFinal.forEach((ln, i) => {
     doc.text(ln, currentX, y.val + i * LINE_HEIGHT)
   })
-
   y.val += textHeight(qLinesFinal) + QUESTION_GAP
 
+  // ── Answer ────────────────────────────────────────────────────────
   if (answerText) {
     if (isFirstInChapter) {
-      // Drop cap for first letter
       const firstLetter = answerText.charAt(0)
       const rest = answerText.slice(1)
 
@@ -649,7 +648,7 @@ async function renderSection(
       doc.setFontSize(ANSWER_SIZE)
       setTxt(doc, C_PRIMARY)
 
-      let restLines = splitText(doc, rest, textWFinal - dcW)
+      let restLines = splitText(doc, rest, currentW - dcW)
 
       while (restLines.length > 0) {
         const pageMaxY = PH - RECTO_BOTTOM - 10
@@ -674,7 +673,7 @@ async function renderSection(
       doc.setFontSize(ANSWER_SIZE)
       setTxt(doc, C_PRIMARY)
 
-      let aLinesFinal = splitText(doc, answerText, textWFinal)
+      let aLinesFinal = splitText(doc, answerText, currentW)
 
       while (aLinesFinal.length > 0) {
         const pageMaxY = PH - RECTO_BOTTOM - 10
@@ -697,25 +696,27 @@ async function renderSection(
     }
   }
 
+  // ── Image — below the answer, centred ────────────────────────────
   if (imgData) {
-  // Place image BESIDE the question and answer, aligned to top of section
-  const sectionStartY = y.val - textHeight(aLines) - QUESTION_GAP - textHeight(qLinesFinal)
-  const imgX = currentX + textWFinal + 4
-  const imgY = Math.max(sectionStartY, isRecto(pageNum.n) ? RECTO_TOP + 4 : VERSO_TOP + 4)
+    y.val += 6 // gap between answer and image
 
-  // Only draw if image fits on page
-  const maxY = PH - RECTO_BOTTOM - 10
-  if (imgY + imgH <= maxY) {
+    // If the image doesn't fit on this page, push to next
+    if (y.val + imgH > maxY) {
+      doc.addPage()
+      pageNum.n++
+      pageBg(doc)
+      y.val = isRecto(pageNum.n) ? RECTO_TOP + 4 : VERSO_TOP + 4
+    }
+
+    const imgX = contentX(pageNum.n) + (contentWidth(pageNum.n) - imgW) / 2
+
     setDraw(doc, C_DIVIDER)
     doc.setLineWidth(0.25)
-    doc.roundedRect(imgX - 1, imgY - 1, imgW + 2, imgH + 2, 2, 2)
-    doc.addImage(imgData, 'JPEG', imgX, imgY, imgW, imgH)
+    doc.roundedRect(imgX - 1, y.val - 1, imgW + 2, imgH + 2, 2, 2)
+    doc.addImage(imgData, 'JPEG', imgX, y.val, imgW, imgH)
 
-    if (y.val < imgY + imgH + 4) {
-      y.val = imgY + imgH + 4
-    }
+    y.val += imgH + 4
   }
-}
 
   // ── QR code — only if this section has a voice recording ─────────
   if (qrUrl) {
@@ -724,7 +725,7 @@ async function renderSection(
       const qrMaxY = PH - RECTO_BOTTOM - 14
       const qrDataUrl = await generateQRDataUrl(qrUrl)
       const qrX = contentX(pageNum.n) + contentWidth(pageNum.n) - QR_SIZE
-      let qrY = y.val + 4  // small gap below answer
+      let qrY = y.val + 4
 
       if (qrY + QR_SIZE + 8 > qrMaxY) {
         doc.addPage()
