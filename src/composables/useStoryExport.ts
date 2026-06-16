@@ -1058,12 +1058,14 @@ export function useStoryExport() {
         const maxWidth = metrics.contentWidth
         const maxHeight = design.layout.imageMaxHeight
 
-        let imgWidth = img.width
-        let imgHeight = img.height
+        // img.width/height are pixels — convert to mm at 96dpi (1px = 0.2646mm)
+const PX_TO_MM = 0.2646
+const naturalW = img.width * PX_TO_MM
+const naturalH = img.height * PX_TO_MM
 
-        const ratio = Math.min(maxWidth / imgWidth, maxHeight / imgHeight)
-        imgWidth *= ratio
-        imgHeight *= ratio
+const ratio = Math.min(maxWidth / naturalW, maxHeight / naturalH, 1)
+const imgWidth = naturalW * ratio
+const imgHeight = naturalH * ratio
 
         if (yState.y + imgHeight > metrics.maxY) {
           doc.addPage()
@@ -1356,12 +1358,14 @@ export function useStoryExport() {
               ? 82
               : 88
 
-        let imgWidth = img.width
-        let imgHeight = img.height
+        // img.width/height are pixels — convert to mm at 96dpi (1px = 0.2646mm)
+const PX_TO_MM = 0.2646
+const naturalW = img.width * PX_TO_MM
+const naturalH = img.height * PX_TO_MM
 
-        const ratio = Math.min(maxWidth / imgWidth, maxHeight / imgHeight)
-        imgWidth *= ratio
-        imgHeight *= ratio
+const ratio = Math.min(maxWidth / naturalW, maxHeight / naturalH, 1)
+const imgWidth = naturalW * ratio
+const imgHeight = naturalH * ratio
 
         const imageX = metrics.rightX + (metrics.columnWidth - imgWidth) / 2
 
