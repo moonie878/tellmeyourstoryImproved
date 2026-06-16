@@ -93,7 +93,7 @@
             class="w-full block"
           >
             <source
-              src="/images/example/dorothy's-story-story.mp4"
+              src="https://jeyybcdnmezivjuvmmcu.supabase.co/storage/v1/object/public/assets/example.mp4"
               type="video/mp4"
             />
             Your browser does not support video playback.
@@ -256,7 +256,7 @@
 
         <div class="mt-10 overflow-hidden rounded-3xl border border-[#E8DDD0] shadow-xl">
           <iframe
-            src="/images/example/dorothys-story.pdf"
+            src="/example-story.pdf"
             width="100%"
             height="900"
             class="block bg-[#F5F0E8]"
