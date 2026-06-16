@@ -189,16 +189,14 @@ async function drawSlide(
   const cx = W / 2
   const pad = 120
 
-  // Background
   ctx.fillStyle = colors.pageBg
   ctx.fillRect(0, 0, W, H)
 
+  // ── TITLE ─────────────────────────────────────────────────────────
   if (slide.type === 'title') {
-    // Cover image if available
     if (slide.coverImageUrl) {
       const img = await loadImage(slide.coverImageUrl)
       if (img) {
-        // Left half image
         ctx.save()
         ctx.beginPath()
         ctx.rect(0, 0, W / 2, H)
@@ -207,8 +205,6 @@ async function drawSlide(
         const iw = img.width * scale
         const ih = img.height * scale
         ctx.drawImage(img, (W / 2 - iw) / 2, (H - ih) / 2, iw, ih)
-
-        // Gradient overlay on image side
         const grad = ctx.createLinearGradient(W / 2, 0, 0, 0)
         grad.addColorStop(0, colors.pageBg)
         grad.addColorStop(0.3, `${colors.pageBg}00`)
@@ -216,105 +212,78 @@ async function drawSlide(
         ctx.fillRect(0, 0, W / 2, H)
         ctx.restore()
 
-        // Text on right half
         const tx = W * 0.55
         const tw = W * 0.38
-
         ctx.font = `300 22px Georgia, serif`
         ctx.fillStyle = colors.textMuted
         ctx.textAlign = 'left'
         ctx.fillText('Tell Me Your Story', tx, H * 0.35)
-
         drawOrnament(ctx, tx + tw / 2, H * 0.4, colors.accent)
-
         ctx.font = `bold 72px Georgia, serif`
         ctx.fillStyle = colors.textPrimary
-        const titleLines = wrapText(ctx, slide.title, tw, 90)
-        titleLines.forEach((line, i) => {
-          ctx.fillText(line, tx, H * 0.48 + i * 90)
-        })
-
+        const titleLines = wrapText(ctx, slide.title, tw)
+        titleLines.forEach((line, i) => { ctx.fillText(line, tx, H * 0.48 + i * 90) })
         const afterTitle = H * 0.48 + titleLines.length * 90 + 20
         drawOrnament(ctx, tx + tw / 2, afterTitle, colors.accent)
-
         ctx.font = `italic 28px Georgia, serif`
         ctx.fillStyle = colors.textSecondary
-        const subLines = wrapText(ctx, slide.subtitle, tw, 40)
-        subLines.forEach((line, i) => {
-          ctx.fillText(line, tx, afterTitle + 40 + i * 44)
-        })
+        const subLines = wrapText(ctx, slide.subtitle, tw)
+        subLines.forEach((line, i) => { ctx.fillText(line, tx, afterTitle + 40 + i * 44) })
       }
     } else {
-      // No cover image — centred layout
       ctx.textAlign = 'center'
-
       ctx.font = `300 22px Georgia, serif`
       ctx.fillStyle = colors.textMuted
       ctx.fillText('Tell Me Your Story', cx, H * 0.32)
-
       drawOrnament(ctx, cx, H * 0.37, colors.accent)
-
       ctx.font = `bold 80px Georgia, serif`
       ctx.fillStyle = colors.textPrimary
-      const titleLines = wrapText(ctx, slide.title, W - pad * 2, 100)
-      titleLines.forEach((line, i) => {
-        ctx.fillText(line, cx, H * 0.46 + i * 100)
-      })
-
+      const titleLines = wrapText(ctx, slide.title, W - pad * 2)
+      titleLines.forEach((line, i) => { ctx.fillText(line, cx, H * 0.46 + i * 100) })
       const afterTitle = H * 0.46 + titleLines.length * 100 + 24
       drawOrnament(ctx, cx, afterTitle, colors.accent)
-
       ctx.font = `italic 30px Georgia, serif`
       ctx.fillStyle = colors.textSecondary
       ctx.fillText(slide.subtitle, cx, afterTitle + 50)
     }
   }
 
+  // ── CHAPTER ───────────────────────────────────────────────────────
   if (slide.type === 'chapter') {
     ctx.textAlign = 'center'
-
-    // Subtle top rule
     ctx.strokeStyle = colors.divider
     ctx.lineWidth = 1
     ctx.beginPath()
     ctx.moveTo(pad, 60)
     ctx.lineTo(W - pad, 60)
     ctx.stroke()
-
     ctx.font = `300 20px Georgia, serif`
     ctx.fillStyle = colors.textMuted
     ctx.letterSpacing = '4px'
     ctx.fillText(`CHAPTER ${slide.chapterIndex}`, cx, H * 0.36)
     ctx.letterSpacing = '0px'
-
     drawOrnament(ctx, cx, H * 0.42, colors.accent)
-
     ctx.font = `bold 88px Georgia, serif`
     ctx.fillStyle = colors.textPrimary
     ctx.fillText(slide.chapter, cx, H * 0.55)
-
     drawOrnament(ctx, cx, H * 0.61, colors.accent)
-
     ctx.font = `italic 30px Georgia, serif`
     ctx.fillStyle = colors.textSecondary
-    const introLines = wrapText(ctx, slide.intro, 900, 44)
-    introLines.forEach((line, i) => {
-      ctx.fillText(line, cx, H * 0.68 + i * 44)
-    })
-
-    // Bottom rule
+    const introLines = wrapText(ctx, slide.intro, 900)
+    introLines.forEach((line, i) => { ctx.fillText(line, cx, H * 0.68 + i * 44) })
     ctx.beginPath()
     ctx.moveTo(pad, H - 60)
     ctx.lineTo(W - pad, H - 60)
     ctx.stroke()
   }
 
+  // ── ANSWER ────────────────────────────────────────────────────────
   if (slide.type === 'answer') {
     const hasImage = !!slide.imageUrl
-    const textX = hasImage ? pad : pad
     const textW = hasImage ? W * 0.52 - pad : W - pad * 2
+    const bottomLimit = H - 80
 
-    // Chapter label top left
+    // Chapter label
     ctx.font = `300 18px Georgia, serif`
     ctx.fillStyle = colors.textMuted
     ctx.textAlign = 'left'
@@ -328,40 +297,84 @@ async function drawSlide(
     ctx.lineTo(W - pad, 80)
     ctx.stroke()
 
-    // Question
-    ctx.font = `italic 32px Georgia, serif`
+    // Auto-fit font size so all text fits within bottomLimit
+    let fontSize = 30
+    let qFontSize = 32
+    let lineH = 42
+    let qLineH = 44
+    let fits = false
+
+    while (fontSize >= 16 && !fits) {
+      qFontSize = fontSize + 2
+      lineH = Math.round(fontSize * 1.4)
+      qLineH = Math.round(qFontSize * 1.38)
+
+      ctx.font = `italic ${qFontSize}px Georgia, serif`
+      const qLines = wrapText(ctx, slide.question, textW)
+      const answerStartY = 160 + qLines.length * qLineH + 40
+
+      const dropCapSize = Math.round(fontSize * 2.4)
+      ctx.font = `bold ${dropCapSize}px Georgia, serif`
+      const dropCapW = ctx.measureText(slide.answer.charAt(0)).width + 6
+
+      ctx.font = `400 ${fontSize}px Georgia, serif`
+      const restAnswer = slide.answer.slice(1)
+      const firstLineWords = restAnswer.split(' ')
+      let firstLine = ''
+      let remaining = ''
+      let measuring = true
+      for (let i = 0; i < firstLineWords.length; i++) {
+        const test = firstLine ? `${firstLine} ${firstLineWords[i]}` : firstLineWords[i]
+        if (measuring && ctx.measureText(test).width > textW - dropCapW) {
+          remaining = firstLineWords.slice(i).join(' ')
+          measuring = false
+          break
+        }
+        firstLine = test
+      }
+      if (measuring) remaining = ''
+
+      const remainingLines = wrapText(ctx, remaining, textW)
+      const totalH = answerStartY + dropCapSize + 8 + remainingLines.length * lineH
+
+      if (totalH <= bottomLimit) {
+        fits = true
+      } else {
+        fontSize -= 2
+      }
+    }
+
+    // Render question
+    ctx.font = `italic ${qFontSize}px Georgia, serif`
     ctx.fillStyle = colors.textSecondary
     ctx.textAlign = 'left'
-    const qLines = wrapText(ctx, slide.question, textW, 44)
+    const qLines = wrapText(ctx, slide.question, textW)
     qLines.forEach((line, i) => {
-      ctx.fillText(line, textX, 160 + i * 44)
+      ctx.fillText(line, pad, 160 + i * qLineH)
     })
 
-    const answerY = 160 + qLines.length * 44 + 40
-
-    // Drop cap
+    const answerY = 160 + qLines.length * qLineH + 40
+    const dropCapSize = Math.round(fontSize * 2.4)
     const firstLetter = slide.answer.charAt(0)
     const restAnswer = slide.answer.slice(1)
 
-    ctx.font = `bold 72px Georgia, serif`
+    // Drop cap
+    ctx.font = `bold ${dropCapSize}px Georgia, serif`
     ctx.fillStyle = colors.accent
-    ctx.textAlign = 'left'
-    ctx.fillText(firstLetter, textX, answerY + 8)
+    ctx.fillText(firstLetter, pad, answerY + 8)
     const dropCapW = ctx.measureText(firstLetter).width + 6
 
-    ctx.font = `400 30px Georgia, serif`
+    ctx.font = `400 ${fontSize}px Georgia, serif`
     ctx.fillStyle = colors.textPrimary
 
-    // First line after drop cap
-    const firstLineW = textW - dropCapW
+    // First line beside drop cap
     const allWords = restAnswer.split(' ')
     let firstLine = ''
     let remaining = ''
     let measuring = true
-
     for (let i = 0; i < allWords.length; i++) {
       const test = firstLine ? `${firstLine} ${allWords[i]}` : allWords[i]
-      if (measuring && ctx.measureText(test).width > firstLineW) {
+      if (measuring && ctx.measureText(test).width > textW - dropCapW) {
         remaining = allWords.slice(i).join(' ')
         measuring = false
         break
@@ -370,16 +383,15 @@ async function drawSlide(
     }
     if (measuring) remaining = ''
 
-    ctx.fillText(firstLine, textX + dropCapW, answerY)
+    ctx.fillText(firstLine, pad + dropCapW, answerY)
 
     // Remaining lines
-    const remainingLines = wrapText(ctx, remaining, textW, 42)
-    const maxLines = Math.min(remainingLines.length, hasImage ? 8 : 12)
-    remainingLines.slice(0, maxLines).forEach((line, i) => {
-      ctx.fillText(line, textX, answerY + 46 + i * 42)
+    const remainingLines = wrapText(ctx, remaining, textW)
+    remainingLines.forEach((line, i) => {
+      ctx.fillText(line, pad, answerY + dropCapSize + 8 + i * lineH)
     })
 
-    // Image on right side
+    // Image on right
     if (hasImage && slide.imageUrl) {
       const img = await loadImage(slide.imageUrl)
       if (img) {
@@ -387,8 +399,6 @@ async function drawSlide(
         const imgW = W * 0.38
         const imgH = H * 0.72
         const imgY = (H - imgH) / 2
-
-        // Rounded rect clip
         ctx.save()
         const r = 24
         ctx.beginPath()
@@ -403,7 +413,6 @@ async function drawSlide(
         ctx.arcTo(imgX, imgY, imgX + r, imgY, r)
         ctx.closePath()
         ctx.clip()
-
         const scale = Math.max(imgW / img.width, imgH / img.height)
         const dw = img.width * scale
         const dh = img.height * scale
@@ -412,8 +421,8 @@ async function drawSlide(
       }
     }
 
-    // QR code — bottom right if voice recording available
-    if (slide.type === 'answer' && slide.qrUrl) {
+    // QR code
+    if (slide.qrUrl) {
       try {
         const qrImg = await loadImage(
           `https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(slide.qrUrl)}`
@@ -442,21 +451,17 @@ async function drawSlide(
     ctx.stroke()
   }
 
+  // ── CLOSING ───────────────────────────────────────────────────────
   if (slide.type === 'closing') {
     ctx.textAlign = 'center'
-
     drawOrnament(ctx, cx, H * 0.38, colors.accent)
-
     ctx.font = `italic 52px Georgia, serif`
     ctx.fillStyle = colors.textSecondary
     ctx.fillText('A story worth keeping.', cx, H * 0.48)
-
     drawOrnament(ctx, cx, H * 0.55, colors.accent)
-
     ctx.font = `300 22px Georgia, serif`
     ctx.fillStyle = colors.textMuted
     ctx.fillText('Created with Tell Me Your Story', cx, H * 0.64)
-
     ctx.font = `300 18px Georgia, serif`
     ctx.fillStyle = colors.textMuted
     ctx.fillText('tellmeyourstory.uk', cx, H * 0.7)
