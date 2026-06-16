@@ -1250,7 +1250,7 @@ const imgHeight = naturalH * ratio
         doc.setFontSize(design.layout.questionSize - 0.3)
         setTextColor(doc, design.theme.textSecondary)
 
-        doc.text(splitQuestion, metrics.leftX, leftY)
+        doc.text(splitQuestion, metrics.leftX, leftY, { maxWidth: metrics.columnWidth - 8 })
         leftY += splitQuestion.length * design.layout.lineHeight + 10
       }
 
@@ -1268,7 +1268,7 @@ const imgHeight = naturalH * ratio
       remainingAnswerLines = remainingAnswerLines.slice(leftLineCapacity)
 
       if (leftLines.length) {
-        doc.text(leftLines, metrics.leftX, leftY)
+        doc.text(leftLines, metrics.leftX, leftY, { maxWidth: metrics.columnWidth - 8 })
       }
 
       const rightAvailableHeight = metrics.maxY - rightY
@@ -1298,8 +1298,8 @@ const imgHeight = naturalH * ratio
 let isFirstSpreadPage = true
 let remainingAnswerLines: string[] = []
 
-const splitQuestion = doc.splitTextToSize(questionText, metrics.columnWidth)
-remainingAnswerLines = doc.splitTextToSize(answerText, metrics.columnWidth)
+const splitQuestion = doc.splitTextToSize(questionText, metrics.columnWidth - 8)
+remainingAnswerLines = doc.splitTextToSize(answerText, metrics.columnWidth - 8)
 
 let imageRendered = false
 
