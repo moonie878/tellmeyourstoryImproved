@@ -89,11 +89,11 @@
             controls
             playsinline
             preload="metadata"
-            poster="/images/example/example-page-cover.png"
+            poster="/images/example/Cover.jpg"
             class="w-full block"
           >
             <source
-              src="https://jeyybcdnmezivjuvmmcu.supabase.co/storage/v1/object/public/assets/example-story.mp4"
+              src="/images/example/dorothy's-story-story.mp4"
               type="video/mp4"
             />
             Your browser does not support video playback.
@@ -138,7 +138,7 @@
         <div class="mt-10 grid gap-5 sm:grid-cols-2">
           <div class="page-card">
             <img
-              src="/images/example/example-page-cover.png"
+              src="/images/example/Cover.jpg"
               alt="Keepsake cover page"
               class="page-img"
               loading="lazy"
@@ -167,7 +167,7 @@
         <div class="mt-5 grid gap-5 sm:grid-cols-2">
           <div class="page-card">
             <img
-              src="/images/example/example-page-world.png"
+              src="/images/example/MemQR.jpg"
               alt="Story answer page with photo"
               class="page-img"
               loading="lazy"
@@ -180,7 +180,7 @@
 
           <div class="page-card">
             <img
-              src="/images/example/example-page-people.png"
+              src="/images/example/memoryQR.jpg"
               alt="Story page about family"
               class="page-img"
               loading="lazy"
@@ -225,7 +225,7 @@
         <div class="mt-5">
           <div class="page-card">
             <img
-              src="/images/example/example-page-dreams.png"
+              src="/images/example/Mem.jpg"
               alt="Story page about childhood dreams"
               class="page-img"
               loading="lazy"
@@ -256,7 +256,7 @@
 
         <div class="mt-10 overflow-hidden rounded-3xl border border-[#E8DDD0] shadow-xl">
           <iframe
-            src="/example-story.pdf"
+            src="/images/example/dorothys-story.pdf"
             width="100%"
             height="900"
             class="block bg-[#F5F0E8]"
