@@ -1185,17 +1185,18 @@ const imgHeight = naturalH * ratio
 
   const hasImage = !!(hasImageExportAccess && sectionImage?.image_url)
   const useCenteredLayout = shouldUseCenteredSpreadLayout(section, hasImage)
+  const safeW = metrics.columnWidth - 10
 
+  // ── NO IMAGE — text only ───────────────────────────────────────────
   if (!hasImage) {
     applyPageBackground(doc, design.theme.pageBg, metrics.pageWidth, metrics.pageHeight)
 
-    // Only draw centre divider for normal text spreads, not centered editorial spreads
     if (!useCenteredLayout) {
       doc.setDrawColor(245, 245, 245)
       doc.line(metrics.centerX, 18, metrics.centerX, metrics.pageHeight - 18)
     }
 
-    // SHORTER TEXT = centered across spread
+    // SHORT TEXT — centred editorial spread
     if (useCenteredLayout) {
       const spreadTextWidth = 120
       const centerX = metrics.centerX
@@ -1204,41 +1205,26 @@ const imgHeight = naturalH * ratio
       doc.setFont(design.font.body, 'italic')
       doc.setFontSize(design.layout.questionSize)
       setTextColor(doc, design.theme.textSecondary)
-
       const splitQuestion = doc.splitTextToSize(section.question, spreadTextWidth)
-      doc.text(splitQuestion, centerX, y, {
-        align: 'center',
-        maxWidth: spreadTextWidth,
-      })
-
+      doc.text(splitQuestion, centerX, y, { align: 'center', maxWidth: spreadTextWidth })
       y += splitQuestion.length * design.layout.lineHeight + 10
 
       doc.setFont(design.font.body, design.font.bodyStyle)
       doc.setFontSize(design.layout.answerSize + 0.5)
       setTextColor(doc, design.theme.textPrimary)
-
       const splitAnswer = doc.splitTextToSize(section.answer.trim(), spreadTextWidth)
-      doc.text(splitAnswer, centerX, y, {
-        align: 'center',
-        maxWidth: spreadTextWidth,
-      })
+      doc.text(splitAnswer, centerX, y, { align: 'center', maxWidth: spreadTextWidth })
 
-      // Hide footer/page numbers on centered editorial-style spread pages
       pagesWithoutFooter.add(doc.getNumberOfPages())
-
       return
     }
 
-    // LONGER TEXT = proper left/right book layout
+    // LONG TEXT — left/right columns
     let isFirstSpreadPage = true
     let remainingAnswerLines: string[] = []
 
-    const splitQuestion = doc.splitTextToSize(section.question, metrics.columnWidth)
-    remainingAnswerLines = doc.splitTextToSize(section.answer.trim(), metrics.columnWidth)
-
     while (isFirstSpreadPage || remainingAnswerLines.length > 0) {
       applyPageBackground(doc, design.theme.pageBg, metrics.pageWidth, metrics.pageHeight)
-
       doc.setDrawColor(245, 245, 245)
       doc.line(metrics.centerX, 18, metrics.centerX, metrics.pageHeight - 18)
 
@@ -1249,40 +1235,41 @@ const imgHeight = naturalH * ratio
         doc.setFont(design.font.body, 'italic')
         doc.setFontSize(design.layout.questionSize - 0.3)
         setTextColor(doc, design.theme.textSecondary)
-
-        doc.text(splitQuestion, metrics.leftX, leftY, { maxWidth: metrics.columnWidth - 8 })
+        // Split AFTER font is set
+        const splitQuestion = doc.splitTextToSize(section.question, safeW)
+        splitQuestion.forEach((line: string, i: number) => {
+          doc.text(line, metrics.leftX, leftY + i * design.layout.lineHeight)
+        })
         leftY += splitQuestion.length * design.layout.lineHeight + 10
+
+        // Split answer AFTER setting answer font
+        doc.setFont(design.font.body, design.font.bodyStyle)
+        doc.setFontSize(design.layout.answerSize + 0.3)
+        setTextColor(doc, design.theme.textPrimary)
+        remainingAnswerLines = doc.splitTextToSize(section.answer.trim(), safeW)
+      } else {
+        doc.setFont(design.font.body, design.font.bodyStyle)
+        doc.setFontSize(design.layout.answerSize + 0.3)
+        setTextColor(doc, design.theme.textPrimary)
       }
 
-      doc.setFont(design.font.body, design.font.bodyStyle)
-      doc.setFontSize(design.layout.answerSize + 0.3)
-      setTextColor(doc, design.theme.textPrimary)
-
       const leftAvailableHeight = metrics.maxY - leftY
-      const leftLineCapacity = Math.max(
-        0,
-        Math.floor(leftAvailableHeight / design.layout.lineHeight)
-      )
-
+      const leftLineCapacity = Math.max(0, Math.floor(leftAvailableHeight / design.layout.lineHeight))
       const leftLines = remainingAnswerLines.slice(0, leftLineCapacity)
       remainingAnswerLines = remainingAnswerLines.slice(leftLineCapacity)
 
-      if (leftLines.length) {
-        doc.text(leftLines, metrics.leftX, leftY, { maxWidth: metrics.columnWidth - 8 })
-      }
+      leftLines.forEach((line: string, i: number) => {
+        doc.text(line, metrics.leftX, leftY + i * design.layout.lineHeight)
+      })
 
       const rightAvailableHeight = metrics.maxY - rightY
-      const rightLineCapacity = Math.max(
-        0,
-        Math.floor(rightAvailableHeight / design.layout.lineHeight)
-      )
-
+      const rightLineCapacity = Math.max(0, Math.floor(rightAvailableHeight / design.layout.lineHeight))
       const rightLines = remainingAnswerLines.slice(0, rightLineCapacity)
       remainingAnswerLines = remainingAnswerLines.slice(rightLineCapacity)
 
-      if (rightLines.length) {
-        doc.text(rightLines, metrics.rightX, rightY)
-      }
+      rightLines.forEach((line: string, i: number) => {
+        doc.text(line, metrics.rightX, rightY + i * design.layout.lineHeight)
+      })
 
       isFirstSpreadPage = false
 
@@ -1294,125 +1281,120 @@ const imgHeight = naturalH * ratio
     return
   }
 
- // IMAGE LAYOUT = editorial left/right spread
-let isFirstSpreadPage = true
-let remainingAnswerLines: string[] = []
+  // ── HAS IMAGE — left text, right image ────────────────────────────
+  let isFirstSpreadPage = true
+  let remainingAnswerLines: string[] = []
+  let imageRendered = false
 
-const safeW = metrics.columnWidth - 10
+  while (isFirstSpreadPage || remainingAnswerLines.length > 0) {
+    applyPageBackground(doc, design.theme.pageBg, metrics.pageWidth, metrics.pageHeight)
+    doc.setDrawColor(245, 245, 245)
+    doc.line(metrics.centerX, 18, metrics.centerX, metrics.pageHeight - 18)
 
-//const splitQuestion = doc.splitTextToSize(questionText, safeW)
-remainingAnswerLines = doc.splitTextToSize(answerText, safeW)
+    let leftY = 28
+    let rightY = 32
 
-let imageRendered = false
+    // ── Question ────────────────────────────────────────────────────
+    if (isFirstSpreadPage) {
+      doc.setFont(design.font.body, 'italic')
+      doc.setFontSize(design.layout.questionSize - 0.5)
+      setTextColor(doc, design.theme.textSecondary)
+      // Split AFTER font is set
+      const splitQ = doc.splitTextToSize(questionText, safeW)
+      splitQ.forEach((line: string, i: number) => {
+        doc.text(line, metrics.leftX, leftY + i * design.layout.lineHeight)
+      })
+      leftY += splitQ.length * design.layout.lineHeight + design.layout.questionSpacing
 
-while (isFirstSpreadPage || remainingAnswerLines.length > 0) {
-  applyPageBackground(doc, design.theme.pageBg, metrics.pageWidth, metrics.pageHeight)
+      // Split answer AFTER setting answer font
+      doc.setFont(design.font.body, design.font.bodyStyle)
+      doc.setFontSize(design.layout.answerSize + 0.3)
+      setTextColor(doc, design.theme.textPrimary)
+      remainingAnswerLines = doc.splitTextToSize(answerText, safeW)
+    } else {
+      doc.setFont(design.font.body, design.font.bodyStyle)
+      doc.setFontSize(design.layout.answerSize + 0.3)
+      setTextColor(doc, design.theme.textPrimary)
+    }
 
-  doc.setDrawColor(245, 245, 245)
-  doc.line(metrics.centerX, 18, metrics.centerX, metrics.pageHeight - 18)
+    // ── Image on right ──────────────────────────────────────────────
+    let imgHeight = 0
 
-  let leftY = 28
-  let rightY = 32
+    if (!imageRendered && hasImageExportAccess && sectionImage?.image_url) {
+      try {
+        const imgData = await loadImageAsBase64(sectionImage.image_url)
+        const img = new Image()
+        img.src = imgData
+        await new Promise((resolve, reject) => {
+          img.onload = resolve
+          img.onerror = reject
+        })
 
-  // ── Question on left ──────────────────────────────────────────────
-  if (isFirstSpreadPage) {
-    doc.setFont(design.font.body, 'italic')
-    doc.setFontSize(design.layout.questionSize - 0.5)
-    setTextColor(doc, design.theme.textSecondary)
-    // Re-split at render font size to be accurate
-    const splitQ = doc.splitTextToSize(questionText, safeW)
-    splitQ.forEach((line: string, i: number) => {
+        const maxWidth = metrics.columnWidth - 4
+        const maxHeight = settings.layout === 'elegant' ? 100
+          : settings.layout === 'minimal' ? 82 : 88
+
+        const PX_TO_MM = 0.2646
+        const naturalW = img.width * PX_TO_MM
+        const naturalH = img.height * PX_TO_MM
+        const ratio = Math.min(maxWidth / naturalW, maxHeight / naturalH, 1)
+        const imgW = naturalW * ratio
+        imgHeight = naturalH * ratio
+
+        const imageX = metrics.rightX + (metrics.columnWidth - imgW) / 2
+
+        if (design.layout.imageFrameStyle !== 'none') {
+          setDrawColor(doc, design.theme.border)
+          if (design.layout.imageFrameStyle === 'luxury') {
+            doc.roundedRect(imageX - 4, rightY - 4, imgW + 8, imgHeight + 8, 4, 4)
+          } else {
+            doc.roundedRect(imageX - 2, rightY - 2, imgW + 4, imgHeight + 4, 2, 2)
+          }
+        }
+
+        doc.addImage(imgData, 'PNG', imageX, rightY, imgW, imgHeight)
+        imageRendered = true
+      } catch (err) {
+        console.error(err)
+      }
+    }
+
+    // ── Left column text ────────────────────────────────────────────
+    const leftAvailableHeight = metrics.maxY - leftY
+    const leftLineCapacity = Math.max(0, Math.floor(leftAvailableHeight / design.layout.lineHeight))
+    const leftLines = remainingAnswerLines.slice(0, leftLineCapacity)
+    remainingAnswerLines = remainingAnswerLines.slice(leftLineCapacity)
+
+    leftLines.forEach((line: string, i: number) => {
       doc.text(line, metrics.leftX, leftY + i * design.layout.lineHeight)
     })
-    leftY += splitQ.length * design.layout.lineHeight + design.layout.questionSpacing
-  }
 
-  doc.setFont(design.font.body, design.font.bodyStyle)
-  doc.setFontSize(design.layout.answerSize + 0.3)
-  setTextColor(doc, design.theme.textPrimary)
+    // ── Right column overflow below image ───────────────────────────
+    const rightContentStartY = imgHeight > 0
+      ? rightY + imgHeight + design.layout.imageSpacing
+      : rightY
+    const rightAvailableHeight = metrics.maxY - rightContentStartY
+    const rightLineCapacity = Math.max(0, Math.floor(rightAvailableHeight / design.layout.lineHeight))
+    const rightLines = remainingAnswerLines.slice(0, rightLineCapacity)
+    remainingAnswerLines = remainingAnswerLines.slice(rightLineCapacity)
 
-  // ── Image on right ────────────────────────────────────────────────
-  let imgHeight = 0
-
-  if (!imageRendered && hasImageExportAccess && sectionImage?.image_url) {
-    try {
-      const imgData = await loadImageAsBase64(sectionImage.image_url)
-
-      const img = new Image()
-      img.src = imgData
-      await new Promise((resolve, reject) => {
-        img.onload = resolve
-        img.onerror = reject
+    if (rightLines.length) {
+      doc.setFont(design.font.body, design.font.bodyStyle)
+      doc.setFontSize(design.layout.answerSize + 0.3)
+      setTextColor(doc, design.theme.textPrimary)
+      rightLines.forEach((line: string, i: number) => {
+        doc.text(line, metrics.rightX, rightContentStartY + i * design.layout.lineHeight)
       })
+    }
 
-      const maxWidth = metrics.columnWidth - 4
-      const maxHeight = settings.layout === 'elegant' ? 100
-        : settings.layout === 'minimal' ? 82 : 88
+    isFirstSpreadPage = false
 
-      const PX_TO_MM = 0.2646
-      const naturalW = img.width * PX_TO_MM
-      const naturalH = img.height * PX_TO_MM
-
-      const ratio = Math.min(maxWidth / naturalW, maxHeight / naturalH, 1)
-      const imgW = naturalW * ratio
-      imgHeight = naturalH * ratio
-
-      const imageX = metrics.rightX + (metrics.columnWidth - imgW) / 2
-
-      if (design.layout.imageFrameStyle !== 'none') {
-        setDrawColor(doc, design.theme.border)
-        if (design.layout.imageFrameStyle === 'luxury') {
-          doc.roundedRect(imageX - 4, rightY - 4, imgW + 8, imgHeight + 8, 4, 4)
-        } else {
-          doc.roundedRect(imageX - 2, rightY - 2, imgW + 4, imgHeight + 4, 2, 2)
-        }
-      }
-
-      doc.addImage(imgData, 'PNG', imageX, rightY, imgW, imgHeight)
-      imageRendered = true
-    } catch (err) {
-      console.error(err)
+    if (remainingAnswerLines.length > 0) {
+      doc.addPage()
     }
   }
 
-  // ── Left column — render line by line, hard stop at safeW ────────
-  const leftAvailableHeight = metrics.maxY - leftY
-  const leftLineCapacity = Math.max(0, Math.floor(leftAvailableHeight / design.layout.lineHeight))
-
-  const leftLines = remainingAnswerLines.slice(0, leftLineCapacity)
-  remainingAnswerLines = remainingAnswerLines.slice(leftLineCapacity)
-
-  leftLines.forEach((line: string, i: number) => {
-    doc.text(line, metrics.leftX, leftY + i * design.layout.lineHeight)
-  })
-  if (leftLines.length) leftY += leftLines.length * design.layout.lineHeight
-
-  // ── Right column overflow — only below the image ──────────────────
-  const rightContentStartY = imgHeight > 0
-    ? rightY + imgHeight + design.layout.imageSpacing
-    : rightY
-  const rightAvailableHeight = metrics.maxY - rightContentStartY
-  const rightLineCapacity = Math.max(0, Math.floor(rightAvailableHeight / design.layout.lineHeight))
-
-  const rightLines = remainingAnswerLines.slice(0, rightLineCapacity)
-  remainingAnswerLines = remainingAnswerLines.slice(rightLineCapacity)
-
-  if (rightLines.length) {
-    doc.setFont(design.font.body, design.font.bodyStyle)
-    doc.setFontSize(design.layout.answerSize + 0.3)
-    setTextColor(doc, design.theme.textPrimary)
-    rightLines.forEach((line: string, i: number) => {
-      doc.text(line, metrics.rightX, rightContentStartY + i * design.layout.lineHeight)
-    })
-  }
-
-  isFirstSpreadPage = false
-
-  if (remainingAnswerLines.length > 0) {
-    doc.addPage()
-  }
-}
-  // ── QR code — only if this section has a voice recording ─────────
+  // ── QR code ────────────────────────────────────────────────────────
   if (qrUrl) {
     try {
       const QR_SIZE = 18
