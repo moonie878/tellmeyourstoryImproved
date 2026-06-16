@@ -22,8 +22,8 @@ export type VideoSlide =
   | { type: 'closing' }
 
 // Canvas dimensions — 1080p landscape
-const W = 1920
-const H = 1080
+const W = 1280
+const H = 720
 
 // Theme colour palettes matching pdfDesign.ts
 const THEMES = {
