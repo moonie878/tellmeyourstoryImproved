@@ -174,7 +174,7 @@
             </div>
             <div class="format-preview bg-[#F5F0E8]">
               <img
-                src="/images/example-story-memory-page.png"
+                src="/images/example-story.png"
                 alt="Keepsake book preview"
                 class="format-preview-img"
                 loading="lazy"
@@ -321,7 +321,7 @@
             <p class="gallery-label">Quote pages</p>
           </div>
           <div class="gallery-item col-span-2 md:col-span-1">
-            <img src="/images/example/example-page-cover.png" alt="Cover page" class="gallery-img" loading="lazy"/>
+            <img src="/images/example/Cover.jpg" alt="Cover page" class="gallery-img" loading="lazy"/>
             <p class="gallery-label">Cover page</p>
           </div>
           <div class="gallery-item col-span-2">
@@ -329,7 +329,7 @@
             <p class="gallery-label">Story pages with photos</p>
           </div>
           <div class="gallery-item col-span-2 md:col-span-1">
-            <img src="/images/example/example-page-dreams.png" alt="Memories page" class="gallery-img" loading="lazy" />
+            <img src="/images/example/MemQR.jpg" alt="Memories page" class="gallery-img" loading="lazy" />
             <p class="gallery-label">Memory pages</p>
           </div>
         </div>
