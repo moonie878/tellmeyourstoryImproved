@@ -468,6 +468,7 @@ async function drawSlide(
   }
 }
 
+
 export function useStoryVideo() {
   const isGenerating = ref(false)
   const progress = ref(0)
