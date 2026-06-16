@@ -1294,12 +1294,14 @@ const imgHeight = naturalH * ratio
     return
   }
 
-  // IMAGE LAYOUT = editorial left/right spread
+ // IMAGE LAYOUT = editorial left/right spread
 let isFirstSpreadPage = true
 let remainingAnswerLines: string[] = []
 
-const splitQuestion = doc.splitTextToSize(questionText, metrics.columnWidth - 8)
-remainingAnswerLines = doc.splitTextToSize(answerText, metrics.columnWidth - 8)
+const safeW = metrics.columnWidth - 10
+
+//const splitQuestion = doc.splitTextToSize(questionText, safeW)
+remainingAnswerLines = doc.splitTextToSize(answerText, safeW)
 
 let imageRendered = false
 
@@ -1317,15 +1319,19 @@ while (isFirstSpreadPage || remainingAnswerLines.length > 0) {
     doc.setFont(design.font.body, 'italic')
     doc.setFontSize(design.layout.questionSize - 0.5)
     setTextColor(doc, design.theme.textSecondary)
-    doc.text(splitQuestion, metrics.leftX, leftY)
-    leftY += splitQuestion.length * design.layout.lineHeight + design.layout.questionSpacing
+    // Re-split at render font size to be accurate
+    const splitQ = doc.splitTextToSize(questionText, safeW)
+    splitQ.forEach((line: string, i: number) => {
+      doc.text(line, metrics.leftX, leftY + i * design.layout.lineHeight)
+    })
+    leftY += splitQ.length * design.layout.lineHeight + design.layout.questionSpacing
   }
 
   doc.setFont(design.font.body, design.font.bodyStyle)
   doc.setFontSize(design.layout.answerSize + 0.3)
   setTextColor(doc, design.theme.textPrimary)
 
-  // ── Image on right first — so we know how much right space is left ─
+  // ── Image on right ────────────────────────────────────────────────
   let imgHeight = 0
 
   if (!imageRendered && hasImageExportAccess && sectionImage?.image_url) {
@@ -1339,7 +1345,7 @@ while (isFirstSpreadPage || remainingAnswerLines.length > 0) {
         img.onerror = reject
       })
 
-      const maxWidth = metrics.columnWidth
+      const maxWidth = metrics.columnWidth - 4
       const maxHeight = settings.layout === 'elegant' ? 100
         : settings.layout === 'minimal' ? 82 : 88
 
@@ -1369,19 +1375,22 @@ while (isFirstSpreadPage || remainingAnswerLines.length > 0) {
     }
   }
 
-  // ── Left column gets all lines it can hold ────────────────────────
+  // ── Left column — render line by line, hard stop at safeW ────────
   const leftAvailableHeight = metrics.maxY - leftY
   const leftLineCapacity = Math.max(0, Math.floor(leftAvailableHeight / design.layout.lineHeight))
 
   const leftLines = remainingAnswerLines.slice(0, leftLineCapacity)
   remainingAnswerLines = remainingAnswerLines.slice(leftLineCapacity)
 
-  if (leftLines.length) {
-    doc.text(leftLines, metrics.leftX, leftY)
-  }
+  leftLines.forEach((line: string, i: number) => {
+    doc.text(line, metrics.leftX, leftY + i * design.layout.lineHeight)
+  })
+  if (leftLines.length) leftY += leftLines.length * design.layout.lineHeight
 
-  // ── Right column overflow — only BELOW the image ──────────────────
-  const rightContentStartY = imgHeight > 0 ? rightY + imgHeight + design.layout.imageSpacing : rightY
+  // ── Right column overflow — only below the image ──────────────────
+  const rightContentStartY = imgHeight > 0
+    ? rightY + imgHeight + design.layout.imageSpacing
+    : rightY
   const rightAvailableHeight = metrics.maxY - rightContentStartY
   const rightLineCapacity = Math.max(0, Math.floor(rightAvailableHeight / design.layout.lineHeight))
 
@@ -1392,7 +1401,9 @@ while (isFirstSpreadPage || remainingAnswerLines.length > 0) {
     doc.setFont(design.font.body, design.font.bodyStyle)
     doc.setFontSize(design.layout.answerSize + 0.3)
     setTextColor(doc, design.theme.textPrimary)
-    doc.text(rightLines, metrics.rightX, rightContentStartY)
+    rightLines.forEach((line: string, i: number) => {
+      doc.text(line, metrics.rightX, rightContentStartY + i * design.layout.lineHeight)
+    })
   }
 
   isFirstSpreadPage = false
