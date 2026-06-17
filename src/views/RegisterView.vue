@@ -117,7 +117,7 @@
           <button
             v-if="!success"
             @click="handleRegister"
-            :disabled="loading || !turnstileReady"
+            :disabled="loading"
             class="w-full rounded-full bg-[#7C5C3B] px-4 py-3 text-sm font-semibold text-white transition hover:opacity-90 disabled:opacity-60 disabled:cursor-not-allowed"
           >
             <span v-if="loading" class="flex items-center justify-center gap-2">
@@ -127,7 +127,6 @@
               </svg>
               Creating your account…
             </span>
-            <span v-else-if="!turnstileReady">Just a moment…</span>
             <span v-else>Create account — it's free</span>
           </button>
 
@@ -156,7 +155,7 @@
 import { ref, watch } from 'vue'
 import { supabase } from '../lib/supabase'
 import TurnstileWidget from '../components/legal/TurnstileWidget.vue'
-import {verifyTurnstileWithRetry } from '../lib/turnstile'
+import { verifyTurnstileWithRetry } from '../lib/turnstile'
 import { track } from '../lib/analytics'
 import { getCurrentUtmData } from '../lib/utm'
 import { useRoute, useRouter } from 'vue-router'
@@ -184,19 +183,14 @@ const fieldErrors = ref<{ email: string; password: string }>({
 
 const turnstileTimedOut = ref(false)
 
-// Mark Turnstile as ready as soon as it resolves a token
+// Turnstile no longer blocks registration (see handleRegister) — we just
+// track whether a token ever arrived, for lightweight visibility if needed.
 watch(turnstileToken, (val) => {
   if (val) turnstileReady.value = true
 })
 
-// Fallback: some browsers (Edge with strict tracking prevention, Safari ITP,
-// privacy extensions) silently block Cloudflare's Private Access Token check,
-// so the token never arrives and the button would stay disabled forever with
-// no explanation. After 6 seconds, unlock the button anyway and let the
-// submit handler retry verification server-side with its own timeout.
 setTimeout(() => {
   if (!turnstileReady.value) {
-    turnstileReady.value = true
     turnstileTimedOut.value = true
   }
 }, 6000)
@@ -253,16 +247,20 @@ async function handleRegister() {
   loading.value = true
 
   try {
+    // Turnstile is currently unreliable for a meaningful number of real
+    // visitors (browser privacy settings, ad blockers, and certain network
+    // configs can silently prevent the widget from ever loading or
+    // resolving a token — see incident June 2026). Rather than block
+    // genuine signups, we attempt verification for monitoring purposes
+    // but never let a failure or timeout stop registration.
     const { success: isHuman, timedOut } = await verifyTurnstileWithRetry(
       () => turnstileToken.value
     )
 
     if (!isHuman) {
-      turnstileError.value = timedOut
-        ? 'Our security check couldn\'t load — this is sometimes caused by strict browser privacy settings or an ad blocker. Try disabling tracking prevention for this site, or use a different browser, then try again.'
-        : 'Security check failed — please refresh the page and try again.'
-      loading.value = false
-      return
+      console.warn(
+        `Turnstile did not verify (timedOut: ${timedOut}) — proceeding with registration anyway.`
+      )
     }
 
     const { error } = await supabase.auth.signUp({
