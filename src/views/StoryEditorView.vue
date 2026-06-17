@@ -86,6 +86,12 @@
                   📖 True Book PDF
                 </button>
                 <button
+                  @click="showProfileModal = true; showMoreActions = false"
+                  class="w-full px-4 py-2.5 text-left text-sm text-stone-700 hover:bg-stone-50"
+                >
+                  🪪 About this person
+                </button>
+                <button
                   v-if="hasTier4Access"
                   @click="showVideoModal = true; showMoreActions = false"
                   class="w-full px-4 py-2.5 text-left text-sm text-stone-700 hover:bg-stone-50"
@@ -320,6 +326,13 @@
       @export="handleTrueBookExport"
     />
 
+    <StoryProfileModal
+      :open="showProfileModal"
+      :project-id="projectId"
+      @close="showProfileModal = false"
+      @saved="handleProfileSaved"
+    />
+
   </div>
 </template>
 
@@ -350,6 +363,8 @@ import { useStoryVideo } from '../composables/useStoryVideo'
 import TrueBookExportModal from '../components/story/TrueBookExportModal.vue'
 import { useStoryTrueBookExport } from '../composables/useTrueBookExport'
 import { useShare } from '../composables/useShare'
+import StoryProfileModal from '../components/story/StoryProfileModal.vue'
+import type { StoryProfile } from '../types/story'
 
 const route = useRoute()
 const router = useRouter()
@@ -363,6 +378,7 @@ const showPremiumPreview  = ref(false)
 const showPdfCustomizer   = ref(false)
 const showVideoModal      = ref(false)
 const showTrueBookModal   = ref(false)
+const showProfileModal    = ref(false)
 const showMidwayUpgrade   = ref(false)
 const showShareNudge      = ref(false)
 const hasShownMidwayUpgrade = ref(false)
@@ -883,6 +899,25 @@ async function toggleCurrentHighlight() {
 
 async function handleTrueBookExport() {
   await exportTrueBook(project.value!, sections.value, getAllImagesForExport, loadImageAsBase64, coverImageUrl.value)
+}
+
+async function handleProfileSaved(profile: StoryProfile) {
+  // Soft auto-fill: only touch the title if it still looks like the default
+  // ("Untitled Story" or empty), never overwrite something the user typed.
+  if (!project.value || !profile.full_name) return
+
+  const currentTitle = project.value.title?.trim() ?? ''
+  const looksDefault = !currentTitle || currentTitle.toLowerCase() === 'untitled story'
+
+  if (looksDefault) {
+    const newTitle = `${profile.full_name}'s Story`
+    project.value.title = newTitle
+    const { error } = await supabase
+      .from('story_projects')
+      .update({ title: newTitle })
+      .eq('id', projectId)
+    if (error) console.error('Failed to auto-fill title from profile:', error)
+  }
 }
 </script>
 

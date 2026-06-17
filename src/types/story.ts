@@ -58,3 +58,26 @@ export type StoryChapterGroup = {
   count: number
   completedCount: number
 }
+
+// Add this to your existing types/story.ts file
+
+export type StoryProfile = {
+  id: string
+  project_id: string
+  full_name: string | null
+  date_of_birth: string | null // ISO date string, e.g. "1952-03-14"
+  birth_place: string | null
+  occupation: string | null
+  father_name: string | null
+  mother_name: string | null
+  spouse_name: string | null
+  children_names: string | null
+  siblings_names: string | null
+  created_at: string
+  updated_at: string
+}
+
+export type StoryProfileInput = Omit<
+  StoryProfile,
+  'id' | 'created_at' | 'updated_at'
+>
