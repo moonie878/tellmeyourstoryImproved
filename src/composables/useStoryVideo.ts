@@ -1,5 +1,5 @@
 import { ref } from 'vue'
-import type { StorySection, StoryProject, PdfTheme } from '../types/story'
+import type { StorySection, StoryProject, PdfTheme, StoryProfile } from '../types/story'
 import type { StoryImage } from '../types/story'
 import { getChapterIntro } from '../utils/pdfDesign'
 
@@ -17,6 +17,7 @@ export type VideoOptions = {
 
 export type VideoSlide =
   | { type: 'title'; title: string; subtitle: string; coverImageUrl?: string }
+  | { type: 'profile'; profile: StoryProfile }
   | { type: 'chapter'; chapter: string; intro: string; chapterIndex: number }
   | { type: 'answer'; question: string; answer: string; imageUrl?: string; chapter: string; qrUrl?: string }
   | { type: 'closing' }
@@ -24,6 +25,32 @@ export type VideoSlide =
 // Canvas dimensions — 1080p landscape
 const W = 1280
 const H = 720
+
+function hasAnyProfileData(profile: StoryProfile | null): boolean {
+  if (!profile) return false
+  return !!(
+    profile.full_name ||
+    profile.date_of_birth ||
+    profile.birth_place ||
+    profile.occupation ||
+    profile.father_name ||
+    profile.mother_name ||
+    profile.spouse_name ||
+    profile.children_names ||
+    profile.siblings_names
+  )
+}
+
+function formatDob(dob: string | null): string {
+  if (!dob) return ''
+  try {
+    const d = new Date(dob)
+    if (isNaN(d.getTime())) return dob
+    return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
+  } catch {
+    return dob
+  }
+}
 
 // Theme colour palettes matching pdfDesign.ts
 const THEMES = {
@@ -57,7 +84,8 @@ function buildSlides(
   project: StoryProject,
   sections: StorySection[],
   images: StoryImage[],
-  voiceMap: Map<string, string>
+  voiceMap: Map<string, string>,
+  profile: StoryProfile | null
 ): VideoSlide[] {
   const slides: VideoSlide[] = []
   const imageMap = new Map(images.map((img) => [img.section_id, img.image_url]))
@@ -69,6 +97,11 @@ function buildSlides(
     subtitle: 'A life told through memories, moments, and love',
     coverImageUrl: project.cover_image_url ?? undefined,
   })
+
+  // Profile slide — only if the user has filled in any details
+  if (hasAnyProfileData(profile)) {
+    slides.push({ type: 'profile', profile: profile! })
+  }
 
   let currentChapter = ''
   let chapterIndex = 0
@@ -246,6 +279,70 @@ async function drawSlide(
       ctx.fillStyle = colors.textSecondary
       ctx.fillText(slide.subtitle, cx, afterTitle + 50)
     }
+  }
+
+  // ── PROFILE ("About this person") ───────────────────────────────────
+  if (slide.type === 'profile') {
+    const p = slide.profile
+    ctx.textAlign = 'center'
+
+    let y = H * 0.2
+
+    ctx.font = `300 20px Georgia, serif`
+    ctx.fillStyle = colors.textMuted
+    ctx.letterSpacing = '2px'
+    ctx.fillText('ABOUT THIS PERSON', cx, y)
+    ctx.letterSpacing = '0px'
+    y += 36
+
+    drawOrnament(ctx, cx, y, colors.accent)
+    y += 50
+
+    if (p.full_name) {
+      ctx.font = `bold 56px Georgia, serif`
+      ctx.fillStyle = colors.textPrimary
+      const nameLines = wrapText(ctx, p.full_name, W * 0.7)
+      nameLines.forEach((line, i) => { ctx.fillText(line, cx, y + i * 64) })
+      y += nameLines.length * 64 + 16
+    }
+
+    const dobLine = formatDob(p.date_of_birth)
+    const subtitleParts = [dobLine, p.birth_place].filter(Boolean)
+    if (subtitleParts.length) {
+      ctx.font = `italic 26px Georgia, serif`
+      ctx.fillStyle = colors.textSecondary
+      ctx.fillText(subtitleParts.join('   ·   '), cx, y)
+      y += 40
+    }
+
+    drawOrnament(ctx, cx, y, colors.accent)
+    y += 46
+
+    const rawDetails: Array<[string, string | null]> = [
+      ['Occupation', p.occupation],
+      ["Father's name", p.father_name],
+      ["Mother's name", p.mother_name],
+      ["Spouse's name", p.spouse_name],
+      ['Children', p.children_names],
+      ['Siblings', p.siblings_names],
+    ]
+    const details: Array<[string, string]> = []
+    for (const [label, value] of rawDetails) {
+      if (value) details.push([label, value])
+    }
+
+    const rowGap = 46
+    details.forEach(([label, value], i) => {
+      const rowY = y + i * rowGap
+      ctx.font = `italic 18px Georgia, serif`
+      ctx.fillStyle = colors.textMuted
+      ctx.letterSpacing = '1px'
+      ctx.fillText(label.toUpperCase(), cx, rowY)
+      ctx.letterSpacing = '0px'
+      ctx.font = `400 24px Georgia, serif`
+      ctx.fillStyle = colors.textPrimary
+      ctx.fillText(value, cx, rowY + 26)
+    })
   }
 
   // ── CHAPTER ───────────────────────────────────────────────────────
@@ -518,7 +615,13 @@ export function useStoryVideo() {
       }
     }
 
-    const slides = buildSlides(project, sections, images, voiceMap)
+    const { data: profileData } = await supabase
+      .from('story_profiles')
+      .select('*')
+      .eq('project_id', project.id)
+      .maybeSingle()
+
+    const slides = buildSlides(project, sections, images, voiceMap, profileData ?? null)
 
     const canvas = document.createElement('canvas')
     canvas.width = W
