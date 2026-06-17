@@ -429,12 +429,20 @@ function handleTierClick(tier: string) {
     return
   }
 
+  // Tier 3 and Tier 4 unlock access across ALL of the user's stories,
+  // not just one — so there's nothing to pick. Just use any project
+  // (most recent) as the redirect anchor for the Stripe success/cancel URL.
+  if (tier === 'tier3' || tier === 'tier4') {
+    goToCheckout(tier, userProjects.value[0].id)
+    return
+  }
+
   if (userProjects.value.length === 1) {
     goToCheckout(tier, userProjects.value[0].id)
     return
   }
 
-  // Multiple projects — ask which one this upgrade is for
+  // Multiple projects, tier1/tier2 (single-story tiers) — ask which one
   pendingTier.value = tier
   showProjectPicker.value = true
 }
