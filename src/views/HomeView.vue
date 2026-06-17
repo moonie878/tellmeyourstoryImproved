@@ -316,7 +316,7 @@
             <img src="/images/example/example-page-childhood.png" alt="Chapter page" class="gallery-img" loading="lazy" />
             <p class="gallery-label">Chapter pages</p>
           </div>
-              <div class="gallery-item col-span-2 md:col-span-1">
+              <div class="gallery-item col-span-1">
             <img src="/images/example/Details.jpg" alt="About this person page" class="gallery-img" loading="lazy" />
             <p class="gallery-label">About this person page</p>
           </div>
