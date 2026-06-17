@@ -7,9 +7,54 @@ import type {
   StoryImage,
   StoryProject,
   StorySection,
+  StoryProfile,
 } from '../types/story'
 import { getPdfDesign, getPageMetrics } from '../utils/pdfDesign'
 import { supabase } from '../lib/supabase'
+
+// ─── "About this person" profile — fetch + helpers ─────────────────
+// Module-level (not inside useStoryExport) since these don't need
+// closure state and mirror the same helpers used in useTrueBookExport.ts
+async function fetchStoryProfile(projectId: string): Promise<StoryProfile | null> {
+  const { data, error } = await supabase
+    .from('story_profiles')
+    .select('*')
+    .eq('project_id', projectId)
+    .maybeSingle()
+
+  if (error) {
+    console.error('Failed to load story profile for export:', error)
+    return null
+  }
+
+  return data ?? null
+}
+
+function hasAnyProfileData(profile: StoryProfile | null): boolean {
+  if (!profile) return false
+  return !!(
+    profile.full_name ||
+    profile.date_of_birth ||
+    profile.birth_place ||
+    profile.occupation ||
+    profile.father_name ||
+    profile.mother_name ||
+    profile.spouse_name ||
+    profile.children_names ||
+    profile.siblings_names
+  )
+}
+
+function formatDob(dob: string | null): string {
+  if (!dob) return ''
+  try {
+    const d = new Date(dob)
+    if (isNaN(d.getTime())) return dob
+    return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
+  } catch {
+    return dob
+  }
+}
 
 type ExportPdfArgs = {
   project: StoryProject
@@ -682,6 +727,95 @@ export function useStoryExport() {
     doc.setFontSize(9)
     setTextColor(doc, design.theme.textMuted)
     doc.text('Created with love and care.', metrics.centerX, 234, { align: 'center' })
+  }
+
+  // ─── "About this person" page — fixed first page, before chapters ──
+  function renderProfilePage(doc: jsPDF, profile: StoryProfile, settings: PdfSettings) {
+    const design = getPdfDesign(settings)
+    const metrics = getPageMetrics(settings)
+
+    doc.addPage()
+    applyPageBackground(doc, design.theme.pageBg, metrics.pageWidth, metrics.pageHeight)
+
+    if (settings.layout === 'elegant') {
+      drawPageBorder(doc, settings, metrics.pageWidth, metrics.pageHeight, design.theme.border)
+    }
+
+    const isLandscape = settings.orientation === 'landscape-spread'
+    const cx = isLandscape ? 215 : metrics.centerX
+
+    if (isLandscape) {
+      setDrawColor(doc, design.theme.divider)
+      doc.line(metrics.centerX, 18, metrics.centerX, metrics.pageHeight - 18)
+    }
+
+    let y = isLandscape ? 70 : 88
+
+    // Small label
+    doc.setFont(design.font.body, 'normal')
+    doc.setFontSize(9)
+    setTextColor(doc, design.theme.textMuted)
+    doc.text('ABOUT THIS PERSON', cx, y, { align: 'center' })
+    y += 14
+
+    if (settings.layout === 'elegant') {
+      drawSmallOrnament(doc, cx, y, design.theme.accent)
+      y += 10
+    }
+
+    // Name — large, centred
+    if (profile.full_name) {
+      doc.setFont(design.font.body, design.font.titleStyle)
+      doc.setFontSize(isLandscape ? 22 : 24)
+      setTextColor(doc, design.theme.textPrimary)
+      doc.text(profile.full_name, cx, y, { align: 'center', maxWidth: isLandscape ? 90 : 130 })
+      y += isLandscape ? 16 : 18
+    }
+
+    // DOB + birthplace subtitle
+    const dobLine = formatDob(profile.date_of_birth)
+    const subtitleParts = [dobLine, profile.birth_place].filter(Boolean)
+    if (subtitleParts.length) {
+      doc.setFont(design.font.body, design.font.accentStyle)
+      doc.setFontSize(11)
+      setTextColor(doc, design.theme.textSecondary)
+      doc.text(subtitleParts.join('  ·  '), cx, y, { align: 'center' })
+      y += 14
+    }
+
+    drawElegantDivider(doc, settings, cx, y, isLandscape ? 28 : 34, design)
+    y += 18
+
+    // Details — simple centred label/value pairs, stacked
+    const rawDetails: Array<[string, string | null]> = [
+      ['Occupation', profile.occupation],
+      ["Father's name", profile.father_name],
+      ["Mother's name", profile.mother_name],
+      ["Spouse's name", profile.spouse_name],
+      ['Children', profile.children_names],
+      ['Siblings', profile.siblings_names],
+    ]
+
+    const details: Array<[string, string]> = []
+    for (const [label, value] of rawDetails) {
+      if (value) details.push([label, value])
+    }
+
+    const rowGap = 11
+
+    details.forEach(([label, value], i) => {
+      const rowY = y + i * rowGap
+
+      doc.setFont(design.font.body, 'italic')
+      doc.setFontSize(9.5)
+      setTextColor(doc, design.theme.textMuted)
+      doc.text(label.toUpperCase(), cx, rowY, { align: 'center' })
+
+      doc.setFont(design.font.body, design.font.bodyStyle)
+      doc.setFontSize(11)
+      setTextColor(doc, design.theme.textPrimary)
+      doc.text(value, cx, rowY + 5.5, { align: 'center', maxWidth: isLandscape ? 90 : 130 })
+    })
   }
 
   function renderQuotePage(
@@ -1570,6 +1704,11 @@ const imgHeight = naturalH * ratio
 
     if (activeSettings.includeDedication && hasTier4Access) {
       renderDedicationPage(doc, activeSettings)
+    }
+
+    const storyProfile = project?.id ? await fetchStoryProfile(project.id) : null
+    if (hasAnyProfileData(storyProfile)) {
+      renderProfilePage(doc, storyProfile!, activeSettings)
     }
 
     const images = await getAllImagesForExport()    
