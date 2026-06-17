@@ -858,7 +858,33 @@ async function removeCoverImage() {
 
 function updateCurrentAnswer(value: string) {
   if (!currentSection.value) return
+
+  const wasEmpty = !currentSection.value.answer || !currentSection.value.answer.trim()
+  const isNowFilled = !!value && !!value.trim()
+
   currentSection.value.answer = value
+
+  // Fire once per question — the moment it goes from unanswered to answered,
+  // not on every subsequent edit/autosave of an already-answered question.
+  if (wasEmpty && isNowFilled) {
+    const isFirstEver = !sections.value.some(
+      (s) => s.id !== currentSection.value!.id && s.answer && s.answer.trim().length > 0
+    )
+
+    track('question_answered', {
+      projectId,
+      sectionId: currentSection.value.id,
+      chapter: currentSection.value.chapter || null,
+    })
+
+    if (isFirstEver) {
+      track('first_question_answered', {
+        projectId,
+        sectionId: currentSection.value.id,
+        chapter: currentSection.value.chapter || null,
+      })
+    }
+  }
 }
 
 function handleExportClick() {

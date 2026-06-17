@@ -18,6 +18,8 @@ type AnalyticsEvent =
   | 'home_pricing'
   | 'cover_banner'
   | 'story_started'
+  | 'question_answered'
+  | 'first_question_answered'
   | 'example_story_clicked'
   | 'login_completed'
   | 'signup_completed'
