@@ -156,6 +156,7 @@
 import { ref, watch } from 'vue'
 import { supabase } from '../lib/supabase'
 import TurnstileWidget from '../components/legal/TurnstileWidget.vue'
+import {verifyTurnstileWithRetry } from '../lib/turnstile'
 import { track } from '../lib/analytics'
 import { getCurrentUtmData } from '../lib/utm'
 import { useRoute, useRouter } from 'vue-router'
