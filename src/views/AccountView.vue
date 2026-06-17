@@ -163,7 +163,7 @@
 
         <div v-if="!hasFullAccess" class="mt-4">
           <button
-            @click="router.push('/pricing')"
+            @click="handleUpgradeClick"
             class="rounded-full bg-[#7C5C3B] px-5 py-3 text-sm font-medium text-white transition hover:opacity-90"
           >
             Upgrade your plan →
@@ -200,6 +200,7 @@ const router = useRouter()
 const userEmail    = ref('')
 const userCreatedAt = ref('')
 const userAccess   = ref<any[]>([])
+const userProjects = ref<Array<{ id: string; title: string | null }>>([])
 const orders       = ref<any[]>([])
 const ordersLoading = ref(true)
 const statsLoading  = ref(true)
@@ -310,6 +311,19 @@ function orderStatusClass(status: string) {
 
 // ─── Data fetching ────────────────────────────────────────────────────────────
 
+function handleUpgradeClick() {
+  if (userProjects.value.length === 0) {
+    router.push('/dashboard')
+    return
+  }
+  if (userProjects.value.length === 1) {
+    router.push(`/story/${userProjects.value[0].id}`)
+    return
+  }
+  // Multiple projects — let the pricing page's picker handle it
+  router.push('/pricing')
+}
+
 async function loadAccount() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) { router.push('/login'); return }
@@ -327,9 +341,10 @@ async function loadAccount() {
   // Stories
   const { data: storiesData } = await supabase
     .from('story_projects')
-    .select('id')
+    .select('id, title')
     .eq('user_id', user.id)
 
+  userProjects.value = storiesData || []
   const storyIds = (storiesData || []).map((s: any) => s.id)
 
   // Everything that needs story IDs

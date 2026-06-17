@@ -42,10 +42,10 @@
                   <p class="text-base font-semibold text-[#1C1917]">Keepsake Book</p>
                   <p class="mt-1 text-2xl font-bold text-[#1C1917]">£3.99</p>
                   <p class="mt-1 text-xs text-[#8C847E]">One-time</p>
-                  <router-link to="/register"
-                    class="mt-3 block rounded-full border border-[#D6CFC8] px-3 py-2 text-xs font-medium text-[#1C1917] transition hover:bg-[#F5F0E8]">
+                  <button @click="handleTierClick('tier1')"
+                    class="mt-3 block w-full rounded-full border border-[#D6CFC8] px-3 py-2 text-xs font-medium text-[#1C1917] transition hover:bg-[#F5F0E8]">
                     Get started
-                  </router-link>
+                  </button>
                 </th>
 
                 <th class="w-[14%] bg-[#1C1917] px-4 py-6 text-center">
@@ -53,20 +53,20 @@
                   <p class="mt-1 text-base font-semibold text-white">Book + Photos</p>
                   <p class="mt-1 text-2xl font-bold text-white">£7.99</p>
                   <p class="mt-1 text-xs text-[#9C7C5C]">One-time</p>
-                  <router-link to="/register"
-                    class="mt-3 block rounded-full bg-white px-3 py-2 text-xs font-semibold text-[#1C1917] transition hover:opacity-90">
+                  <button @click="handleTierClick('tier2')"
+                    class="mt-3 block w-full rounded-full bg-white px-3 py-2 text-xs font-semibold text-[#1C1917] transition hover:opacity-90">
                     Get started
-                  </router-link>
+                  </button>
                 </th>
 
                 <th class="w-[14%] px-4 py-6 text-center">
                   <p class="text-base font-semibold text-[#1C1917]">All Stories</p>
                   <p class="mt-1 text-2xl font-bold text-[#1C1917]">£11.99</p>
                   <p class="mt-1 text-xs text-[#8C847E]">One-time</p>
-                  <router-link to="/register"
-                    class="mt-3 block rounded-full border border-[#D6CFC8] px-3 py-2 text-xs font-medium text-[#1C1917] transition hover:bg-[#F5F0E8]">
+                  <button @click="handleTierClick('tier3')"
+                    class="mt-3 block w-full rounded-full border border-[#D6CFC8] px-3 py-2 text-xs font-medium text-[#1C1917] transition hover:bg-[#F5F0E8]">
                     Get started
-                  </router-link>
+                  </button>
                 </th>
 
                 <th class="w-[16%] px-4 py-6 text-center">
@@ -74,10 +74,10 @@
                   <p class="text-base font-semibold text-[#1C1917]">Premium Keepsake</p>
                   <p class="mt-1 text-2xl font-bold text-[#1C1917]">£17.99</p>
                   <p class="mt-1 text-xs text-[#8C847E]">One-time</p>
-                  <router-link to="/register"
-                    class="mt-3 block rounded-full bg-[#7C5C3B] px-3 py-2 text-xs font-semibold text-white transition hover:opacity-90">
+                  <button @click="handleTierClick('tier4')"
+                    class="mt-3 block w-full rounded-full bg-[#7C5C3B] px-3 py-2 text-xs font-semibold text-white transition hover:opacity-90">
                     Get started
-                  </router-link>
+                  </button>
                 </th>
               </tr>
             </thead>
@@ -160,13 +160,20 @@
                 {{ feature }}
               </li>
             </ul>
-            <router-link to="/register"
+            <router-link v-if="!plan.tier" to="/register"
               :class="['mt-5 block rounded-full px-4 py-2.5 text-center text-sm font-semibold transition',
                 plan.featured ? 'bg-white text-[#1C1917] hover:opacity-90' :
                 plan.premium ? 'bg-[#7C5C3B] text-white hover:opacity-90' :
                 'border border-[#D6CFC8] text-[#1C1917] hover:bg-[#F5F0E8]']">
               {{ plan.cta }}
             </router-link>
+            <button v-else @click="handleTierClick(plan.tier)"
+              :class="['mt-5 block w-full rounded-full px-4 py-2.5 text-center text-sm font-semibold transition',
+                plan.featured ? 'bg-white text-[#1C1917] hover:opacity-90' :
+                plan.premium ? 'bg-[#7C5C3B] text-white hover:opacity-90' :
+                'border border-[#D6CFC8] text-[#1C1917] hover:bg-[#F5F0E8]']">
+              {{ plan.cta }}
+            </button>
           </div>
         </div>
 
@@ -338,16 +345,105 @@
       </div>
     </section>
 
+    <!-- ── Project picker — shown when logged-in user has multiple stories ── -->
+    <div
+      v-if="showProjectPicker"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+      @click.self="showProjectPicker = false"
+    >
+      <div class="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl">
+        <h3 class="text-base font-semibold text-[#1C1917]">Which story is this for?</h3>
+        <p class="mt-1.5 text-sm text-[#8C847E]">Choose the story you'd like to upgrade.</p>
+        <div class="mt-4 space-y-2">
+          <button
+            v-for="proj in userProjects"
+            :key="proj.id"
+            @click="selectProjectForUpgrade(proj.id)"
+            class="w-full rounded-xl border border-[#E8DDD0] px-4 py-3 text-left text-sm text-[#1C1917] transition hover:bg-[#F5F0E8]"
+          >
+            {{ proj.title || 'Untitled story' }}
+          </button>
+        </div>
+        <button
+          @click="showProjectPicker = false"
+          class="mt-4 w-full rounded-full px-4 py-2 text-center text-sm font-medium text-[#8C847E] hover:bg-[#F5F0E8]"
+        >
+          Cancel
+        </button>
+      </div>
+    </div>
+
   </main>
 </template>
 
 <script setup lang="ts">
+import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { useSeo } from '../composables/useSeo'
+import { supabase } from '../lib/supabase'
+
+const router = useRouter()
 
 useSeo({
   title: 'Pricing | Tell Me Your Story',
   description: 'Start free with no time limit. Unlock a beautifully designed keepsake book or video when you\'re ready. One-time payment — no subscription, no renewal.',
 })
+
+// ─── Logged-in upgrade flow ──────────────────────────────────────────
+// Paid tiers need a projectId to check out (see useStoryCheckout.ts),
+// so a logged-in user clicking a tier here needs routing into their
+// project's editor rather than /register.
+const isLoggedIn = ref(false)
+const userProjects = ref<Array<{ id: string; title: string | null }>>([])
+const showProjectPicker = ref(false)
+const pendingTier = ref<string | null>(null)
+
+onMounted(async () => {
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return
+
+  isLoggedIn.value = true
+
+  const { data } = await supabase
+    .from('story_projects')
+    .select('id, title')
+    .eq('user_id', user.id)
+    .order('created_at', { ascending: false })
+
+  userProjects.value = data || []
+})
+
+function goToCheckout(tier: string, projectId: string) {
+  router.push(`/story/${projectId}?upgrade=${tier}`)
+}
+
+function handleTierClick(tier: string) {
+  if (!isLoggedIn.value) {
+    router.push('/register')
+    return
+  }
+
+  if (userProjects.value.length === 0) {
+    // Logged in but no projects yet — send to dashboard to start one
+    router.push('/dashboard')
+    return
+  }
+
+  if (userProjects.value.length === 1) {
+    goToCheckout(tier, userProjects.value[0].id)
+    return
+  }
+
+  // Multiple projects — ask which one this upgrade is for
+  pendingTier.value = tier
+  showProjectPicker.value = true
+}
+
+function selectProjectForUpgrade(projectId: string) {
+  if (!pendingTier.value) return
+  goToCheckout(pendingTier.value, projectId)
+  showProjectPicker.value = false
+}
 
 const printedBookFeatures = [
   'Professionally printed 6×9 softcover',
@@ -395,6 +491,7 @@ const extrasRows = [
 const mobilePlans = [
   {
     name: 'Free',
+    tier: null,
     price: '£0',
     badge: null,
     featured: false,
@@ -409,6 +506,7 @@ const mobilePlans = [
   },
   {
     name: 'Keepsake Book',
+    tier: 'tier1',
     price: '£3.99',
     badge: null,
     featured: false,
@@ -426,6 +524,7 @@ const mobilePlans = [
   },
   {
     name: 'Book + Photos',
+    tier: 'tier2',
     price: '£7.99',
     badge: 'Most popular',
     featured: true,
@@ -442,6 +541,7 @@ const mobilePlans = [
   },
   {
     name: 'All Stories',
+    tier: 'tier3',
     price: '£11.99',
     badge: null,
     featured: false,
@@ -458,6 +558,7 @@ const mobilePlans = [
   },
   {
     name: 'Premium Keepsake',
+    tier: 'tier4',
     price: '£17.99',
     badge: '✦ Premium',
     featured: false,

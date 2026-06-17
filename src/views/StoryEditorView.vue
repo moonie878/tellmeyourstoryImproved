@@ -581,6 +581,24 @@ onMounted(async () => {
   await checkPaymentStatus()
   await loadCurrentSectionImage()
   document.addEventListener('click', handleClickOutside)
+
+  // Auto-trigger checkout if arriving from the pricing page with
+  // ?upgrade=tierX — e.g. /story/abc123?upgrade=tier2
+  const upgradeParam = route.query.upgrade as string | undefined
+  if (upgradeParam) {
+    const tierHandlers: Record<string, () => Promise<void>> = {
+      tier1: upgradeSingleText,
+      tier2: upgradeSingleImages,
+      tier3: upgradeAllText,
+      tier4: upgradeAllImages,
+    }
+    const handler = tierHandlers[upgradeParam]
+    if (handler) {
+      // Clean the query param off the URL so refreshing doesn't re-trigger checkout
+      router.replace({ query: { ...route.query, upgrade: undefined } })
+      await handler()
+    }
+  }
 })
 
 onUnmounted(() => {
