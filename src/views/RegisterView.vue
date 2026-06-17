@@ -156,7 +156,6 @@
 import { ref, watch } from 'vue'
 import { supabase } from '../lib/supabase'
 import TurnstileWidget from '../components/legal/TurnstileWidget.vue'
-import { verifyTurnstile } from '../lib/turnstile'
 import { track } from '../lib/analytics'
 import { getCurrentUtmData } from '../lib/utm'
 import { useRoute, useRouter } from 'vue-router'
@@ -182,10 +181,24 @@ const fieldErrors = ref<{ email: string; password: string }>({
   password: '',
 })
 
+const turnstileTimedOut = ref(false)
+
 // Mark Turnstile as ready as soon as it resolves a token
 watch(turnstileToken, (val) => {
   if (val) turnstileReady.value = true
 })
+
+// Fallback: some browsers (Edge with strict tracking prevention, Safari ITP,
+// privacy extensions) silently block Cloudflare's Private Access Token check,
+// so the token never arrives and the button would stay disabled forever with
+// no explanation. After 6 seconds, unlock the button anyway and let the
+// submit handler retry verification server-side with its own timeout.
+setTimeout(() => {
+  if (!turnstileReady.value) {
+    turnstileReady.value = true
+    turnstileTimedOut.value = true
+  }
+}, 6000)
 
 function validateEmail() {
   if (!email.value) {
@@ -239,10 +252,14 @@ async function handleRegister() {
   loading.value = true
 
   try {
-    const isHuman = await verifyTurnstile(turnstileToken.value)
+    const { success: isHuman, timedOut } = await verifyTurnstileWithRetry(
+      () => turnstileToken.value
+    )
 
     if (!isHuman) {
-      turnstileError.value = 'Security check failed — please refresh the page and try again.'
+      turnstileError.value = timedOut
+        ? 'Our security check couldn\'t load — this is sometimes caused by strict browser privacy settings or an ad blocker. Try disabling tracking prevention for this site, or use a different browser, then try again.'
+        : 'Security check failed — please refresh the page and try again.'
       loading.value = false
       return
     }
