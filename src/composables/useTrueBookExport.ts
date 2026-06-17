@@ -1,6 +1,6 @@
 import jsPDF from 'jspdf'
 import { ref } from 'vue'
-import type { StoryImage, StoryProject, StorySection } from '../types/story'
+import type { StoryImage, StoryProject, StorySection, StoryProfile } from '../types/story'
 import { EBGaramondRegular } from '../fonts/EBGaramond-Regular'
 import { EBGaramondItalic } from '../fonts/EBGaramond-Italic'
 import { EBGaramondBold } from '../fonts/EBGaramond-Bold'
@@ -113,6 +113,136 @@ async function fetchVoiceRecordings(projectId: string): Promise<Map<string, stri
   }
   return map
 }
+
+// ─── Fetch the "About this person" profile, if one exists ──────────
+async function fetchStoryProfile(projectId: string): Promise<StoryProfile | null> {
+  const { data, error } = await supabase
+    .from('story_profiles')
+    .select('*')
+    .eq('project_id', projectId)
+    .maybeSingle()
+
+  if (error) {
+    console.error('Failed to load story profile for export:', error)
+    return null
+  }
+
+  return data ?? null
+}
+
+function hasAnyProfileData(profile: StoryProfile | null): boolean {
+  if (!profile) return false
+  return !!(
+    profile.full_name ||
+    profile.date_of_birth ||
+    profile.birth_place ||
+    profile.occupation ||
+    profile.father_name ||
+    profile.mother_name ||
+    profile.spouse_name ||
+    profile.children_names ||
+    profile.siblings_names
+  )
+}
+
+function formatDob(dob: string | null): string {
+  if (!dob) return ''
+  try {
+    const d = new Date(dob)
+    if (isNaN(d.getTime())) return dob
+    return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
+  } catch {
+    return dob
+  }
+}
+
+// ─── "About this person" page — fixed first page, before chapters ────
+function renderProfilePage(
+  doc: jsPDF,
+  profile: StoryProfile,
+  pageNum: { n: number },
+  skipHeader: Set<number>
+) {
+  pageBg(doc)
+  skipHeader.add(pageNum.n)
+
+  const cx = PW / 2
+  const contentXPos = contentX(pageNum.n)
+  const contentW = contentWidth(pageNum.n)
+
+  let y = RECTO_TOP + 18
+
+  // Small label
+  doc.setFont('EBGaramond', 'normal')
+  doc.setFontSize(9)
+  setTxt(doc, C_MUTED)
+  doc.text('ABOUT THIS PERSON', cx, y, { align: 'center' })
+  y += 10
+
+  ornament(doc, cx, y)
+  y += 14
+
+  // Name — large, centred
+  if (profile.full_name) {
+    doc.setFont('EBGaramond', 'bold')
+    doc.setFontSize(TITLE_SIZE - 2)
+    setTxt(doc, C_PRIMARY)
+    const nameLines = splitText(doc, profile.full_name, contentW)
+    nameLines.forEach((line, i) => {
+      doc.text(line, cx, y + i * (LINE_HEIGHT + 2), { align: 'center' })
+    })
+    y += nameLines.length * (LINE_HEIGHT + 2) + 6
+  }
+
+  // DOB + birthplace subtitle
+  const dobLine = formatDob(profile.date_of_birth)
+  const subtitleParts = [dobLine, profile.birth_place].filter(Boolean)
+  if (subtitleParts.length) {
+    doc.setFont('EBGaramond', 'italic')
+    doc.setFontSize(SUBTITLE_SIZE + 1)
+    setTxt(doc, C_SECONDARY)
+    doc.text(subtitleParts.join(' · '), cx, y, { align: 'center' })
+    y += 12
+  }
+
+  ornament(doc, cx, y)
+  y += 16
+
+  // Details as a simple two-column label/value list
+  const rawDetails: Array<[string, string | null]> = [
+    ['Occupation', profile.occupation],
+    ["Father's name", profile.father_name],
+    ["Mother's name", profile.mother_name],
+    ["Spouse's name", profile.spouse_name],
+    ["Children", profile.children_names],
+    ["Siblings", profile.siblings_names],
+  ]
+
+  const details: Array<[string, string]> = []
+  for (const [label, value] of rawDetails) {
+    if (value) details.push([label, value])
+  }
+
+  const labelW = 38
+  const rowGap = 9
+
+  details.forEach(([label, value], i) => {
+    const rowY = y + i * rowGap
+
+    doc.setFont('EBGaramond', 'italic')
+    doc.setFontSize(ANSWER_SIZE)
+    setTxt(doc, C_MUTED)
+    doc.text(label, contentXPos + (contentW / 2) - labelW, rowY, { align: 'left' })
+
+    doc.setFont('EBGaramond', 'normal')
+    doc.setFontSize(ANSWER_SIZE)
+    setTxt(doc, C_PRIMARY)
+    const valueLines = splitText(doc, value, contentW / 2 - 6)
+    doc.text(valueLines[0] || '', contentXPos + (contentW / 2) + 2, rowY, { align: 'left' })
+  })
+}
+
+
 
 function splitText(doc: jsPDF, text: string, width: number): string[] {
   return doc.splitTextToSize(text, width)
@@ -824,6 +954,9 @@ const imageMap = new Map(images.map((img) => [img.section_id, img.image_url]))
 // Load voice recordings with QR enabled
 const voiceMap = await fetchVoiceRecordings(project.id)
 
+// Load the "About this person" profile, if filled in
+const storyProfile = await fetchStoryProfile(project.id)
+
   const storyTitle    = project.title || 'My Story'
   const storySubtitle = STORY_SUBTITLES[project.story_type || ''] || 'A story told through memories, moments, and love'
 
@@ -861,6 +994,20 @@ const voiceMap = await fetchVoiceRecordings(project.id)
   pageNum.n++
   pageBg(doc)
   skipHeader.add(pageNum.n)
+
+  // Page 7 — "About this person" (recto), only if any profile data exists
+  if (hasAnyProfileData(storyProfile)) {
+    ensureRecto(doc, pageNum, skipHeader)
+    doc.addPage()
+    pageNum.n++
+    renderProfilePage(doc, storyProfile!, pageNum, skipHeader)
+
+    // Following blank verso so chapters still begin cleanly on recto
+    doc.addPage()
+    pageNum.n++
+    pageBg(doc)
+    skipHeader.add(pageNum.n)
+  }
 
   // ── Chapter pages ──────────────────────────────────────────────────
   const chapterPages = new Map<string, number>()
