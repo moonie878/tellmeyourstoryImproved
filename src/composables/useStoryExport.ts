@@ -742,14 +742,9 @@ export function useStoryExport() {
     }
 
     const isLandscape = settings.orientation === 'landscape-spread'
-    const cx = isLandscape ? 215 : metrics.centerX
+    const cx = metrics.centerX
 
-    if (isLandscape) {
-      setDrawColor(doc, design.theme.divider)
-      doc.line(metrics.centerX, 18, metrics.centerX, metrics.pageHeight - 18)
-    }
-
-    let y = isLandscape ? 70 : 88
+    let y = isLandscape ? 60 : 88
 
     // Small label
     doc.setFont(design.font.body, 'normal')
