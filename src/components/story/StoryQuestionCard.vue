@@ -11,7 +11,7 @@
         <div class="border-b border-stone-100 px-5 py-4 sm:px-6">
           <div class="flex items-start justify-between gap-4">
             <div class="flex-1 min-w-0">
-              <p class="text-[10px] font-medium uppercase tracking-[0.2em] text-stone-400">
+              <p class="text-xs font-medium uppercase tracking-[0.2em] text-stone-400">
                 {{ section.chapter || 'Chapter' }}
               </p>
               <h2 class="mt-1.5 text-lg font-bold leading-7 text-stone-900 sm:text-xl">
@@ -25,8 +25,8 @@
 
           <!-- Progress bar -->
           <div class="mt-3 flex items-center gap-3">
-            <div class="flex-1 h-1 rounded-full bg-stone-200">
-              <div class="h-1 rounded-full bg-[#7C5C3B] transition-all" :style="{ width: progress + '%' }" />
+            <div class="flex-1 h-1.5 rounded-full bg-stone-200">
+              <div class="h-1.5 rounded-full bg-[#7C5C3B] transition-all" :style="{ width: progress + '%' }" />
             </div>
             <span class="flex-shrink-0 text-xs text-stone-400">{{ Math.round(progress) }}%</span>
           </div>
@@ -75,23 +75,6 @@
             </div>
           </div>
 
-          <!-- QR toggle — only when recording exists -->
-          <div v-if="existingRecording && !voiceRecording.isRecording.value" class="mb-3 flex items-center justify-between rounded-xl border border-green-100 bg-green-50 px-3 py-2">
-            <div>
-              <p class="text-xs font-medium text-green-800">Include QR code in printed book</p>
-              <p class="text-[10px] text-green-600">Family scan to hear this memory</p>
-            </div>
-            <button
-              @click="toggleQR"
-              class="relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200"
-              :class="existingRecording.show_qr ? 'bg-[#7C5C3B]' : 'bg-stone-300'"
-            >
-              <span
-                class="inline-block h-4 w-4 transform rounded-full bg-white shadow transition duration-200"
-                :class="existingRecording.show_qr ? 'translate-x-4' : 'translate-x-0'"
-              />
-            </button>
-          </div>
 
           <!-- Textarea -->
           <textarea
@@ -130,7 +113,22 @@
               <div class="h-1.5 w-full overflow-hidden rounded-full bg-green-200">
                 <div class="h-1.5 rounded-full bg-[#7C5C3B] transition-all" :style="{ width: `${existingProgress}%` }" />
               </div>
-              <p class="mt-1 text-[10px] text-green-600">{{ existingRecording.duration_seconds }}s · QR code in printed book</p>
+              <div class="mt-1.5 flex items-center justify-between">
+                <p class="text-[10px] text-green-600">{{ existingRecording.duration_seconds }}s voice recording</p>
+                <div class="flex items-center gap-1.5">
+                  <span class="text-[10px] text-green-700">QR in book</span>
+                  <button
+                    @click="toggleQR"
+                    class="relative inline-flex h-4 w-7 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200"
+                    :class="existingRecording.show_qr ? 'bg-[#7C5C3B]' : 'bg-stone-300'"
+                  >
+                    <span
+                      class="inline-block h-3 w-3 transform rounded-full bg-white shadow transition duration-200"
+                      :class="existingRecording.show_qr ? 'translate-x-3' : 'translate-x-0'"
+                    />
+                  </button>
+                </div>
+              </div>
             </div>
 
             <div class="flex-shrink-0 text-center">

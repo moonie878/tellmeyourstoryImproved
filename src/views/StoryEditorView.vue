@@ -248,8 +248,9 @@
 
         <!-- Question card -->
         <div class="lg:order-2">
-          <div class="mb-3 rounded-2xl border border-stone-100 bg-white px-4 py-3 text-center">
+          <div v-if="showHintBanner" class="mb-3 flex items-center justify-between rounded-2xl border border-stone-100 bg-white px-4 py-3">
             <p class="text-xs text-stone-400">💛 Answer as many or as few questions as you like — every answer adds to your story.</p>
+            <button @click="showHintBanner = false" class="ml-3 flex-shrink-0 text-stone-300 transition hover:text-stone-500">✕</button>
           </div>
 
           <StoryQuestionCard
@@ -374,6 +375,7 @@ const projectId = route.params.id as string
 // ── UI state ───────────────────────────────────────────────────────────────────
 const showMoreActions     = ref(false)
 const showMobileMap       = ref(false)
+const showHintBanner      = ref(true)
 const showPremiumPreview  = ref(false)
 const showPdfCustomizer   = ref(false)
 const showVideoModal      = ref(false)

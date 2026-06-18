@@ -73,12 +73,7 @@
               {{ question.index + 1 }}. {{ question.question }}
             </span>
 
-            <span
-              class="shrink-0 text-xs"
-              :class="question.isCompleted ? 'text-green-600' : 'text-stone-400'"
-            >
-              {{ question.isCompleted ? '✓' : '○' }}
-            </span>
+            <span v-if="question.isCompleted" class="shrink-0 text-xs text-green-600">✓</span>
           </button>
         </div>
       </div>
