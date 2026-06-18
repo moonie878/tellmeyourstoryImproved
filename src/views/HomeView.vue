@@ -39,7 +39,10 @@
             <div class="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center md:justify-start">
               <router-link to="/register" @click="trackStart" class="btn-primary">
                 Start your story — it's free
-              </router-link>              
+              </router-link>
+              <router-link to="/example" @click="trackExampleStory" class="btn-hero-ghost">
+                See an example →
+              </router-link>
             </div>
 
             <div class="mt-6 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs text-[#8C847E] md:justify-start">
@@ -226,12 +229,16 @@
             </div>
             <div class="format-preview bg-[#2C2420]">
               <div class="video-preview-mockup">
+                <div class="video-letterbox video-letterbox-top"></div>
                 <div class="video-slide-title">
                   <p class="video-slide-label">Tell Me Your Story</p>
                   <p class="video-slide-name">Mum's Story</p>
                   <p class="video-slide-sub">A life told through memories, moments, and love</p>
                 </div>
-                <div class="video-play-icon">▶</div>
+                <div class="video-play-btn">
+                  <span class="video-play-triangle">▶</span>
+                </div>
+                <div class="video-letterbox video-letterbox-bottom"></div>
               </div>
             </div>
           </div>
@@ -324,7 +331,7 @@
             <img src="/images/example/Cover.jpg" alt="Cover page" class="gallery-img" loading="lazy"/>
             <p class="gallery-label">Cover page</p>
           </div>
-          <div class="gallery-item col-span-2">
+          <div class="gallery-item gallery-item-wide col-span-2 md:col-span-3">
             <img src="/images/example/example-page-world.png" alt="Story page with photo" class="gallery-img" loading="lazy" />
             <p class="gallery-label">Story pages with photos</p>
           </div>
@@ -332,7 +339,7 @@
             <img src="/images/example/MemQR.jpg" alt="Memories page" class="gallery-img" loading="lazy" />
             <p class="gallery-label">Memory pages</p>
           </div>
-          <div class="gallery-item col-span-2 md:col-span-1">
+          <div class="gallery-item gallery-item-about col-span-2 md:col-span-2">
             <img src="/images/example/Details.jpg" alt="About this person page" class="gallery-img" loading="lazy" />
             <p class="gallery-label">About this person page</p>
           </div>
@@ -624,6 +631,8 @@ h1 { font-family: 'Playfair Display', Georgia, serif; }
 .btn-secondary:hover { background: #F0EBE3; }
 .btn-ghost { display: inline-block; color: #A89880; font-size: 14px; font-weight: 500; padding: 14px 20px; border-radius: 100px; text-decoration: none; border: 1px solid rgba(255,255,255,0.2); transition: color 0.2s; }
 .btn-ghost:hover { color: white; }
+.btn-hero-ghost { display: inline-block; color: #5C534E; font-size: 14px; font-weight: 500; padding: 14px 24px; border-radius: 100px; text-decoration: none; border: 1px solid #C4B9AD; transition: border-color 0.2s, color 0.2s; white-space: nowrap; }
+.btn-hero-ghost:hover { border-color: #7C5C3B; color: #1C1917; }
 
 .section-label { font-size: 11px; font-weight: 500; letter-spacing: 0.22em; text-transform: uppercase; color: #8C847E; }
 .section-title { font-family: 'Playfair Display', Georgia, serif; font-size: clamp(1.8rem, 3vw, 2.6rem); font-weight: 700; line-height: 1.15; letter-spacing: -0.02em; color: #1C1917; max-width: 640px; margin-left: auto; margin-right: auto; }
@@ -656,11 +665,15 @@ h1 { font-family: 'Playfair Display', Georgia, serif; }
 
 .new-badge { margin-top: 14px; display: inline-block; background: #7C5C3B; color: white; font-size: 11px; font-weight: 500; letter-spacing: 0.1em; padding: 4px 12px; border-radius: 100px; }
 
-.video-preview-mockup { width: 100%; min-height: 200px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; padding: 32px; position: relative; }
+.video-preview-mockup { width: 100%; min-height: 200px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; padding: 0 32px; position: relative; }
+.video-letterbox { width: 100%; height: 20px; background: #111; flex-shrink: 0; }
+.video-letterbox-top { border-radius: 0; }
+.video-letterbox-bottom { border-radius: 0; }
 .video-slide-label { font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: #8C847E; }
 .video-slide-name { font-family: 'Playfair Display', Georgia, serif; font-size: 1.8rem; font-weight: 700; color: white; text-align: center; }
 .video-slide-sub { font-size: 12px; color: #8C847E; font-style: italic; text-align: center; }
-.video-play-icon { margin-top: 16px; width: 44px; height: 44px; border-radius: 50%; border: 1.5px solid #5C534E; display: flex; align-items: center; justify-content: center; font-size: 14px; color: #8C847E; }
+.video-play-btn { margin-top: 16px; width: 52px; height: 52px; border-radius: 50%; border: 1.5px solid #7C5C3B; background: rgba(124,92,59,0.15); display: flex; align-items: center; justify-content: center; transition: background 0.2s, border-color 0.2s; }
+.video-play-triangle { font-size: 16px; color: #C4A882; margin-left: 3px; }
 
 /* ── Step cards ─────────────────────────── */
 .step-card { background: white; border: 1px solid #E8E0D8; border-radius: 24px; padding: 28px 28px 32px; }
@@ -672,6 +685,8 @@ h1 { font-family: 'Playfair Display', Georgia, serif; }
 /* ── Gallery ────────────────────────────── */
 .gallery-item { border-radius: 16px; overflow: hidden; border: 1px solid #E8E0D8; background: #F5F0E8; }
 .gallery-img { width: 100%; display: block; }
+.gallery-item-wide .gallery-img { height: 380px; object-fit: cover; object-position: top center; }
+.gallery-item-about .gallery-img { height: 340px; object-fit: cover; object-position: 50% 22%; }
 .gallery-label { padding: 8px 14px; font-size: 12px; color: #8C847E; }
 
 /* ── Why section ────────────────────────── */
