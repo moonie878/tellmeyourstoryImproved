@@ -316,10 +316,6 @@
             <img src="/images/example/example-page-childhood.png" alt="Chapter page" class="gallery-img" loading="lazy" />
             <p class="gallery-label">Chapter pages</p>
           </div>
-              <div class="gallery-item col-span-1">
-            <img src="/images/example/Details.jpg" alt="About this person page" class="gallery-img" loading="lazy" />
-            <p class="gallery-label">About this person page</p>
-          </div>
           <div class="gallery-item col-span-1">
             <img src="/images/example/example-page-cooking-quote.png" alt="Quote page" class="gallery-img" loading="lazy" />
             <p class="gallery-label">Quote pages</p>
@@ -336,7 +332,10 @@
             <img src="/images/example/MemQR.jpg" alt="Memories page" class="gallery-img" loading="lazy" />
             <p class="gallery-label">Memory pages</p>
           </div>
-      
+          <div class="gallery-item col-span-2 md:col-span-1">
+            <img src="/images/exampledetails.jpg" alt="About this person page" class="gallery-img" loading="lazy" />
+            <p class="gallery-label">About this person page</p>
+          </div>
         </div>
 
         <div class="mt-8 text-center">
@@ -440,6 +439,33 @@
 
   </div>
 </section>
+
+    <!-- ═══════════════════════════════════════ -->
+    <!-- PARTNERS                                -->
+    <!-- ═══════════════════════════════════════ -->
+    <section class="bg-white px-5 py-12 sm:px-8 sm:py-14">
+      <div class="mx-auto max-w-4xl text-center">
+        <p class="text-xs font-medium uppercase tracking-[0.15em] text-[#A89B8F]">
+          Recommended by
+        </p>
+        <div class="mt-6 flex flex-wrap items-center justify-center gap-x-12 gap-y-6">
+          <a
+            href="https://lwdwtraining.uk/video/links/"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="opacity-70 transition hover:opacity-100"
+            aria-label="Visit Living Well Dying Well Training"
+          >
+            <img
+              src="/images/partners/lwdw-logo.png"
+              alt="Living Well Dying Well — End of Life Doula Training"
+              class="h-12 w-auto sm:h-14"
+              loading="lazy"
+            />
+          </a>
+        </div>
+      </div>
+    </section>
 
     <!-- ═══════════════════════════════════════ -->
     <!-- STORY TYPES                            -->
