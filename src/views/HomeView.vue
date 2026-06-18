@@ -318,7 +318,7 @@
           Chapters, quote pages, elegant typography, and personal images all come together to create a keepsake that feels genuinely finished.
         </p>
 
-        <div class="mt-10 grid grid-cols-2 gap-4 md:grid-cols-3 md:gap-5">
+        <div class="mt-10 grid grid-cols-2 gap-4 md:grid-cols-3 md:gap-5 items-start">
           <div class="gallery-item col-span-1">
             <img src="/images/example/example-page-childhood.png" alt="Chapter page" class="gallery-img" loading="lazy" />
             <p class="gallery-label">Chapter pages</p>
