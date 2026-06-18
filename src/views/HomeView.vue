@@ -333,7 +333,7 @@
             <p class="gallery-label">Memory pages</p>
           </div>
           <div class="gallery-item col-span-2 md:col-span-1">
-            <img src="/images/exampledetails.jpg" alt="About this person page" class="gallery-img" loading="lazy" />
+            <img src="/images/example/Details.jpg" alt="About this person page" class="gallery-img" loading="lazy" />
             <p class="gallery-label">About this person page</p>
           </div>
         </div>
