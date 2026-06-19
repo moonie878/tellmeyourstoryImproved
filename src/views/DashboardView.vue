@@ -178,6 +178,15 @@
 >
   {{ generatingPrintId === story.id ? 'Preparing…' : '📖 Order Printed Book' }}
 </button>
+
+  <!-- TEMP — remove once hardcover dimensions are confirmed working -->
+  <button
+    v-if="hasPrintAccess()"
+    @click="previewCover(story, '0600X0900.FC.PRE.CW.080CW444.GXX', 142)"
+    class="rounded-full border border-stone-300 bg-white px-4 py-2.5 text-xs font-medium text-stone-500 transition hover:bg-stone-50"
+  >
+    🔍 Preview hardcover
+  </button>
   </div>
 
   <p v-if="hasPrintAccess()" class="mt-1.5 text-xs text-stone-400">
@@ -408,6 +417,61 @@ const { exportPhotoBookAsBlob } = usePhotoBookExport()
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL as string
 const POD_PACKAGE_ID = '0600X0900.FC.STD.PB.060UW444.MXX'
+
+// ─── TEMP: cover preview for testing Lulu dimensions before ordering ───────────
+// Remove once hardcover/dust jacket cover dimensions are confirmed working.
+async function previewCover(story: any, podId: string, pageCount: number) {
+  try {
+    const dimsResponse = await fetch(`${API_BASE}/lulu-cover-dimensions`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        pod_package_id: podId,
+        interior_page_count: pageCount,
+        unit: 'mm',
+      }),
+    })
+
+    if (!dimsResponse.ok) {
+      alert('Could not fetch dimensions from Lulu — check console.')
+      console.error(await dimsResponse.text())
+      return
+    }
+
+    const dims = await dimsResponse.json()
+    const luluWidth = parseFloat(dims.width)
+    const luluHeight = parseFloat(dims.height)
+    console.log('Preview — Lulu dimensions for', podId, ':', luluWidth, luluHeight)
+
+    const bindingType =
+      podId === '0600X0900.FC.PRE.LW.080CW444.GNG' ? 'dustjacket' :
+      podId === '0600X0900.FC.PRE.CW.080CW444.GXX' ? 'hardcover' :
+      'softcover'
+
+    const coverBlob = await generateCoverPDF({
+      title: story.title || 'Untitled Story',
+      subtitle: 'A life told through memories, moments, and love',
+      pageCount,
+      coverImageUrl: story.cover_image_url || '',
+      loadImageAsBase64,
+      luluWidth,
+      luluHeight,
+      bindingType,
+    })
+
+    const url = URL.createObjectURL(coverBlob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `cover-preview-${bindingType}-${luluWidth.toFixed(2)}x${luluHeight.toFixed(2)}mm.pdf`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    setTimeout(() => URL.revokeObjectURL(url), 5000)
+  } catch (err) {
+    console.error('Cover preview error:', err)
+    alert('Something went wrong generating the preview — check console.')
+  }
+}
 
 const shareResult    = ref<string>('')
 
