@@ -664,38 +664,36 @@ const includesPhotoBook = sessionData.metadata?.includesPhotoBook === 'true'
 const photoBookBlob = includesPhotoBook
   ? await exportPhotoBookAsBlob(story.story_type, story.cover_image_url || '', getAllImagesForExport)
   : null
-    // Get exact cover dimensions from Lulu for this page count
-
+// Get exact cover dimensions from Lulu for this page count and binding —
+// ALWAYS call the real API, for every binding type. Hardcoding case wrap
+// and dust jacket dimensions here previously caused Lulu order rejections
+// once page count or Lulu's own spec drifted from the hardcoded values
+// (incident June 2026 — case wrap order rejected, dimensions outside
+// Lulu's accepted tolerance).
 let luluWidth: number
 let luluHeight: number
 
-if (podId === '0600X0900.FC.PRE.CW.080CW444.GXX') {
-  // Hardcover case wrap
-  luluWidth  = 355.60
-  luluHeight = 273.05
-  console.log('Using hardcover case wrap dimensions:', luluWidth, luluHeight)
-} else if (podId === '0600X0900.FC.PRE.LW.080CW444.GNG') {
-  // Dust jacket — much wider due to flaps
-  luluWidth  = 508.00
-  luluHeight = 247.65
-  console.log('Using dust jacket dimensions:', luluWidth, luluHeight)
-} else {
-  // Softcover — fetch from Lulu API
-  const dimsResponse = await fetch(`${API_BASE}/lulu-cover-dimensions`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      pod_package_id:      podId,
-      interior_page_count: actualPageCount,
-      unit:                'mm',
-    }),
-  })
-  const dims = await dimsResponse.json()
-  console.log('Raw dims response:', JSON.stringify(dims))
-  luluWidth  = parseFloat(dims.width)
-  luluHeight = parseFloat(dims.height)
-  console.log('Cover dims from Lulu:', luluWidth, luluHeight)
+const dimsResponse = await fetch(`${API_BASE}/lulu-cover-dimensions`, {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    pod_package_id:      podId,
+    interior_page_count: actualPageCount,
+    unit:                'mm',
+  }),
+})
+
+if (!dimsResponse.ok) {
+  const errText = await dimsResponse.text()
+  console.error('Lulu cover dimensions request failed:', errText)
+  throw new Error('Could not get cover dimensions from Lulu. Please try again or contact support.')
 }
+
+const dims = await dimsResponse.json()
+console.log('Raw dims response:', JSON.stringify(dims))
+luluWidth  = parseFloat(dims.width)
+luluHeight = parseFloat(dims.height)
+console.log('Cover dims from Lulu for', podId, ':', luluWidth, luluHeight)
 
 console.log('Converted dims mm:', luluWidth, luluHeight)
 

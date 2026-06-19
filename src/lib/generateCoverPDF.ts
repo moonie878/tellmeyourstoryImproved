@@ -18,9 +18,10 @@ import { EBGaramondBoldItalic } from '../fonts/EBGaramond-BoldItalic'
 // Bleed is 3.175mm (0.125 inches) on all sides.
 
 const BLEED       = 3.175   // mm — fixed for all Lulu 6x9 books
-const TRIM_W      = 152.4   // mm — 6 inches per side
-const TRIM_H      = 228.6   // mm — 9 inches
-const FLAP_W      = 76.2    // mm — standard 3 inch dust jacket flap
+const TRIM_W       = 152.4   // mm — 6 inches per side
+const TRIM_H       = 228.6   // mm — 9 inches
+const FLAP_W       = 76.2    // mm — standard 3 inch dust jacket flap
+const HC_WRAP      = 6.35    // mm — case wrap hardcover adds 0.25" wrap allowance per side, on top of bleed
 
 const IMG_QUALITY = 0.85
 
@@ -85,6 +86,7 @@ export async function generateCoverPDF(options: CoverOptions): Promise<Blob> {
   const {
     title,
     subtitle,
+    pageCount,
     coverImageUrl,
     loadImageAsBase64,
     luluWidth,
@@ -93,10 +95,37 @@ export async function generateCoverPDF(options: CoverOptions): Promise<Blob> {
   } = options
 
   const isDustJacket = bindingType === 'dustjacket'
+  const isHardcover  = bindingType === 'hardcover'
 
-  // Use Lulu's exact dimensions
-  const totalW = luluWidth  || (isDustJacket ? 508.00 : 314.280)
-  const totalH = luluHeight || (isDustJacket ? 247.65 : 234.950)
+  // Use Lulu's exact dimensions if provided — ALWAYS prefer these.
+  // Fallbacks below are last-resort estimates only and may not pass Lulu's
+  // validation, especially for hardcover/case wrap which adds a wrap
+  // allowance Lulu calculates per page-count via /cover-dimensions/.
+  let totalW = luluWidth
+  let totalH = luluHeight
+
+  if (!totalW || !totalH) {
+    console.warn(
+      `[generateCoverPDF] No luluWidth/luluHeight provided for bindingType="${bindingType}". ` +
+      `Falling back to an estimated size — this MAY be rejected by Lulu. ` +
+      `Fetch real dimensions from /lulu-cover-dimensions before calling generateCoverPDF.`
+    )
+
+    if (isDustJacket) {
+      totalW = totalW || 508.00
+      totalH = totalH || 247.65
+    } else if (isHardcover) {
+      // Hardcover case wrap: standard bleed+trim+spine, PLUS wrap allowance
+      // on each side (Lulu adds ~0.25" wrap on top of the flat bleed used
+      // for softcover — this was previously missing entirely).
+      const estSpine = getSpineWidthMm(pageCount || 28)
+      totalW = totalW || (TRIM_W * 2 + estSpine + (BLEED + HC_WRAP) * 2)
+      totalH = totalH || (TRIM_H + (BLEED + HC_WRAP) * 2)
+    } else {
+      totalW = totalW || 314.280
+      totalH = totalH || 234.950
+    }
+  }
 
   // ── Layout calculations ────────────────────────────────────────────────────
 
@@ -343,11 +372,13 @@ export function getSpineWidthMm(pageCount: number): number {
   return pageCount * 0.002252 * 25.4
 }
 
-export function getCoverDimensions(pageCount: number) {
+export function getCoverDimensions(pageCount: number, bindingType: 'softcover' | 'hardcover' | 'dustjacket' = 'softcover') {
   const spine = getSpineWidthMm(pageCount)
+  const wrap  = bindingType === 'hardcover' ? HC_WRAP : 0
+
   return {
-    width_mm:  TRIM_W * 2 + spine + BLEED * 2,
-    height_mm: TRIM_H + BLEED * 2,
+    width_mm:  TRIM_W * 2 + spine + (BLEED + wrap) * 2,
+    height_mm: TRIM_H + (BLEED + wrap) * 2,
     spine_mm:  spine,
     bleed_mm:  BLEED,
   }
