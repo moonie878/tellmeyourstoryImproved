@@ -337,7 +337,15 @@
     <h2 class="text-xl font-bold text-stone-900">Choose your book type</h2>
     <p class="mt-2 text-sm text-stone-500">Select a binding before checkout. Price includes UK shipping.</p>
 
-    <div class="mt-5 space-y-2">
+    <div v-if="!bindingModalPricesReady" class="mt-6 flex flex-col items-center gap-3 py-8">
+      <svg class="h-6 w-6 animate-spin text-[#7C5C3B]" viewBox="0 0 24 24" fill="none">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/>
+      </svg>
+      <p class="text-xs text-stone-500">Calculating pricing for your book…</p>
+    </div>
+
+    <div v-else class="mt-5 space-y-2">
       <button
         v-for="b in bindingOptions"
         :key="b.id"
@@ -347,10 +355,11 @@
       >
         <div class="flex items-center justify-between">
           <p class="text-sm font-semibold text-stone-900">{{ b.label }}</p>
-          <p class="text-sm font-bold text-stone-900">£{{ (b.cost + 4.99).toFixed(2) }}</p>
+          <p class="text-sm font-bold text-stone-900">£{{ getPrintPrice(b.id, bindingModalPageCount || 0).toFixed(2) }}</p>
         </div>
         <p class="mt-0.5 text-xs text-stone-500">{{ b.desc }}</p>
       </button>
+      <p class="pt-1 text-center text-[11px] text-stone-400">{{ bindingModalPageCount }} pages · price includes UK shipping</p>
     </div>
 
     <div class="mt-6 flex gap-3">
@@ -362,7 +371,8 @@
       </button>
       <button
         @click="startPrintOrder(bindingModalStory)"
-        class="flex-1 rounded-full bg-[#7C5C3B] py-2.5 text-sm font-semibold text-white hover:opacity-90"
+        :disabled="!bindingModalPricesReady"
+        class="flex-1 rounded-full bg-[#7C5C3B] py-2.5 text-sm font-semibold text-white hover:opacity-90 disabled:opacity-50"
       >
         Continue to payment →
       </button>
@@ -375,7 +385,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, nextTick, computed } from 'vue'
+import { ref, onMounted, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import { supabase } from '../lib/supabase'
 import { track } from '../lib/analytics'
@@ -483,14 +493,14 @@ const { share, shareWhatsApp, shareEmail } = useShare()
 
 const bindingModalOpen  = ref(false)
 const bindingModalStory = ref<any>(null)
-const selectedBindingId = ref('softcover')
+const selectedBindingId = ref<BindingId>('softcover')
+const bindingModalPricesReady  = ref(false)
+const bindingModalPageCount    = ref<number | null>(null)
+const bindingModalInteriorBlob = ref<Blob | null>(null)
 
-const bindingOptions = [
-  { id: 'softcover',  label: 'Softcover',              desc: 'Perfect bound · standard quality',    cost: 24.99, podId: '0600X0900.FC.STD.PB.060UW444.MXX', includesPhotoBook: false },
-  { id: 'hardcover',  label: 'Hardcover Case Wrap',    desc: 'Hardcover · premium colour interior', cost: 29.99, podId: '0600X0900.FC.PRE.CW.080CW444.GXX', includesPhotoBook: false },
-  { id: 'dustjacket', label: 'Hardcover + Dust Jacket', desc: 'Linen wrap · foil spine · premium',  cost: 34.99, podId: '0600X0900.FC.PRE.LW.080CW444.GNG', includesPhotoBook: false },
-  { id: 'bundle',     label: 'Story + Photo Book',     desc: 'Softcover story book AND a separate photo-only book · both delivered together', cost: 44.99, podId: '0600X0900.FC.STD.PB.060UW444.MXX', includesPhotoBook: true },
-]
+import { BINDING_CONFIGS, getPrintPrice, type BindingId } from '../lib/printPricing'
+
+const bindingOptions = BINDING_CONFIGS
 
 async function handleShare() {
   const result = await share('dashboard')
@@ -504,6 +514,58 @@ function openBindingModal(story: any) {
   selectedBindingId.value = 'softcover'
   bindingModalStory.value = story
   bindingModalOpen.value  = true
+  bindingModalPricesReady.value = false
+  bindingModalPageCount.value = null
+  bindingModalInteriorBlob.value = null
+
+  // Generate the interior PDF immediately so we know the REAL page count
+  // before showing any price. Previously, a flat price was shown here and
+  // the actual page count (which drives Lulu's real cost) was only
+  // discovered AFTER payment — meaning long books were being sold at a
+  // loss. See printPricing.ts for the bracket pricing this now uses.
+  prepareInteriorForPricing(story)
+}
+
+async function prepareInteriorForPricing(story: any) {
+  try {
+    const { data: sections } = await supabase
+      .from('story_sections')
+      .select('*')
+      .eq('story_type', story.story_type)
+      .order('order_index')
+
+    const { data: answers } = await supabase
+      .from('story_answers')
+      .select('*')
+      .eq('project_id', story.id)
+
+    const mergedSections = (sections || []).map((s: any) => {
+      const answer = answers?.find((a: any) => a.section_id === s.id)
+      return { ...s, answer: answer?.answer || '', is_highlighted: answer?.is_highlighted || false }
+    })
+
+    async function getAllImagesForExport() {
+      const { data } = await supabase.from('story_images').select('*').eq('project_id', story.id)
+      return data || []
+    }
+
+    const { blob: interiorBlob, pageCount: actualPageCount } = await exportTrueBookAsBlob(
+      story, mergedSections, getAllImagesForExport, loadImageAsBase64, story.cover_image_url || ''
+    )
+
+    // Only apply if the modal is still open for this same story — guards
+    // against a stale result landing after the user closed/changed stories.
+    if (bindingModalStory.value?.id !== story.id) return
+
+    bindingModalInteriorBlob.value = interiorBlob
+    bindingModalPageCount.value    = actualPageCount
+    bindingModalPricesReady.value  = true
+  } catch (err) {
+    console.error('Failed to prepare interior for pricing:', err)
+    bindingModalPricesReady.value = false
+    alert('Could not calculate pricing for this book. Please try again.')
+    bindingModalOpen.value = false
+  }
 }
 
 async function generateShareLink(storyId: string) {
@@ -558,9 +620,7 @@ async function shareStoryWhatsApp(storyId: string, storyTitle: string) {
   window.open(`https://wa.me/?text=${text}`, '_blank')
 }
 
-const selectedBinding = computed(() =>
-  bindingOptions.find(b => b.id === selectedBindingId.value) ?? bindingOptions[0]
-)
+
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -639,14 +699,16 @@ async function startPrintOrder(story: any) {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return
 
-    const binding = selectedBinding.value
+    const binding = bindingOptions.find((b) => b.id === selectedBindingId.value)!
+    const pageCount = bindingModalPageCount.value || 0
+    const price = getPrintPrice(binding.id, pageCount)
 
-     console.log('Sending to checkout:', {  // ← add this
-      amount: Math.round((binding.cost + 4.99) * 100),
+    console.log('Sending to checkout:', {
+      amount: Math.round(price * 100),
       podId: binding.podId,
       binding: binding.label,
+      pageCount,
     })
-
 
     const response = await fetch(`${API_BASE}/create-print-checkout`, {
       method: 'POST',
@@ -655,10 +717,11 @@ async function startPrintOrder(story: any) {
         userId:     user.id,
         storyId:    story.id,
         storyTitle: story.title || 'My Story',
-        amount:     Math.round((binding.cost + 4.99) * 100), // pence
+        amount:     Math.round(price * 100), // pence — now correctly bracketed by real page count
         podId:      binding.podId,
         binding:    binding.label,
         includesPhotoBook:  binding.includesPhotoBook,
+        pageCount,
       }),
     })
 
@@ -681,23 +744,6 @@ async function openPrintModal(story: any, sessionId: string) {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return
 
-    // Fetch sections and answers
-    const { data: sections } = await supabase
-      .from('story_sections')
-      .select('*')
-      .eq('story_type', story.story_type)
-      .order('order_index')
-
-    const { data: answers } = await supabase
-      .from('story_answers')
-      .select('*')
-      .eq('project_id', story.id)
-
-    const mergedSections = (sections || []).map((s: any) => {
-      const answer = answers?.find((a: any) => a.section_id === s.id)
-      return { ...s, answer: answer?.answer || '', is_highlighted: answer?.is_highlighted || false }
-    })
-
     const storyTitle = story.title || 'My Story'
     const subtitle   = 'A life told through memories, moments, and love'
 
@@ -706,14 +752,41 @@ async function openPrintModal(story: any, sessionId: string) {
       return data || []
     }
 
-    // Generate interior PDF — returns blob + real page count
-    const { blob: interiorBlob, pageCount: actualPageCount } = await exportTrueBookAsBlob(
-      story, mergedSections, getAllImagesForExport, loadImageAsBase64, story.cover_image_url || ''
-    )
+    // Reuse the interior PDF generated earlier in prepareInteriorForPricing
+    // (before checkout) if it's still available for this story — avoids
+    // regenerating the same PDF twice. Falls back to regenerating if the
+    // page was refreshed or the cached blob isn't for this story.
+    let interiorBlob: Blob
+    let actualPageCount: number
 
+    if (bindingModalInteriorBlob.value && bindingModalStory.value?.id === story.id) {
+      interiorBlob = bindingModalInteriorBlob.value
+      actualPageCount = bindingModalPageCount.value!
+      console.log('Reusing pre-generated interior PDF, page count:', actualPageCount)
+    } else {
+      const { data: sections } = await supabase
+        .from('story_sections')
+        .select('*')
+        .eq('story_type', story.story_type)
+        .order('order_index')
 
+      const { data: answers } = await supabase
+        .from('story_answers')
+        .select('*')
+        .eq('project_id', story.id)
 
-    console.log('Actual page count:', actualPageCount)
+      const mergedSections = (sections || []).map((s: any) => {
+        const answer = answers?.find((a: any) => a.section_id === s.id)
+        return { ...s, answer: answer?.answer || '', is_highlighted: answer?.is_highlighted || false }
+      })
+
+      const result = await exportTrueBookAsBlob(
+        story, mergedSections, getAllImagesForExport, loadImageAsBase64, story.cover_image_url || ''
+      )
+      interiorBlob = result.blob
+      actualPageCount = result.pageCount
+      console.log('Regenerated interior PDF (no cached version available), page count:', actualPageCount)
+    }
 
     // Get session metadata to retrieve selected binding
 const sessionResponse = await fetch(`${API_BASE}/stripe-session/${sessionId}`)
