@@ -48,7 +48,7 @@
             <div class="mt-6 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs text-[#8C847E] md:justify-start">
               <span class="flex items-center gap-1.5"><span class="check">✓</span> No subscription</span>
               <span class="flex items-center gap-1.5"><span class="check">✓</span> Free to start</span>
-              <span class="flex items-center gap-1.5"><span class="check">✓</span> Printed book from £29.98</span>
+              <span class="flex items-center gap-1.5"><span class="check">✓</span> Printed book from £{{ PRINTED_BOOK_FROM_PRICE.toFixed(2) }}</span>
             </div>
           </div>
 
@@ -126,7 +126,7 @@
             </div>
             <h3 class="feature-title">Order a printed hardback</h3>
             <p class="feature-desc">
-              Turn any completed story into a beautifully printed 6×9 softcover book — professionally printed and shipped directly to your door. From £29.98 including UK delivery.
+              Turn any completed story into a beautifully printed 6×9 softcover book — professionally printed and shipped directly to your door. From £{{ PRINTED_BOOK_FROM_PRICE.toFixed(2) }} including UK delivery.
             </p>
             <div class="feature-tag">Printed by Lulu Press • Ships in 10–14 days</div>
           </div>
@@ -197,7 +197,7 @@
                 <li>Professional print quality</li>
                 <li>QR codes printed in the book</li>
                 <li>Shipped UK-wide</li>
-                <li>From £29.98 inc. delivery</li>
+                <li>From £{{ PRINTED_BOOK_FROM_PRICE.toFixed(2) }} inc. delivery</li>
               </ul>
               <div class="new-badge">Now available</div>
             </div>
@@ -539,6 +539,7 @@
 import { track } from '../lib/analytics'
 import { useSeo } from '../composables/useSeo'
 import PricingTable from '../components/pricing/PricingTable.vue'
+import { PRINTED_BOOK_FROM_PRICE } from '../lib/printPricing'
 
 useSeo({
   title: 'Tell Me Your Story | Life Story Keepsake Books | Free to Start',
@@ -575,7 +576,7 @@ useSeo({
           { '@type': 'Offer', name: 'Single Story', price: '3.99', priceCurrency: 'GBP' },
           { '@type': 'Offer', name: 'Story + Photos', price: '5.99', priceCurrency: 'GBP' },
           { '@type': 'Offer', name: 'Full Collection', price: '11.99', priceCurrency: 'GBP' },
-          { '@type': 'Offer', name: 'Printed Book', price: '29.98', priceCurrency: 'GBP', description: 'Professionally printed 6x9 softcover with QR voice codes, shipped UK-wide.' },
+          { '@type': 'Offer', name: 'Printed Book', price: String(PRINTED_BOOK_FROM_PRICE), priceCurrency: 'GBP', description: 'Professionally printed 6x9 softcover with QR voice codes, shipped UK-wide.' },
         ],
       },
     ],

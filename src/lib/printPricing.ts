@@ -13,6 +13,14 @@
 // derived from real Lulu /print-job-cost-calculations responses (see
 // PRICING_NOTES at the bottom for the source data points).
 
+// Marketing-facing "from" price — use this everywhere a single headline
+// print price is shown (homepage, pricing page, SEO landing pages, CTAs).
+// This MUST match the lowest bracket price in BINDING_CONFIGS below
+// (currently softcover, up to 80 pages) — if that bracket price changes,
+// update this constant in the same edit so marketing copy never drifts
+// out of sync with actual checkout pricing again.
+export const PRINTED_BOOK_FROM_PRICE = 21.99
+
 export type BindingId = 'softcover' | 'hardcover' | 'dustjacket' | 'bundle'
 
 export interface PriceBracket {

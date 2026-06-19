@@ -211,7 +211,7 @@
               Order your printed book
             </router-link>
             <div>
-              <p class="text-2xl font-bold text-[#1C1917]">£29.98</p>
+              <p class="text-2xl font-bold text-[#1C1917]">£{{ PRINTED_BOOK_FROM_PRICE.toFixed(2) }}</p>
               <p class="text-xs text-[#8C847E]">Includes UK shipping</p>
             </div>
           </div>
@@ -381,6 +381,7 @@ import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useSeo } from '../composables/useSeo'
 import { supabase } from '../lib/supabase'
+import { PRINTED_BOOK_FROM_PRICE } from '../lib/printPricing'
 
 const router = useRouter()
 
@@ -466,7 +467,7 @@ const printedBookSteps = [
   { icon: '📖', title: 'Beautiful typeset layout', desc: 'The same design as your digital PDF — chapters, drop caps, quote pages, and photos.' },
   { icon: '🎙️', title: 'QR codes for voice recordings', desc: 'Each voice answer gets a QR code printed next to it. Family scan to hear their loved one speak.' },
   { icon: '📦', title: 'Printed and shipped', desc: 'Professionally printed by Lulu Press and shipped directly to your door in 10–14 days.' },
-  { icon: '💷', title: 'From £29.98 including delivery', desc: 'One copy or multiple — £29.99 per book plus £4.99 UK shipping.' },
+  { icon: '💷', title: `From £${PRINTED_BOOK_FROM_PRICE.toFixed(2)} including delivery`, desc: `One copy or multiple — from £${PRINTED_BOOK_FROM_PRICE.toFixed(2)} per book plus £4.99 UK shipping.` },
 ]
 
 const writingRows = [
@@ -493,7 +494,7 @@ const extrasRows = [
   { label: 'All story types unlocked', free: false, book: false, photos: false, all: true, premium: true },
   { label: 'Video export (MP4)', free: false, book: false, photos: false, all: false, premium: true },
   { label: 'Tribute video creator', free: false, book: false, photos: false, all: false, premium: true },
-  { label: 'Order printed book (£29.98)', free: false, book: true, photos: true, all: true, premium: true },
+  { label: `Order printed book (from £${PRINTED_BOOK_FROM_PRICE.toFixed(2)})`, free: false, book: true, photos: true, all: true, premium: true },
 ]
 
 const mobilePlans = [
@@ -527,7 +528,7 @@ const mobilePlans = [
       'Design themes',
       // Add to Keepsake Book, Book + Photos, All Stories features:
 'Voice recording per answer 🎙️',
-'Order a printed book from £29.98',
+`Order a printed book from £${PRINTED_BOOK_FROM_PRICE.toFixed(2)}`,
     ],
   },
   {
@@ -544,7 +545,7 @@ const mobilePlans = [
       'Cover image',
       // Add to Keepsake Book, Book + Photos, All Stories features:
 'Voice recording per answer 🎙️',
-'Order a printed book from £29.98',
+`Order a printed book from £${PRINTED_BOOK_FROM_PRICE.toFixed(2)}`,
     ],
   },
   {
@@ -561,7 +562,7 @@ const mobilePlans = [
       'Text-only PDF exports',
       // Add to Keepsake Book, Book + Photos, All Stories features:
 'Voice recording per answer 🎙️',
-'Order a printed book from £29.98',
+`Order a printed book from £${PRINTED_BOOK_FROM_PRICE.toFixed(2)}`,
     ],
   },
   {
@@ -581,7 +582,7 @@ const mobilePlans = [
       'Tribute video creator (free)',
        'Voice recording per answer 🎙️',  // add
     'QR codes in printed book',         // add
-    'Order a printed book from £29.98', // add
+    `Order a printed book from £${PRINTED_BOOK_FROM_PRICE.toFixed(2)}`, // add
     ],
   },
 ]

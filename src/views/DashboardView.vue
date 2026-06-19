@@ -190,7 +190,7 @@
   </div>
 
   <p v-if="hasPrintAccess()" class="mt-1.5 text-xs text-stone-400">
-    Printed & shipped to your door — £24.99 + £4.99 UK shipping
+    Printed & shipped to your door — from £{{ PRINTED_BOOK_FROM_PRICE.toFixed(2) }}, UK shipping included
   </p>
 
   <p v-if="generatingPrintId === story.id" class="mt-1.5 text-xs text-stone-500">
@@ -394,6 +394,7 @@ import { useStoryTrueBookExport } from '../composables/useTrueBookExport'
 import { generateCoverPDF } from '../lib/generateCoverPDF'
 import PrintOrderModal from '../components/print/PrintOrderModal.vue'
 import { useShare } from '../composables/useShare'
+import { PRINTED_BOOK_FROM_PRICE } from '../lib/printPricing'
 import { usePhotoBookExport } from '../composables/usePhotoBookExport'
 
 // ─── State ────────────────────────────────────────────────────────────────────
