@@ -110,6 +110,11 @@ const routes = [
 { path: '/personalised-gift-for-grandparents', component: () => import('../views/PersonalisedGiftForGrandparentsView.vue') },
 { path: '/questions-about-family-history',   component: () => import('../views/QuestionsAboutFamilyHistoryView.vue') },
 {
+  path: '/storyworth-vs-tellmeyourstory',
+  name: 'storyworth-vs-tellmeyourstory',
+  component: () => import('../views/StoryworthVsTellMeYourStoryView.vue'),
+},
+{
   path: '/remento-alternative',
   name: 'remento-alternative',
   component: () => import('../views/RementoAlternativeView.vue')
