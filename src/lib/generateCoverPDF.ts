@@ -296,20 +296,22 @@ export async function generateCoverPDF(options: CoverOptions): Promise<Blob> {
 
   // ── BACK COVER ────────────────────────────────────────────────────────────
 
+  const backHeaderH = totalH * 0.12
+
   setFill(doc, C_DARK)
-  doc.rect(backLeft, 0, TRIM_W, totalH * 0.12, 'F')
+  doc.rect(backLeft, 0, TRIM_W, backHeaderH, 'F')
 
   doc.setFont('EBGaramond', 'normal')
   doc.setFontSize(8)
   setTxt(doc, [198, 168, 130])
   doc.text('TELL ME YOUR STORY', backCX, BLEED + totalH * 0.06, { align: 'center' })
 
-  ornament(doc, backCX, BLEED + totalH * 0.12 + 16)
+  ornament(doc, backCX, backHeaderH + 16)
 
   doc.setFont('EBGaramond', 'italic')
   doc.setFontSize(11)
   setTxt(doc, C_SECONDARY)
-  doc.text(`"${title}"`, backCX, BLEED + totalH * 0.12 + 30, { align: 'center', maxWidth: TRIM_W - 24 })
+  doc.text(`"${title}"`, backCX, backHeaderH + 30, { align: 'center', maxWidth: TRIM_W - 24 })
 
   doc.setFont('EBGaramond', 'normal')
   doc.setFontSize(9)
@@ -317,14 +319,25 @@ export async function generateCoverPDF(options: CoverOptions): Promise<Blob> {
   const desc  = 'A life told through memories, moments, and love. Created with Tell Me Your Story — capturing the stories that matter most, before they are lost.'
   const lines = doc.splitTextToSize(desc, TRIM_W - 32)
   lines.forEach((ln: string, i: number) => {
-    doc.text(ln, backCX, BLEED + totalH * 0.12 + 46 + i * 6, { align: 'center' })
+    doc.text(ln, backCX, backHeaderH + 46 + i * 6, { align: 'center' })
   })
 
-  ornament(doc, backCX, totalH / 2 + 20)
+  // Track where the description block actually ends, so the next ornament
+  // and website line flow naturally from real content height rather than
+  // jumping to a fixed totalH/2 position (which created a large dead gap
+  // once cover height grew with the corrected hardcover dimensions).
+  const descEndY = backHeaderH + 46 + lines.length * 6
+
+  // Centre the remaining elements in whatever space is left between the
+  // description and the footer, rather than anchoring to totalH/2.
+  const remainingSpace = contentBot - descEndY
+  const midOfRemaining = descEndY + remainingSpace / 2
+
+  ornament(doc, backCX, midOfRemaining - 6)
   doc.setFont('EBGaramond', 'normal')
   doc.setFontSize(8)
   setTxt(doc, C_MUTED)
-  doc.text('tellmeyourstory.uk', backCX, totalH / 2 + 32, { align: 'center' })
+  doc.text('tellmeyourstory.uk', backCX, midOfRemaining + 6, { align: 'center' })
 
   // Back footer
   setDraw(doc, C_DIVIDER)
