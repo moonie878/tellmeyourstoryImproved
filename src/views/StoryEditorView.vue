@@ -544,8 +544,14 @@ watch(
   }
 )
 
-watch(isStoryComplete, (complete) => {
-  if (complete && !hasTier4Access.value) {
+watch(isStoryComplete, (complete, wasComplete) => {
+  // Only trigger when the story genuinely transitions from incomplete to
+  // complete DURING this session (wasComplete === false). Without this
+  // check, a story that was already complete from a previous session
+  // re-fires this watcher as soon as isStoryComplete first resolves to
+  // true on page load/reload — popping the premium preview every time,
+  // even though nothing actually just happened.
+  if (complete && wasComplete === false && !hasTier4Access.value) {
     setTimeout(() => { showPremiumPreview.value = true }, 800)
   }
 })
