@@ -221,8 +221,8 @@ const comparisonRows = [
 ]
 
 useSeo({
-  title: 'StoryKeeper Review 2026 — Honest Look Before You Buy | Tell Me Your Story',
-  description: 'An honest review of StoryKeeper for UK families. How it works, what it costs, the AI rewriting question, and how it compares to Tell Me Your Story — free to start, UK printed.',
+  title: 'StoryKeeper Reviews 2026 — Cost, Complaints & UK Alternative',
+  description: 'StoryKeeper reviews, pricing in GBP, and known complaints — plus how it compares to Tell Me Your Story, a free-to-start UK alternative with no upfront cost.',
   canonical: 'https://tellmeyourstory.uk/storykeeper-review',
 })
 </script>
