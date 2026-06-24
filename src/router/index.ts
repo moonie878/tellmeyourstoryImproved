@@ -115,6 +115,31 @@ const routes = [
   component: () => import('../views/StoryworthVsTellMeYourStoryView.vue'),
 },
 {
+  path: '/remento-vs-tellmeyourstory',
+  name: 'remento-vs-tellmeyourstory',
+  component: () => import('../views/RementoVsTellMeYourStoryView.vue'),
+},
+{
+  path: '/end-of-life-questions-to-ask-parents',
+  name: 'end-of-life-questions-to-ask-parents',
+  component: () => import('../views/EndOfLifeQuestionsToAskParentsView.vue'),
+},
+{
+  path: '/memory-book-vs-memory-box',
+  name: 'memory-book-vs-memory-box',
+  component: () => import('../views/MemoryBookVsMemoryBoxView.vue'),
+},
+{
+  path: '/how-to-write-an-obituary',
+  name: 'how-to-write-an-obituary',
+  component: () => import('../views/HowToWriteAnObituaryView.vue'),
+},
+{
+  path: '/write-your-own-life-story',
+  name: 'write-your-own-life-story',
+  component: () => import('../views/WriteYourOwnLifeStoryView.vue'),
+},
+{
   path: '/remento-alternative',
   name: 'remento-alternative',
   component: () => import('../views/RementoAlternativeView.vue')
