@@ -161,7 +161,7 @@
           </div>
         </div>
 
-        <div v-if="!hasFullAccess" class="mt-4">
+        <div v-if="!isPremium" class="mt-4">
           <button
             @click="handleUpgradeClick"
             class="rounded-full bg-[#7C5C3B] px-5 py-3 text-sm font-medium text-white transition hover:opacity-90"
@@ -240,6 +240,13 @@ const hasPrintAccess = computed(() =>
 const hasExportAccess = computed(() =>
   userAccess.value.some(a => a.access_type === 'export')
 )
+
+// True only at the genuine top tier (full access + print/images).
+// The upgrade button should show for anyone below this, including
+// tier3 users who have hasFullAccess but not hasPrintAccess yet —
+// previously the button only checked hasFullAccess, which incorrectly
+// hid it from tier3 users who still need to upgrade to premium.
+const isPremium = computed(() => hasFullAccess.value && hasPrintAccess.value)
 
 const tierLabel = computed(() => {
   if (hasFullAccess.value && hasPrintAccess.value) return 'Premium'
