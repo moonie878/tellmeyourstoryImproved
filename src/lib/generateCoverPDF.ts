@@ -31,6 +31,13 @@ const HC_WRAP      = 19.045 // mm — hardcover case wrap margin per side.
 // the spine to calculate far too wide and throwing off the entire
 // front cover layout (June 2026 — see hardcover front cover bug).
 
+// Small cosmetic nudge — shifts front/back cover text/image content
+// slightly OUTWARD (away from the spine) to better centre it within
+// Lulu's safe area, per visual check against Lulu's own preview tool.
+// Positive value shifts front cover right and back cover left.
+// Adjust in small (1-2mm) increments and re-check against Lulu's preview.
+const COVER_CONTENT_NUDGE = 3 // mm
+
 const IMG_QUALITY = 0.85
 
 // ─── Colours ──────────────────────────────────────────────────────────────────
@@ -164,8 +171,8 @@ export async function generateCoverPDF(options: CoverOptions): Promise<Blob> {
   }
 
   const contentBot = totalH - BLEED - 18
-  const backCX     = backLeft  + TRIM_W / 2
-  const frontCX    = frontLeft + TRIM_W / 2
+  const backCX     = backLeft  + TRIM_W / 2 - COVER_CONTENT_NUDGE
+  const frontCX    = frontLeft + TRIM_W / 2 + COVER_CONTENT_NUDGE
   const spineCX    = spineLeft + spine / 2
 
   console.log(`Cover PDF (${bindingType}): ${totalW.toFixed(3)}×${totalH.toFixed(3)}mm, spine: ${spine.toFixed(3)}mm`)
@@ -256,7 +263,7 @@ export async function generateCoverPDF(options: CoverOptions): Promise<Blob> {
       const ratio  = Math.min(maxIW / naturalW, maxIH / naturalH, 1)
       const iw     = naturalW * ratio
       const ih     = naturalH * ratio
-      const ix     = frontLeft + (TRIM_W - iw) / 2
+      const ix     = frontLeft + (TRIM_W - iw) / 2 + COVER_CONTENT_NUDGE
 
       // Total height of the image + ornament + title + ornament + subtitle
       // block, used to centre the whole thing vertically within the
