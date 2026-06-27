@@ -243,7 +243,15 @@ export async function generateCoverPDF(options: CoverOptions): Promise<Blob> {
       const iw     = naturalW * ratio
       const ih     = naturalH * ratio
       const ix     = frontLeft + (TRIM_W - iw) / 2
-      const iy     = BLEED + 20
+
+      // Total height of the image + ornament + title + ornament + subtitle
+      // block, used to centre the whole thing vertically within the
+      // available front cover space — rather than anchoring everything to
+      // a fixed top offset, which left a large dead gap at the bottom once
+      // cover height grew with the corrected hardcover dimensions.
+      const blockH = ih + 12 + 14 + 10 + 12 + 14
+      const availableH = contentBot - BLEED
+      const iy = BLEED + Math.max(20, (availableH - blockH) / 2)
 
       const compressed = await compressImage(rawImg, iw, ih)
 
