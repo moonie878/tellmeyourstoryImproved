@@ -246,10 +246,13 @@ export async function generateCoverPDF(options: CoverOptions): Promise<Blob> {
 
       // Total height of the image + ornament + title + ornament + subtitle
       // block, used to centre the whole thing vertically within the
-      // available front cover space — rather than anchoring everything to
-      // a fixed top offset, which left a large dead gap at the bottom once
-      // cover height grew with the corrected hardcover dimensions.
-      const blockH = ih + 12 + 14 + 10 + 12 + 14
+      // available front cover space. The block's true height matches the
+      // last element's offset from iy (subtitle sits at iy + ih + 48) plus
+      // a little buffer for the subtitle's own line height — NOT ih plus
+      // every individual gap added together, which overestimates the
+      // block and barely shifts the centred position (first attempt at
+      // this fix made this mistake).
+      const blockH = ih + 48 + 10
       const availableH = contentBot - BLEED
       const iy = BLEED + Math.max(20, (availableH - blockH) / 2)
 
