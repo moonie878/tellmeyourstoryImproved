@@ -228,11 +228,20 @@ export async function generateCoverPDF(options: CoverOptions): Promise<Blob> {
         img.onerror = reject
       })
 
+      // img.width/height are pixels — convert to mm at 96dpi (1px = 0.2646mm)
+      // before comparing against maxIW/maxIH, which are already in mm.
+      // Without this conversion the ratio comes out as mm-per-pixel (tiny),
+      // rendering the image far smaller than intended (see: hardcover
+      // front cover photo printing tiny with an odd border, June 2026).
+      const PX_TO_MM = 0.2646
+      const naturalW = img.width * PX_TO_MM
+      const naturalH = img.height * PX_TO_MM
+
       const maxIW  = TRIM_W - 24
       const maxIH  = TRIM_H * 0.42
-      const ratio  = Math.min(maxIW / img.width, maxIH / img.height)
-      const iw     = img.width  * ratio
-      const ih     = img.height * ratio
+      const ratio  = Math.min(maxIW / naturalW, maxIH / naturalH, 1)
+      const iw     = naturalW * ratio
+      const ih     = naturalH * ratio
       const ix     = frontLeft + (TRIM_W - iw) / 2
       const iy     = BLEED + 20
 
