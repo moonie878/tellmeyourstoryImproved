@@ -38,6 +38,12 @@ const HC_WRAP      = 19.045 // mm — hardcover case wrap margin per side.
 // Adjust in small (1-2mm) increments and re-check against Lulu's preview.
 const COVER_CONTENT_NUDGE = 3 // mm
 
+// Small cosmetic nudge for spine text specifically — jsPDF's rotated
+// text (angle: 90) doesn't always centre on its true anchor point the
+// same way unrotated text does, so the spine title can render slightly
+// off-centre within the spine strip even when spineCX itself is correct.
+const SPINE_TEXT_NUDGE = 2 // mm — positive shifts spine text right
+
 const IMG_QUALITY = 0.85
 
 // ─── Colours ──────────────────────────────────────────────────────────────────
@@ -328,7 +334,7 @@ export async function generateCoverPDF(options: CoverOptions): Promise<Blob> {
     doc.setFont('EBGaramond', 'bold')
     doc.setFontSize(Math.min(8, spine * 2.5))
     setTxt(doc, C_PRIMARY)
-    doc.text(title, spineCX, totalH / 2, {
+    doc.text(title, spineCX + SPINE_TEXT_NUDGE, totalH / 2, {
       align:    'center',
       angle:    90,
       maxWidth: totalH - 40,
