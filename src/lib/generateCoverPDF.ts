@@ -21,7 +21,15 @@ const BLEED       = 3.175   // mm — fixed for all Lulu 6x9 books
 const TRIM_W       = 152.4   // mm — 6 inches per side
 const TRIM_H       = 228.6   // mm — 9 inches
 const FLAP_W       = 76.2    // mm — standard 3 inch dust jacket flap
-const HC_WRAP      = 6.35    // mm — case wrap hardcover adds 0.25" wrap allowance per side, on top of bleed
+const HC_WRAP      = 19.045 // mm — hardcover case wrap margin per side.
+// Derived from Lulu's stated requirement for 0600X0900.FC.PRE.CW.080CW444.GXX:
+// width 365.12mm, spine 15.88mm (per Lulu's own product spec panel).
+// margin_per_side = (365.12 - 152.4*2 - 15.88) / 2 = 22.22mm total,
+// of which BLEED (3.175mm) is the flat bleed — so HC_WRAP is the
+// remainder: 22.22 - 3.175 = 19.045mm. The previous value (6.35mm) was
+// a guess that undershot the real figure by more than half, causing
+// the spine to calculate far too wide and throwing off the entire
+// front cover layout (June 2026 — see hardcover front cover bug).
 
 const IMG_QUALITY = 0.85
 
@@ -143,8 +151,14 @@ export async function generateCoverPDF(options: CoverOptions): Promise<Blob> {
     frontLeft = spineLeft + spine
   } else {
     // Softcover/Hardcover: [bleed][back][spine][front][bleed]
-    spine     = totalW - TRIM_W * 2 - BLEED * 2
-    backLeft  = BLEED
+    // Hardcover case wrap needs the extra wrap margin (HC_WRAP) subtracted
+    // on top of bleed on both sides — without this, spine calculates far
+    // too wide (e.g. 53.97mm instead of Lulu's correct 15.88mm for a
+    // 142-page hardcover), which throws off the whole layout including
+    // where the front cover panel starts (June 2026 bug).
+    const sideMargin = isHardcover ? BLEED + HC_WRAP : BLEED
+    spine     = totalW - TRIM_W * 2 - sideMargin * 2
+    backLeft  = sideMargin
     spineLeft = backLeft + TRIM_W
     frontLeft = spineLeft + spine
   }
@@ -255,11 +269,6 @@ export async function generateCoverPDF(options: CoverOptions): Promise<Blob> {
       const blockH = ih + 48 + 10
       const availableH = contentBot - BLEED
       const iy = BLEED + Math.max(20, (availableH - blockH) / 2)
-
-      console.log('FRONT COVER DEBUG:', {
-        totalH, BLEED, contentBot, availableH, ih, blockH, iy,
-        calcShift: (availableH - blockH) / 2,
-      })
 
       const compressed = await compressImage(rawImg, iw, ih)
 
