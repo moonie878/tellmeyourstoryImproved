@@ -42,7 +42,7 @@ const COVER_CONTENT_NUDGE = 3 // mm
 // text (angle: 90) doesn't always centre on its true anchor point the
 // same way unrotated text does, so the spine title can render slightly
 // off-centre within the spine strip even when spineCX itself is correct.
-const SPINE_TEXT_NUDGE = 2 // mm — positive shifts spine text right
+const SPINE_TEXT_NUDGE = 6 // mm — positive shifts spine text right
 
 const IMG_QUALITY = 0.85
 
