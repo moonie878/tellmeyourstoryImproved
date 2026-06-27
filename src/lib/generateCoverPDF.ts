@@ -256,6 +256,11 @@ export async function generateCoverPDF(options: CoverOptions): Promise<Blob> {
       const availableH = contentBot - BLEED
       const iy = BLEED + Math.max(20, (availableH - blockH) / 2)
 
+      console.log('FRONT COVER DEBUG:', {
+        totalH, BLEED, contentBot, availableH, ih, blockH, iy,
+        calcShift: (availableH - blockH) / 2,
+      })
+
       const compressed = await compressImage(rawImg, iw, ih)
 
       setDraw(doc, C_DIVIDER)
