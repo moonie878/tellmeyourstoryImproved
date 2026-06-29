@@ -197,8 +197,8 @@ const chapters = [
 ]
 
 useSeo({
-  title: '100 Life Story Interview Questions for Parents & Grandparents | Tell Me Your Story',
-  description: '100 life story interview questions organised by chapter — childhood, love, work, family, hard times, and legacy. Everything you need to run a meaningful life story interview.',
+  title: 'Life Story Interview Questions: 100 Questions by Chapter (2026)',
+  description: '100 life story interview questions, organised by chapter: childhood, love, work, family, hard times, and legacy. Free to use — start your interview today.',
   canonical: 'https://tellmeyourstory.uk/life-story-interview-questions',
 })
 </script>
