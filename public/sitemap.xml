@@ -29,12 +29,7 @@
     <loc>https://tellmeyourstory.uk/questions-to-ask-your-grandma</loc>
     <priority>0.8</priority>
     <changefreq>monthly</changefreq>
-  </url>
-  <url>
-    <loc>https://tellmeyourstory.uk/questions-to-ask-your-dad</loc>
-    <priority>0.8</priority>
-    <changefreq>monthly</changefreq>
-  </url>
+  </url> 
   <url>
   <loc>https://tellmeyourstory.uk/blog/what-to-do-when-a-parent-wont-open-up</loc>
   <priority>0.9</priority>
@@ -134,12 +129,7 @@
     <loc>https://tellmeyourstory.uk/remento-alternative</loc>
     <priority>0.9</priority>
     <changefreq>monthly</changefreq>
-  </url>
-  <url>
-    <loc>https://tellmeyourstory.uk//blog/how-to-make-a-memorial-tribute-video</loc>
-    <priority>0.9</priority>
-    <changefreq>monthly</changefreq>
-  </url>
+  </url>  
   <url>
   <loc>https://tellmeyourstory.uk/life-story-video</loc>
   <priority>0.9</priority>
