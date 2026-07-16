@@ -171,13 +171,15 @@
    <div class="mx-auto max-w-7xl px-4 py-5 sm:px-6">
 
   <!-- Onboarding: guided first question (new stories only) -->
-  <StoryOnboarding
-    v-if="showOnboarding"
-    :first-section="sections[0] || null"
-    :total-sections="sections.length"
-    @answer-submitted="handleOnboardingAnswer"
-    @continue="handleOnboardingContinue"
-  />
+ <StoryOnboarding
+  v-if="showOnboarding"
+  :first-section="sections[0] || null"
+  :total-sections="sections.length"
+  :project-id="projectId"
+  @answer-submitted="handleOnboardingAnswer"
+  @image-upload="handleImageUpload"
+  @continue="handleOnboardingContinue"
+/>
 
   <!-- Normal editor (after onboarding or returning users) -->
   <template v-else>
