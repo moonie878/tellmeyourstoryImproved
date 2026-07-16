@@ -168,8 +168,19 @@
       />
     </div>
 
-    <!-- ── Main editor ─────────────────────────────────────────────────────── -->
-    <div class="mx-auto max-w-7xl px-4 py-5 sm:px-6">
+   <div class="mx-auto max-w-7xl px-4 py-5 sm:px-6">
+
+  <!-- Onboarding: guided first question (new stories only) -->
+  <StoryOnboarding
+    v-if="showOnboarding"
+    :first-section="sections[0] || null"
+    :total-sections="sections.length"
+    @answer-submitted="handleOnboardingAnswer"
+    @continue="handleOnboardingContinue"
+  />
+
+  <!-- Normal editor (after onboarding or returning users) -->
+  <template v-else>
 
       <!-- Upgrade panel (free/low tier, early in journey) -->
       <div v-if="currentPlan !== 'tier4' && answeredProgress < 20" class="mb-5">
@@ -281,6 +292,7 @@
         </div>
 
       </div>
+  </template>
     </div>
 
     <!-- ── Modals ──────────────────────────────────────────────────────────── -->
@@ -334,6 +346,15 @@
       @saved="handleProfileSaved"
     />
 
+    <UpgradeGateModal
+  :open="showUpgradeGate"
+  :answered-sections="answeredSectionsWithContent"
+  :project-title="project?.title || ''"
+  :total-sections="sections.length"
+  @close="showUpgradeGate = false"
+  @upgrade="upgradeFromGate"
+/>
+
   </div>
 </template>
 
@@ -366,6 +387,8 @@ import { useStoryTrueBookExport } from '../composables/useTrueBookExport'
 import { useShare } from '../composables/useShare'
 import StoryProfileModal from '../components/story/StoryProfileModal.vue'
 import type { StoryProfile } from '../types/story'
+import StoryOnboarding from '../components/story/Storyonboarding.vue'
+import UpgradeGateModal from '../components/story/Upgradegatemodal.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -384,6 +407,11 @@ const showProfileModal    = ref(false)
 const showMidwayUpgrade   = ref(false)
 const showShareNudge      = ref(false)
 const hasShownMidwayUpgrade = ref(false)
+
+const FREE_QUESTION_LIMIT = 5
+const showOnboarding       = ref(false)
+const onboardingComplete   = ref(false)
+const showUpgradeGate      = ref(false)
 
 // ── Loading / export state ─────────────────────────────────────────────────────
 const checkoutLoading  = ref(false)
@@ -504,6 +532,26 @@ const answeredProgress = computed(() => {
 const isStoryComplete = computed(() =>
   sections.value.length > 0 &&
   sections.value.every((s) => s.answer && s.answer.trim().length > 0)
+)
+
+// Is this user gated? Free users who haven't paid.
+const isFreeUser = computed(() => !isPaidUser.value)
+
+// Answered sections with their content (for the gate modal preview)
+const answeredSectionsWithContent = computed(() =>
+  sections.value
+    .filter(s => s.answer?.trim())
+    .map(s => ({
+      id: s.id,
+      chapter: s.chapter || 'Your story',
+      question: s.question,
+      answer: s.answer,
+    }))
+)
+
+// Should block navigation to the next unanswered question?
+const isAtFreeLimit = computed(() =>
+  isFreeUser.value && answeredSectionsWithContent.value.length >= FREE_QUESTION_LIMIT
 )
 
 const chapterTree = computed<StoryChapterGroup[]>(() => {
@@ -673,11 +721,25 @@ function initializeOpenChapters() {
   openChapters.value = chapterMap
 }
 
+function upgradeFromGate() {
+  track('upgrade_clicked', { source: 'question_gate', projectId, answeredCount: answeredSectionsWithContent.value.length })
+  upgradeWithImages()
+}
+
 async function goToSectionByIndex(index: number) {
   if (currentSection.value) await saveAnswer(currentSection.value)
-  currentSectionIndex.value = index
 
-  // Open the chapter of the section we navigated to
+  // If free user at limit, only allow navigating to already-answered questions
+  if (isAtFreeLimit.value) {
+    const targetSection = sections.value[index]
+    if (!targetSection?.answer?.trim()) {
+      showUpgradeGate.value = true
+      track('upgrade_gate_shown', { projectId, source: 'sidebar', answeredCount: answeredSectionsWithContent.value.length })
+      return
+    }
+  }
+
+  currentSectionIndex.value = index
   const chapter = sections.value[index]?.chapter
   if (chapter) openChapters.value[chapter] = true
 }
@@ -728,11 +790,44 @@ async function loadAnswers() {
 
   initializeOpenChapters()
   goToResumeSection()
+  // Show onboarding for brand-new stories with zero answers
+const hasAnyAnswers = sections.value.some(s => s.answer?.trim())
+if (!hasAnyAnswers) {
+  showOnboarding.value = true
+} else {
+  onboardingComplete.value = true
+}
 }
 
 async function saveProjectTitle() {
   if (!project.value) return
   await supabase.from('story_projects').update({ title: project.value.title }).eq('id', projectId)
+}
+
+async function handleOnboardingAnswer(payload: { sectionId: string; answer: string }) {
+  // Find the section and set its answer
+  const section = sections.value.find(s => s.id === payload.sectionId)
+  if (!section) return
+
+  section.answer = payload.answer
+  await saveAnswer(section)
+
+  track('first_question_answered', {
+    projectId,
+    sectionId: payload.sectionId,
+    chapter: section.chapter || null,
+    source: 'onboarding',
+  })
+}
+
+function handleOnboardingContinue() {
+  showOnboarding.value = false
+  onboardingComplete.value = true
+
+  // Jump to question index 1 (second question, since first is answered)
+  currentSectionIndex.value = 1
+  const chapter = sections.value[1]?.chapter
+  if (chapter) openChapters.value[chapter] = true
 }
 
 async function loadUserAccess() {
@@ -806,6 +901,14 @@ async function exportWordHandler() {
 async function goToNextSection() {
   if (!currentSection.value) return
   await saveAnswer(currentSection.value)
+
+  // Check if free user is at the limit
+  if (isAtFreeLimit.value) {
+    showUpgradeGate.value = true
+    track('upgrade_gate_shown', { projectId, answeredCount: answeredSectionsWithContent.value.length })
+    return
+  }
+
   if (currentSectionIndex.value < sections.value.length - 1) currentSectionIndex.value++
 }
 

@@ -33,6 +33,7 @@ type AnalyticsEvent =
   | 'tribute_payment_error'
   | 'tribute_tier4_download'
    | 'print_book_ordered'
+   | 'upgrade_gate_shown'
 
 type AnalyticsValue =
   | string
