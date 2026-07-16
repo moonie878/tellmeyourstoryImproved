@@ -180,6 +180,20 @@
         <p class="mt-6 text-center text-xs text-[#8C847E]">
           One-time payment · No subscription · No renewal · Download when ready
         </p>
+        <!-- Trustpilot link badge -->
+<div class="mt-6 flex justify-center">
+  
+    <a href="https://uk.trustpilot.com/review/tellmeyourstory.uk"
+    target="_blank"
+    rel="noopener noreferrer"
+    class="inline-flex items-center gap-2 rounded-full border border-[#E8DDD0] bg-white px-5 py-2.5 text-sm text-stone-600 transition hover:border-[#00B67A]"
+  >
+    <span class="text-base" style="color: #00B67A;">★★★★★</span>
+    <span>Rated <strong class="text-stone-900">5.0</strong> on</span>
+    <span class="font-semibold" style="color: #00B67A;">Trustpilot</span>
+    <span class="text-xs text-stone-400">· 10 reviews</span>
+  </a>
+</div>
       </div>
     </section>
 <!-- ── Printed Book callout ──────────────────────────────────────── -->
