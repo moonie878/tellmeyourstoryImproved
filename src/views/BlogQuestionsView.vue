@@ -133,13 +133,16 @@
         </div>
 
         <!-- Back to blog -->
-        <div class="mt-10 border-t border-stone-100 pt-8">
+        <div class="mt-10 border-t border-stone-100 pt-8 flex flex-wrap gap-4">
           <router-link to="/" class="text-sm text-[#7C5C3B] hover:underline">
             ← Back to Tell Me Your Story
           </router-link>
-          <router-link to="/tribute" class="text-[#7C5C3B] hover:underline">
-  → Create a free memorial tribute video
-</router-link>
+          <router-link to="/life-story-questions" class="text-sm text-[#7C5C3B] hover:underline">
+            → 150 life story questions
+          </router-link>
+          <router-link to="/tribute" class="text-sm text-[#7C5C3B] hover:underline">
+            → Create a free memorial tribute video
+          </router-link>
         </div>
 
       </div>

@@ -35,6 +35,8 @@
         <div class="mt-6 flex flex-wrap justify-center gap-3">
           <router-link to="/how-to-capture-parents-life-story" class="text-xs text-[#7C5C3B] underline hover:no-underline">How to capture your parents' life story →</router-link>
           <span class="text-xs text-stone-300">·</span>
+          <router-link to="/life-story-questions" class="text-xs text-[#7C5C3B] underline hover:no-underline">150 life story questions →</router-link>
+          <span class="text-xs text-stone-300">·</span>
           <router-link to="/dementia-life-story-book" class="text-xs text-[#7C5C3B] underline hover:no-underline">Life story books for dementia →</router-link>
           <span class="text-xs text-stone-300">·</span>
           <router-link to="/questions-to-ask-dying-parent" class="text-xs text-[#7C5C3B] underline hover:no-underline">Questions for a dying parent →</router-link>
@@ -176,7 +178,7 @@
       <h2 class="font-display text-2xl font-bold text-white sm:text-3xl">Their stories won't keep themselves</h2>
       <p class="mx-auto mt-4 max-w-lg text-sm leading-7 text-[#A8A29E]">Tell Me Your Story guides your parent through 100 questions by voice or text — and turns their answers into a beautifully printed keepsake book. Free to start, no card needed.</p>
       <router-link to="/register" class="mt-8 inline-block rounded-full bg-[#C4A882] px-8 py-3 text-sm font-semibold text-[#1C1917] transition hover:opacity-90">Start capturing their story free →</router-link>
-      <p class="mt-4 text-xs text-[#9C7C5C]">Free to start · One-time payment · Printed book from £34.98</p>
+      <p class="mt-4 text-xs text-[#9C7C5C]">Free to start · One-time payment · Printed book from £{{ PRINTED_BOOK_FROM_PRICE.toFixed(2) }}</p>
     </section>
 
   </main>
@@ -184,6 +186,7 @@
 
 <script setup lang="ts">
 import { useSeo } from '../composables/useSeo'
+import { PRINTED_BOOK_FROM_PRICE } from '../lib/printPricing'
 
 const howToTips = [
   { icon: '☕', title: 'Don\'t read from a list', desc: 'Pick two or three questions and let the conversation flow naturally from there. The best questions are the follow-up ones — "what happened next?" and "how did that feel?" — that you ask in the moment.' },
