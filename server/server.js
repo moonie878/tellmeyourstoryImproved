@@ -251,52 +251,59 @@ app.post('/register-contact', async (req, res) => {
 
     await addToResendContacts(email, firstName || '')
 
-    // Send the welcome email — fire and forget. A failure here should
-    // never block registration itself, since the account is already
-    // created by the time this endpoint is called from the frontend.
-    try {
-      await resend.emails.send({
-        from:    'Mark at Tell Me Your Story <mark-griffiths@tellmeyourstory.uk>',
-        to:      email,
-        subject: 'Welcome to Tell Me Your Story 💛',
-        html: `
-          <div style="font-family: Georgia, serif; max-width: 600px; margin: 0 auto; padding: 40px 20px;">
-            <h1 style="font-size: 26px; color: #1C1917;">Welcome${firstName ? `, ${firstName}` : ''} 💛</h1>
-            <p style="font-size: 15px; color: #5C534E; line-height: 1.7;">
-              I'm really glad you're here.
-            </p>
-            <p style="font-size: 15px; color: #5C534E; line-height: 1.7;">
-              This is a simple way to capture a life story, one question at a time. You can type your answers, or record your voice if that feels more natural — there's no right way to do it, and no rush. Answer one question today, or ten, whatever feels right.
-            </p>
-            <div style="background: #F5F0E8; border-radius: 16px; padding: 24px; margin: 24px 0;">
-              <p style="font-size: 12px; color: #9C7C5C; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.1em;">A few things that might help</p>
-              <p style="font-size: 14px; color: #3C3530; line-height: 1.8; margin: 0;">
-                · Everything autosaves as you go, so you can dip in and out whenever you have time.<br>
-                · You can add photos alongside any answer.<br>
-                · If you record your voice, we'll include a QR code in any printed book so family can scan it and actually hear the voice behind the words.<br>
-                · It's completely free to get started — you only pay if and when you're ready to export or print.
+    // Only send welcome email to genuinely new users (created in last 2 mins)
+    // This prevents Google OAuth re-logins from triggering repeat emails
+    const { data: { users } } = await supabaseAdmin.auth.admin.listUsers({ perPage: 1000 })
+    const user = users?.find(u => u.email === email)
+    const isNewUser = user && (Date.now() - new Date(user.created_at).getTime() < 120_000)
+
+    if (isNewUser) {
+      try {
+        await resend.emails.send({
+          from:    'Mark at Tell Me Your Story <mark-griffiths@tellmeyourstory.uk>',
+          to:      email,
+          subject: 'Welcome to Tell Me Your Story 💛',
+          html: `
+            <div style="font-family: Georgia, serif; max-width: 600px; margin: 0 auto; padding: 40px 20px;">
+              <h1 style="font-size: 26px; color: #1C1917;">Welcome${firstName ? `, ${firstName}` : ''} 💛</h1>
+              <p style="font-size: 15px; color: #5C534E; line-height: 1.7;">
+                I'm really glad you're here.
+              </p>
+              <p style="font-size: 15px; color: #5C534E; line-height: 1.7;">
+                This is a simple way to capture a life story, one question at a time. You can type your answers, or record your voice if that feels more natural — there's no right way to do it, and no rush.
+              </p>
+              <div style="background: #F5F0E8; border-radius: 16px; padding: 24px; margin: 24px 0;">
+                <p style="font-size: 12px; color: #9C7C5C; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.1em;">A few things that might help</p>
+                <p style="font-size: 14px; color: #3C3530; line-height: 1.8; margin: 0;">
+                  · Everything autosaves as you go, so you can dip in and out whenever you have time.<br>
+                  · You can add photos alongside any answer.<br>
+                  · If you record your voice, we'll include a QR code in any printed book so family can scan it and actually hear the voice behind the words.<br>
+                  · Try 5 questions free — upgrade any time from £3.99 to unlock the full set and export your keepsake.
+                </p>
+              </div>
+              <p style="font-size: 15px; color: #5C534E; line-height: 1.7;">
+                If you ever get stuck on a question, our writing assistant can offer gentle prompts to help you think it through — it won't write it for you, just nudge you in the right direction.
+              </p>
+              <p style="font-size: 15px; color: #5C534E; line-height: 1.7;">
+                If you have any questions at all, just reply to this email — I read every message myself.
+              </p>
+              <p style="font-size: 14px; color: #3C3530; margin-top: 28px;">
+                Warm wishes,<br>
+                Mark<br>
+                Founder, Tell Me Your Story
+              </p>
+              <p style="font-size: 12px; color: #A8A29E; margin-top: 32px;">
+                Tell Me Your Story · <a href="https://tellmeyourstory.uk" style="color: #7C5C3B;">tellmeyourstory.uk</a>
               </p>
             </div>
-            <p style="font-size: 15px; color: #5C534E; line-height: 1.7;">
-              If you ever get stuck on a question, our writing assistant can offer gentle prompts to help you think it through — it won't write it for you, just nudge you in the right direction.
-            </p>
-            <p style="font-size: 15px; color: #5C534E; line-height: 1.7;">
-              If you have any questions at all, just reply to this email — I read every message myself.
-            </p>
-            <p style="font-size: 14px; color: #3C3530; margin-top: 28px;">
-              Warm wishes,<br>
-              Mark<br>
-              Founder, Tell Me Your Story
-            </p>
-            <p style="font-size: 12px; color: #A8A29E; margin-top: 32px;">
-              Tell Me Your Story · <a href="https://tellmeyourstory.uk" style="color: #7C5C3B;">tellmeyourstory.uk</a>
-            </p>
-          </div>
-        `,
-      })
-      console.log('Welcome email sent to:', email)
-    } catch (emailErr) {
-      console.error('Welcome email error:', emailErr.message)
+          `,
+        })
+        console.log('Welcome email sent to:', email)
+      } catch (emailErr) {
+        console.error('Welcome email error:', emailErr.message)
+      }
+    } else {
+      console.log('Skipping welcome email (returning user):', email)
     }
 
     res.json({ success: true })
