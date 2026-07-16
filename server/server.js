@@ -313,6 +313,129 @@ app.post('/register-contact', async (req, res) => {
   }
 })
 
+// ─── Nurture: gate email (cron) ───────────────────────────────────────────────
+app.get('/cron/nurture-gate-email', async (req, res) => {
+  // Protect with a secret so only your cron service can call it
+  if (req.query.key !== process.env.CRON_SECRET) {
+    return res.status(401).json({ error: 'Unauthorized' })
+  }
+
+  try {
+    // Find users created 24-72 hours ago
+    const now = new Date()
+    const ago24 = new Date(now - 24 * 60 * 60 * 1000).toISOString()
+    const ago72 = new Date(now - 72 * 60 * 60 * 1000).toISOString()
+
+    // Get all users created in that window
+    const { data: { users } } = await supabaseAdmin.auth.admin.listUsers({ perPage: 1000 })
+    const recentUsers = users.filter(u => {
+      const created = new Date(u.created_at)
+      return created >= new Date(ago72) && created <= new Date(ago24)
+    })
+
+    if (recentUsers.length === 0) {
+      return res.json({ sent: 0, message: 'No users in window' })
+    }
+
+    let sentCount = 0
+
+    for (const user of recentUsers) {
+      // Check they have 5+ answers (hit the gate)
+      const { count: answerCount } = await supabaseAdmin
+        .from('story_answers')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user.id)
+
+      if (answerCount < 5) continue
+
+      // Check they're still free (no paid access)
+      const { count: accessCount } = await supabaseAdmin
+        .from('user_access')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user.id)
+
+      if (accessCount > 0) continue
+
+      // Check we haven't already sent this email
+      const { data: alreadySent } = await supabaseAdmin
+        .from('nurture_emails')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('email_type', 'gate_nudge')
+        .maybeSingle()
+
+      if (alreadySent) continue
+
+      // Get their story content for the preview line
+      const { data: answers } = await supabaseAdmin
+        .from('story_answers')
+        .select('id')
+        .eq('user_id', user.id)
+
+      const totalAnswers = answers?.length || 0
+      const firstName = user.user_metadata?.full_name?.split(' ')[0]
+        || user.user_metadata?.name?.split(' ')[0]
+        || ''
+
+      // Send the nudge
+      try {
+        await resend.emails.send({
+          from:    'Mark at Tell Me Your Story <mark-griffiths@tellmeyourstory.uk>',
+          to:      user.email,
+          subject: `Your story is waiting — ${totalAnswers} pages written so far`,
+          html: `
+            <div style="font-family: Georgia, serif; max-width: 600px; margin: 0 auto; padding: 40px 20px;">
+              <h1 style="font-size: 26px; color: #1C1917;">Your story is taking shape${firstName ? `, ${firstName}` : ''} 💛</h1>
+              <p style="font-size: 15px; color: #5C534E; line-height: 1.7;">
+                You've already answered ${totalAnswers} questions — that's ${totalAnswers} pages of memories that didn't exist before you started.
+              </p>
+              <p style="font-size: 15px; color: #5C534E; line-height: 1.7;">
+                I know life gets busy, but those answers are safely saved and waiting for you. There are 100+ questions covering every chapter of a life — childhood, family, career, lessons, and the stories only you can tell.
+              </p>
+              <div style="background: #F5F0E8; border-radius: 16px; padding: 24px; margin: 24px 0; text-align: center;">
+                <p style="font-size: 12px; color: #9C7C5C; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.1em;">Pick up where you left off</p>
+                <a href="https://tellmeyourstory.uk/dashboard" style="display: inline-block; background: #7C5C3B; color: white; padding: 12px 32px; border-radius: 100px; font-size: 14px; text-decoration: none; font-weight: 500;">Continue your story</a>
+                <p style="font-size: 13px; color: #8C847E; margin-top: 12px;">
+                  Upgrade from just £3.99 to unlock all questions
+                </p>
+              </div>
+              <p style="font-size: 15px; color: #5C534E; line-height: 1.7;">
+                Every question you answer becomes a page in a book your family can hold forever. Some people finish in a weekend, others take months — there's no rush, just start where it feels right.
+              </p>
+              <p style="font-size: 15px; color: #5C534E; line-height: 1.7;">
+                If anything's holding you back, just reply — I read every message.
+              </p>
+              <p style="font-size: 14px; color: #3C3530; margin-top: 28px;">
+                Warm wishes,<br>
+                Mark<br>
+                Founder, Tell Me Your Story
+              </p>
+              <p style="font-size: 12px; color: #A8A29E; margin-top: 32px;">
+                Tell Me Your Story · <a href="https://tellmeyourstory.uk" style="color: #7C5C3B;">tellmeyourstory.uk</a>
+              </p>
+            </div>
+          `,
+        })
+
+        // Record it so we don't send again
+        await supabaseAdmin
+          .from('nurture_emails')
+          .insert({ user_id: user.id, email_type: 'gate_nudge' })
+
+        console.log('Gate nudge sent to:', user.email)
+        sentCount++
+      } catch (emailErr) {
+        console.error('Gate nudge email error:', user.email, emailErr.message)
+      }
+    }
+
+    res.json({ sent: sentCount, checked: recentUsers.length })
+  } catch (err) {
+    console.error('Nurture cron error:', err.message)
+    res.status(500).json({ error: err.message })
+  }
+})
+
 // ─── Transcribe ───────────────────────────────────────────────────────────────
 app.post('/transcribe', upload.single('audio'), async (req, res) => {
   try {
