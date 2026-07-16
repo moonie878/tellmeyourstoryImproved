@@ -9,7 +9,7 @@
           Start free, upgrade when you're ready
         </h1>
         <p class="mx-auto mt-5 max-w-2xl text-base leading-7 text-[#5C534E] sm:text-lg">
-          Begin capturing their story for free — no time limit, no credit card. Unlock the finished keepsake when you're ready to export.
+           Try 5 questions free — no card needed. See your story take shape, then upgrade to unlock the full set and export your finished keepsake.
         </p>
         <div class="mt-6 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-[#8C847E]">
           <span class="flex items-center gap-1.5"><span class="text-[#7C5C3B] font-semibold">✓</span> One-time payment</span>
@@ -334,13 +334,13 @@
           Start free today
         </h3>
         <p class="mx-auto mt-4 max-w-lg text-sm leading-7 text-[#A8A29E]">
-          No credit card needed. Answer as many or as few questions as feel right — and upgrade to a keepsake whenever you're ready.
+          No credit card needed. Answer 5 questions free and see your story come to life — then upgrade to unlock the full set and create your keepsake.
         </p>
         <router-link
           to="/register"
           class="mt-8 inline-block rounded-full bg-white px-7 py-3 text-sm font-semibold text-[#1C1917] transition hover:opacity-90"
         >
-          Start capturing their story — it's free
+         Try it free — 5 questions to start
         </router-link>
       </div>
     </section>
@@ -472,7 +472,8 @@ const printedBookSteps = [
 
 const writingRows = [
   { label: 'Start any story type', free: true, book: true, photos: true, all: true, premium: true },
-  { label: 'All 100 guided questions', free: true, book: true, photos: true, all: true, premium: true },
+  { label: '5 guided questions to try', free: true, book: false, photos: false, all: false, premium: false },
+{ label: 'All 100+ guided questions', free: false, book: true, photos: true, all: true, premium: true }, 
   { label: 'Autosave', free: true, book: true, photos: true, all: true, premium: true },
   { label: 'Add photos per answer', free: true, book: true, photos: true, all: true, premium: true },
   { label: 'Voice recording per answer 🎙️', free: true, book: true, photos: true, all: true, premium: true },
@@ -507,11 +508,11 @@ const mobilePlans = [
     premium: false,
     cta: 'Start free',
     features: [
-      'Start any story type',
-      'All 100 guided questions',
-      'Autosave',
-      'Add photos per answer',
-    ],
+  'Start any story type',
+  '5 guided questions to try',
+  'See your answers as a book page',
+  'Autosave',
+],
   },
   {
     name: 'Keepsake Book',
@@ -606,7 +607,7 @@ const tributeSteps = [
 const faqs = [
   {
     q: 'Is it really free to start?',
-    a: 'Yes — completely free, no credit card needed. You can answer all 100 questions and add photos at no cost. You only pay when you\'re ready to export your finished keepsake.',
+    a: 'Yes — completely free, no credit card needed. You can answer 5 questions and see your story start to take shape as a real book page. Upgrade any time to unlock all 100+ questions, voice recording, export, and printing.',
   },
   {
     q: 'What\'s the difference between Keepsake Book and Book + Photos?',
@@ -614,7 +615,7 @@ const faqs = [
   },
   {
     q: 'Can I upgrade later after starting free?',
-    a: 'Yes — you can start free, answer questions at your own pace, and upgrade to any tier whenever you\'re ready to export. Your answers are always saved.',
+    a: 'Yes — your answers are always saved. Start with 5 free questions, then upgrade to any tier whenever you\'re ready to keep going and export your keepsake.',
   },
   {
     q: 'Is this a one-time payment or a subscription?',

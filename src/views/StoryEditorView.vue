@@ -721,9 +721,22 @@ function initializeOpenChapters() {
   openChapters.value = chapterMap
 }
 
-function upgradeFromGate() {
-  track('upgrade_clicked', { source: 'question_gate', projectId, answeredCount: answeredSectionsWithContent.value.length })
-  upgradeWithImages()
+function upgradeFromGate(tier: string) {
+  track('upgrade_clicked', {
+    source: 'question_gate',
+    projectId,
+    plan: tier,
+    answeredCount: answeredSectionsWithContent.value.length,
+  })
+
+  const handlers: Record<string, () => Promise<void>> = {
+    tier1: upgradeSingleText,
+    tier2: upgradeSingleImages,
+    tier3: upgradeAllText,
+    tier4: upgradeAllImages,
+  }
+
+  handlers[tier]?.()
 }
 
 async function goToSectionByIndex(index: number) {

@@ -260,7 +260,7 @@
             <div class="step-number text-[#7C5C3B]">02</div>
             <h3 class="step-title">Answer by typing or speaking</h3>
             <p class="step-desc">
-              100 guided questions across 10 chapters. Type your answers or tap the microphone and speak — your voice is recorded and saved alongside the text. Add photos to bring each memory to life.
+              Start with 5 free questions, then unlock 100+ across 10 chapters. Type your answers or tap the microphone and speak — your voice is recorded and saved alongside the text. Add photos to bring each memory to life.
             </p>
           </div>
 
@@ -510,7 +510,7 @@
           Their story deserves to be kept.
         </h2>
         <p class="mx-auto mt-5 max-w-xl text-base leading-[1.8] text-stone-300 sm:text-lg">
-          Start free, speak or type your answers, and turn meaningful memories into a book your family can hold — and hear — forever.
+          Try 5 questions free, speak or type your answers, and turn meaningful memories into a book your family can hold — and hear — forever.
         </p>
         <div class="mt-10 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
           <router-link to="/register" @click="trackStart" class="btn-primary-light">
@@ -563,7 +563,7 @@ useSeo({
         operatingSystem: 'Web',
         description: 'Capture a loved one\'s life story by typing or speaking. Voice recordings are saved with QR codes in printed keepsake books — family scan to hear their voice years from now.',
         offers: [
-          { '@type': 'Offer', name: 'Free', price: '0', priceCurrency: 'GBP', description: 'Start any story, answer all 100 questions, voice recording included.' },
+          { '@type': 'Offer', name: 'Free Trial', price: '0', priceCurrency: 'GBP', description: 'Start any story, answer 5 guided questions free, see your story as a book page.' },
           { '@type': 'Offer', name: 'Single Story', price: '3.99', priceCurrency: 'GBP' },
           { '@type': 'Offer', name: 'Story + Photos', price: '5.99', priceCurrency: 'GBP' },
           { '@type': 'Offer', name: 'Full Collection', price: '11.99', priceCurrency: 'GBP' },

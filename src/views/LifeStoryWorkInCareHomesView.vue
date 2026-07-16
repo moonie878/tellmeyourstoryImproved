@@ -128,7 +128,7 @@
         </div>
         <div class="mt-8 rounded-2xl bg-[#1C1917] p-8 text-center">
           <p class="font-display text-lg font-bold text-white">Start a life story book today</p>
-          <p class="mt-2 text-sm text-stone-400">Free to start. 100 guided questions. Printed book from £34.98.</p>
+          <p class="mt-2 text-sm text-stone-400">Free to start. 100 guided questions. Printed book from £21.99.</p>
           <router-link to="/register" class="mt-6 inline-block rounded-full bg-[#C4A882] px-7 py-3 text-sm font-semibold text-[#1C1917] transition hover:opacity-90">Create a life story book free →</router-link>
         </div>
       </div>
@@ -176,7 +176,7 @@
       <h2 class="font-display text-2xl font-bold text-white sm:text-3xl">Their story belongs in their care</h2>
       <p class="mx-auto mt-4 max-w-lg text-sm leading-7 text-[#A8A29E]">Start capturing their life story today — free, in their own words, at their own pace. Share it with their care team and keep it for the family forever.</p>
       <router-link to="/register" class="mt-8 inline-block rounded-full bg-[#C4A882] px-8 py-3 text-sm font-semibold text-[#1C1917] transition hover:opacity-90">Create a life story book free →</router-link>
-      <p class="mt-4 text-xs text-[#9C7C5C]">Free to start · One-time payment · Printed book from £34.98</p>
+      <p class="mt-4 text-xs text-[#9C7C5C]">Free to start · One-time payment · Printed book from £21.99</p>
     </section>
 
   </main>

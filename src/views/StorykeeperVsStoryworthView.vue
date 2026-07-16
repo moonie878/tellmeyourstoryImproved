@@ -210,7 +210,7 @@ const deepDive = [
     paras: [
       'Tell Me Your Story was built specifically for UK families who want voice recording alongside written answers, UK printing and delivery, and a one-time payment rather than an annual subscription.',
       'The most distinctive feature is voice recording with QR codes. When someone records a voice answer, a QR code is automatically included in the printed book next to that answer. Family members scan it and hear them speak — their actual voice, preserved in the pages of a physical book. Neither StoryKeeper nor Storyworth offers this.',
-      `The pricing model is also different. You can start for free with no card required. When you're ready to export or print, you pay once — from £3.99 for a digital export, from £${PRINTED_BOOK_FROM_PRICE.toFixed(2)} for a printed book. No annual renewal, no subscription running in the background.`,
+      `The pricing model is also different. You can try 5 questions free with no card required. When you're ready to unlock the full set and export, you pay once — from £3.99 for a digital export, from £${PRINTED_BOOK_FROM_PRICE.toFixed(2)} for a printed book. No annual renewal, no subscription running in the background.`,
       'The printed book is produced in the UK by Lulu Press and delivered within 10-14 days, with no international shipping costs or customs complications.',
     ]
   },

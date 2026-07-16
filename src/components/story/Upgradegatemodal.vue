@@ -82,19 +82,36 @@
             </div>
           </div>
 
-          <!-- CTA section -->
+          <!-- Tier picker -->
           <div class="border-t border-stone-100 px-6 py-5 sm:px-8">
-            <button
-              @click="$emit('upgrade')"
-              class="w-full rounded-full bg-[#7C5C3B] py-3 text-sm font-medium text-white transition hover:opacity-90"
-            >
-              Upgrade to keep building — from £3.99
-            </button>
+            <p class="mb-3 text-center text-xs font-medium uppercase tracking-widest text-stone-400">Choose your plan</p>
+
+            <div class="grid grid-cols-2 gap-2">
+              <button
+                v-for="tier in tiers"
+                :key="tier.id"
+                @click="$emit('upgrade', tier.id)"
+                :class="[
+                  'relative rounded-2xl border p-3 text-left transition hover:border-[#7C5C3B]',
+                  tier.popular
+                    ? 'border-[#7C5C3B] bg-[#FAF7F4]'
+                    : 'border-stone-200 bg-white'
+                ]"
+              >
+                <span
+                  v-if="tier.popular"
+                  class="absolute -top-2 right-3 rounded-full bg-[#7C5C3B] px-2 py-0.5 text-[9px] font-medium text-white"
+                >Most popular</span>
+                <p class="text-sm font-semibold text-stone-900">{{ tier.price }}</p>
+                <p class="mt-0.5 text-xs font-medium text-stone-700">{{ tier.name }}</p>
+                <p class="mt-1 text-[10px] leading-snug text-stone-400">{{ tier.desc }}</p>
+              </button>
+            </div>
 
             <div class="mt-3 flex items-center justify-center gap-4 text-[11px] text-stone-400">
-              <span>✓ Unlock all questions</span>
-              <span>✓ Export & print</span>
-              <span>✓ AI writing help</span>
+              <span>✓ One-time payment</span>
+              <span>✓ No subscription</span>
+              <span>✓ Answers always saved</span>
             </div>
 
             <button
@@ -130,8 +147,15 @@ const props = defineProps<{
 
 defineEmits<{
   (e: 'close'): void
-  (e: 'upgrade'): void
+  (e: 'upgrade', tier: string): void
 }>()
+
+const tiers = [
+  { id: 'tier1', name: 'Keepsake Book',    price: '£3.99',  desc: 'PDF export with chapters & layouts', popular: false },
+  { id: 'tier2', name: 'Book + Photos',    price: '£7.99',  desc: 'Photos, cover image & premium design', popular: true },
+  { id: 'tier3', name: 'All Stories',       price: '£11.99', desc: 'Unlimited stories & story types', popular: false },
+  { id: 'tier4', name: 'Premium Keepsake', price: '£17.99', desc: 'Everything — video, print layouts & more', popular: false },
+]
 
 const answeredCount = computed(() => props.answeredSections.length)
 

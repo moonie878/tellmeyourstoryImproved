@@ -128,7 +128,7 @@
           <router-link to="/register" class="rounded-full bg-[#C4A882] px-7 py-3 text-sm font-semibold text-[#1C1917] transition hover:opacity-90">Start your story free →</router-link>
           <router-link to="/example" class="rounded-full border border-white/20 px-7 py-3 text-sm font-medium text-white transition hover:bg-white/10">See an example</router-link>
         </div>
-        <p class="mt-5 text-xs text-[#9C7C5C]">Free to start · No subscription · Printed book from £34.98</p>
+        <p class="mt-5 text-xs text-[#9C7C5C]">Free to start · No subscription · Printed book from £21.99</p>
       </div>
     </section>
 

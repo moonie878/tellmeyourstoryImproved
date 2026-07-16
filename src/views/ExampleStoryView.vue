@@ -287,7 +287,7 @@
             <span class="reassurance-icon">💛</span>
             <p class="reassurance-title">Answer at your own pace</p>
             <p class="reassurance-desc">
-              You don't need to answer all 100 questions. Start with one memory and build from there.
+              Start with one memory and build from there.
             </p>
           </div>
           <div class="reassurance-card">
@@ -318,7 +318,7 @@
           Now imagine this for someone you love.
         </h2>
         <p class="mx-auto mt-5 max-w-xl text-base leading-8 text-[#A8A29E] sm:text-lg">
-          Free to start. Answer as many questions as you like.
+          Free to start. Try 5 questions, then upgrade when you're ready.
           The keepsake will be there when you're ready.
         </p>
         <div class="mt-10 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">

@@ -107,7 +107,7 @@
             </router-link>
           </div>
         </div>
-        <p class="mt-4 text-xs text-stone-400">Add a printed hardcover book from £34.98 — delivered to their door</p>
+        <p class="mt-4 text-xs text-stone-400">Add a printed hardcover book from £21.99 — delivered to their door</p>
       </div>
     </section>
 
@@ -142,7 +142,7 @@
       <router-link to="/gift" class="mt-8 inline-block rounded-full bg-[#C4A882] px-8 py-3 text-sm font-semibold text-[#1C1917] transition hover:opacity-90">
         Gift a life story today →
       </router-link>
-      <p class="mt-4 text-xs text-[#9C7C5C]">Gift link sent instantly · One-time payment · Printed book from £34.98</p>
+      <p class="mt-4 text-xs text-[#9C7C5C]">Gift link sent instantly · One-time payment · Printed book from £21.99</p>
     </section>
 
   </main>
@@ -163,7 +163,7 @@ const memories = [
 const features = [
   { icon: '📖', title: '100 guided questions', desc: 'Written for their life — childhood, work, family, love, and legacy. No blank page, no pressure.' },
   { icon: '🎙️', title: 'Voice recordings', desc: 'Answer by speaking. A QR code in the printed book lets family hear their voice any time — forever.' },
-  { icon: '📚', title: 'UK printed hardcover', desc: 'Professionally printed and bound in the UK. Delivered to their door. From £34.98.' },
+  { icon: '📚', title: 'UK printed hardcover', desc: 'Professionally printed and bound in the UK. Delivered to their door. From £21.99.' },
   { icon: '⏱️', title: 'No time pressure', desc: 'Answer one question a day or ten at once. No subscription running down.' },
   { icon: '✨', title: 'Simple to use', desc: 'Works on phone, tablet, or computer. Simple enough for anyone.' },
   { icon: '🤍', title: 'The whole family', desc: 'Share a link so children, grandchildren, and great-grandchildren can all read along.' },

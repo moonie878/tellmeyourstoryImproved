@@ -200,7 +200,7 @@ const deepDive = [
     title: 'Tell Me Your Story — built for UK families, with voice at the centre',
     paras: [
       'Tell Me Your Story was built specifically around the idea that voice matters as much as the written word. When someone records a voice answer instead of (or alongside) typing it, a QR code is automatically placed in the printed book next to that answer. Anyone holding the physical book can scan it and hear the person speak, in their actual voice. This is something Storyworth simply doesn\'t offer.',
-      `There's no annual subscription. You start completely free, with no card required, and answer questions at your own pace — there's no pressure to keep up with a weekly schedule if life gets in the way for a few weeks. When you're ready to export or print, you pay once. Digital exports start from £3.99, and a printed softcover book starts from £${PRINTED_BOOK_FROM_PRICE.toFixed(2)}.`,
+      `There's no annual subscription. You start with 5 questions free, no card required, and work at your own pace — there's no pressure to keep up with a weekly schedule if life gets in the way for a few weeks. When you're ready to export or print, you pay once. Digital exports start from £3.99, and a printed softcover book starts from £${PRINTED_BOOK_FROM_PRICE.toFixed(2)}.`,
       'The printed book is produced in the UK by Lulu Press, with delivery typically within 10-14 days, no international shipping fees, and no customs delays — a meaningful difference for UK families compared to ordering from a US-based service.',
       'Beyond the book, Tell Me Your Story also offers a tribute video export — turning the same questions and answers into a video keepsake, which can be a more accessible format for some families, particularly for sharing at a celebration of life or with family who live abroad.',
     ]
@@ -241,9 +241,9 @@ const verdicts = [
 const faqs = [
   { q: 'What is the main difference between Storyworth and Tell Me Your Story?', a: 'Storyworth uses a weekly email format and an annual subscription, with no voice recording and US-based printing. Tell Me Your Story is a UK-built alternative that lets you start for free, includes voice recording with QR codes in the printed book, and uses a one-time payment instead of a subscription.' },
   { q: 'Is Tell Me Your Story cheaper than Storyworth?', a: `Storyworth costs roughly £79/year as a subscription. Tell Me Your Story is free to start, with digital exports from £3.99 and printed softcover books from £${PRINTED_BOOK_FROM_PRICE.toFixed(2)} — a one-time payment, with no renewal required.` },
-  { q: 'Does Storyworth offer voice recording?', a: 'Storyworth\'s core product is built around written answers sent by email. Voice options are limited compared to Tell Me Your Story, which includes voice recording in the free tier and prints a QR code in the finished book so family can scan it and hear the recording.' },
+  { q: 'Does Storyworth offer voice recording?', a: 'Storyworth\'s core product is built around written answers sent by email. Voice options are limited compared to Tell Me Your Story, which includes voice recording on all tiers and prints a QR code in the finished book so family can scan it and hear the recording.' },
   { q: 'Is there a UK alternative to Storyworth?', a: 'Yes — Tell Me Your Story is a UK-native platform built specifically for UK families, with UK printing and delivery, voice recording with QR codes in the printed book, and no subscription required.' },
-  { q: 'Can I try Tell Me Your Story before paying, like a free trial?', a: 'Yes. Unlike Storyworth\'s annual subscription, Tell Me Your Story is free to start with no card required. You can answer as many questions as you like before deciding whether to export or print anything.' },
+  { q: 'Can I try Tell Me Your Story before paying, like a free trial?', a: 'Yes. Unlike Storyworth\'s annual subscription, Tell Me Your Story is free to start with no card required. You can try 5 questions free before deciding whether to upgrade. Your answers are always saved.' },
 ]
 
 useSeo({

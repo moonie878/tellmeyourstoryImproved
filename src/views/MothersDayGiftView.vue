@@ -90,7 +90,7 @@
               :class="tier.featured ? 'bg-[#7C5C3B] text-white hover:opacity-90' : 'border border-stone-300 text-stone-700 hover:bg-stone-50'">Gift this →</router-link>
           </div>
         </div>
-        <p class="mt-4 text-xs text-stone-400">Add a printed hardcover book from £34.98 — delivered to her door</p>
+        <p class="mt-4 text-xs text-stone-400">Add a printed hardcover book from £21.99 — delivered to her door</p>
       </div>
     </section>
 
@@ -100,7 +100,7 @@
       <h2 class="mt-4 font-display text-2xl font-bold text-white sm:text-3xl">Give Mum the gift of being heard</h2>
       <p class="mx-auto mt-4 max-w-lg text-sm leading-7 text-[#A8A29E]">Her story is irreplaceable. This Mother's Day, give her something that lasts long after the flowers have faded.</p>
       <router-link to="/gift" class="mt-8 inline-block rounded-full bg-[#C4A882] px-8 py-3 text-sm font-semibold text-[#1C1917] transition hover:opacity-90">Gift a life story today →</router-link>
-      <p class="mt-4 text-xs text-[#9C7C5C]">Gift link sent instantly · One-time payment · Printed book from £34.98</p>
+      <p class="mt-4 text-xs text-[#9C7C5C]">Gift link sent instantly · One-time payment · Printed book from £21.99</p>
     </section>
 
   </main>
@@ -112,7 +112,7 @@ import { useSeo } from '../composables/useSeo'
 const features = [
   { icon: '📖', title: '100 guided questions', desc: 'Written for her life — childhood, family, work, love, and legacy. No blank page, no pressure.' },
   { icon: '🎙️', title: 'Her voice, preserved', desc: 'Answer by speaking. A QR code in the printed book lets the family hear her voice any time — forever.' },
-  { icon: '📚', title: 'UK printed hardcover', desc: 'Professionally printed and bound in the UK. Delivered to her door. From £34.98.' },
+  { icon: '📚', title: 'UK printed hardcover', desc: 'Professionally printed and bound in the UK. Delivered to her door. From £21.99.' },
   { icon: '⏱️', title: 'At her own pace', desc: 'One question a day or ten at once. No pressure, no deadline, no subscription running down.' },
   { icon: '✨', title: 'Simple to use', desc: 'Works on phone, tablet, or computer. Simple enough for anyone.' },
   { icon: '🤍', title: 'For the whole family', desc: 'Share with siblings and grandchildren so everyone can read along as the story grows.' },

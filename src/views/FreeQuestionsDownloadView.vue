@@ -99,7 +99,7 @@
         <router-link to="/register" class="mt-8 inline-block rounded-full bg-[#7C5C3B] px-8 py-3 text-sm font-semibold text-white transition hover:opacity-90">
           Start their story free →
         </router-link>
-        <p class="mt-3 text-xs text-stone-400">Free to start · One-time payment · Printed book from £34.98</p>
+        <p class="mt-3 text-xs text-stone-400">Free to start · One-time payment · Printed book from £21.99</p>
       </div>
     </section>
 
@@ -153,7 +153,7 @@ const sampleQuestions = [
 
 const features = [
   { icon: '🎙️', title: 'Voice recordings',       desc: 'Record answers by speaking. Their voice preserved via QR codes in the printed book.' },
-  { icon: '📚', title: 'UK printed hardcover',    desc: 'Professionally printed and delivered to your door. From £34.98.' },
+  { icon: '📚', title: 'UK printed hardcover',    desc: 'Professionally printed and delivered to your door. From £21.99.' },
   { icon: '📸', title: 'Photos and chapters',     desc: 'Add photos alongside answers. Beautiful layouts across 10 chapters.' },
 ]
 

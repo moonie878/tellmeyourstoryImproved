@@ -143,7 +143,7 @@
         <div class="mt-8 rounded-2xl border border-stone-200 bg-stone-50 p-5 text-left sm:flex sm:items-center sm:gap-5">
           <p class="text-2xl flex-shrink-0">📦</p>
           <div class="mt-3 sm:mt-0">
-            <p class="text-sm font-semibold text-stone-900">Add a printed book — from £34.98</p>
+            <p class="text-sm font-semibold text-stone-900">Add a printed book — from £21.99</p>
             <p class="mt-1 text-xs text-stone-500">Once the story is written, order a professionally printed and bound hardcover delivered to their door. UK shipping included.</p>
           </div>
         </div>
@@ -160,7 +160,7 @@
       <router-link to="/gift" class="mt-8 inline-block rounded-full bg-[#C4A882] px-8 py-3 text-sm font-semibold text-[#1C1917] transition hover:opacity-90">
         Give this gift today →
       </router-link>
-      <p class="mt-4 text-xs text-[#9C7C5C]">Gift link sent instantly · One-time payment · Printed book from £34.98</p>
+      <p class="mt-4 text-xs text-[#9C7C5C]">Gift link sent instantly · One-time payment · Printed book from £21.99</p>
     </section>
 
   </main>

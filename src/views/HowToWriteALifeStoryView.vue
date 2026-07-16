@@ -138,7 +138,7 @@
           <router-link to="/register" class="rounded-full bg-[#C4A882] px-7 py-3 text-sm font-semibold text-[#1C1917] transition hover:opacity-90">Start a life story free →</router-link>
           <router-link to="/example" class="rounded-full border border-white/20 px-7 py-3 text-sm font-medium text-white transition hover:bg-white/10">See an example</router-link>
         </div>
-        <p class="mt-5 text-xs text-[#9C7C5C]">Free to start · No subscription · Printed book from £34.98</p>
+        <p class="mt-5 text-xs text-[#9C7C5C]">Free to start · No subscription · Printed book from £21.99</p>
       </div>
     </section>
 
@@ -184,7 +184,7 @@
       <h2 class="font-display text-2xl font-bold text-white sm:text-3xl">Their story won't write itself</h2>
       <p class="mx-auto mt-4 max-w-lg text-sm leading-7 text-[#A8A29E]">Free to start, no commitment. Begin capturing their life story today.</p>
       <router-link to="/register" class="mt-8 inline-block rounded-full bg-[#C4A882] px-8 py-3 text-sm font-semibold text-[#1C1917] transition hover:opacity-90">Start a life story free →</router-link>
-      <p class="mt-4 text-xs text-[#9C7C5C]">Free to start · One-time payment · Printed book from £34.98</p>
+      <p class="mt-4 text-xs text-[#9C7C5C]">Free to start · One-time payment · Printed book from £21.99</p>
     </section>
 
   </main>
@@ -234,7 +234,7 @@ const steps = [
     number: '7',
     title: 'Turn it into a keepsake',
     desc: 'A life story that exists only in a notebook or phone recording is at risk — phones break, notebooks get lost. Export it to a PDF, print it as a book, or use Tell Me Your Story to generate a professionally designed keepsake automatically. A physical printed book is the gold standard — something that can be shared, displayed, and passed down to grandchildren who won\'t know what a phone app is.',
-    detail: 'Printed books from Tell Me Your Story start at £34.98 including UK delivery.',
+    detail: 'Printed books from Tell Me Your Story start at £21.99 including UK delivery.',
   },
 ]
 

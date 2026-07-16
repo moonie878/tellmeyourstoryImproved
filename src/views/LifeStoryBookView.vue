@@ -110,7 +110,7 @@
           <div class="rounded-2xl bg-white p-6">
             <p class="text-2xl">📚</p>
             <p class="mt-3 text-sm font-semibold text-stone-900">UK printed hardcover</p>
-            <p class="mt-2 text-xs leading-5 text-stone-500">Professionally printed and bound in the UK. Softcover from £34.98, hardcover options available. Delivered to your door.</p>
+            <p class="mt-2 text-xs leading-5 text-stone-500">Professionally printed and bound in the UK. Softcover from £21.99, hardcover options available. Delivered to your door.</p>
           </div>
           <div class="rounded-2xl bg-white p-6">
             <p class="text-2xl">💷</p>
@@ -169,7 +169,7 @@
             </router-link>
           </div>
         </div>
-        <p class="mt-6 text-xs text-stone-400">One-time payment · No subscription · Printed book from £34.98</p>
+        <p class="mt-6 text-xs text-stone-400">One-time payment · No subscription · Printed book from £21.99</p>
       </div>
     </section>
 
@@ -239,7 +239,7 @@ const tiers = [
 
 useSeo({
   title: 'Create a Life Story Book — Capture Their Story in Their Own Words | Tell Me Your Story',
-  description: 'Create a life story book for a parent or grandparent. 100 guided questions, voice recordings, and a beautifully printed hardcover book. Free to start — UK delivery from £34.98.',
+  description: 'Create a life story book for a parent or grandparent. 100 guided questions, voice recordings, and a beautifully printed hardcover book. Free to start — UK delivery from £21.99.',
   canonical: 'https://tellmeyourstory.uk/life-story-book',
 })
 </script>

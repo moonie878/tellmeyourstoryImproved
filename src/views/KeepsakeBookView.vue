@@ -16,7 +16,7 @@
           <router-link to="/register" class="rounded-full bg-[#C4A882] px-7 py-3 text-sm font-semibold text-[#1C1917] transition hover:opacity-90">Create a keepsake book free →</router-link>
           <router-link to="/example" class="rounded-full border border-white/20 px-7 py-3 text-sm font-medium text-white transition hover:bg-white/10">See an example</router-link>
         </div>
-        <p class="mt-5 text-xs text-[#9C7C5C]">Free to start · No subscription · Printed book from £34.98</p>
+        <p class="mt-5 text-xs text-[#9C7C5C]">Free to start · No subscription · Printed book from £21.99</p>
       </div>
     </section>
 
@@ -128,7 +128,7 @@
               :class="tier.featured ? 'bg-[#7C5C3B] text-white hover:opacity-90' : 'border border-stone-300 text-stone-700 hover:bg-stone-50'">Get started →</router-link>
           </div>
         </div>
-        <p class="mt-4 text-xs text-stone-400">One-time payment · No subscription · Printed book from £34.98</p>
+        <p class="mt-4 text-xs text-stone-400">One-time payment · No subscription · Printed book from £21.99</p>
       </div>
     </section>
 
@@ -174,7 +174,7 @@
       <h2 class="font-display text-2xl font-bold text-white sm:text-3xl">Their story deserves to be kept</h2>
       <p class="mx-auto mt-4 max-w-lg text-sm leading-7 text-[#A8A29E]">Free to start, no commitment. Create a life story keepsake book today — in their own words, with their own voice.</p>
       <router-link to="/register" class="mt-8 inline-block rounded-full bg-[#C4A882] px-8 py-3 text-sm font-semibold text-[#1C1917] transition hover:opacity-90">Create a keepsake book free →</router-link>
-      <p class="mt-4 text-xs text-[#9C7C5C]">Free to start · One-time payment · Printed book from £34.98</p>
+      <p class="mt-4 text-xs text-[#9C7C5C]">Free to start · One-time payment · Printed book from £21.99</p>
     </section>
 
   </main>
@@ -196,7 +196,7 @@ const features = [
   { icon: '📖', title: '100 guided questions', desc: 'Covering every chapter of life — from earliest memories to legacy. No blank page, no pressure. The questions do the hard work.' },
   { icon: '🎙️', title: 'Voice recordings with QR codes', desc: 'Record answers by speaking. A QR code is printed in the physical book next to each memory — family scan it to hear them speak, years from now.' },
   { icon: '📸', title: 'Photos alongside answers', desc: 'Add photos to bring every memory to life on the page. Photos sit alongside the answers they belong to — not in a separate album.' },
-  { icon: '📚', title: 'Professionally printed hardcover', desc: 'A beautifully bound hardcover or softcover book printed in the UK and delivered to your door. From £34.98 including delivery.' },
+  { icon: '📚', title: 'Professionally printed hardcover', desc: 'A beautifully bound hardcover or softcover book printed in the UK and delivered to your door. From £21.99 including delivery.' },
   { icon: '💷', title: 'One-time payment, no subscription', desc: 'Pay once when you\'re ready to export or print. No annual fee, no monthly charge. Yours to keep forever.' },
   { icon: '🤍', title: 'Family collaboration', desc: 'Share a link with family so everyone can read along and add comments as the story grows.' },
 ]
@@ -219,7 +219,7 @@ const faqs = [
   { q: 'How long does it take to create a keepsake book?', a: 'There\'s no deadline. You answer as many or as few questions as you like — every answer adds to the book. Some people complete their story in an afternoon. Others return to it over weeks or months. Everything saves automatically.' },
   { q: 'Can elderly parents use it if they\'re not good with technology?', a: 'Yes. The platform is designed to be simple. They can answer by speaking rather than typing — just tap the microphone and talk. Family members often sit with them and help with the typing while they speak their answers.' },
   { q: 'What does the printed book look like?', a: 'A professionally printed 6×9 book with chapters, elegant typography, photos alongside answers, and QR codes that play voice recordings. Available as a softcover or hardcover. You can see a full example at tellmeyourstory.uk/example.' },
-  { q: 'How much does a printed keepsake book cost?', a: 'The printed book starts from £34.98 for a softcover including UK delivery. Hardcover options are available from £44.98. You also need a digital tier (from £3.99) to export the content. Free to start — no payment needed to begin.' },
+  { q: 'How much does a printed keepsake book cost?', a: 'The printed book starts from £21.99 for a softcover including UK delivery. Hardcover options are available from £44.98. You also need a digital tier (from £3.99) to export the content. Free to start — no payment needed to begin.' },
   { q: 'Can I order multiple copies?', a: 'Yes. Once your book is created you can order as many printed copies as you like. Many families order copies for each child or sibling.' },
   { q: 'What makes Tell Me Your Story different from other keepsake book services?', a: 'Three things: voice recordings with QR codes printed in the book so family can hear them speak; 100 guided questions that cover every chapter of life so you\'re never staring at a blank page; and professional UK printing delivered to your door. No other service combines all three.' },
 ]
@@ -236,7 +236,7 @@ useSeo({
         mainEntity: [
           { '@type': 'Question', name: 'What is a life story keepsake book?', acceptedAnswer: { '@type': 'Answer', text: 'A life story keepsake book is a structured record of someone\'s life, told in their own words, organised into chapters — from childhood and teenage years through to love, family, work, and legacy.' } },
           { '@type': 'Question', name: 'How long does it take to create a keepsake book?', acceptedAnswer: { '@type': 'Answer', text: 'There\'s no deadline. You answer as many or as few questions as you like — every answer adds to the book. Some people complete their story in an afternoon. Others return to it over weeks or months.' } },
-          { '@type': 'Question', name: 'How much does a printed keepsake book cost?', acceptedAnswer: { '@type': 'Answer', text: 'The printed book starts from £34.98 for a softcover including UK delivery. Hardcover options are available from £44.98. Free to start — no payment needed to begin.' } },
+          { '@type': 'Question', name: 'How much does a printed keepsake book cost?', acceptedAnswer: { '@type': 'Answer', text: 'The printed book starts from £21.99 for a softcover including UK delivery. Hardcover options are available from £44.98. Free to start — no payment needed to begin.' } },
           { '@type': 'Question', name: 'Can elderly parents use it if they\'re not good with technology?', acceptedAnswer: { '@type': 'Answer', text: 'Yes. They can answer by speaking rather than typing — just tap the microphone and talk. Family members often sit with them and help with the typing while they speak their answers.' } },
           { '@type': 'Question', name: 'What makes Tell Me Your Story different?', acceptedAnswer: { '@type': 'Answer', text: 'Voice recordings with QR codes printed in the book, 100 guided questions across 10 chapters, and professional UK printing. No other service combines all three.' } },
         ]

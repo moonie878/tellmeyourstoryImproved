@@ -78,7 +78,7 @@
         </div>
         <div class="mt-8 rounded-2xl bg-[#1C1917] p-8 text-center">
           <p class="font-display text-lg font-bold text-white">Create a tribute life story book</p>
-          <p class="mt-2 text-sm text-stone-400">Free to start. Capture their story in their family's words. Printed book from £34.98.</p>
+          <p class="mt-2 text-sm text-stone-400">Free to start. Capture their story in their family's words. Printed book from £21.99.</p>
           <router-link to="/register" class="mt-6 inline-block rounded-full bg-[#C4A882] px-7 py-3 text-sm font-semibold text-[#1C1917] transition hover:opacity-90">Start a tribute book free →</router-link>
         </div>
       </div>
@@ -146,7 +146,7 @@
       <h2 class="font-display text-2xl font-bold text-white sm:text-3xl">A gift that honours their story</h2>
       <p class="mx-auto mt-4 max-w-lg text-sm leading-7 text-[#A8A29E]">Create a life story book that preserves who they were — in their family's words, for every generation that follows.</p>
       <router-link to="/register" class="mt-8 inline-block rounded-full bg-[#C4A882] px-8 py-3 text-sm font-semibold text-[#1C1917] transition hover:opacity-90">Start a tribute book free →</router-link>
-      <p class="mt-4 text-xs text-[#9C7C5C]">Free to start · One-time payment · Printed book from £34.98</p>
+      <p class="mt-4 text-xs text-[#9C7C5C]">Free to start · One-time payment · Printed book from £21.99</p>
     </section>
 
   </main>
@@ -159,7 +159,7 @@ const giftCategories = [
   {
     icon: '📖', title: 'Memory and tribute gifts',
     gifts: [
-      { title: 'A life story or tribute book', desc: 'A beautifully printed book capturing who they were — their memories, their voice, their stories. Created by family, kept forever. Tell Me Your Story makes this straightforward — free to start, printed book from £34.98.', price: 'From £34.98' },
+      { title: 'A life story or tribute book', desc: 'A beautifully printed book capturing who they were — their memories, their voice, their stories. Created by family, kept forever. Tell Me Your Story makes this straightforward — free to start, printed book from £21.99.', price: 'From £21.99' },
       { title: 'A framed photo with a handwritten memory', desc: 'Print a favourite photo of the person who has died, frame it beautifully, and write a specific memory of them on the back. Simple, personal, and lasting.', price: '£20–£60' },
       { title: 'A memory box', desc: 'A keepsake box filled with meaningful objects — a letter, a photo, something that belonged to the person. Many online retailers offer personalised versions, or assemble your own.', price: '£30–£80' },
       { title: 'A commissioned illustration or portrait', desc: 'A hand-painted or illustrated portrait of the person who has died, based on a favourite photo. A truly personal and lasting tribute.', price: '£80–£300' },

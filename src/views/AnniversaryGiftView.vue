@@ -102,7 +102,7 @@
             <router-link to="/gift" class="mt-4 block rounded-full py-2 text-xs font-medium transition" :class="tier.featured ? 'bg-[#7C5C3B] text-white hover:opacity-90' : 'border border-stone-300 text-stone-700 hover:bg-stone-50'">Gift this →</router-link>
           </div>
         </div>
-        <p class="mt-4 text-xs text-stone-400">Add a printed hardcover from £34.98 — delivered to their door</p>
+        <p class="mt-4 text-xs text-stone-400">Add a printed hardcover from £21.99 — delivered to their door</p>
       </div>
     </section>
 
@@ -133,7 +133,7 @@
       <h2 class="mt-4 font-display text-2xl font-bold text-white sm:text-3xl">Their love story. Kept forever.</h2>
       <p class="mx-auto mt-4 max-w-lg text-sm leading-7 text-[#A8A29E]">A gift the whole family will treasure — a record of a love story told in their own words.</p>
       <router-link to="/gift" class="mt-8 inline-block rounded-full bg-[#C4A882] px-8 py-3 text-sm font-semibold text-[#1C1917] transition hover:opacity-90">Gift a life story today →</router-link>
-      <p class="mt-4 text-xs text-[#9C7C5C]">Gift link sent instantly · One-time payment · Printed book from £34.98</p>
+      <p class="mt-4 text-xs text-[#9C7C5C]">Gift link sent instantly · One-time payment · Printed book from £21.99</p>
     </section>
 
   </main>
@@ -161,7 +161,7 @@ const chapters = [
 const features = [
   { icon: '📖', title: '100 guided questions', desc: 'Questions written for a life story — covering their whole journey together and individually.' },
   { icon: '🎙️', title: 'Voice recordings',    desc: 'Their voices preserved in the printed book via QR codes — forever.' },
-  { icon: '📚', title: 'UK printed hardcover', desc: 'Professionally printed and bound. Delivered to their door. From £34.98.' },
+  { icon: '📚', title: 'UK printed hardcover', desc: 'Professionally printed and bound. Delivered to their door. From £21.99.' },
   { icon: '📸', title: 'Photos included',      desc: 'Add photos alongside the answers they relate to.' },
   { icon: '💷', title: 'One-time payment',     desc: 'Pay once, own forever. No subscription.' },
   { icon: '🤍', title: 'For the whole family', desc: 'Children and grandchildren can read along as the story grows.' },

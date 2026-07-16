@@ -121,7 +121,7 @@
           <div class="rounded-2xl border border-stone-200 bg-white p-6">
             <p class="text-2xl">📚</p>
             <p class="mt-3 text-sm font-semibold text-stone-900">UK printed hardcover</p>
-            <p class="mt-2 text-xs leading-5 text-stone-500">Printed and shipped from the UK. No international shipping fees, no 3-week wait. Softcover from £34.98.</p>
+            <p class="mt-2 text-xs leading-5 text-stone-500">Printed and shipped from the UK. No international shipping fees, no 3-week wait. Softcover from £21.99.</p>
           </div>
           <div class="rounded-2xl border border-stone-200 bg-white p-6">
             <p class="text-2xl">💷</p>
@@ -223,7 +223,7 @@
       <router-link to="/register" class="mt-8 inline-block rounded-full bg-[#C4A882] px-8 py-3 text-sm font-semibold text-[#1C1917] transition hover:opacity-90">
         Start free — no subscription →
       </router-link>
-      <p class="mt-4 text-xs text-[#9C7C5C]">Free to start · One-time payment · Printed books from £34.98</p>
+      <p class="mt-4 text-xs text-[#9C7C5C]">Free to start · One-time payment · Printed books from £21.99</p>
     </section>
 
   </main>

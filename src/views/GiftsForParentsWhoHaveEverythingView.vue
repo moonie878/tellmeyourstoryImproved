@@ -120,7 +120,7 @@
             </router-link>
           </div>
         </div>
-        <p class="mt-4 text-xs text-stone-400">Add a printed hardcover book from £34.98 — delivered to their door</p>
+        <p class="mt-4 text-xs text-stone-400">Add a printed hardcover book from £21.99 — delivered to their door</p>
       </div>
     </section>
 
@@ -159,7 +159,7 @@
       <h2 class="mt-4 font-display text-2xl font-bold text-white sm:text-3xl">Give them the gift of being heard</h2>
       <p class="mx-auto mt-4 max-w-lg text-sm leading-7 text-[#A8A29E]">Their stories are irreplaceable. This is the gift that captures them — and gives the whole family something to treasure forever.</p>
       <router-link to="/gift" class="mt-8 inline-block rounded-full bg-[#C4A882] px-8 py-3 text-sm font-semibold text-[#1C1917] transition hover:opacity-90">Give this gift today →</router-link>
-      <p class="mt-4 text-xs text-[#9C7C5C]">Gift link sent instantly · One-time payment · Printed book from £34.98</p>
+      <p class="mt-4 text-xs text-[#9C7C5C]">Gift link sent instantly · One-time payment · Printed book from £21.99</p>
     </section>
 
   </main>
@@ -180,7 +180,7 @@ const gifts = [
 const features = [
   { icon: '📖', title: '100 guided questions', desc: 'Covering every chapter of their life. No blank page, no pressure — just their stories, drawn out gently.' },
   { icon: '🎙️', title: 'Voice recordings', desc: 'Answer by speaking. A QR code in the printed book lets family hear their voice any time — forever.' },
-  { icon: '📚', title: 'UK printed hardcover', desc: 'Professionally printed and bound in the UK. Delivered to their door. From £34.98 including shipping.' },
+  { icon: '📚', title: 'UK printed hardcover', desc: 'Professionally printed and bound in the UK. Delivered to their door. From £21.99 including shipping.' },
   { icon: '💷', title: 'One-time payment', desc: 'Pay once, own forever. No subscription, no annual renewal, no being locked out.' },
   { icon: '⏱️', title: 'No pressure', desc: 'Answer one question at a time, at their own pace. No deadline, no weekly emails.' },
   { icon: '🤍', title: 'For the whole family', desc: 'Share with siblings, grandchildren, and extended family. A gift that brings everyone together.' },

@@ -104,7 +104,7 @@
       <div class="mx-auto max-w-3xl text-center">
         <p class="text-xs font-medium uppercase tracking-[0.22em] text-[#9C7C5C]">Pricing</p>
         <h2 class="mt-3 font-display text-2xl font-bold text-stone-900 sm:text-3xl">Free to start — pay when you're ready</h2>
-        <p class="mt-3 text-sm text-stone-500">StoryKeeper charges $99 (~£78) upfront before you've tried anything. Tell Me Your Story is free to start — you pay only when you export or print.</p>
+        <p class="mt-3 text-sm text-stone-500">Tell Me Your Story is free to try — 5 questions included, then pay once from £3.99 to unlock everything.</p>
         <div class="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
           <div v-for="tier in tiers" :key="tier.name" class="rounded-3xl border p-5 text-center" :class="tier.featured ? 'border-[#7C5C3B] bg-[#FAF7F4]' : 'border-stone-200 bg-white'">
             <p v-if="tier.featured" class="mb-2 text-[10px] font-semibold uppercase tracking-wider text-[#7C5C3B]">Most popular</p>
@@ -145,7 +145,7 @@
       <h2 class="mt-4 font-display text-2xl font-bold text-white sm:text-3xl">The UK alternative to StoryKeeper</h2>
       <p class="mx-auto mt-4 max-w-lg text-sm leading-7 text-[#A8A29E]">Free to start. Their exact words. Their own voice. UK printed hardcover. No upfront commitment.</p>
       <router-link to="/register" class="mt-8 inline-block rounded-full bg-[#C4A882] px-8 py-3 text-sm font-semibold text-[#1C1917] transition hover:opacity-90">Start free today →</router-link>
-      <p class="mt-4 text-xs text-[#9C7C5C]">Free to start · One-time payment · UK printed book from £34.98</p>
+      <p class="mt-4 text-xs text-[#9C7C5C]">Free to start · One-time payment · UK printed book from £21.99</p>
     </section>
 
   </main>
@@ -155,7 +155,7 @@
 import { useSeo } from '../composables/useSeo'
 
 const reasons = [
-  { icon: '💵', title: '$99 upfront before you\'ve tried anything', desc: 'StoryKeeper requires a $99 payment before you can properly experience the platform. For families unsure whether their parent will engage, that\'s a significant commitment. Tell Me Your Story is free to start — you only pay when you\'re ready to export or print.' },
+  { icon: '💵', title: '$99 upfront before you\'ve tried anything', desc: 'StoryKeeper requires a $99 payment before you can properly experience the platform. For families unsure whether their parent will engage, that\'s a significant commitment. Tell Me Your Story lets you try 5 questions free — you pay once from £3.99 when you\'re ready to unlock the full set and export.'},
   { icon: '🤖', title: 'AI rewrites your loved one\'s words', desc: 'StoryKeeper uses AI and professional editors to shape spoken answers into polished narratives. The result reads well — but it\'s not exactly what your parent said. If preserving their authentic voice matters to you, this is worth thinking about carefully.' },
   { icon: '🇬🇧', title: 'Not built for UK families', desc: 'StoryKeeper is an Ireland-based company operating globally. Their UK subdirectory has only a handful of pages. Tell Me Your Story is built by a UK founder, for UK families, with UK printing and delivery.' },
 ]
@@ -163,7 +163,7 @@ const reasons = [
 const features = [
   { icon: '🎙️', title: 'Voice recordings',       desc: 'Record answers by speaking. Their voice preserved in the printed book via QR codes — forever.' },
   { icon: '📚', title: 'UK printed hardcover',    desc: 'Professionally printed and delivered in the UK. Softcover from £34.98, hardcover available.' },
-  { icon: '💷', title: 'Free to start',           desc: 'No upfront payment. Start for free, pay only when you export or print.' },
+  { icon: '💷', title: 'Free to start',           desc: 'No upfront payment. Try 5 questions free, pay once from £3.99 to unlock everything.' },
   { icon: '✍️', title: 'Their exact words',       desc: 'No AI rewriting. Every answer preserved exactly as given — their voice, their phrases, their personality.' },
   { icon: '📸', title: 'Photos included',         desc: 'Add photos alongside answers to bring every memory to life on the page.' },
   { icon: '🤍', title: 'Share with family',       desc: 'Share with the whole family so everyone can read along as the story grows.' },

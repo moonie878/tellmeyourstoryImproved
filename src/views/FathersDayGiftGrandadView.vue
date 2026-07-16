@@ -174,7 +174,7 @@ const questions = [
 const steps = [
   { number: '1', title: 'Choose a gift', desc: 'Pick from Story, Story + Photos, All Stories, or Premium. One-time payment, no subscription.' },
   { number: '2', title: 'Get your gift link instantly', desc: 'A unique gift link is emailed to you immediately. Share it with Grandad on Father\'s Day.' },
-  { number: '3', title: 'He starts his story', desc: 'He opens the link, creates a free account, and starts answering whenever he feels like it.' },
+  { number: '3', title: 'He starts his story', desc: 'He opens the link, tries 5 questions free, and upgrades when he is hooked.' },
   { number: '4', title: 'Order the printed book', desc: 'When he\'s ready, order a professionally printed hardcover delivered to the door.' },
 ]
 

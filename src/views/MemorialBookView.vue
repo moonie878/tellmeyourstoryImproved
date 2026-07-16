@@ -126,7 +126,7 @@
         <div class="mt-8 grid gap-4 sm:grid-cols-3">
           <div class="rounded-2xl border border-stone-200 p-5 text-center">
             <p class="text-sm font-semibold text-stone-900">Softcover</p>
-            <p class="mt-1 text-2xl font-bold text-stone-900">£34.98</p>
+            <p class="mt-1 text-2xl font-bold text-stone-900">£21.99</p>
             <p class="mt-1 text-xs text-stone-500">UK shipping included</p>
           </div>
           <div class="rounded-2xl border border-[#7C5C3B] bg-[#FAF7F4] p-5 text-center">
@@ -176,7 +176,7 @@
       <router-link to="/register" class="mt-8 inline-block rounded-full bg-[#C4A882] px-8 py-3 text-sm font-semibold text-[#1C1917] transition hover:opacity-90">
         Start a memorial book free →
       </router-link>
-      <p class="mt-4 text-xs text-[#9C7C5C]">Free to start · One-time payment · Printed books from £34.98</p>
+      <p class="mt-4 text-xs text-[#9C7C5C]">Free to start · One-time payment · Printed books from £21.99</p>
     </section>
 
   </main>
