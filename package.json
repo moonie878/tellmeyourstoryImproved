@@ -28,13 +28,14 @@
     "vue-server": "^0.8.1"
   },
   "devDependencies": {
+    "@sparticuz/chromium": "^149.0.0",
     "@types/file-saver": "^2.0.7",
     "@types/node": "^24.12.0",
     "@types/qrcode": "^1.5.6",
     "@vitejs/plugin-vue": "^6.0.5",
     "@vue/tsconfig": "^0.9.0",
     "playwright": "^1.61.0",
-    "puppeteer": "^25.3.0",
+    "puppeteer-core": "^25.3.0",
     "serve-handler": "^6.1.7",
     "typescript": "~5.9.3",
     "vite": "^8.0.1",

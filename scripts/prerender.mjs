@@ -11,7 +11,8 @@ import { readFile, writeFile, mkdir } from 'fs/promises'
 import { existsSync } from 'fs'
 import { resolve, join, extname } from 'path'
 import { createServer } from 'http'
-import puppeteer from 'puppeteer'
+import puppeteer from 'puppeteer-core'
+import chromium from '@sparticuz/chromium'
 
 // ─── Config ───────────────────────────────────────────────────────────────────
 
@@ -109,8 +110,10 @@ async function prerender() {
 
   const server = await startServer()
   const browser = await puppeteer.launch({
-    headless: 'new',
-    args: ['--no-sandbox', '--disable-setuid-sandbox'],
+    args: chromium.args,
+    defaultViewport: chromium.defaultViewport,
+    executablePath: await chromium.executablePath(),
+    headless: chromium.headless,
   })
 
   let rendered = 0
