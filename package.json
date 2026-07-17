@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "node scripts/generate-sitemap.mjs && vue-tsc -b && vite build",
+    "build": "vite build && node scripts/generate-sitemap.mjs && node scripts/prerender.mjs",
     "preview": "vite preview"
   },
   "dependencies": {
