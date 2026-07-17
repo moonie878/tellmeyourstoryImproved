@@ -2,23 +2,15 @@
  * scripts/prerender.mjs
  *
  * Prerenders SEO pages to static HTML after `vite build`.
- * Vercel serves these as static HTML — no JS execution needed by crawlers.
+ * Zero external dependencies beyond puppeteer.
  *
  * Usage:  vite build && node scripts/prerender.mjs
- *
- * How it works:
- *   1. Starts a local static server from dist/
- *   2. Puppeteer visits each SEO route
- *   3. Waits for Vue to render, extracts the HTML
- *   4. Writes it to dist/<route>/index.html
- *   5. Vercel serves these static files first, SPA handles the rest
  */
 
-import { readdir, writeFile, mkdir } from 'fs/promises'
+import { readFile, writeFile, mkdir } from 'fs/promises'
 import { existsSync } from 'fs'
-import { resolve, join } from 'path'
+import { resolve, join, extname } from 'path'
 import { createServer } from 'http'
-import handler from 'serve-handler'
 import puppeteer from 'puppeteer'
 
 // ─── Config ───────────────────────────────────────────────────────────────────
@@ -27,7 +19,6 @@ const DIST_DIR = resolve('dist')
 const PORT = 4173
 const BASE_URL = `http://localhost:${PORT}`
 
-// All your SEO routes — add new ones here as you publish them
 const SEO_ROUTES = [
   '/',
   '/pricing',
@@ -57,22 +48,51 @@ const SEO_ROUTES = [
   '/about',
   '/gift',
   '/how-it-works',
-  // Add new SEO pages here as you create them
 ]
 
-// ─── Static server ────────────────────────────────────────────────────────────
+// ─── Minimal static server (no dependencies) ─────────────────────────────────
+
+const MIME_TYPES = {
+  '.html': 'text/html',
+  '.js':   'application/javascript',
+  '.css':  'text/css',
+  '.json': 'application/json',
+  '.png':  'image/png',
+  '.jpg':  'image/jpeg',
+  '.svg':  'image/svg+xml',
+  '.woff': 'font/woff',
+  '.woff2': 'font/woff2',
+}
 
 function startServer() {
-  return new Promise((resolve) => {
-    const server = createServer((req, res) => {
-      return handler(req, res, {
-        public: DIST_DIR,
-        rewrites: [{ source: '**', destination: '/index.html' }],
-      })
+  return new Promise((res) => {
+    const server = createServer(async (req, reply) => {
+      let filePath = join(DIST_DIR, req.url === '/' ? 'index.html' : req.url)
+
+      // If path has no extension and isn't a file, serve index.html (SPA fallback)
+      if (!extname(filePath)) {
+        const withHtml = filePath + '.html'
+        const withIndex = join(filePath, 'index.html')
+        if (existsSync(withHtml)) filePath = withHtml
+        else if (existsSync(withIndex)) filePath = withIndex
+        else filePath = join(DIST_DIR, 'index.html')
+      }
+
+      try {
+        const data = await readFile(filePath)
+        const ext = extname(filePath)
+        reply.writeHead(200, { 'Content-Type': MIME_TYPES[ext] || 'application/octet-stream' })
+        reply.end(data)
+      } catch {
+        // Fallback to index.html for SPA routes
+        const fallback = await readFile(join(DIST_DIR, 'index.html'))
+        reply.writeHead(200, { 'Content-Type': 'text/html' })
+        reply.end(fallback)
+      }
     })
     server.listen(PORT, () => {
-      console.log(`  Preview server running on ${BASE_URL}`)
-      resolve(server)
+      console.log(`  Preview server on ${BASE_URL}`)
+      res(server)
     })
   })
 }
@@ -100,40 +120,22 @@ async function prerender() {
     try {
       const page = await browser.newPage()
 
-      // Block unnecessary resources to speed up rendering
       await page.setRequestInterception(true)
       page.on('request', (req) => {
-        const type = req.resourceType()
-        if (['image', 'font', 'media'].includes(type)) {
-          req.abort()
-        } else {
-          req.continue()
-        }
+        if (['image', 'font', 'media'].includes(req.resourceType())) req.abort()
+        else req.continue()
       })
 
-      const url = `${BASE_URL}${route}`
-      await page.goto(url, { waitUntil: 'networkidle0', timeout: 15000 })
-
-      // Wait for Vue to finish rendering
+      await page.goto(`${BASE_URL}${route}`, { waitUntil: 'networkidle0', timeout: 15000 })
       await page.waitForSelector('#app', { timeout: 5000 })
-      // Small extra wait for any async component transitions
       await page.evaluate(() => new Promise(r => setTimeout(r, 500)))
 
-      // Get the full rendered HTML
       const html = await page.content()
 
-      // Write to dist/<route>/index.html
-      const outputDir = route === '/'
-        ? DIST_DIR
-        : join(DIST_DIR, route)
+      const outputDir = route === '/' ? DIST_DIR : join(DIST_DIR, route)
+      if (route !== '/') await mkdir(outputDir, { recursive: true })
 
-      if (route !== '/') {
-        await mkdir(outputDir, { recursive: true })
-      }
-
-      const outputFile = join(outputDir, 'index.html')
-      await writeFile(outputFile, html, 'utf-8')
-
+      await writeFile(join(outputDir, 'index.html'), html, 'utf-8')
       console.log(`  ✓ ${route}`)
       rendered++
       await page.close()
@@ -146,8 +148,7 @@ async function prerender() {
   await browser.close()
   server.close()
 
-  console.log(`\n  Done: ${rendered} rendered, ${failed} failed`)
-  console.log(`  Static HTML written to dist/\n`)
+  console.log(`\n  Done: ${rendered} rendered, ${failed} failed\n`)
 }
 
 prerender()
