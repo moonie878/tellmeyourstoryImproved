@@ -24,8 +24,8 @@
             </h1>
 
             <p class="mx-auto mt-6 max-w-lg text-base leading-[1.8] text-[#5C534E] sm:text-lg md:mx-0">
-              Guided questions. Voice recordings. A real printed book — delivered to your door.
-            </p>
+  Record their voice. See it become a book. Scan the QR to hear them again — years from now.
+</p>
 
             <div class="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center md:justify-start">
               <router-link to="/register" @click="trackStart" class="btn-primary">
@@ -53,13 +53,13 @@
                 loading="eager"
               />
               <!-- Floating badge — updated to voice -->
-  <!--             <div class="hero-badge">
+  <div class="hero-badge">
   <span class="hero-badge-icon">🎙️</span>
   <div>
-    <p class="hero-badge-title">Nan's voice playing</p>
-    <p class="hero-badge-sub">Scan the QR in the book</p>
+    <p class="hero-badge-title">Voice recording saved</p>
+    <p class="hero-badge-sub">QR code in the printed book</p>
   </div>
-</div> -->
+</div>
             </div>
           </div>
 
@@ -124,13 +124,71 @@
 
         </div>
 
-        <!-- Listen demo link -->
-        <div class="mt-10 rounded-2xl border border-[#2C2420] bg-[#2C2420] px-6 py-5 text-center">
-          <p class="text-sm text-stone-400">
-            🎙️ <span class="text-white font-medium">Imagine scanning a QR code at Christmas</span> and hearing your grandmother's voice describing the home she grew up in.
-            That's what Tell Me Your Story makes possible.
-          </p>
+       <!-- Voice → QR demo -->
+<div class="mt-10 rounded-2xl border border-[#2C2420] bg-[#2C2420] px-6 py-8 sm:px-10">
+  <div class="grid items-center gap-8 md:grid-cols-2">
+    
+    <!-- Left — the story -->
+    <div class="text-center md:text-left">
+      <p class="text-xs font-medium uppercase tracking-widest text-[#9C7C5C]">How it works</p>
+      <h3 class="mt-3 text-xl font-semibold text-white sm:text-2xl">
+        Record their voice today.<br/>
+        Hear it in the book forever.
+      </h3>
+      <div class="mt-5 space-y-3">
+        <div class="flex items-start gap-3">
+          <span class="mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-[#7C5C3B] text-xs font-bold text-white">1</span>
+          <p class="text-sm leading-relaxed text-stone-300">They tap the microphone and speak their answer naturally</p>
         </div>
+        <div class="flex items-start gap-3">
+          <span class="mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-[#7C5C3B] text-xs font-bold text-white">2</span>
+          <p class="text-sm leading-relaxed text-stone-300">Their voice is saved and transcribed into text automatically</p>
+        </div>
+        <div class="flex items-start gap-3">
+          <span class="mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-[#7C5C3B] text-xs font-bold text-white">3</span>
+          <p class="text-sm leading-relaxed text-stone-300">A QR code is printed in the book — scan it to hear their voice, years from now</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right — visual mockup -->
+    <div class="flex justify-center">
+      <div class="relative">
+        <!-- Book page with QR -->
+        <div class="w-48 rounded-sm bg-white p-4 shadow-lg sm:w-56 sm:p-5" style="aspect-ratio: 6/9;">
+          <p class="text-[8px] font-medium uppercase tracking-widest text-[#7C5C3B]/50">Chapter 2 · Childhood</p>
+          <p class="mt-2 font-serif text-[10px] italic text-stone-500 sm:text-xs">"What did your childhood home smell like?"</p>
+          <p class="mt-2 font-serif text-[9px] leading-relaxed text-stone-700 sm:text-[10px]">
+            It smelled of cooking, washing drying near the fire, and sometimes something sweet baking in the oven…
+          </p>
+          <div class="mt-3 flex items-center gap-2 rounded-lg bg-[#F5F0E8] p-2">
+            <div class="flex h-8 w-8 items-center justify-center rounded bg-white">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-[#7C5C3B]" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M3 11V3h8v8H3zm2-2h4V5H5v4zm8-6h8v8h-8V3zm2 2v4h4V5h-4zM3 21v-8h8v8H3zm2-2h4v-4H5v4z"/>
+              </svg>
+            </div>
+            <div>
+              <p class="text-[8px] font-medium text-stone-700">🎙️ Voice recording</p>
+              <p class="text-[7px] text-stone-400">Scan to listen</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Phone scanning overlay -->
+        <div class="absolute -bottom-3 -right-6 w-20 rounded-xl border-2 border-stone-700 bg-stone-900 p-1.5 shadow-xl sm:-right-8 sm:w-24 sm:p-2">
+          <div class="rounded-lg bg-white p-2 text-center">
+            <p class="text-[7px] font-medium text-stone-700">▶ Now playing</p>
+            <p class="mt-0.5 text-[6px] text-stone-400">Nan's voice · 1:32</p>
+            <div class="mt-1 h-0.5 w-full rounded-full bg-stone-100">
+              <div class="h-0.5 w-2/3 rounded-full bg-[#7C5C3B]"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
 
       </div>
     </section>
@@ -328,7 +386,7 @@
           </div>
           <div class="gallery-item col-span-2 md:col-span-1">
             <img src="/images/example/MemQR.jpg" alt="Memories page" class="gallery-img" loading="lazy" />
-            <p class="gallery-label">Memory pages</p>
+            <p class="gallery-label">Voice QR codes — scan to hear their voice</p>
           </div>
           <div class="gallery-item gallery-item-about col-span-2 md:col-span-2">
             <img src="/images/example/Details.jpg" alt="About this person page" class="gallery-img" loading="lazy" />
