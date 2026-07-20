@@ -433,10 +433,10 @@ function goToCheckout(tier: string, projectId: string) {
 }
 
 function handleTierClick(tier: string) {
-  if (!isLoggedIn.value) {
-    router.push('/register')
-    return
-  }
+ if (!isLoggedIn.value) {
+  router.push(`/register?plan=${tier}`)
+  return
+}
 
   if (userProjects.value.length === 0) {
     // Logged in but no projects yet — send to dashboard to start one

@@ -90,7 +90,7 @@
       <p class="mt-5 text-center text-sm text-[#8C847E]">
   Don't have an account?
   <router-link
-    :to="giftToken ? `/register?gift=${giftToken}` : '/register'"
+    :to="giftToken ? `/register?gift=${giftToken}` : planKey ? `/register?plan=${planKey}` : '/register'"
     class="font-medium text-[#1C1917] hover:underline"
   >Sign up free</router-link>
 </p>
@@ -116,6 +116,7 @@ const errorMessage = ref('')
 const route     = useRoute()
 const router    = useRouter()
 const giftToken = route.query.gift as string | undefined
+const planKey = route.query.plan as string | undefined
 
 const slowConnection = ref(false)
 
@@ -123,9 +124,10 @@ let slowTimer: ReturnType<typeof setTimeout> | null = null
 
 async function handleGoogleLogin() {
   googleLoading.value = true
-  const redirectTo = giftToken
-    ? `https://tellmeyourstory.uk/gift/redeem/${giftToken}`
-    : 'https://tellmeyourstory.uk/dashboard'
+
+  let redirectTo = 'https://tellmeyourstory.uk/dashboard'
+  if (giftToken)  redirectTo = `https://tellmeyourstory.uk/gift/redeem/${giftToken}`
+  else if (planKey) redirectTo = `https://tellmeyourstory.uk/dashboard?plan=${planKey}`
 
   const { error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
@@ -167,6 +169,8 @@ async function handleLogin() {
 
       if (giftToken) {
   router.push(`/gift/redeem/${giftToken}`)
+} else if (planKey) {
+  router.push(`/dashboard?plan=${planKey}`)
 } else {
   router.push('/dashboard')
 }
