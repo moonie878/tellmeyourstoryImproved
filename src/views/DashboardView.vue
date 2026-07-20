@@ -25,9 +25,9 @@
                 Start Child Story
               </button>
             </div>
-            <p v-if="isFirstTimeUser" class="mt-5 inline-block rounded-full bg-stone-100 px-3 py-1 text-sm text-stone-700">
-              Your first keepsake can be started in under a minute — answer as many or as few questions as you like 💛
-            </p>
+           <p v-if="isFirstTimeUser" class="mt-5 inline-block rounded-full bg-stone-100 px-3 py-1 text-sm text-stone-700">
+  Your first keepsake can be started in under a minute — try 5 questions free 💛
+</p>
           </div>
 
           <div class="grid gap-4 sm:grid-cols-2 md:grid-cols-1">
