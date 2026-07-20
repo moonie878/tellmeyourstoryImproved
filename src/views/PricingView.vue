@@ -438,11 +438,10 @@ function handleTierClick(tier: string) {
   return
 }
 
-  if (userProjects.value.length === 0) {
-    // Logged in but no projects yet — send to dashboard to start one
-    router.push('/dashboard')
-    return
-  }
+ if (userProjects.value.length === 0) {
+  router.push(`/dashboard?plan=${tier}`)
+  return
+}
 
   // Tier 3 and Tier 4 unlock access across ALL of the user's stories,
   // not just one — so there's nothing to pick. Just use any project
