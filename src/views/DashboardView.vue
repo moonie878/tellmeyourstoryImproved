@@ -43,6 +43,26 @@
         </div>
       </section>
 
+      <!-- Upgrade banner (free users only) -->
+<section
+  v-if="!hasAnyAccess"
+  class="rounded-[2rem] border border-[#E8DDD0] bg-white p-5 shadow-sm sm:p-6 md:p-8"
+>
+  <div class="flex flex-col items-center justify-between gap-4 sm:flex-row">
+    <div>
+      <p class="text-xs font-medium uppercase tracking-[0.2em] text-[#9C7C5C]">Free plan</p>
+      <h2 class="mt-1 text-lg font-semibold text-stone-900">Unlock the full experience</h2>
+      <p class="mt-1 text-sm text-stone-500">You've got 5 free questions. Upgrade to unlock all 100+, voice recording, export, and printing.</p>
+    </div>
+    <router-link
+      to="/pricing"
+      class="flex-shrink-0 rounded-full bg-[#7C5C3B] px-6 py-3 text-sm font-medium text-white transition hover:opacity-90"
+    >
+      View plans — from £3.99
+    </router-link>
+  </div>
+</section>
+
       <!-- Story starters -->
       <section class="rounded-[2rem] border border-stone-200 bg-white p-5 shadow-sm sm:p-6 md:p-8">
         <div class="text-center md:text-left">
@@ -385,7 +405,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, nextTick } from 'vue'
+import { ref, onMounted, nextTick, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { supabase } from '../lib/supabase'
 import { track } from '../lib/analytics'
@@ -425,6 +445,8 @@ const router     = useRouter()
 const storyTypes = STORY_TYPES
 const { exportTrueBookAsBlob } = useStoryTrueBookExport()
 const { exportPhotoBookAsBlob } = usePhotoBookExport()
+const hasAnyAccess = computed(() => userAccess.value.length > 0)
+
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL as string
 const POD_PACKAGE_ID = '0600X0900.FC.STD.PB.060UW444.MXX'
