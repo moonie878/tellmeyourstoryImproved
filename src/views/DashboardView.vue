@@ -985,5 +985,40 @@ onMounted(async () => {
     const story = stories.value.find((s: any) => s.id === storyId)
     if (story) await openPrintModal(story, sessionId)
   }
+
+  // ─── Auto-checkout from register-as-premium flow ──────────────────────────
+  const planFromRegister = params.get('plan')
+
+  if (planFromRegister && ['tier1', 'tier2', 'tier3', 'tier4'].includes(planFromRegister)) {
+    // Clear the param so refresh doesn't re-trigger
+    window.history.replaceState({}, '', '/dashboard')
+
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return
+
+    // If user has no stories yet, create a default one
+    let targetStoryId = stories.value[0]?.id
+
+    if (!targetStoryId) {
+      const { data: newStory, error: storyErr } = await supabase
+        .from('story_projects')
+        .insert([{ user_id: user.id, title: "Mum's Story", story_type: 'mum' }])
+        .select()
+        .single()
+
+      if (storyErr || !newStory) {
+        console.error('Auto-create story failed:', storyErr?.message)
+        return
+      }
+      targetStoryId = newStory.id
+      track('story_auto_created', { source: 'register_premium', plan: planFromRegister })
+    }
+
+    track('checkout_from_register', { plan: planFromRegister })
+
+    // Forward to editor with plan param — editor triggers checkout
+    router.push(`/story/${targetStoryId}?plan=${planFromRegister}`)
+  }
+
 })
 </script>

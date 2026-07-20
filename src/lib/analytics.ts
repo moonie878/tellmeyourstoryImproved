@@ -34,6 +34,9 @@ type AnalyticsEvent =
   | 'tribute_tier4_download'
    | 'print_book_ordered'
    | 'upgrade_gate_shown'
+   |'story_auto_created'
+   |'checkout_from_register'
+
 
 type AnalyticsValue =
   | string

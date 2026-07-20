@@ -657,6 +657,25 @@ onMounted(async () => {
       await handler()
     }
   }
+  // ─── Auto-checkout from register-as-premium ───────────────────────────────
+const planParam = route.query.plan as string | undefined
+
+if (planParam && ['tier1', 'tier2', 'tier3', 'tier4'].includes(planParam)) {
+  // Clear param
+  router.replace({ query: { ...route.query, plan: undefined } })
+
+  const handlers: Record<string, () => void> = {
+    tier1: upgradeSingleText,
+    tier2: upgradeSingleImages,
+    tier3: upgradeAllText,
+    tier4: upgradeAllImages,
+  }
+
+  // Small delay to let the editor fully initialise
+  setTimeout(() => {
+    handlers[planParam]?.()
+  }, 1000)
+}
 })
 
 onUnmounted(() => {

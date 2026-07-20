@@ -2,11 +2,33 @@
   <div class="min-h-screen flex items-center justify-center bg-[#F5F0E8] px-6 py-12">
     <div class="w-full max-w-md">
 
-      <!-- Header -->
+      <!-- Header — changes based on whether a plan is selected -->
       <div class="text-center mb-6">
-        <p class="text-[11px] font-medium uppercase tracking-[0.22em] text-[#9C7C5C]">Free to start · No credit card needed</p>
-        <h1 class="mt-2 font-display text-2xl font-bold text-[#1C1917]">Create your account</h1>
-        <p class="mt-2 text-sm text-[#5C534E]">Start capturing their story today</p>
+        <template v-if="selectedPlan">
+          <p class="text-[11px] font-medium uppercase tracking-[0.22em] text-[#9C7C5C]">One-time payment · No subscription</p>
+          <h1 class="mt-2 font-display text-2xl font-bold text-[#1C1917]">Create your account</h1>
+          <p class="mt-2 text-sm text-[#5C534E]">Then you'll be taken to checkout for <strong>{{ selectedPlan.name }}</strong></p>
+        </template>
+        <template v-else>
+          <p class="text-[11px] font-medium uppercase tracking-[0.22em] text-[#9C7C5C]">Free to start · No credit card needed</p>
+          <h1 class="mt-2 font-display text-2xl font-bold text-[#1C1917]">Create your account</h1>
+          <p class="mt-2 text-sm text-[#5C534E]">Start capturing their story today</p>
+        </template>
+      </div>
+
+      <!-- Plan summary card (only shown when plan selected) -->
+      <div v-if="selectedPlan" class="mb-5 rounded-2xl border border-[#E8DDD0] bg-white px-5 py-4">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm font-semibold text-[#1C1917]">{{ selectedPlan.name }}</p>
+            <p class="text-xs text-[#5C534E]">{{ selectedPlan.desc }}</p>
+          </div>
+          <p class="text-lg font-bold text-[#7C5C3B]">{{ selectedPlan.price }}</p>
+        </div>
+        <button
+          @click="clearPlan"
+          class="mt-2 text-xs text-stone-400 hover:text-stone-600 hover:underline"
+        >Start free instead</button>
       </div>
 
       <!-- Card -->
@@ -75,7 +97,6 @@
                 class="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600"
                 tabindex="-1"
               >
-                <!-- Eye / eye-off icon -->
                 <svg v-if="!showPassword" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
@@ -93,7 +114,7 @@
             <span>Send me story prompts and reminders so I don't forget to capture these moments (optional)</span>
           </label>
 
-          <!-- Turnstile hidden — token watched to set turnstileReady -->
+          <!-- Turnstile hidden -->
           <div class="invisible h-0 overflow-hidden">
             <TurnstileWidget v-model="turnstileToken" />
           </div>
@@ -107,6 +128,9 @@
             <p class="text-sm font-medium text-[#1C1917]">✓ Account created</p>
             <p v-if="giftToken" class="mt-1 text-xs text-[#5C534E]">
               Redirecting you to redeem your gift…
+            </p>
+            <p v-else-if="planKey" class="mt-1 text-xs text-[#5C534E]">
+              Redirecting you to checkout…
             </p>
             <p v-else class="mt-1 text-xs text-[#5C534E]">
               Check your email to confirm your account, then you're good to go.
@@ -127,6 +151,7 @@
               </svg>
               Creating your account…
             </span>
+            <span v-else-if="selectedPlan">Create account & continue to checkout</span>
             <span v-else>Create account — it's free</span>
           </button>
 
@@ -136,15 +161,22 @@
       <p class="mt-6 text-center text-sm text-[#5C534E]">
         Already have an account?
         <router-link
-          :to="giftToken ? `/login?gift=${giftToken}` : '/login'"
+          :to="loginRoute"
           class="font-medium text-[#1C1917] hover:underline"
         >Log in</router-link>
       </p>
 
       <div class="mt-6 flex flex-wrap justify-center gap-x-5 gap-y-2 text-xs text-[#A89880]">
-        <span>✦ No subscription</span>
-        <span>✦ Free to start</span>
-        <span>✦ Download when ready</span>
+        <template v-if="selectedPlan">
+          <span>✦ One-time payment</span>
+          <span>✦ No subscription</span>
+          <span>✦ Instant access</span>
+        </template>
+        <template v-else>
+          <span>✦ No subscription</span>
+          <span>✦ Free to start</span>
+          <span>✦ Download when ready</span>
+        </template>
       </div>
 
     </div>
@@ -152,7 +184,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { supabase } from '../lib/supabase'
 import TurnstileWidget from '../components/legal/TurnstileWidget.vue'
 import { verifyTurnstileWithRetry } from '../lib/turnstile'
@@ -175,6 +207,7 @@ const utmData = getCurrentUtmData()
 const route = useRoute()
 const router = useRouter()
 const giftToken = route.query.gift as string | undefined
+const planKey = route.query.plan as string | undefined
 
 const fieldErrors = ref<{ email: string; password: string }>({
   email: '',
@@ -183,8 +216,30 @@ const fieldErrors = ref<{ email: string; password: string }>({
 
 const turnstileTimedOut = ref(false)
 
-// Turnstile no longer blocks registration (see handleRegister) — we just
-// track whether a token ever arrived, for lightweight visibility if needed.
+// ─── Plan config ──────────────────────────────────────────────────────────────
+
+const PLANS: Record<string, { name: string; price: string; desc: string }> = {
+  tier1: { name: 'Keepsake Book',    price: '£3.99',  desc: 'All questions + PDF export' },
+  tier2: { name: 'Book + Photos',    price: '£7.99',  desc: 'Photos, cover image & premium design' },
+  tier3: { name: 'All Stories',       price: '£11.99', desc: 'Unlimited stories & story types' },
+  tier4: { name: 'Premium Keepsake', price: '£17.99', desc: 'Everything — video, print layouts & more' },
+}
+
+const selectedPlan = computed(() => planKey ? PLANS[planKey] || null : null)
+
+const loginRoute = computed(() => {
+  const params: string[] = []
+  if (giftToken) params.push(`gift=${giftToken}`)
+  if (planKey)   params.push(`plan=${planKey}`)
+  return params.length ? `/login?${params.join('&')}` : '/login'
+})
+
+function clearPlan() {
+  router.replace({ query: { ...route.query, plan: undefined } })
+}
+
+// ─── Turnstile ────────────────────────────────────────────────────────────────
+
 watch(turnstileToken, (val) => {
   if (val) turnstileReady.value = true
 })
@@ -194,6 +249,8 @@ setTimeout(() => {
     turnstileTimedOut.value = true
   }
 }, 6000)
+
+// ─── Validation ───────────────────────────────────────────────────────────────
 
 function validateEmail() {
   if (!email.value) {
@@ -221,11 +278,18 @@ function validateAll(): boolean {
   return !fieldErrors.value.email && !fieldErrors.value.password
 }
 
+// ─── Auth ─────────────────────────────────────────────────────────────────────
+
+// Build the post-login redirect based on context
+function getRedirectPath() {
+  if (giftToken) return `/gift/redeem/${giftToken}`
+  if (planKey)   return `/dashboard?plan=${planKey}`
+  return '/dashboard'
+}
+
 async function handleGoogleLogin() {
   googleLoading.value = true
-  const redirectTo = giftToken
-    ? `https://tellmeyourstory.uk/gift/redeem/${giftToken}`
-    : 'https://tellmeyourstory.uk/dashboard'
+  const redirectTo = `https://tellmeyourstory.uk${getRedirectPath()}`
 
   const { error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
@@ -241,18 +305,11 @@ async function handleRegister() {
   errorMessage.value = ''
   turnstileError.value = ''
 
-  // Validate fields first — before touching Turnstile
   if (!validateAll()) return
 
   loading.value = true
 
   try {
-    // Turnstile is currently unreliable for a meaningful number of real
-    // visitors (browser privacy settings, ad blockers, and certain network
-    // configs can silently prevent the widget from ever loading or
-    // resolving a token — see incident June 2026). Rather than block
-    // genuine signups, we attempt verification for monitoring purposes
-    // but never let a failure or timeout stop registration.
     const { success: isHuman, timedOut } = await verifyTurnstileWithRetry(
       () => turnstileToken.value
     )
@@ -277,9 +334,12 @@ async function handleRegister() {
       errorMessage.value = error.message
     } else {
       success.value = true
-      track('signup_completed', { source: 'register_page', ...utmData })
+      track('signup_completed', {
+        source: 'register_page',
+        plan: planKey || 'free',
+        ...utmData,
+      })
 
-      // Add to Resend contacts — only if they opted in
       if (emailOptIn.value) {
         try {
           await fetch(`${import.meta.env.VITE_API_BASE_URL}/register-contact`, {
@@ -288,16 +348,14 @@ async function handleRegister() {
             body: JSON.stringify({ email: email.value, firstName: '' }),
           })
         } catch {
-          // Non-critical — don't block registration
+          // Non-critical
         }
       }
 
-      // If registering via a gift link, redirect after short delay
-      if (giftToken) {
-        setTimeout(() => {
-          router.push(`/gift/redeem/${giftToken}`)
-        }, 2000)
-      }
+      // Redirect based on context
+      setTimeout(() => {
+        router.push(getRedirectPath())
+      }, 2000)
     }
   } catch (err) {
     console.error(err)
