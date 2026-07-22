@@ -87,7 +87,7 @@
                 <path d="M12 1a4 4 0 0 1 4 4v6a4 4 0 0 1-8 0V5a4 4 0 0 1 4-4zm0 2a2 2 0 0 0-2 2v6a2 2 0 0 0 4 0V5a2 2 0 0 0-2-2zm-1 14.93V20H9v2h6v-2h-2v-2.07A8 8 0 0 0 20 11h-2a6 6 0 0 1-12 0H4a8 8 0 0 0 7 7.93z"/>
               </svg>
             </div>
-            <h3 class="feature-title">Speak your answers</h3>
+            <h3 class="feature-title">Voice record your answers</h3>
             <p class="feature-desc">
               Tap the microphone on any question and speak naturally. Your words appear as you talk — no typing needed. Perfect for elderly parents who find typing difficult.
             </p>
