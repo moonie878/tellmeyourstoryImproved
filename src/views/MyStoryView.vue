@@ -26,7 +26,13 @@
           <p class="mt-6 font-serif text-base leading-[2] text-stone-700 sm:text-lg">
             I had a pacemaker fitted and they also found other issues with my heart, including a bicuspid aortic valve. Over the last eight years my heart has deteriorated. In 2025 I had major open heart surgery — they broke my sternum to replace my valve.
           </p>
-
+<figure class="my-8">
+  <img
+    src="/images/mystory-surgery.jpg"
+    alt="Mark in intensive care after open heart surgery"
+    class="w-full rounded-2xl"
+  />
+</figure>
           <p class="mt-6 font-serif text-base leading-[2] text-stone-700 sm:text-lg">
             I've had more surgery this year, and I was told my heart is only functioning at 45%. I'm now under the heart failure team. I have many scars and I'll be on medication for the rest of my life.
           </p>
@@ -40,6 +46,13 @@
             <p class="font-serif text-lg font-medium leading-relaxed text-stone-900 sm:text-xl">
               What bothers me most, lying in the hospital bed before my surgeries, is realising how little my children would know and remember about me if I wasn't here anymore.
             </p>
+            <figure class="my-8">
+  <img
+    src="/images/mystory-kids.jpg"
+    alt="Mark with his two children in hospital"
+    class="w-full rounded-2xl"
+  />
+</figure>
           </div>
 
           <p class="font-serif text-base leading-[2] text-stone-700 sm:text-lg">
