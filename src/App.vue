@@ -29,7 +29,9 @@
             <router-link to="/contact" class="text-stone-600 transition hover:text-stone-900">
               Contact
             </router-link>
-
+<router-link to="/my-story" class="text-stone-600 transition hover:text-stone-900">
+  Our Story
+</router-link>
             <button
               @click="handleLogout"
               class="rounded-full border border-stone-300 bg-white px-4 py-2 text-stone-900 transition hover:bg-stone-100"
@@ -51,7 +53,9 @@
   Tribute Video
 </router-link>
             
-
+<router-link to="/my-story" class="text-stone-600 transition hover:text-stone-900">
+  Our Story
+</router-link>
             <router-link to="/contact" class="text-stone-600 transition hover:text-stone-900">
               Contact
             </router-link>
@@ -135,7 +139,13 @@ class="rounded-2xl px-4 py-3 text-stone-700 transition hover:bg-stone-100"
             >
               Contact
             </router-link>
-
+<router-link
+  to="/my-story"
+  class="rounded-2xl px-4 py-3 text-stone-700 transition hover:bg-stone-100"
+  @click="mobileMenuOpen = false"
+>
+  Our Story
+</router-link>
             <button
               @click="handleMobileLogout"
               class="mt-2 rounded-2xl border border-stone-300 bg-white px-4 py-3 text-left text-stone-900 transition hover:bg-stone-100"
@@ -166,7 +176,13 @@ class="rounded-2xl px-4 py-3 text-stone-700 transition hover:bg-stone-100"
             >
               Pricing
             </router-link>
-
+<router-link
+  to="/my-story"
+  class="rounded-2xl px-4 py-3 text-stone-700 transition hover:bg-stone-100"
+  @click="mobileMenuOpen = false"
+>
+  Our Story
+</router-link>
             <router-link
               to="/contact"
               class="rounded-2xl px-4 py-3 text-stone-700 transition hover:bg-stone-100"

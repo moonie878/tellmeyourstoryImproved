@@ -48,6 +48,7 @@ const SEO_ROUTES = [
   '/write-your-own-life-story',
   '/about',
   '/gift',
+  '/my-story',
   '/how-it-works',
 ]
 
