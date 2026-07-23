@@ -233,7 +233,7 @@ defineEmits(['track'])
 
 const writingRows = [
   { label: 'Start any story type', free: true, book: true, photos: true, all: true, premium: true },
-  { label: 'All 100 guided questions', free: true, book: true, photos: true, all: true, premium: true },
+  { label: 'All 100 guided questions', free: false, book: true, photos: true, all: true, premium: true },
   { label: 'Autosave', free: true, book: true, photos: true, all: true, premium: true },
   { label: 'Add photos per answer', free: true, book: true, photos: true, all: true, premium: true },
 ]
