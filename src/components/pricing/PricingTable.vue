@@ -266,7 +266,6 @@ const mobilePlans = [
     cta: 'Start free',
     features: [
       'Start any story type',
-      'All 100 guided questions',
       'Autosave',
       'Add photos per answer',
     ],
@@ -281,6 +280,7 @@ const mobilePlans = [
     cta: 'Get Keepsake Book',
     features: [
       'Everything in Free',
+      'All 100 guided questions',
       'PDF keepsake export',
       'Chapters, drop caps & layouts',
       'Design themes',
