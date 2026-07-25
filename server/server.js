@@ -436,6 +436,118 @@ app.get('/cron/nurture-gate-email', async (req, res) => {
   }
 })
 
+// ─── Nurture: Trustpilot review request (cron) ───────────────────────────────
+app.get('/cron/trustpilot-ask', async (req, res) => {
+  if (req.query.key !== process.env.CRON_SECRET) {
+    return res.status(401).json({ error: 'Unauthorized' })
+  }
+
+  try {
+    // Find users with 10+ answers (engaged, likely paid)
+    const { data: engagedUsers, error: queryErr } = await supabaseAdmin
+      .rpc('get_engaged_users_for_review', {})
+
+    // Fallback: manual query if RPC doesn't exist
+    // Get all users with 10+ story answers
+    const { data: answerCounts, error: countErr } = await supabaseAdmin
+      .from('story_answers')
+      .select('user_id')
+
+    if (countErr) {
+      console.error('Trustpilot cron query error:', countErr.message)
+      return res.status(500).json({ error: countErr.message })
+    }
+
+    // Count answers per user
+    const userCounts = {}
+    for (const row of answerCounts || []) {
+      userCounts[row.user_id] = (userCounts[row.user_id] || 0) + 1
+    }
+
+    // Filter to users with 5+ answers
+    const qualifiedUserIds = Object.entries(userCounts)
+      .filter(([_, count]) => count >= 5)
+      .map(([userId]) => userId)
+
+    if (qualifiedUserIds.length === 0) {
+      return res.json({ sent: 0, message: 'No qualified users' })
+    }
+
+    let sentCount = 0
+
+    for (const userId of qualifiedUserIds) {
+      // Check we haven't already sent this email
+      const { data: alreadySent } = await supabaseAdmin
+        .from('nurture_emails')
+        .select('id')
+        .eq('user_id', userId)
+        .eq('email_type', 'trustpilot_ask')
+        .maybeSingle()
+
+      if (alreadySent) continue
+
+      // Get user email
+      const { data: { user } } = await supabaseAdmin.auth.admin.getUserById(userId)
+      if (!user?.email) continue
+
+      const firstName = user.user_metadata?.full_name?.split(' ')[0]
+        || user.user_metadata?.name?.split(' ')[0]
+        || ''
+
+      try {
+        await resend.emails.send({
+          from: 'Mark at Tell Me Your Story <mark-griffiths@tellmeyourstory.uk>',
+          to: user.email,
+          subject: 'Could I ask a small favour? 💛',
+          html: `
+            <div style="font-family: Georgia, serif; max-width: 600px; margin: 0 auto; padding: 40px 20px;">
+              <h1 style="font-size: 24px; color: #1C1917;">Hi${firstName ? ` ${firstName}` : ''} 💛</h1>
+              <p style="font-size: 15px; color: #5C534E; line-height: 1.7;">
+                It's Mark from Tell Me Your Story.
+              </p>
+              <p style="font-size: 15px; color: #5C534E; line-height: 1.7;">
+                I'm building this on my own — no team, no investors, just me — and honest reviews make a huge difference to a small business like this. They help other families feel confident enough to start capturing their stories too.
+              </p>
+              <p style="font-size: 15px; color: #5C534E; line-height: 1.7;">
+                If you've had a good experience so far, would you mind leaving a quick review on Trustpilot? Even a sentence or two goes a long way.
+              </p>
+              <div style="background: #F5F0E8; border-radius: 16px; padding: 24px; margin: 24px 0; text-align: center;">
+                <a href="https://uk.trustpilot.com/evaluate/tellmeyourstory.uk" style="display: inline-block; background: #7C5C3B; color: white; padding: 12px 32px; border-radius: 100px; font-size: 14px; text-decoration: none; font-weight: 500;">Leave a review on Trustpilot</a>
+                <p style="font-size: 12px; color: #8C847E; margin-top: 10px;">Takes about 30 seconds</p>
+              </div>
+              <p style="font-size: 15px; color: #5C534E; line-height: 1.7;">
+                Thank you — and if there's anything I can improve, just reply to this email. I read every message myself.
+              </p>
+              <p style="font-size: 14px; color: #3C3530; margin-top: 28px;">
+                Warm wishes,<br>
+                Mark<br>
+                Founder, Tell Me Your Story
+              </p>
+              <p style="font-size: 12px; color: #A8A29E; margin-top: 32px;">
+                Tell Me Your Story · <a href="https://tellmeyourstory.uk" style="color: #7C5C3B;">tellmeyourstory.uk</a>
+              </p>
+            </div>
+          `,
+        })
+
+        await supabaseAdmin
+          .from('nurture_emails')
+          .insert({ user_id: userId, email_type: 'trustpilot_ask' })
+
+        console.log('Trustpilot ask sent to:', user.email)
+        sentCount++
+      } catch (emailErr) {
+        console.error('Trustpilot ask error:', user.email, emailErr.message)
+      }
+    }
+
+    res.json({ sent: sentCount, checked: qualifiedUserIds.length })
+  } catch (err) {
+    console.error('Trustpilot cron error:', err.message)
+    res.status(500).json({ error: err.message })
+  }
+})
+
 // ─── Transcribe ───────────────────────────────────────────────────────────────
 app.post('/transcribe', upload.single('audio'), async (req, res) => {
   try {
