@@ -532,7 +532,7 @@
               loading="lazy"
             />
           </a>
-         <a href="https://www.elm-online.co.uk/"
+         <!-- <a href="https://www.elm-online.co.uk/"
   target="_blank"
   rel="noopener noreferrer"
   class="flex items-center justify-center"
@@ -542,7 +542,7 @@
     alt="Recommended by ELM Legal Services"
     class="h-16 w-auto object-contain opacity-80 transition hover:opacity-100"
   />
-</a>
+</a> -->
         </div>
       </div>
     </section>
