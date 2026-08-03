@@ -532,6 +532,17 @@
               loading="lazy"
             />
           </a>
+         <a href="https://www.elm-online.co.uk/"
+  target="_blank"
+  rel="noopener noreferrer"
+  class="flex items-center justify-center"
+>
+  <img
+    src="/images/partners/elm-legal.png"
+    alt="Recommended by ELM Legal Services"
+    class="h-16 w-auto object-contain opacity-80 transition hover:opacity-100"
+  />
+</a>
         </div>
       </div>
     </section>
