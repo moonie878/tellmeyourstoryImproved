@@ -50,6 +50,7 @@ const SEO_ROUTES = [
   '/gift',
   '/my-story',
   '/how-it-works',
+  '/help',
 ]
 
 // ─── Minimal static server (no dependencies) ─────────────────────────────────

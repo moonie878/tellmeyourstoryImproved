@@ -29,6 +29,9 @@
             <router-link to="/contact" class="text-stone-600 transition hover:text-stone-900">
               Contact
             </router-link>
+            <router-link to="/help" class="text-stone-600 transition hover:text-stone-900">
+              Help & Guides
+            </router-link>
 <router-link to="/my-story" class="text-stone-600 transition hover:text-stone-900">
   Our Story
 </router-link>
@@ -58,6 +61,9 @@
 </router-link>
             <router-link to="/contact" class="text-stone-600 transition hover:text-stone-900">
               Contact
+            </router-link>
+            <router-link to="/help" class="text-stone-600 transition hover:text-stone-900">
+              Help & Guides
             </router-link>
 
             <router-link to="/login" class="text-stone-600 transition hover:text-stone-900">
@@ -190,7 +196,9 @@ class="rounded-2xl px-4 py-3 text-stone-700 transition hover:bg-stone-100"
             >
               Contact
             </router-link>
-
+<router-link to="/help" class="rounded-2xl px-4 py-3 text-stone-700 transition hover:bg-stone-100" @click="mobileMenuOpen = false">
+              Help & Guides
+            </router-link>
             <router-link
               to="/login"
               class="rounded-2xl px-4 py-3 text-stone-700 transition hover:bg-stone-100"

@@ -253,6 +253,11 @@ const routes = [
   component: () => import('../views/MyStoryView.vue'),
   meta: { title: 'My Story — Tell Me Your Story' },
 },
+{
+  path: '/help',
+  component: () => import('../views/HelpVideosView.vue'),
+  meta: { title: 'Help & Guides — Tell Me Your Story' },
+},
   {
     path: '/questions-to-ask-your-grandparents',
     name: 'questions-to-ask-grandparents',
