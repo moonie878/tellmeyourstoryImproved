@@ -83,7 +83,7 @@
   <!-- Feature 1 — Voice -->
   <div class="reveal reveal-delay-1 feature-card">
     <div class="overflow-hidden rounded-xl border border-[#3C3430]">
-      <img src="/images/screenshots/voice-recording.png" alt="Voice recording" class="w-full" loading="lazy" />
+      <img src="/images/Screenshots/voice-recording.png" alt="Voice recording" class="w-full" loading="lazy" />
     </div>
     <h3 class="feature-title mt-4">Voice record your answers</h3>
     <p class="feature-desc">
@@ -95,7 +95,7 @@
   <!-- Feature 2 — QR code -->
   <div class="reveal reveal-delay-2 feature-card feature-card-accent">
     <div class="overflow-hidden rounded-xl border border-[#7C5C3B]">
-      <img src="/images/screenshots/qr-code.png" alt="QR code in book" class="w-full" loading="lazy" />
+      <img src="/images/Screenshots/qr-code.png" alt="QR code in book" class="w-full" loading="lazy" />
     </div>
     <h3 class="feature-title mt-4">Hear their voice in the book</h3>
     <p class="feature-desc">
@@ -107,7 +107,7 @@
   <!-- Feature 3 — Printed book -->
   <div class="reveal reveal-delay-3 feature-card">
     <div class="overflow-hidden rounded-xl border border-[#3C3430]">
-      <img src="/images/screenshots/printed-book.jpg" alt="Printed book" class="w-full" loading="lazy" />
+      <img src="/images/Screenshots/printed-book.jpg" alt="Printed book" class="w-full" loading="lazy" />
     </div>
     <h3 class="feature-title mt-4">Order a printed keepsake</h3>
     <p class="feature-desc">
@@ -265,7 +265,7 @@
       <!-- Large tile — Editor -->
       <div class="reveal reveal-delay-1 col-span-2 overflow-hidden rounded-2xl border border-stone-200 bg-[#FAFAF8]">
         <img
-          src="/images/screenshots/editor.png"
+          src="/images/Screenshots/editor.png"
           alt="Story editor showing a question and handwritten answer"
           class="w-full"
           loading="lazy"
@@ -279,7 +279,7 @@
       <!-- Voice recording -->
       <div class="reveal reveal-delay-2 col-span-1 overflow-hidden rounded-2xl border border-stone-200 bg-[#FAFAF8]">
         <img
-          src="/images/screenshots/voice-recording.png"
+          src="/images/Screenshots/voice-recording.png"
           alt="Voice recording in progress with live transcription"
           class="w-full"
           loading="lazy"
@@ -293,7 +293,7 @@
       <!-- Book page preview -->
       <div class="reveal reveal-delay-1 col-span-1 overflow-hidden rounded-2xl border border-stone-200 bg-[#FAFAF8]">
         <img
-          src="/images/screenshots/book-page.png"
+          src="/images/Screenshots/book-page.png"
           alt="Formatted book page with question, answer and photo"
           class="w-full"
           loading="lazy"
@@ -307,7 +307,7 @@
       <!-- QR code -->
       <div class="reveal reveal-delay-2 col-span-1 overflow-hidden rounded-2xl border border-stone-200 bg-[#FAFAF8]">
         <img
-          src="/images/screenshots/qr-code.png"
+          src="/images/Screenshots/qr-code.png"
           alt="QR code printed in the book linking to voice recording"
           class="w-full"
           loading="lazy"
@@ -321,7 +321,7 @@
       <!-- Printed book — large -->
       <div class="reveal reveal-delay-3 col-span-2 lg:col-span-1 overflow-hidden rounded-2xl border border-stone-200 bg-[#FAFAF8]">
         <img
-          src="/images/screenshots/printed-book.jpg"
+          src="/images/Screenshots/printed-book.jpg"
           alt="Physical printed keepsake book"
           class="w-full"
           loading="lazy"
