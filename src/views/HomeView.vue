@@ -4,7 +4,7 @@
     <!-- ═══════════════════════════════════════ -->
     <!-- HERO                                    -->
     <!-- ═══════════════════════════════════════ -->
-    <section class="hero relative overflow-hidden px-5 pb-0 pt-20 sm:px-8 sm:pt-28 md:pt-32">
+    <section class="reveal hero relative overflow-hidden px-5 pb-0 pt-20 sm:px-8 sm:pt-28 md:pt-32">
       <div class="grain"></div>
       <div class="hero-circle"></div>
 
@@ -70,7 +70,7 @@
     <!-- ═══════════════════════════════════════ -->
     <!-- NEW FEATURES — voice, QR, print        -->
     <!-- ═══════════════════════════════════════ -->
-    <section class="bg-[#1C1917] px-5 py-16 sm:px-8 sm:py-20">
+    <section class="reveal bg-[#1C1917] px-5 py-16 sm:px-8 sm:py-20">
       <div class="mx-auto max-w-6xl">
 
         <div class="section-label text-center text-[#9C7C5C]">What makes us different</div>
@@ -78,51 +78,47 @@
   The memory book that speaks
 </h2>
 
-        <div class="mt-12 grid gap-5 md:grid-cols-3 md:gap-6">
+       <div class="mt-12 grid gap-5 md:grid-cols-3 md:gap-6">
 
-          <!-- Feature 1 — Voice to text -->
-          <div class="feature-card">
-            <div class="feature-icon-wrap feature-icon-voice">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-white" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 1a4 4 0 0 1 4 4v6a4 4 0 0 1-8 0V5a4 4 0 0 1 4-4zm0 2a2 2 0 0 0-2 2v6a2 2 0 0 0 4 0V5a2 2 0 0 0-2-2zm-1 14.93V20H9v2h6v-2h-2v-2.07A8 8 0 0 0 20 11h-2a6 6 0 0 1-12 0H4a8 8 0 0 0 7 7.93z"/>
-              </svg>
-            </div>
-            <h3 class="feature-title">Voice record your answers</h3>
-            <p class="feature-desc">
-              Tap the microphone on any question and speak naturally. Your words appear as you talk — no typing needed. Perfect for elderly parents who find typing difficult.
-            </p>
-            <div class="feature-tag">Live transcription • Works in Chrome & Safari</div>
-          </div>
+  <!-- Feature 1 — Voice -->
+  <div class="reveal reveal-delay-1 feature-card">
+    <div class="overflow-hidden rounded-xl border border-[#3C3430]">
+      <img src="/images/screenshots/voice-recording.png" alt="Voice recording" class="w-full" loading="lazy" />
+    </div>
+    <h3 class="feature-title mt-4">Voice record your answers</h3>
+    <p class="feature-desc">
+      Tap the microphone and speak naturally. Your words appear as you talk — no typing needed.
+    </p>
+    <div class="feature-tag">Live transcription</div>
+  </div>
 
-          <!-- Feature 2 — QR code in book -->
-          <div class="feature-card feature-card-accent">
-            <div class="feature-icon-wrap feature-icon-qr">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-white" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M3 11V3h8v8H3zm2-2h4V5H5v4zm8-6h8v8h-8V3zm2 2v4h4V5h-4zM3 21v-8h8v8H3zm2-2h4v-4H5v4zm13 2h-2v-2h2v2zm-4-4h2v2h-2v-2zm4-2h2v2h-2v-2zm-2-2h2v2h-2v-2zm2 4h-2v-2h2v2zm-4 0v2h-2v-2h2zm-2-4h2v2h-2v-2z"/>
-              </svg>
-            </div>
-            <h3 class="feature-title">Hear their voice in the book</h3>
-            <p class="feature-desc">
-              Voice recordings are saved alongside written answers. A QR code is printed in your keepsake book next to each memory — family scan it to hear their loved one's voice, years from now.
-            </p>
-            <div class="feature-tag feature-tag-accent">The only memory book that speaks</div>
-          </div>
+  <!-- Feature 2 — QR code -->
+  <div class="reveal reveal-delay-2 feature-card feature-card-accent">
+    <div class="overflow-hidden rounded-xl border border-[#7C5C3B]">
+      <img src="/images/screenshots/qr-code.png" alt="QR code in book" class="w-full" loading="lazy" />
+    </div>
+    <h3 class="feature-title mt-4">Hear their voice in the book</h3>
+    <p class="feature-desc">
+      A QR code is printed next to each memory — family scan it to hear their voice, years from now.
+    </p>
+    <div class="feature-tag feature-tag-accent">The only memory book that speaks</div>
+  </div>
 
-          <!-- Feature 3 — Printed book -->
-          <div class="feature-card">
-            <div class="feature-icon-wrap feature-icon-print">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-white" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M18 3H6a1 1 0 0 0-1 1v4H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h1v2a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2h1a2 2 0 0 0 2-2V10a2 2 0 0 0-2-2h-1V4a1 1 0 0 0-1-1zm-1 16H7v-4h10v4zm0-11H7V5h10v3zm3 6h-1v-2a1 1 0 0 0-1-1H6a1 1 0 0 0-1 1v2H4v-6h16v6z"/>
-              </svg>
-            </div>
-            <h3 class="feature-title">Order a printed hardback</h3>
-            <p class="feature-desc">
-              Turn any completed story into a beautifully printed 6×9 softcover book — professionally printed and shipped directly to your door. From £{{ PRINTED_BOOK_FROM_PRICE.toFixed(2) }} including UK delivery.
-            </p>
-            <div class="feature-tag">Printed by Lulu Press • Ships in 10–14 days</div>
-          </div>
+  <!-- Feature 3 — Printed book -->
+  <div class="reveal reveal-delay-3 feature-card">
+    <div class="overflow-hidden rounded-xl border border-[#3C3430]">
+      <img src="/images/screenshots/printed-book.jpg" alt="Printed book" class="w-full" loading="lazy" />
+    </div>
+    <h3 class="feature-title mt-4">Order a printed keepsake</h3>
+    <p class="feature-desc">
+      Professionally printed, bound, and shipped to your door. From £{{ PRINTED_BOOK_FROM_PRICE.toFixed(2) }} including UK delivery.
+    </p>
+    <div class="feature-tag">Ships in 10–14 days</div>
+  </div>
 
-        </div>
+</div>
+
+        
 
        <!-- Voice → QR demo -->
 <div class="mt-10 rounded-2xl border border-[#2C2420] bg-[#2C2420] px-6 py-8 sm:px-10">
@@ -191,122 +187,19 @@
 </div>
 
       </div>
-    </section>
-
-    <!-- ═══════════════════════════════════════ -->
-    <!-- FORMATS — what you get                 -->
-    <!-- ═══════════════════════════════════════ -->
-    <section class="bg-white px-5 py-16 sm:px-8 sm:py-20">
-      <div class="mx-auto max-w-6xl">
-
-        <div class="section-label text-center">What you create</div>
-        <h2 class="section-title mt-3 text-center">
-          Three beautiful ways to keep a story
-        </h2>
-        <p class="mx-auto mt-4 max-w-2xl text-center text-base leading-[1.8] text-[#5C534E] sm:text-lg">
-          Every story you capture can become a digital keepsake book, a shareable video, or a professionally printed hardback — with QR codes that bring their voice to life.
-        </p>
-
-        <div class="mt-12 grid gap-5 md:grid-cols-3 md:gap-6">
-
-          <!-- Format 1 — Keepsake Book -->
-          <div class="format-card">
-            <div class="format-card-inner">
-              <div class="format-icon">📖</div>
-              <h3 class="format-title">Digital Keepsake Book</h3>
-              <p class="format-desc">
-                A beautifully typeset PDF with chapters, quote pages, photos, QR voice codes, and elegant layouts — ready to download, share, or print at home.
-              </p>
-              <ul class="format-list">
-                <li>Chapters, drop caps &amp; quote pages</li>
-                <li>Voice recording QR codes</li>
-                <li>Three design themes</li>
-                <li>Instant PDF download</li>
-              </ul>
-            </div>
-            <div class="format-preview bg-[#F5F0E8]">
-              <img
-                src="/images/example-story.png"
-                alt="Keepsake book preview"
-                class="format-preview-img"
-                loading="lazy"
-              />
-            </div>
-          </div>
-
-          <!-- Format 2 — Printed Book -->
-          <div class="format-card format-card-print">
-            <div class="format-card-inner">
-              <div class="format-icon">📚</div>
-              <h3 class="format-title" style="color:#1C1917;">Printed Keepsake Book</h3>
-              <p class="format-desc">
-                A professionally printed 6×9 softcover book — the same beautiful design as the digital version, physically printed and shipped to your door.
-              </p>
-              <ul class="format-list">
-                <li>Professional print quality</li>
-                <li>QR codes printed in the book</li>
-                <li>Shipped UK-wide</li>
-                <li>From £{{ PRINTED_BOOK_FROM_PRICE.toFixed(2) }} inc. delivery</li>
-              </ul>
-              <div class="new-badge">Now available</div>
-            </div>
-            <div class="format-preview bg-[#F0E8DC]">
-  <img
-    src="/images/example-story-hero-cover.jpg"
-    alt="Printed keepsake book"
-    class="format-preview-img"
-    loading="lazy"
-  />
-</div>
-          </div>
-
-          <!-- Format 3 — Video -->
-          <div class="format-card format-card-dark">
-            <div class="format-card-inner">
-              <div class="format-icon">🎬</div>
-              <h3 class="format-title format-card-dark">Story Video</h3>
-              <p class="format-desc text-stone-300">
-                A cinematic video of their story — title slide, chapters, answers, and photos — with music of your choice. Play it at birthdays, Christmas, or any moment that matters.
-              </p>
-              <ul class="format-list text-stone-400">
-                <li>Title, chapters &amp; answer slides</li>
-                <li>Add your own music</li>
-                <li>Choose your theme &amp; pace</li>
-                <li>Downloads as MP4</li>
-              </ul>
-              <div class="new-badge">New feature</div>
-            </div>
-            <div class="format-preview bg-[#2C2420]">
-              <div class="video-preview-mockup">
-                <div class="video-letterbox video-letterbox-top"></div>
-                <div class="video-slide-title">
-                  <p class="video-slide-label">Tell Me Your Story</p>
-                  <p class="video-slide-name">Mum's Story</p>
-                  <p class="video-slide-sub">A life told through memories, moments, and love</p>
-                </div>
-                <div class="video-play-btn">
-                  <span class="video-play-triangle">▶</span>
-                </div>
-                <div class="video-letterbox video-letterbox-bottom"></div>
-              </div>
-            </div>
-          </div>
-
-        </div>
-      </div>
-    </section>
+    </section>   
 
     <!-- ═══════════════════════════════════════ -->
     <!-- HOW IT WORKS                           -->
     <!-- ═══════════════════════════════════════ -->
-    <section class="bg-[#F5F0E8] px-5 py-16 sm:px-8 sm:py-20">
+    <section class="reveal bg-[#F5F0E8] px-5 py-16 sm:px-8 sm:py-20">
       <div class="mx-auto max-w-6xl">
 
         <div class="section-label">How it works</div>
         <h2 class="section-title mt-3">Simple to start, beautiful to finish</h2>
 
         <div class="mt-12 grid gap-5 md:grid-cols-3 md:gap-6">
-          <div class="step-card">
+          <div class="reveal reveal-delay-1 step-card">
             <div class="step-number">01</div>
             <h3 class="step-title">Choose a story type</h3>
             <p class="step-desc">
@@ -314,7 +207,7 @@
             </p>
           </div>
 
-          <div class="step-card step-card-accent">
+          <div class="reveal reveal-delay-2 step-card step-card-accent">
             <div class="step-number text-[#7C5C3B]">02</div>
             <h3 class="step-title">Answer by typing or speaking</h3>
             <p class="step-desc">
@@ -322,7 +215,7 @@
             </p>
           </div>
 
-          <div class="step-card">
+          <div class="reveal reveal-delay-3 step-card">
             <div class="step-number">03</div>
             <h3 class="step-title">Export, print, or share</h3>
             <p class="step-desc">
@@ -356,57 +249,104 @@
     </section>
 
     <!-- ═══════════════════════════════════════ -->
-    <!-- GALLERY — the finished result          -->
-    <!-- ═══════════════════════════════════════ -->
-    <section class="bg-white px-5 py-16 sm:px-8 sm:py-20">
-      <div class="mx-auto max-w-6xl">
+<!-- PRODUCT — see it in action             -->
+<!-- ═══════════════════════════════════════ -->
+<section class="reveal bg-white px-5 py-16 sm:px-8 sm:py-20">
+  <div class="mx-auto max-w-6xl">
 
-        <div class="section-label">The finished result</div>
-        <h2 class="section-title mt-3">From answers to something beautiful</h2>
-        <p class="mt-4 max-w-2xl text-base leading-[1.8] text-[#5C534E] sm:text-lg">
-          Chapters, quote pages, elegant typography, and personal images all come together to create a keepsake that feels genuinely finished.
-        </p>
+    <div class="section-label text-center">See it in action</div>
+    <h2 class="section-title mt-3 text-center">
+      From first question to finished book
+    </h2>
 
-        <div class="mt-10 grid grid-cols-2 gap-4 md:grid-cols-3 md:gap-5 items-start">
-          <div class="gallery-item col-span-1">
-            <img src="/images/example/example-page-childhood.png" alt="Chapter page" class="gallery-img" loading="lazy" />
-            <p class="gallery-label">Chapter pages</p>
-          </div>
-          <div class="gallery-item col-span-1">
-            <img src="/images/example/example-page-cooking-quote.png" alt="Quote page" class="gallery-img" loading="lazy" />
-            <p class="gallery-label">Quote pages</p>
-          </div>
-          <div class="gallery-item col-span-2 md:col-span-1">
-            <img src="/images/example/Cover.jpg" alt="Cover page" class="gallery-img" loading="lazy"/>
-            <p class="gallery-label">Cover page</p>
-          </div>
-          <div class="gallery-item gallery-item-wide col-span-2 md:col-span-3">
-            <img src="/images/example/example-page-world.png" alt="Story page with photo" class="gallery-img" loading="lazy" />
-            <p class="gallery-label">Story pages with photos</p>
-          </div>
-          <div class="gallery-item col-span-2 md:col-span-1">
-            <img src="/images/example/MemQR.jpg" alt="Memories page" class="gallery-img" loading="lazy" />
-            <p class="gallery-label">Voice QR codes — scan to hear their voice</p>
-          </div>
-          <div class="gallery-item gallery-item-about col-span-2 md:col-span-2">
-            <img src="/images/example/Details.jpg" alt="About this person page" class="gallery-img" loading="lazy" />
-            <p class="gallery-label">About this person page</p>
-          </div>
+    <!-- Bento grid -->
+    <div class="mt-12 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3">
+
+      <!-- Large tile — Editor -->
+      <div class="reveal reveal-delay-1 col-span-2 overflow-hidden rounded-2xl border border-stone-200 bg-[#FAFAF8]">
+        <img
+          src="/images/screenshots/editor.png"
+          alt="Story editor showing a question and handwritten answer"
+          class="w-full"
+          loading="lazy"
+        />
+        <div class="px-5 py-4">
+          <p class="text-sm font-semibold text-stone-900">Answer 100+ thoughtful questions</p>
+          <p class="mt-1 text-xs text-stone-500">Type your answer or tap the mic to speak — we transcribe it for you</p>
         </div>
-
-        <div class="mt-8 text-center">
-          <router-link to="/example" @click="trackExampleStory" class="btn-secondary">
-            Explore a full example story
-          </router-link>
-        </div>
-
       </div>
-    </section>
+
+      <!-- Voice recording -->
+      <div class="reveal reveal-delay-2 col-span-1 overflow-hidden rounded-2xl border border-stone-200 bg-[#FAFAF8]">
+        <img
+          src="/images/screenshots/voice-recording.png"
+          alt="Voice recording in progress with live transcription"
+          class="w-full"
+          loading="lazy"
+        />
+        <div class="px-4 py-3">
+          <p class="text-sm font-semibold text-stone-900">Record your voice</p>
+          <p class="mt-1 text-xs text-stone-500">Speak naturally — perfect for parents who find typing difficult</p>
+        </div>
+      </div>
+
+      <!-- Book page preview -->
+      <div class="reveal reveal-delay-1 col-span-1 overflow-hidden rounded-2xl border border-stone-200 bg-[#FAFAF8]">
+        <img
+          src="/images/screenshots/book-page.png"
+          alt="Formatted book page with question, answer and photo"
+          class="w-full"
+          loading="lazy"
+        />
+        <div class="px-4 py-3">
+          <p class="text-sm font-semibold text-stone-900">Every answer becomes a page</p>
+          <p class="mt-1 text-xs text-stone-500">Beautifully formatted with photos and serif typography</p>
+        </div>
+      </div>
+
+      <!-- QR code -->
+      <div class="reveal reveal-delay-2 col-span-1 overflow-hidden rounded-2xl border border-stone-200 bg-[#FAFAF8]">
+        <img
+          src="/images/screenshots/qr-code.png"
+          alt="QR code printed in the book linking to voice recording"
+          class="w-full"
+          loading="lazy"
+        />
+        <div class="px-4 py-3">
+          <p class="text-sm font-semibold text-stone-900">QR codes in the book</p>
+          <p class="mt-1 text-xs text-stone-500">Scan with your phone to hear their voice telling the story</p>
+        </div>
+      </div>
+
+      <!-- Printed book — large -->
+      <div class="reveal reveal-delay-3 col-span-2 lg:col-span-1 overflow-hidden rounded-2xl border border-stone-200 bg-[#FAFAF8]">
+        <img
+          src="/images/screenshots/printed-book.jpg"
+          alt="Physical printed keepsake book"
+          class="w-full"
+          loading="lazy"
+        />
+        <div class="px-4 py-3">
+          <p class="text-sm font-semibold text-stone-900">A real book you can hold</p>
+          <p class="mt-1 text-xs text-stone-500">Professionally printed and shipped to your door</p>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="mt-8 text-center">
+      <router-link to="/example" @click="trackExampleStory" class="btn-secondary">
+        Explore a full example story
+      </router-link>
+    </div>
+
+  </div>
+</section>
 
     <!-- ═══════════════════════════════════════ -->
     <!-- WHY IT MATTERS — emotional             -->
     <!-- ═══════════════════════════════════════ -->
-    <section class="why-section px-5 py-20 sm:px-8 sm:py-28">
+    <section class="reveal why-section px-5 py-20 sm:px-8 sm:py-28">
       <div class="grain"></div>
       <div class="relative mx-auto max-w-3xl text-center">
         <div class="why-ornament">— ◦ ○ ◦ —</div>
@@ -430,7 +370,7 @@
     <!-- ═══════════════════════════════════════ -->
 <!-- TESTIMONIALS                           -->
 <!-- ═══════════════════════════════════════ -->
-<section class="bg-[#FAF7F4] px-5 py-16 sm:px-8 sm:py-20">
+<section class="reveal bg-[#FAF7F4] px-5 py-16 sm:px-8 sm:py-20">
   <div class="mx-auto max-w-6xl">
 
     <div class="section-label text-center">What families say</div>
@@ -440,7 +380,7 @@
 
     <div class="mt-12 grid gap-5 md:grid-cols-3 md:gap-6">
 
-      <div class="testimonial-card">
+      <div class="reveal reveal-delay-1 testimonial-card">
   <div class="testimonial-stars">★★★★★</div>
   <p class="testimonial-quote">
     "I wasn't sure what to expect at first, but I found the app really easy to use. It guides you through everything step by step. I loved being able to add memories and stories in my own way, and seeing it all come together was really special."
@@ -454,7 +394,7 @@
   </div>
 </div>
 
-<div class="testimonial-card testimonial-card-accent">
+<div class="reveal reveal-delay-2 testimonial-card testimonial-card-accent">
   <div class="testimonial-stars" style="color:#C4A882;">★★★★★</div>
   <p class="testimonial-quote" style="color:#E8E0D8;">
     "An amazing app to use to record your memories and make stories for your family to cherish! It's made to what you want and how you want to tell them. We absolutely love the ones we have made!"
@@ -468,7 +408,7 @@
   </div>
 </div>
 
-<div class="testimonial-card">
+<div class="reveal reveal-delay-3 testimonial-card">
   <div class="testimonial-stars">★★★★★</div>
   <p class="testimonial-quote">
     "This app takes you through every step to create lovely memories and tributes. Such a lovely idea to create something truly special for family and friends to look back on."
@@ -512,7 +452,7 @@
     <!-- ═══════════════════════════════════════ -->
     <!-- PARTNERS                                -->
     <!-- ═══════════════════════════════════════ -->
-    <section class="bg-white px-5 py-12 sm:px-8 sm:py-14">
+    <section class="reveal bg-white px-5 py-12 sm:px-8 sm:py-14">
       <div class="mx-auto max-w-4xl text-center">
         <p class="text-xs font-medium uppercase tracking-[0.15em] text-[#A89B8F]">
           Recommended by
@@ -547,34 +487,6 @@
       </div>
     </section>
 
-    <!-- ═══════════════════════════════════════ -->
-    <!-- STORY TYPES                            -->
-    <!-- ═══════════════════════════════════════ -->
-    <section class="bg-white px-5 py-16 sm:px-8 sm:py-20">
-      <div class="mx-auto max-w-6xl">
-
-        <div class="section-label">Story types</div>
-        <h2 class="section-title mt-3">Made for the people who matter most</h2>
-
-        <div class="mt-10 grid grid-cols-2 gap-3 sm:grid-cols-3 md:gap-4 lg:grid-cols-6">
-  <router-link
-    v-for="type in storyTypes"
-    :key="type.id"
-    to="/register"
-    @click="trackStart"
-    class="story-type-chip"
-  >
-    <span class="story-type-emoji">{{ type.emoji }}</span>
-    <span class="story-type-label">{{ type.label }}</span>
-    <span class="story-type-sub">{{ type.sub }}</span>
-  </router-link>
-</div>
-
-<p class="mt-8 text-sm text-[#8C847E]">
-  Each story type has its own set of guided questions — thoughtfully written for that person and their life.
-</p>
-      </div>
-    </section>
 
     <!-- ═══════════════════════════════════════ -->
     <!-- PRICING                                -->
@@ -584,7 +496,7 @@
     <!-- ═══════════════════════════════════════ -->
     <!-- FINAL CTA                              -->
     <!-- ═══════════════════════════════════════ -->
-    <section class="final-cta px-5 py-20 sm:px-8 sm:py-28">
+    <section class="revealfinal-cta px-5 py-20 sm:px-8 sm:py-28">
       <div class="grain"></div>
       <div class="relative mx-auto max-w-3xl text-center">
         <div class="why-ornament text-stone-400">— ◦ ○ ◦ —</div>
@@ -613,6 +525,23 @@ import { track } from '../lib/analytics'
 import { useSeo } from '../composables/useSeo'
 import PricingTable from '../components/pricing/PricingTable.vue'
 import { PRINTED_BOOK_FROM_PRICE } from '../lib/printPricing'
+
+import { onMounted } from 'vue'
+
+onMounted(() => {
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((e) => {
+        if (e.isIntersecting) {
+          e.target.classList.add('visible')
+          observer.unobserve(e.target)
+        }
+      })
+    },
+    { threshold: 0.1, rootMargin: '0px 0px -40px 0px' }
+  )
+  document.querySelectorAll('.reveal').forEach((el) => observer.observe(el))
+})
 
 useSeo({
   title: 'Tell Me Your Story | Life Story Keepsake Books | Free to Start',
@@ -655,15 +584,6 @@ useSeo({
     ],
   },
 })
-
-const storyTypes = [
-  { id: 'mum',     emoji: '💛', label: "Mum's Story",     sub: 'Her life in her words' },
-  { id: 'dad',     emoji: '💙', label: "Dad's Story",     sub: 'His story, preserved' },
-  { id: 'grandma', emoji: '🌸', label: "Grandma's Story", sub: 'Memories worth keeping' },
-  { id: 'grandad', emoji: '⭐', label: "Grandad's Story", sub: 'Stories to pass down' },
-  { id: 'life',    emoji: '📖', label: 'Life Story',      sub: 'Your own journey' },
-  { id: 'couple',  emoji: '💞', label: 'Couple Story',    sub: 'A love story told together' },
-]
 
 function trackStart() { track('upgrade_clicked', { source: 'homepage' }) }
 function trackExampleStory() { track('example_story_clicked', { source: 'homepage' }) }
@@ -828,4 +748,19 @@ h1 { font-family: 'Playfair Display', Georgia, serif; }
 .testimonial-avatar { width: 36px; height: 36px; border-radius: 50%; background: #E8E0D8; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 600; color: #5C534E; flex-shrink: 0; }
 .testimonial-name { font-size: 13px; font-weight: 600; color: #1C1917; }
 .testimonial-detail { font-size: 11px; color: #9C7C5C; margin-top: 1px; }
+
+/* ── Scroll reveal ─────────────────────── */
+.reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+.reveal-delay-1 { transition-delay: 0.1s; }
+.reveal-delay-2 { transition-delay: 0.2s; }
+.reveal-delay-3 { transition-delay: 0.3s; }
 </style>
