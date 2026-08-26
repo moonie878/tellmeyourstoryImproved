@@ -1,129 +1,146 @@
 <template>
-  <div class="space-y-4">
+  <div>
     <Transition name="fade-slide" mode="out-in">
       <div
         v-if="section"
         :key="section.id"
-        class="overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-sm"
+        class="relative overflow-hidden rounded-2xl border border-stone-200 bg-white"
       >
 
-        <!-- ── Question header ─────────────────────────────────────────────── -->
-        <div class="border-b border-stone-100 px-5 py-4 sm:px-6">
-          <div class="flex items-start justify-between gap-4">
-            <div class="flex-1 min-w-0">
-              <p class="text-xs font-medium uppercase tracking-[0.2em] text-stone-400">
+        <!-- Reading progress — hairline at the very top -->
+        <div class="absolute inset-x-0 top-0 z-10 h-[3px] bg-stone-100">
+          <div
+            class="h-full bg-[#7C5C3B] transition-all duration-700"
+            :style="{ width: progress + '%' }"
+          />
+        </div>
+
+        <!-- ══════════════════════════════════════════════════════════ -->
+        <!-- QUESTION — the hero of the screen                          -->
+        <!-- ══════════════════════════════════════════════════════════ -->
+        <div class="px-6 pb-6 pt-8 sm:px-10 sm:pt-10">
+          <div class="flex items-start justify-between gap-6">
+            <div class="min-w-0 flex-1">
+              <p class="text-[11px] font-semibold uppercase tracking-[0.2em] text-[#9C7C5C]">
                 {{ section.chapter || 'Chapter' }}
               </p>
-              <h2 class="mt-1.5 text-lg font-bold leading-7 text-stone-900 sm:text-xl">
+              <h2 class="mt-3 font-display text-[22px] font-semibold leading-[1.35] tracking-[-0.01em] text-stone-900 sm:text-[26px]">
                 {{ section.question }}
               </h2>
             </div>
-            <!-- Save status -->
-            <span v-if="saveStatus" class="flex-shrink-0 text-xs text-stone-400 mt-1">{{ saveStatus }}</span>
-            <span v-else-if="lastSavedLabel" class="flex-shrink-0 text-xs text-stone-400 mt-1">{{ lastSavedLabel }}</span>
+
+            <!-- Save state — quiet, top right -->
+            <p class="mt-1 flex-shrink-0 text-[11px] text-stone-300">
+              {{ saveStatus || lastSavedLabel }}
+            </p>
           </div>
 
-          <!-- Progress bar -->
-          <div class="mt-3 flex items-center gap-3">
-            <div class="flex-1 h-1.5 rounded-full bg-stone-200">
-              <div class="h-1.5 rounded-full bg-[#7C5C3B] transition-all" :style="{ width: progress + '%' }" />
-            </div>
-            <span class="flex-shrink-0 text-xs text-stone-400">{{ Math.round(progress) }}%</span>
-          </div>
-          <p v-if="saveError" class="mt-2 text-xs text-red-600">{{ saveError }}</p>
+          <p v-if="saveError" class="mt-3 text-xs text-red-600">{{ saveError }}</p>
         </div>
 
-        <!-- ── Answer area ─────────────────────────────────────────────────── -->
-        <div class="px-5 py-4 sm:px-6">
+        <!-- ══════════════════════════════════════════════════════════ -->
+        <!-- WRITING SURFACE — feels like a page, not a form            -->
+        <!-- ══════════════════════════════════════════════════════════ -->
+        <div class="px-6 sm:px-10">
 
-          <!-- Toolbar -->
-          <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
-  <p class="text-xs text-stone-400 min-w-0">
-              <span v-if="voiceRecording.isRecording.value" class="flex items-center gap-1.5 text-red-600 font-medium">
-                <span class="inline-block h-2 w-2 animate-pulse rounded-full bg-red-500" />
-                Recording…
-              </span>
-              <span v-else-if="voiceRecording.isTranscribing.value" class="text-stone-400">✦ Transcribing…</span>
-              <span v-else-if="voiceRecording.isSaving.value" class="text-stone-400">Saving…</span>
-              <span v-else>Type your answer or speak it</span>
-           </p>
-  <div class="flex flex-shrink-0 items-center gap-2">
-              <!-- Voice saved badge -->
+          <!-- Recording indicator -->
+          <Transition name="fade">
+            <div
+              v-if="voiceRecording.isRecording.value"
+              class="mb-3 flex items-center gap-2"
+            >
+              <span class="inline-block h-1.5 w-1.5 animate-pulse rounded-full bg-red-500" />
+              <p class="text-xs font-medium text-red-600">Recording — speak naturally</p>
+            </div>
+            <p
+              v-else-if="voiceRecording.isTranscribing.value"
+              class="mb-3 text-xs text-stone-400"
+            >Transcribing your recording…</p>
+          </Transition>
+
+          <textarea
+            ref="textareaRef"
+            :value="voiceRecording.isRecording.value ? voiceRecording.liveTranscript.value : section.answer"
+            @input="onAnswerInput"
+            class="prose-answer min-h-[260px] w-full resize-none border-0 bg-transparent p-0 focus:outline-none focus:ring-0 sm:min-h-[300px]"
+            :class="voiceRecording.isRecording.value ? 'text-stone-500' : 'text-stone-800'"
+            rows="10"
+            :placeholder="voiceRecording.isRecording.value
+              ? 'Your words will appear here when you stop…'
+              : 'Start wherever feels natural. There is no wrong way to tell it.'"
+            :readonly="voiceRecording.isRecording.value"
+          />
+
+          <p v-if="voiceRecording.error.value" class="mt-2 text-xs text-red-500">
+            {{ voiceRecording.error.value }}
+          </p>
+
+          <!-- Word count + voice button -->
+          <div class="mt-4 flex items-center justify-between border-t border-stone-100 pt-4">
+            <p class="text-xs text-stone-400">
+              <template v-if="wordCount">{{ wordCount }} {{ wordCount === 1 ? 'word' : 'words' }}</template>
+              <template v-else-if="voiceRecording.speechSupported">
+                Type, or tap Speak to talk it through
+              </template>
+              <template v-else>Type your answer</template>
+            </p>
+
+            <div class="flex items-center gap-2">
               <span
                 v-if="existingRecording && !voiceRecording.isRecording.value"
-                class="flex items-center gap-1 rounded-full bg-green-50 border border-green-200 px-2 py-0.5 text-xs text-green-700"
-              >
-                🎙️ Saved
-              </span>
+                class="hidden text-[11px] text-[#4A7C59] sm:inline"
+              >Voice saved</span>
 
-              <!-- Mic button -->
               <button
                 v-if="voiceRecording.speechSupported"
                 type="button"
                 @click="handleVoiceToggle"
                 :disabled="voiceRecording.isSaving.value || voiceRecording.isTranscribing.value"
-                class="flex items-center gap-1.5 rounded-full border px-2 py-1.5 text-xs font-medium transition disabled:opacity-50 sm:px-3"
+                class="inline-flex items-center gap-2 rounded-full border px-4 py-2 text-xs font-semibold transition disabled:opacity-40"
                 :class="voiceRecording.isRecording.value
-                  ? 'border-red-300 bg-red-50 text-red-700 hover:bg-red-100'
-                  : 'border-stone-300 bg-white text-stone-700 hover:bg-stone-50'"
+                  ? 'border-red-200 bg-red-50 text-red-700 hover:bg-red-100'
+                  : 'border-stone-200 text-stone-700 hover:border-[#7C5C3B] hover:text-[#7C5C3B]'"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M12 1a4 4 0 0 1 4 4v6a4 4 0 0 1-8 0V5a4 4 0 0 1 4-4zm0 2a2 2 0 0 0-2 2v6a2 2 0 0 0 4 0V5a2 2 0 0 0-2-2zm-1 14.93V20H9v2h6v-2h-2v-2.07A8 8 0 0 0 20 11h-2a6 6 0 0 1-12 0H4a8 8 0 0 0 7 7.93z"/>
                 </svg>
-                {{ voiceRecording.isRecording.value ? 'Stop' : existingRecording ? 'Re-record' : '🎙️ Speak' }}
+                {{ voiceRecording.isRecording.value ? 'Stop' : existingRecording ? 'Re-record' : 'Speak' }}
               </button>
             </div>
           </div>
-
-
-          <!-- Textarea -->
-          <textarea
-            ref="textareaRef"
-            :value="voiceRecording.isRecording.value ? voiceRecording.liveTranscript.value : section.answer"
-            @input="onAnswerInput"
-            class="min-h-[200px] w-full resize-none rounded-xl border bg-stone-50 p-4 text-base leading-7 text-stone-900 placeholder:text-stone-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#7C5C3B] sm:min-h-[240px] transition"
-            :class="voiceRecording.isRecording.value ? 'border-red-200 bg-red-50/30' : 'border-stone-200'"
-            rows="8"
-            :placeholder="voiceRecording.isRecording.value ? 'Speak your answer — transcript appears when you stop' : 'Write your answer here…'"
-            :readonly="voiceRecording.isRecording.value"
-          />
-
-          <!-- Voice tip -->
-          <p v-if="!voiceRecording.isRecording.value && !section.answer && voiceRecording.speechSupported" class="mt-2 text-xs text-stone-400">
-            💡 Tap <strong>Speak</strong> — talk naturally and we'll transcribe it for you
-          </p>
-          <p v-if="voiceRecording.error.value" class="mt-2 text-xs text-red-500">{{ voiceRecording.error.value }}</p>
         </div>
 
-        <!-- ── Voice recording player ──────────────────────────────────────── -->
+        <!-- ══════════════════════════════════════════════════════════ -->
+        <!-- VOICE PLAYER                                               -->
+        <!-- ══════════════════════════════════════════════════════════ -->
         <div
           v-if="existingRecording && !voiceRecording.isRecording.value"
-          class="mx-5 mb-4 rounded-xl border border-green-200 bg-green-50 p-3 sm:mx-6"
+          class="mx-6 mt-5 rounded-xl bg-[#FAF7F4] p-4 sm:mx-10"
         >
-          <div class="flex items-center gap-3">
+          <div class="flex items-center gap-4">
             <button
               @click="toggleExistingPlayback"
-              class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-[#7C5C3B] text-white transition hover:opacity-90"
+              class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-[#7C5C3B] text-white transition hover:opacity-90"
             >
-              <svg v-if="!isPlayingExisting" xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 ml-0.5" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+              <svg v-if="!isPlayingExisting" xmlns="http://www.w3.org/2000/svg" class="ml-0.5 h-3.5 w-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
               <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
             </button>
 
-            <div class="flex-1">
-              <div class="h-1.5 w-full overflow-hidden rounded-full bg-green-200">
-                <div class="h-1.5 rounded-full bg-[#7C5C3B] transition-all" :style="{ width: `${existingProgress}%` }" />
+            <div class="min-w-0 flex-1">
+              <div class="h-1 w-full overflow-hidden rounded-full bg-[#E8DDD0]">
+                <div class="h-full rounded-full bg-[#7C5C3B] transition-all" :style="{ width: `${existingProgress}%` }" />
               </div>
-              <div class="mt-1.5 flex items-center justify-between">
-                <p class="text-[10px] text-green-600">{{ existingRecording.duration_seconds }}s voice recording</p>
-                <div class="flex items-center gap-1.5">
-                  <span class="text-[10px] text-green-700">QR in book</span>
+              <div class="mt-2 flex items-center justify-between gap-3">
+                <p class="text-[11px] text-stone-500">{{ existingRecording.duration_seconds }}s recording</p>
+                <div class="flex items-center gap-2">
+                  <span class="text-[11px] text-stone-500">QR in book</span>
                   <button
                     @click="toggleQR"
-                    class="relative inline-flex h-4 w-7 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200"
+                    class="relative inline-flex h-4 w-7 flex-shrink-0 cursor-pointer rounded-full transition-colors duration-200"
                     :class="existingRecording.show_qr ? 'bg-[#7C5C3B]' : 'bg-stone-300'"
                   >
                     <span
-                      class="inline-block h-3 w-3 transform rounded-full bg-white shadow transition duration-200"
+                      class="mt-0.5 ml-0.5 inline-block h-3 w-3 transform rounded-full bg-white shadow transition duration-200"
                       :class="existingRecording.show_qr ? 'translate-x-3' : 'translate-x-0'"
                     />
                   </button>
@@ -131,11 +148,12 @@
               </div>
             </div>
 
-            <div class="flex-shrink-0 text-center">
-              <canvas ref="qrCanvas" class="rounded" width="56" height="56" />
-            </div>
+            <canvas ref="qrCanvas" class="hidden flex-shrink-0 rounded sm:block" width="48" height="48" />
 
-            <button @click="deleteExistingRecording" class="flex-shrink-0 text-xs text-stone-400 hover:text-red-500 transition">Remove</button>
+            <button
+              @click="deleteExistingRecording"
+              class="flex-shrink-0 text-[11px] text-stone-400 transition hover:text-red-500"
+            >Remove</button>
           </div>
 
           <audio
@@ -148,141 +166,182 @@
           />
         </div>
 
-        <!-- ── Writing assist ─────────────────────────────────────────────── -->
-        <div class="border-t border-stone-100 px-5 py-4 sm:px-6">
-          <div class="flex flex-wrap gap-2">
+        <!-- ══════════════════════════════════════════════════════════ -->
+        <!-- TOOLS — one quiet row                                      -->
+        <!-- ══════════════════════════════════════════════════════════ -->
+        <div class="px-6 pt-5 sm:px-10">
+          <div class="flex flex-wrap items-center gap-2">
+
             <button
               v-if="!section?.answer?.trim() || section.answer.trim().length <= 20"
               type="button"
               @click="fetchWritingAssist('start')"
               :disabled="writingAssistLoading"
-              class="inline-flex items-center gap-1.5 rounded-full border border-stone-200 bg-white px-3 py-1.5 text-xs font-medium text-stone-600 transition hover:bg-stone-50 disabled:opacity-50"
-            >
-              <span>💡</span> Help me start this
-            </button>
+              class="tool-btn"
+            >Help me start</button>
+
             <button
               v-else-if="!writingAssistLoading"
               type="button"
               @click="fetchWritingAssist('expand')"
-              class="inline-flex items-center gap-1.5 rounded-full border border-stone-200 bg-white px-3 py-1.5 text-xs font-medium text-stone-600 transition hover:bg-stone-50"
-            >
-              <span>✨</span> Help me expand this
-            </button>
-            <div v-if="writingAssistLoading" class="flex items-center gap-2 text-xs text-stone-400">
-              <span class="inline-block h-3 w-3 animate-spin rounded-full border-2 border-stone-300 border-t-stone-600" />
-              Getting suggestions…
-            </div>
+              class="tool-btn"
+            >Help me add more</button>
 
-            <!-- Highlight button -->
+            <span v-if="writingAssistLoading" class="inline-flex items-center gap-2 text-xs text-stone-400">
+              <span class="inline-block h-3 w-3 animate-spin rounded-full border-2 border-stone-200 border-t-[#7C5C3B]" />
+              Thinking…
+            </span>
+
             <button
               type="button"
               @click="$emit('toggle-highlight')"
-              class="inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition"
-              :class="isHighlighted ? 'border-amber-300 bg-amber-50 text-amber-800' : 'border-stone-200 bg-white text-stone-600 hover:bg-stone-50'"
+              class="tool-btn"
+              :class="isHighlighted ? 'border-[#7C5C3B] bg-[#FAF7F4] text-[#7C5C3B]' : ''"
             >
-              <span>{{ isHighlighted ? '★' : '☆' }}</span>
-              {{ isHighlighted ? 'Highlighted' : 'Highlight memory' }}
+              {{ isHighlighted ? 'Highlighted' : 'Highlight this memory' }}
             </button>
-          </div>
 
-          <p v-if="writingAssistError" class="mt-2 text-xs text-red-500">{{ writingAssistError }}</p>
-
-          <div v-if="writingAssistSuggestions.length" class="mt-3 rounded-xl border border-amber-100 bg-amber-50 p-4">
-            <p class="text-xs font-medium text-amber-800">💡 Things to think about adding</p>
-            <p class="mt-0.5 text-[10px] text-amber-600">These are just prompts — keep writing in your own words</p>
-            <ul class="mt-3 space-y-2">
-              <li v-for="(suggestion, i) in writingAssistSuggestions" :key="i" class="text-xs leading-5 text-amber-900">{{ suggestion }}</li>
-            </ul>
-            <button @click="writingAssistSuggestions = []" class="mt-3 text-[10px] text-amber-600 hover:underline">Dismiss</button>
-          </div>
-
-          <!-- Family comments -->
-          <div v-if="commentCount > 0" class="mt-3">
-            <button
-              @click="showComments = !showComments"
-              class="inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-3 py-1.5 text-xs font-medium text-amber-800 transition hover:bg-amber-100"
-            >
-              <span>💬</span>
-              {{ commentCount }} family comment{{ commentCount === 1 ? '' : 's' }}
-              <span class="text-amber-500">{{ showComments ? '▲' : '▼' }}</span>
-            </button>
-            <div v-if="showComments" class="mt-3 space-y-3 rounded-xl border border-amber-100 bg-amber-50 p-4">
-              <p class="text-xs font-medium text-amber-800">What family said about this answer</p>
-              <div v-for="comment in sectionComments" :key="comment.id" class="flex gap-3">
-                <div class="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-amber-200 text-xs font-semibold text-amber-800">
-                  {{ comment.author_name.charAt(0).toUpperCase() }}
-                </div>
-                <div>
-                  <p class="text-xs font-medium text-stone-800">{{ comment.author_name }}</p>
-                  <p class="mt-0.5 text-xs leading-5 text-stone-600">{{ comment.comment }}</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- ── Photo upload ────────────────────────────────────────────────── -->
-        <div class="border-t border-stone-100 px-5 pb-4 sm:px-6">
-          <div v-if="currentImagePreview && currentImagePreview.length > 0" class="mt-4">
-            <div class="relative">
-              <img :src="currentImagePreview" alt="Story image" class="max-h-56 w-full rounded-xl object-cover" @error="$emit('image-error')" />
-              <div v-if="!hasImageExportAccess" class="absolute right-2 top-2 rounded-full bg-amber-500 px-2 py-0.5 text-xs font-medium text-white">Premium</div>
-            </div>
-            <div class="mt-3 flex gap-2">
-              <label class="cursor-pointer rounded-full border border-stone-200 px-3 py-1.5 text-xs font-medium text-stone-600 hover:bg-stone-50">
-                Replace photo
-                <input type="file" accept="image/*" @change="$emit('image-upload', $event)" class="hidden" />
-              </label>
-              <button @click="$emit('remove-image')" class="rounded-full border border-red-200 px-3 py-1.5 text-xs font-medium text-red-500 hover:bg-red-50">Remove</button>
-            </div>
-            <p v-if="!hasImageExportAccess" class="mt-2 text-xs text-amber-700">
-              Photo saved — <button @click="$emit('upgrade-images')" class="font-semibold underline">upgrade to include it in your keepsake</button>
-            </p>
-          </div>
-
-          <div v-else class="mt-4">
-            <label class="flex cursor-pointer items-center gap-3 rounded-xl border border-dashed border-stone-200 bg-stone-50 px-4 py-3 transition hover:bg-stone-100">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 flex-shrink-0 text-stone-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>
-              </svg>
-              <div>
-                <p class="text-xs font-medium text-stone-600">Add a photo to this answer</p>
-                <p class="text-[10px] text-stone-400">Helps make your keepsake feel more personal</p>
-              </div>
+            <!-- Photo — inline, not a whole section -->
+            <label v-if="!currentImagePreview" class="tool-btn cursor-pointer">
+              Add a photo
               <input type="file" accept="image/*" @change="$emit('image-upload', $event)" class="hidden" />
             </label>
+
+            <button
+              v-if="commentCount > 0"
+              @click="showComments = !showComments"
+              class="tool-btn border-[#7C5C3B]/30 text-[#7C5C3B]"
+            >
+              {{ commentCount }} family comment{{ commentCount === 1 ? '' : 's' }}
+            </button>
+          </div>
+
+          <p v-if="writingAssistError" class="mt-3 text-xs text-red-500">{{ writingAssistError }}</p>
+
+          <!-- Writing assist output -->
+          <Transition name="fade">
+            <div v-if="writingAssistSuggestions.length" class="mt-4 rounded-xl bg-[#FAF7F4] p-5">
+              <div class="flex items-start justify-between gap-4">
+                <div>
+                  <p class="text-xs font-semibold text-stone-800">Things you might add</p>
+                  <p class="mt-0.5 text-[11px] text-stone-500">Prompts only — keep writing in your own words</p>
+                </div>
+                <button
+                  @click="writingAssistSuggestions = []"
+                  class="flex-shrink-0 text-[11px] text-stone-400 hover:text-stone-600"
+                >Dismiss</button>
+              </div>
+              <ul class="mt-4 space-y-2.5">
+                <li
+                  v-for="(suggestion, i) in writingAssistSuggestions"
+                  :key="i"
+                  class="flex gap-3 text-[13px] leading-relaxed text-stone-700"
+                >
+                  <span class="mt-[7px] h-1 w-1 flex-shrink-0 rounded-full bg-[#9C7C5C]" />
+                  {{ suggestion }}
+                </li>
+              </ul>
+            </div>
+          </Transition>
+
+          <!-- Family comments -->
+          <Transition name="fade">
+            <div v-if="showComments && commentCount > 0" class="mt-4 rounded-xl bg-[#FAF7F4] p-5">
+              <p class="text-xs font-semibold text-stone-800">What family said about this answer</p>
+              <div class="mt-4 space-y-4">
+                <div v-for="comment in sectionComments" :key="comment.id" class="flex gap-3">
+                  <div class="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-[#E8DDD0] text-[11px] font-semibold text-[#7C5C3B]">
+                    {{ comment.author_name.charAt(0).toUpperCase() }}
+                  </div>
+                  <div>
+                    <p class="text-xs font-semibold text-stone-800">{{ comment.author_name }}</p>
+                    <p class="mt-0.5 text-[13px] leading-relaxed text-stone-600">{{ comment.comment }}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </Transition>
+
+          <!-- Photo preview -->
+          <div v-if="currentImagePreview && currentImagePreview.length > 0" class="mt-4">
+            <div class="relative overflow-hidden rounded-xl">
+              <img
+                :src="currentImagePreview"
+                alt="Story photo"
+                class="max-h-64 w-full object-cover"
+                @error="$emit('image-error')"
+              />
+              <div
+                v-if="!hasImageExportAccess"
+                class="absolute right-3 top-3 rounded-full bg-black/60 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-white backdrop-blur"
+              >Premium</div>
+            </div>
+            <div class="mt-2.5 flex flex-wrap items-center gap-2">
+              <label class="tool-btn cursor-pointer">
+                Replace
+                <input type="file" accept="image/*" @change="$emit('image-upload', $event)" class="hidden" />
+              </label>
+              <button @click="$emit('remove-image')" class="tool-btn hover:border-red-200 hover:text-red-500">
+                Remove
+              </button>
+              <p v-if="!hasImageExportAccess" class="text-[11px] text-stone-500">
+                Saved —
+                <button @click="$emit('upgrade-images')" class="font-semibold text-[#7C5C3B] underline">
+                  upgrade to include it in your keepsake
+                </button>
+              </p>
+            </div>
           </div>
 
           <p v-if="imageUploadStatus" class="mt-2 text-xs text-stone-500">{{ imageUploadStatus }}</p>
         </div>
 
-        <!-- ── Completion card ─────────────────────────────────────────────── -->
-        <div v-if="progress === 100" class="mx-5 mb-4 rounded-2xl border border-green-200 bg-green-50 p-5 text-center sm:mx-6">
-          <p class="text-xs font-semibold uppercase tracking-wider text-green-700">Story complete</p>
-          <p class="mt-2 text-lg font-semibold text-green-900">You've created something worth keeping</p>
-          <p class="mt-2 text-sm leading-6 text-green-800">Your story is ready to become a finished keepsake.</p>
-          <div class="mt-4 flex flex-col items-center gap-2">
-            <button @click="$emit('finish')" class="rounded-full bg-[#7C5C3B] px-6 py-2.5 text-sm font-medium text-white transition hover:opacity-90">Create My Keepsake</button>
-            <button v-if="!hasImageExportAccess" @click="$emit('upgrade-images')" class="rounded-full border border-stone-300 px-5 py-2.5 text-sm text-stone-700 hover:bg-stone-50">Make it more beautiful</button>
+        <!-- ══════════════════════════════════════════════════════════ -->
+        <!-- COMPLETION                                                 -->
+        <!-- ══════════════════════════════════════════════════════════ -->
+        <div v-if="progress === 100" class="mx-6 mt-6 rounded-2xl bg-[#2C2420] p-6 text-center sm:mx-10">
+          <p class="text-[11px] font-semibold uppercase tracking-[0.2em] text-[#C4A882]">Story complete</p>
+          <p class="mt-3 font-display text-xl font-semibold text-white">
+            You've created something worth keeping
+          </p>
+          <p class="mt-2 text-sm leading-relaxed text-stone-400">
+            Every answer is saved. It's ready to become a finished keepsake.
+          </p>
+          <div class="mt-5 flex flex-col items-center gap-2.5">
+            <button
+              @click="$emit('finish')"
+              class="rounded-full bg-[#7C5C3B] px-7 py-3 text-sm font-semibold text-white transition hover:opacity-90"
+            >Create my keepsake</button>
+            <button
+              v-if="!hasImageExportAccess"
+              @click="$emit('upgrade-images')"
+              class="text-xs text-stone-400 transition hover:text-white"
+            >Add photos and premium layouts</button>
           </div>
         </div>
 
-        <!-- ── Navigation ─────────────────────────────────────────────────── -->
-        <div class="sticky bottom-0 border-t border-stone-100 bg-white/95 px-5 py-3 backdrop-blur sm:px-6">
+        <!-- ══════════════════════════════════════════════════════════ -->
+        <!-- NAVIGATION                                                 -->
+        <!-- ══════════════════════════════════════════════════════════ -->
+        <div class="sticky bottom-0 mt-6 border-t border-stone-100 bg-white/90 px-6 py-3.5 backdrop-blur-sm sm:px-10">
           <div class="flex items-center justify-between gap-3">
             <button
               @click="$emit('previous')"
               :disabled="currentIndex === 0"
-              class="rounded-full border border-stone-200 px-5 py-2.5 text-sm font-medium text-stone-600 transition disabled:opacity-30 hover:bg-stone-50"
+              class="rounded-full px-4 py-2 text-sm font-medium text-stone-500 transition hover:bg-stone-50 hover:text-stone-800 disabled:pointer-events-none disabled:opacity-25"
             >
               ← Previous
             </button>
-            <span class="text-xs text-stone-400">{{ currentIndex + 1 }} / {{ totalSections }}</span>
+
+            <span class="font-display text-xs text-stone-400">
+              {{ currentIndex + 1 }} <span class="text-stone-300">of</span> {{ totalSections }}
+            </span>
+
             <button
               @click="handleNextClick"
-              class="rounded-full bg-[#7C5C3B] px-5 py-2.5 text-sm font-medium text-white transition hover:opacity-90"
+              class="rounded-full bg-[#7C5C3B] px-6 py-2.5 text-sm font-semibold text-white transition hover:opacity-90"
             >
-              {{ currentIndex === totalSections - 1 ? 'Finish →' : 'Next →' }}
+              {{ currentIndex === totalSections - 1 ? 'Finish' : 'Next' }} →
             </button>
           </div>
         </div>
@@ -347,6 +406,12 @@ const showComments    = ref(false)
 const commentCount    = computed(() => sectionComments.value.length)
 
 const voiceRecording = useVoiceRecording()
+
+const wordCount = computed(() => {
+  const text = props.section?.answer?.trim()
+  if (!text) return 0
+  return text.split(/\s+/).filter(Boolean).length
+})
 
 async function toggleQR() {
   if (!existingRecording.value) return
@@ -487,8 +552,54 @@ onUnmounted(() => { voiceRecording.cancelRecording() })
 </script>
 
 <style scoped>
+.font-display {
+  font-family: 'Playfair Display', Georgia, serif;
+}
+
+/* The writing surface — a page, not a form field */
+.prose-answer {
+  font-family: 'Lora', Georgia, serif;
+  font-size: 17px;
+  line-height: 1.9;
+  letter-spacing: 0.005em;
+}
+.prose-answer::placeholder {
+  color: #C4BEB8;
+  font-style: italic;
+}
+
+/* Quiet secondary buttons */
+.tool-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  border-radius: 9999px;
+  border: 1px solid #E7E5E4;
+  background: #fff;
+  padding: 0.4rem 0.85rem;
+  font-size: 12px;
+  font-weight: 500;
+  color: #57534E;
+  transition: all 0.2s ease;
+}
+.tool-btn:hover {
+  border-color: #7C5C3B;
+  color: #7C5C3B;
+}
+.tool-btn:disabled {
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+.fade-enter-active,
+.fade-leave-active { transition: opacity 0.25s ease; }
+.fade-enter-from,
+.fade-leave-to { opacity: 0; }
+
 .fade-slide-enter-active,
-.fade-slide-leave-active { transition: all 0.25s ease; }
-.fade-slide-enter-from { opacity: 0; transform: translateY(8px); }
+.fade-slide-leave-active {
+  transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.fade-slide-enter-from { opacity: 0; transform: translateY(12px); }
 .fade-slide-leave-to { opacity: 0; transform: translateY(-8px); }
 </style>
