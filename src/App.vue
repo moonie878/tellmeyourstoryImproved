@@ -29,6 +29,9 @@
             <router-link to="/contact" class="text-stone-600 transition hover:text-stone-900">
               Contact
             </router-link>
+            <router-link to="/gift" class="text-stone-600 transition hover:text-stone-900">
+  Gift
+</router-link>
             <router-link to="/help" class="text-stone-600 transition hover:text-stone-900">
               Help & Guides
             </router-link>
@@ -148,6 +151,9 @@ class="rounded-2xl px-4 py-3 text-stone-700 transition hover:bg-stone-100"
             >
               Contact
             </router-link>
+            <router-link to="/gift" class="text-stone-600 transition hover:text-stone-900" @click="mobileMenuOpen = false">
+  Gift
+</router-link>
 <router-link
   to="/my-story"
   class="rounded-2xl px-4 py-3 text-stone-700 transition hover:bg-stone-100"
