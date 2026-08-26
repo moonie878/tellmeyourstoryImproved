@@ -46,7 +46,7 @@
           <div class="relative w-full bg-black" style="padding-bottom: 56.25%;">
             <iframe
               v-if="video.youtubeId"
-              :src="`https://www.youtube-nocookie.com/embed/${video.youtubeId}?rel=0`"
+              :src="`https://www.youtube.com/embed/${video.youtubeId}?rel=0`"
               class="absolute inset-0 h-full w-full"
               frameborder="0"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
