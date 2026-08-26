@@ -1,405 +1,421 @@
 <template>
-  <div class="min-h-screen bg-stone-50 px-4 py-8 sm:px-6 md:py-12">
-    <div class="mx-auto max-w-6xl space-y-6 sm:space-y-8">
+  <div class="min-h-screen bg-[#FAF9F7]">
 
-      <!-- Hero -->
-      <section class="overflow-hidden rounded-[2rem] border border-stone-200 bg-white shadow-sm">
-        <div class="grid gap-6 px-5 py-6 sm:px-6 sm:py-8 md:grid-cols-[1.2fr_0.8fr] md:gap-8 md:px-8 md:py-10">
-          <div class="text-center md:text-left">
-            <p class="text-xs font-medium uppercase tracking-[0.25em] text-stone-500">Dashboard</p>
-            <h1 class="mt-3 text-2xl font-bold text-stone-900 sm:text-3xl md:text-4xl">
-              Welcome to Tell Me Your Story
-            </h1>
-            <p class="mt-4 max-w-2xl text-sm leading-7 text-stone-600 sm:text-base">
-              Create meaningful keepsakes, return to them whenever you like, and turn treasured
-              memories into something beautifully finished.
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- HEADER — personal, with real stats                          -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <header class="border-b border-stone-200/80 bg-white">
+      <div class="mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-10">
+
+        <div class="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+
+          <div>
+            <p class="text-[11px] font-medium uppercase tracking-[0.22em] text-[#9C7C5C]">
+              {{ greeting }}
             </p>
-            <div class="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:justify-center md:justify-start">
-              <button @click="createStory('mum')" class="rounded-full bg-[#7C5C3B] px-5 py-3 text-sm font-medium text-white transition hover:opacity-90">
-                Start Mum Story
-              </button>
-              <button @click="createStory('dad')" class="rounded-full border border-stone-300 bg-white px-5 py-3 text-sm font-medium text-stone-900 transition hover:bg-stone-100">
-                Start Dad Story
-              </button>
-              <button @click="createStory('child_story')" class="rounded-full bg-[#7C5C3B] px-5 py-3 text-sm font-medium text-white transition hover:opacity-90">
-                Start Child Story
-              </button>
-            </div>
-           <p v-if="isFirstTimeUser" class="mt-5 inline-block rounded-full bg-stone-100 px-3 py-1 text-sm text-stone-700">
-  Your first keepsake can be started in under a minute — try 5 questions free 💛
-</p>
+            <h1 class="mt-2 font-display text-2xl font-bold tracking-[-0.02em] text-stone-900 sm:text-3xl">
+              <template v-if="stories.length">Your stories</template>
+              <template v-else>Let's begin</template>
+            </h1>
+            <p class="mt-2 max-w-md text-sm leading-relaxed text-stone-500">
+              <template v-if="stories.length">
+                Pick up where you left off, or start capturing someone new.
+              </template>
+              <template v-else>
+                Choose who you'd like to capture first. You can start with just one question.
+              </template>
+            </p>
           </div>
 
-          <div class="grid gap-4 sm:grid-cols-2 md:grid-cols-1">
-            <div class="rounded-3xl bg-stone-50 p-5">
-              <p class="text-sm font-semibold text-stone-900">Your library</p>
-              <p class="mt-2 text-sm leading-6 text-stone-600">Keep all your stories in one place and return whenever inspiration comes.</p>
+          <!-- Stats -->
+          <div v-if="stories.length" class="flex items-center gap-6 sm:gap-8">
+            <div>
+              <p class="font-display text-2xl font-bold text-stone-900">{{ stories.length }}</p>
+              <p class="mt-0.5 text-[11px] uppercase tracking-wider text-stone-400">
+                {{ stories.length === 1 ? 'Story' : 'Stories' }}
+              </p>
             </div>
-            <div class="rounded-3xl bg-stone-50 p-5">
-              <p class="text-sm font-semibold text-stone-900">Finished keepsakes</p>
-              <p class="mt-2 text-sm leading-6 text-stone-600">Export polished PDFs and documents when you're ready to preserve the story.</p>
+            <div class="h-8 w-px bg-stone-200"></div>
+            <div>
+              <p class="font-display text-2xl font-bold text-stone-900">{{ averageProgress }}%</p>
+              <p class="mt-0.5 text-[11px] uppercase tracking-wider text-stone-400">Complete</p>
+            </div>
+            <div class="h-8 w-px bg-stone-200"></div>
+            <div>
+              <p class="font-display text-2xl font-bold text-[#7C5C3B]">{{ planLabel }}</p>
+              <p class="mt-0.5 text-[11px] uppercase tracking-wider text-stone-400">Plan</p>
             </div>
           </div>
-        </div>
-      </section>
 
-      <!-- Upgrade banner (free users only) -->
-<section
-  v-if="!hasAnyAccess"
-  class="rounded-[2rem] border border-[#E8DDD0] bg-white p-5 shadow-sm sm:p-6 md:p-8"
->
-  <div class="flex flex-col items-center justify-between gap-4 sm:flex-row">
-    <div>
-      <p class="text-xs font-medium uppercase tracking-[0.2em] text-[#9C7C5C]">Free plan</p>
-      <h2 class="mt-1 text-lg font-semibold text-stone-900">Unlock the full experience</h2>
-      <p class="mt-1 text-sm text-stone-500">You've got 5 free questions. Upgrade to unlock all 100+, voice recording, export, and printing.</p>
-    </div>
-    <router-link
-      to="/pricing"
-      class="flex-shrink-0 rounded-full bg-[#7C5C3B] px-6 py-3 text-sm font-medium text-white transition hover:opacity-90"
-    >
-      View plans — from £3.99
-    </router-link>
-  </div>
-</section>
-
-      <!-- Story starters -->
-      <section class="rounded-[2rem] border border-stone-200 bg-white p-5 shadow-sm sm:p-6 md:p-8">
-        <div class="text-center md:text-left">
-          <p class="text-xs font-medium uppercase tracking-[0.25em] text-stone-500">Start a new story</p>
-          <h2 class="mt-2 text-2xl font-bold text-stone-900">Choose the keepsake you want to create</h2>
-          <p class="mt-2 text-sm text-stone-500">Answer as many or as few questions as feel right — there's no pressure to complete them all.</p>
         </div>
-        <div class="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          <button
-            v-for="type in storyTypes"
-            :key="type.id"
-            @click="createStory(type.id)"
-            class="group rounded-[1.75rem] border border-stone-200 bg-stone-50 p-5 text-left transition hover:-translate-y-1 hover:border-stone-300 hover:bg-white hover:shadow-md"
+      </div>
+    </header>
+
+    <div class="mx-auto max-w-6xl space-y-10 px-4 py-8 sm:px-6 sm:py-10">
+
+      <!-- ═══════════════════════════════════════════════════════════ -->
+      <!-- UPGRADE BANNER — free users only                            -->
+      <!-- ═══════════════════════════════════════════════════════════ -->
+      <section
+        v-if="!hasAnyAccess"
+        class="overflow-hidden rounded-2xl border border-[#E8DDD0] bg-gradient-to-br from-[#FDFBF8] to-[#F5F0E8]"
+      >
+        <div class="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
+          <div class="flex items-start gap-4">
+            <div class="hidden h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-[#7C5C3B] sm:flex">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="11" width="18" height="11" rx="2"/>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+              </svg>
+            </div>
+            <div>
+              <p class="text-sm font-semibold text-stone-900">Unlock the full story</p>
+              <p class="mt-1 text-sm leading-relaxed text-stone-600">
+                You have 5 free questions. Upgrade for all 100+, voice recording, export and printing.
+              </p>
+            </div>
+          </div>
+          <router-link
+            to="/pricing"
+            class="flex-shrink-0 rounded-full bg-[#7C5C3B] px-5 py-2.5 text-center text-sm font-semibold text-white transition hover:opacity-90"
           >
-            <p v-if="type.label" class="text-xs font-medium uppercase tracking-[0.2em] text-stone-500">{{ type.label }}</p>
-            <h3 class="mt-3 text-lg font-semibold text-stone-900">{{ type.title }}</h3>
-            <p class="mt-2 text-sm leading-6 text-stone-600">{{ type.description }}</p>
-            <p class="mt-4 text-sm font-medium text-[#7C5C3B]">Start story →</p>
-          </button>
+            View plans — from £3.99
+          </router-link>
         </div>
       </section>
 
-      <!-- Empty state -->
-      <section v-if="isFirstTimeUser" class="rounded-[2rem] border border-stone-200 bg-white p-5 shadow-sm sm:p-6 md:p-8">
-        <div class="max-w-3xl text-center md:text-left">
-          <p class="text-xs font-medium uppercase tracking-[0.25em] text-stone-500">Welcome</p>
-          <h2 class="mt-3 text-2xl font-bold text-stone-900">Start your first keepsake in a few simple steps</h2>
-          <p class="mt-3 text-sm leading-7 text-stone-600 sm:text-base">
-            Choose a story, answer one memory at a time, and slowly turn it into something you can save, print, and share.
-          </p>
-        </div>
-        <div class="mt-8 grid gap-4 md:grid-cols-3">
-          <div class="rounded-2xl bg-stone-50 p-5">
-            <p class="text-sm font-semibold text-stone-900">1. Choose a story</p>
-            <p class="mt-2 text-sm leading-6 text-stone-600">Start with a meaningful story type and begin capturing memories straight away.</p>
-          </div>
-          <div class="rounded-2xl bg-stone-50 p-5">
-            <p class="text-sm font-semibold text-stone-900">2. Answer at your own pace</p>
-            <p class="mt-2 text-sm leading-6 text-stone-600">Write one answer at a time with autosave, so nothing feels rushed.</p>
-          </div>
-          <div class="rounded-2xl bg-stone-50 p-5">
-            <p class="text-sm font-semibold text-stone-900">3. Turn it into a keepsake</p>
-            <p class="mt-2 text-sm leading-6 text-stone-600">Export the finished story as a beautifully preserved PDF or printed book.</p>
-          </div>
-        </div>
-      </section>
+      <!-- ═══════════════════════════════════════════════════════════ -->
+      <!-- STORIES — existing work comes first                         -->
+      <!-- ═══════════════════════════════════════════════════════════ -->
+      <section v-if="stories.length" class="space-y-4">
 
-      <!-- Stories -->
-      <section v-if="stories.length" class="space-y-5">
-        <div class="text-center md:text-left">
-          <p class="text-xs font-medium uppercase tracking-[0.25em] text-stone-500">Your stories</p>
-          <h2 class="mt-2 text-2xl font-bold text-stone-900">Continue where you left off</h2>
-        </div>
-
-        <div class="grid gap-5 lg:grid-cols-2">
+        <div class="grid gap-4 lg:grid-cols-2">
           <article
             v-for="story in stories"
             :key="story.id"
-            class="overflow-hidden rounded-[2rem] border border-stone-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-md"
+            class="group overflow-hidden rounded-2xl border border-stone-200 bg-white transition duration-300 hover:border-stone-300 hover:shadow-[0_8px_30px_-12px_rgba(0,0,0,0.15)]"
           >
-            <div class="grid gap-0 sm:grid-cols-[140px_1fr]">
+            <div class="flex">
 
-              <!-- Thumbnail -->
-              <div class="flex min-h-[160px] items-center justify-center bg-stone-100 p-4">
+              <!-- Cover -->
+              <div class="relative hidden w-[120px] flex-shrink-0 overflow-hidden bg-gradient-to-br from-stone-100 to-stone-200 sm:block">
                 <img
                   v-if="story.cover_image_url"
                   :src="story.cover_image_url"
-                  alt="Story cover"
-                  class="h-full max-h-[180px] w-auto rounded-xl object-cover shadow-sm"
+                  alt=""
+                  class="h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]"
                   loading="lazy"
                 />
-                <div v-else class="flex h-full w-full items-center justify-center rounded-2xl border border-dashed border-stone-300 bg-white px-4 text-center">
-                  <div>
-                    <p class="text-xs font-medium uppercase tracking-[0.18em] text-stone-500">{{ story.story_type }}</p>
-                    <p class="mt-2 text-sm text-stone-600">Keepsake preview</p>
+                <div v-else class="flex h-full w-full items-center justify-center p-3">
+                  <div class="w-full rounded-lg bg-white/70 px-2 py-6 text-center backdrop-blur-sm">
+                    <p class="font-display text-[10px] font-semibold uppercase tracking-widest text-stone-400">
+                      {{ formatStoryType(story.story_type) }}
+                    </p>
                   </div>
+                </div>
+                <!-- Progress rail on the cover edge -->
+                <div class="absolute inset-x-0 bottom-0 h-1 bg-black/10">
+                  <div class="h-full bg-[#7C5C3B] transition-all duration-500" :style="{ width: `${story.progress}%` }"></div>
                 </div>
               </div>
 
-              <!-- Content -->
-<div class="flex flex-col p-5 sm:p-6 min-w-0 overflow-hidden">
+              <!-- Body -->
+              <div class="min-w-0 flex-1 p-5">
 
-  <!-- Title + badge -->
-  <div class="flex flex-wrap items-center gap-2">
-    <h3 class="text-xl font-semibold text-stone-900">{{ story.title }}</h3>
-    <span v-if="hasAllStoriesAccess()" class="rounded-full bg-stone-900 px-2.5 py-0.5 text-xs font-medium text-white">All Stories</span>
-    <span v-else-if="hasStoryAccess(story.story_type)" class="rounded-full bg-stone-200 px-2.5 py-0.5 text-xs font-medium text-stone-700">Unlocked</span>
-    <span v-else class="rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-medium text-amber-700">Free Draft</span>
-  </div>
+                <!-- Title row -->
+                <div class="flex items-start justify-between gap-3">
+                  <div class="min-w-0">
+                    <h3 class="truncate font-display text-lg font-semibold text-stone-900">
+                      {{ story.title }}
+                    </h3>
+                    <p class="mt-0.5 text-xs text-stone-400">
+                      {{ formatStoryType(story.story_type) }} · {{ formatDate(story.created_at) }}
+                    </p>
+                  </div>
 
-  <!-- Meta -->
-  <p class="mt-1.5 text-sm text-stone-500">{{ formatStoryType(story.story_type) }} • {{ formatDate(story.created_at) }}</p>
+                  <span
+                    v-if="hasStoryAccess(story.story_type)"
+                    class="flex-shrink-0 rounded-full bg-[#F0F5F1] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-[#4A7C59]"
+                  >Unlocked</span>
+                  <span
+                    v-else
+                    class="flex-shrink-0 rounded-full bg-[#FDF6EC] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-[#B07D3A]"
+                  >Free draft</span>
+                </div>
 
-  <!-- Progress -->
-  <div class="mt-4">
-    <div class="flex items-center justify-between text-xs text-stone-500">
-      <span>Progress</span>
-      <span class="font-medium text-stone-700">{{ story.progress }}%</span>
-    </div>
-    <div class="mt-1.5 h-1.5 w-full rounded-full bg-stone-200">
-      <div class="h-1.5 rounded-full bg-[#7C5C3B] transition-all" :style="{ width: `${story.progress}%` }" />
-    </div>
-  </div>
+                <!-- Progress -->
+                <div class="mt-4">
+                  <div class="flex items-baseline justify-between">
+                    <p class="text-xs text-stone-400">Progress</p>
+                    <p class="font-display text-sm font-semibold text-stone-700">{{ story.progress }}%</p>
+                  </div>
+                  <div class="mt-1.5 h-1 w-full overflow-hidden rounded-full bg-stone-100">
+                    <div
+                      class="h-full rounded-full bg-[#7C5C3B] transition-all duration-700"
+                      :style="{ width: `${story.progress}%` }"
+                    />
+                  </div>
+                </div>
 
-  <!-- Access status -->
-  <div class="mt-3 flex gap-4 text-xs text-stone-500">
-    <span>
-      Story:
-      <span v-if="hasStoryAccess(story.story_type)" class="font-medium text-green-600">Unlocked</span>
-      <span v-else class="font-medium text-amber-600">Free draft</span>
-    </span>
-    <span>
-      Export:
-      <span v-if="canExportStory(story.story_type)" class="font-medium text-green-600">Unlocked</span>
-      <span v-else class="font-medium text-amber-600">Locked</span>
-    </span>
-  </div>
+                <!-- Actions -->
+                <div class="mt-5 flex flex-wrap items-center gap-2">
+                  <button
+                    @click="openStory(story.id)"
+                    class="rounded-full bg-[#7C5C3B] px-5 py-2 text-sm font-semibold text-white transition hover:opacity-90"
+                  >
+                    {{ story.progress > 0 ? 'Continue' : 'Start writing' }}
+                  </button>
+<p v-if="hasPrintAccess()" class="mt-2 text-xs text-stone-400">
+  Printed and shipped from £{{ PRINTED_BOOK_FROM_PRICE.toFixed(2) }}, UK delivery included
+</p>
+                  <button
+                    v-if="hasPrintAccess()"
+                    @click="openBindingModal(story)"
+                    :disabled="generatingPrintId === story.id"
+                    class="rounded-full border border-stone-200 px-4 py-2 text-sm font-medium text-stone-700 transition hover:border-[#7C5C3B] hover:text-[#7C5C3B] disabled:opacity-50"
+                  >
+                    {{ generatingPrintId === story.id ? 'Preparing…' : 'Order print' }}
+                  </button>
+                </div>
 
-  <!-- Primary actions -->
-  <div class="mt-5 flex flex-wrap gap-2">
-    <button
-      @click="openStory(story.id)"
-      class="rounded-full bg-[#7C5C3B] px-5 py-2.5 text-sm font-medium text-white transition hover:opacity-90"
-    >
-      {{ hasStoryAccess(story.story_type) ? 'Continue' : 'Edit Draft' }}
-    </button>
+                <p v-if="generatingPrintId === story.id" class="mt-2 text-xs text-stone-400">
+                  Building your book for print — about 30 seconds…
+                </p>
 
-    <button
-  v-if="hasPrintAccess()"
-  @click="openBindingModal(story)"
-  :disabled="generatingPrintId === story.id"
-  class="rounded-full border border-[#7C5C3B] bg-white px-5 py-2.5 text-sm font-medium text-[#7C5C3B] transition hover:bg-[#F5F0E8] disabled:opacity-50"
->
-  {{ generatingPrintId === story.id ? 'Preparing…' : '📖 Order Printed Book' }}
-</button>
+                <!-- Footer: share + delete -->
+                <div class="mt-5 flex items-center gap-3 border-t border-stone-100 pt-4">
+                  <div class="min-w-0 flex-1">
+                    <button
+                      v-if="!shareLinks[story.id]"
+                      @click="generateShareLink(story.id)"
+                      :disabled="sharingStoryId === story.id"
+                      class="inline-flex items-center gap-1.5 text-xs font-medium text-stone-500 transition hover:text-[#7C5C3B] disabled:opacity-50"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/>
+                        <polyline points="16 6 12 2 8 6"/>
+                        <line x1="12" y1="2" x2="12" y2="15"/>
+                      </svg>
+                      {{ sharingStoryId === story.id ? 'Generating…' : 'Share with family' }}
+                    </button>
 
-  <!-- TEMP — remove once hardcover dimensions are confirmed working -->
-  <button
-    v-if="hasPrintAccess()"
-    @click="previewCover(story, '0600X0900.FC.PRE.CW.080CW444.GXX', 142)"
-    class="rounded-full border border-stone-300 bg-white px-4 py-2.5 text-xs font-medium text-stone-500 transition hover:bg-stone-50"
-  >
-    🔍 Preview hardcover
-  </button>
-  </div>
+                    <div v-else class="space-y-2">
+                      <div class="flex items-center gap-2 overflow-hidden rounded-lg border border-stone-200 bg-stone-50 px-2.5 py-1.5">
+                        <p class="min-w-0 flex-1 truncate text-[11px] text-stone-500">{{ shareLinks[story.id] }}</p>
+                        <button
+                          @click="copyShareLink(story.id)"
+                          class="flex-shrink-0 text-[11px] font-semibold text-[#7C5C3B] hover:underline"
+                        >
+                          {{ shareCopied === story.id ? '✓ Copied' : 'Copy' }}
+                        </button>
+                      </div>
+                      <button
+                        @click="shareStoryWhatsApp(story.id, story.title)"
+                        class="inline-flex items-center gap-1 rounded-full border border-stone-200 px-3 py-1 text-[11px] font-medium text-stone-600 transition hover:bg-stone-50"
+                      >
+                        Send on WhatsApp
+                      </button>
+                    </div>
+                  </div>
 
-  <p v-if="hasPrintAccess()" class="mt-1.5 text-xs text-stone-400">
-    Printed & shipped to your door — from £{{ PRINTED_BOOK_FROM_PRICE.toFixed(2) }}, UK shipping included
-  </p>
+                  <button
+                    @click.stop="deleteStory(story.id)"
+                    :disabled="deletingStoryId === story.id"
+                    class="flex-shrink-0 text-xs text-stone-300 transition hover:text-red-500 disabled:opacity-50"
+                  >
+                    {{ deletingStoryId === story.id ? 'Deleting…' : 'Delete' }}
+                  </button>
+                </div>
 
-  <p v-if="generatingPrintId === story.id" class="mt-1.5 text-xs text-stone-500">
-    Building your book for print — this takes about 30 seconds…
-  </p>
-
-  <!-- Secondary actions — share + delete -->
-  <div class="mt-5 flex items-center gap-3 border-t border-stone-100 pt-4">
-
-    <!-- Share with family -->
-    <div class="flex-1 min-w-0 overflow-hidden">
-      <div v-if="!shareLinks[story.id]">
-        <button
-          @click="generateShareLink(story.id)"
-          :disabled="sharingStoryId === story.id"
-          class="inline-flex items-center gap-1.5 text-xs text-stone-500 transition hover:text-stone-800 disabled:opacity-50"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/>
-            <polyline points="16 6 12 2 8 6"/>
-            <line x1="12" y1="2" x2="12" y2="15"/>
-          </svg>
-          {{ sharingStoryId === story.id ? 'Generating…' : 'Share with family' }}
-        </button>
-      </div>
-
-      <div v-else class="space-y-2">
-        <p class="text-xs font-medium text-stone-700">🤍 Family link</p>
-       <div class="flex items-center gap-2 rounded-xl border border-stone-200 bg-stone-50 px-3 py-2 overflow-hidden">
-  <p class="flex-1 truncate text-xs text-stone-500 min-w-0 overflow-hidden">{{ shareLinks[story.id] }}</p>
-          <button
-            @click="copyShareLink(story.id)"
-            class="flex-shrink-0 text-xs font-medium text-[#7C5C3B] hover:underline"
-          >
-            {{ shareCopied === story.id ? '✓ Copied' : 'Copy' }}
-          </button>
-        </div>
-        <div class="flex items-center gap-2">
-          <button
-            @click="shareStoryWhatsApp(story.id, story.title)"
-            class="inline-flex items-center gap-1 rounded-full border border-stone-200 bg-white px-3 py-1.5 text-xs font-medium text-stone-700 transition hover:bg-stone-50"
-          >
-            💬 WhatsApp
-          </button>
-          <p class="text-[10px] text-stone-400">Family can view & comment</p>
-        </div>
-      </div>
-    </div>
-
-    <!-- Delete — tucked to the right, small and unobtrusive -->
-    <button
-      @click.stop="deleteStory(story.id)"
-      :disabled="deletingStoryId === story.id"
-      class="flex-shrink-0 text-xs text-stone-400 transition hover:text-red-500 disabled:opacity-50"
-    >
-      {{ deletingStoryId === story.id ? 'Deleting…' : 'Delete' }}
-    </button>
-
-  </div>
-
-</div>
+              </div>
             </div>
           </article>
         </div>
       </section>
 
-      <!-- Bottom info cards -->
-      <section class="grid gap-5 md:grid-cols-3 md:gap-6">
-        <div class="rounded-[1.75rem] border border-stone-200 bg-white p-5 shadow-sm sm:p-6">
-          <h2 class="text-lg font-semibold text-stone-900">Your stories</h2>
-          <p class="mt-2 text-sm leading-6 text-stone-600">Start and continue keepsakes for parents, grandparents, couples, and more.</p>
+      <!-- ═══════════════════════════════════════════════════════════ -->
+      <!-- START A NEW STORY                                           -->
+      <!-- ═══════════════════════════════════════════════════════════ -->
+      <section>
+        <div class="flex items-end justify-between">
+          <div>
+            <h2 class="font-display text-xl font-bold text-stone-900">
+              {{ stories.length ? 'Start another story' : 'Choose a story to begin' }}
+            </h2>
+            <p class="mt-1 text-sm text-stone-500">
+              Each story type has its own set of questions written for that person.
+            </p>
+          </div>
         </div>
-        <div class="rounded-[1.75rem] border border-stone-200 bg-white p-5 shadow-sm sm:p-6">
-          <h2 class="text-lg font-semibold text-stone-900">Your progress</h2>
-          <p class="mt-2 text-sm leading-6 text-stone-600">Return any time and keep building each story at your own pace.</p>
-        </div>
-        <div class="rounded-[1.75rem] border border-stone-200 bg-white p-5 shadow-sm sm:p-6">
-          <h2 class="text-lg font-semibold text-stone-900">Your keepsakes</h2>
-          <p class="mt-2 text-sm leading-6 text-stone-600">Turn completed stories into polished keepsakes you can save, print, and share.</p>
+
+        <div class="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          <button
+            v-for="type in storyTypes"
+            :key="type.id"
+            @click="createStory(type.id)"
+            class="group relative overflow-hidden rounded-2xl border border-stone-200 bg-white p-5 text-left transition duration-300 hover:-translate-y-0.5 hover:border-[#7C5C3B]/40 hover:shadow-[0_8px_24px_-12px_rgba(124,92,59,0.25)]"
+          >
+            <!-- Hover wash -->
+            <div class="pointer-events-none absolute inset-0 bg-gradient-to-br from-[#FDFBF8] to-transparent opacity-0 transition duration-300 group-hover:opacity-100"></div>
+
+            <div class="relative">
+              <p v-if="type.label" class="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#9C7C5C]">
+                {{ type.label }}
+              </p>
+              <h3 class="mt-2 font-display text-base font-semibold text-stone-900">{{ type.title }}</h3>
+              <p class="mt-1.5 text-[13px] leading-relaxed text-stone-500">{{ type.description }}</p>
+              <p class="mt-4 inline-flex items-center gap-1 text-[13px] font-semibold text-[#7C5C3B]">
+                Start
+                <span class="transition duration-300 group-hover:translate-x-0.5">→</span>
+              </p>
+            </div>
+          </button>
         </div>
       </section>
-      <!-- ── Share section ── -->
-<section class="rounded-[2rem] border border-stone-200 bg-white p-5 shadow-sm sm:p-6 md:p-8">
-  <div class="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
-    <div>
-      <p class="text-xs font-medium uppercase tracking-[0.25em] text-stone-500">Share</p>
-      <h2 class="mt-2 text-xl font-bold text-stone-900">Know someone who'd love this?</h2>
-      <p class="mt-2 max-w-lg text-sm leading-6 text-stone-600">
-        If Tell Me Your Story means something to you, sharing it with one person who has an elderly parent or grandparent is the kindest thing you can do.
-      </p>
-    </div>
-    <div class="flex flex-shrink-0 flex-col gap-2 sm:items-end">
-      <button
-        @click="handleShare"
-        class="inline-flex items-center gap-2 rounded-full bg-[#7C5C3B] px-5 py-3 text-sm font-medium text-white transition hover:opacity-90"
+
+      <!-- ═══════════════════════════════════════════════════════════ -->
+      <!-- FIRST-TIME HELP                                             -->
+      <!-- ═══════════════════════════════════════════════════════════ -->
+      <section
+        v-if="isFirstTimeUser"
+        class="rounded-2xl border border-stone-200 bg-white p-6 sm:p-8"
       >
-        <span>🤍</span>
-        <span>Share Tell Me Your Story</span>
-      </button>
-      <div class="flex gap-2">
-        <button
-          @click="shareWhatsApp('dashboard')"
-          class="inline-flex items-center gap-1.5 rounded-full border border-stone-200 bg-white px-4 py-2 text-xs font-medium text-stone-700 transition hover:bg-stone-50"
+        <h2 class="font-display text-lg font-bold text-stone-900">How it works</h2>
+        <div class="mt-6 grid gap-6 sm:grid-cols-3">
+          <div v-for="(step, i) in howItWorks" :key="step.title" class="flex gap-3">
+            <span class="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-[#F5F0E8] font-display text-xs font-bold text-[#7C5C3B]">
+              {{ i + 1 }}
+            </span>
+            <div>
+              <p class="text-sm font-semibold text-stone-900">{{ step.title }}</p>
+              <p class="mt-1 text-[13px] leading-relaxed text-stone-500">{{ step.body }}</p>
+            </div>
+          </div>
+        </div>
+        <router-link
+          to="/help"
+          class="mt-6 inline-flex items-center gap-1 text-sm font-semibold text-[#7C5C3B] hover:underline"
         >
-          <span>💬</span> WhatsApp
-        </button>
-        <button
-          @click="shareEmail('dashboard')"
-          class="inline-flex items-center gap-1.5 rounded-full border border-stone-200 bg-white px-4 py-2 text-xs font-medium text-stone-700 transition hover:bg-stone-50"
-        >
-          <span>✉️</span> Email
-        </button>
-      </div>
-      <p v-if="shareResult" class="text-xs text-green-600">{{ shareResult }}</p>
-    </div>
-  </div>
-</section>
+          Watch the short how-to videos →
+        </router-link>
+      </section>
+
+      <!-- ═══════════════════════════════════════════════════════════ -->
+      <!-- SHARE                                                       -->
+      <!-- ═══════════════════════════════════════════════════════════ -->
+      <section class="rounded-2xl border border-stone-200 bg-white p-6 sm:p-8">
+        <div class="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h2 class="font-display text-lg font-bold text-stone-900">
+              Know someone who'd love this?
+            </h2>
+            <p class="mt-2 max-w-lg text-sm leading-relaxed text-stone-500">
+              If this means something to you, sharing it with one person who has an elderly parent or grandparent is the kindest thing you can do.
+            </p>
+          </div>
+          <div class="flex flex-shrink-0 flex-col gap-2 sm:items-end">
+            <button
+              @click="handleShare"
+              class="rounded-full bg-[#7C5C3B] px-5 py-2.5 text-sm font-semibold text-white transition hover:opacity-90"
+            >
+              Share Tell Me Your Story
+            </button>
+            <div class="flex gap-2">
+              <button
+                @click="shareWhatsApp('dashboard')"
+                class="rounded-full border border-stone-200 px-4 py-1.5 text-xs font-medium text-stone-600 transition hover:bg-stone-50"
+              >WhatsApp</button>
+              <button
+                @click="shareEmail('dashboard')"
+                class="rounded-full border border-stone-200 px-4 py-1.5 text-xs font-medium text-stone-600 transition hover:bg-stone-50"
+              >Email</button>
+            </div>
+            <p v-if="shareResult" class="text-xs text-[#4A7C59]">{{ shareResult }}</p>
+          </div>
+        </div>
+      </section>
+
     </div>
 
     <!-- Print Order Modal -->
-  <PrintOrderModal
-  v-if="printModalOpen && printModalData"
-  :interior-pdf-blob="printModalData.interiorBlob"
-  :cover-pdf-blob="printModalData.coverBlob"
-  :photo-book-blob="printModalData.photoBookBlob"
-  :photo-book-cover-blob="printModalData.photoBookCoverBlob"
-  :page-count="printModalData.pageCount"
-  :story-title="printModalData.storyTitle"
-  :story-id="printModalData.storyId"
-  :user-id="printModalData.userId"
-  :user-email="printModalData.userEmail"
-  :print-cost="printModalData.printCost"
-  :stripe-payment-id="printModalData.stripePaymentId"
-  :pod-id="printModalData.podId"
-  :binding-label="printModalData.bindingLabel"
-  @close="printModalOpen = false"
-  @ordered="onOrdered"
-/>
+    <PrintOrderModal
+      v-if="printModalOpen && printModalData"
+      :interior-pdf-blob="printModalData.interiorBlob"
+      :cover-pdf-blob="printModalData.coverBlob"
+      :photo-book-blob="printModalData.photoBookBlob"
+      :photo-book-cover-blob="printModalData.photoBookCoverBlob"
+      :page-count="printModalData.pageCount"
+      :story-title="printModalData.storyTitle"
+      :story-id="printModalData.storyId"
+      :user-id="printModalData.userId"
+      :user-email="printModalData.userEmail"
+      :print-cost="printModalData.printCost"
+      :stripe-payment-id="printModalData.stripePaymentId"
+      :pod-id="printModalData.podId"
+      :binding-label="printModalData.bindingLabel"
+      @close="printModalOpen = false"
+      @ordered="onOrdered"
+    />
 
     <!-- Binding select modal -->
-<div v-if="bindingModalOpen && bindingModalStory" class="fixed inset-0 z-50 flex items-center justify-center px-4">
-  <div class="absolute inset-0 bg-black/50" @click="bindingModalOpen = false" />
-  <div class="relative w-full max-w-sm rounded-3xl bg-white px-8 py-8 shadow-2xl">
-    <h2 class="text-xl font-bold text-stone-900">Choose your book type</h2>
-    <p class="mt-2 text-sm text-stone-500">Select a binding before checkout. Price includes UK shipping.</p>
+    <Transition name="fade">
+      <div v-if="bindingModalOpen && bindingModalStory" class="fixed inset-0 z-50 flex items-center justify-center px-4">
+        <div class="absolute inset-0 bg-black/50" @click="bindingModalOpen = false" />
+        <div class="relative w-full max-w-sm overflow-hidden rounded-2xl bg-white shadow-2xl">
 
-    <div v-if="!bindingModalPricesReady" class="mt-6 flex flex-col items-center gap-3 py-8">
-      <svg class="h-6 w-6 animate-spin text-[#7C5C3B]" viewBox="0 0 24 24" fill="none">
-        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
-        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/>
-      </svg>
-      <p class="text-xs text-stone-500">Calculating pricing for your book…</p>
-    </div>
+          <div class="border-b border-stone-100 px-6 py-5">
+            <h2 class="font-display text-lg font-bold text-stone-900">Choose your book type</h2>
+            <p class="mt-1 text-sm text-stone-500">Price includes UK shipping.</p>
+          </div>
 
-    <div v-else class="mt-5 space-y-2">
-      <button
-        v-for="b in bindingOptions"
-        :key="b.id"
-        @click="selectedBindingId = b.id"
-        class="w-full rounded-2xl border p-4 text-left transition"
-        :class="selectedBindingId === b.id ? 'border-[#7C5C3B] bg-[#FAF7F4]' : 'border-stone-200 hover:bg-stone-50'"
-      >
-        <div class="flex items-center justify-between">
-          <p class="text-sm font-semibold text-stone-900">{{ b.label }}</p>
-          <p class="text-sm font-bold text-stone-900">£{{ getPrintPrice(b.id, bindingModalPageCount || 0).toFixed(2) }}</p>
+          <div class="px-6 py-5">
+            <div v-if="!bindingModalPricesReady" class="flex flex-col items-center gap-3 py-8">
+              <svg class="h-6 w-6 animate-spin text-[#7C5C3B]" viewBox="0 0 24 24" fill="none">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/>
+              </svg>
+              <p class="text-xs text-stone-500">Calculating pricing for your book…</p>
+            </div>
+
+            <div v-else class="space-y-2">
+              <button
+                v-for="b in bindingOptions"
+                :key="b.id"
+                @click="selectedBindingId = b.id"
+                class="w-full rounded-xl border p-4 text-left transition"
+                :class="selectedBindingId === b.id
+                  ? 'border-[#7C5C3B] bg-[#FAF7F4] ring-1 ring-[#7C5C3B]/20'
+                  : 'border-stone-200 hover:bg-stone-50'"
+              >
+                <div class="flex items-center justify-between">
+                  <p class="text-sm font-semibold text-stone-900">{{ b.label }}</p>
+                  <p class="font-display text-sm font-bold text-stone-900">
+                    £{{ getPrintPrice(b.id, bindingModalPageCount || 0).toFixed(2) }}
+                  </p>
+                </div>
+                <p class="mt-0.5 text-xs text-stone-500">{{ b.desc }}</p>
+              </button>
+              <p class="pt-1 text-center text-[11px] text-stone-400">
+                {{ bindingModalPageCount }} pages · UK shipping included
+              </p>
+            </div>
+
+            <div class="mt-5 flex gap-3">
+              <button
+                @click="bindingModalOpen = false"
+                class="flex-1 rounded-full border border-stone-200 py-2.5 text-sm font-medium text-stone-700 transition hover:bg-stone-50"
+              >Cancel</button>
+              <button
+                @click="startPrintOrder(bindingModalStory)"
+                :disabled="!bindingModalPricesReady"
+                class="flex-1 rounded-full bg-[#7C5C3B] py-2.5 text-sm font-semibold text-white transition hover:opacity-90 disabled:opacity-50"
+              >Continue to payment</button>
+            </div>
+          </div>
+
         </div>
-        <p class="mt-0.5 text-xs text-stone-500">{{ b.desc }}</p>
-      </button>
-      <p class="pt-1 text-center text-[11px] text-stone-400">{{ bindingModalPageCount }} pages · price includes UK shipping</p>
-    </div>
-
-    <div class="mt-6 flex gap-3">
-      <button
-        @click="bindingModalOpen = false"
-        class="flex-1 rounded-full border border-stone-300 py-2.5 text-sm font-medium text-stone-700 hover:bg-stone-50"
-      >
-        Cancel
-      </button>
-      <button
-        @click="startPrintOrder(bindingModalStory)"
-        :disabled="!bindingModalPricesReady"
-        class="flex-1 rounded-full bg-[#7C5C3B] py-2.5 text-sm font-semibold text-white hover:opacity-90 disabled:opacity-50"
-      >
-        Continue to payment →
-      </button>
-    </div>
-  </div>
-</div>
-
+      </div>
+    </Transition>
 
   </div>
 </template>
@@ -446,65 +462,48 @@ const storyTypes = STORY_TYPES
 const { exportTrueBookAsBlob } = useStoryTrueBookExport()
 const { exportPhotoBookAsBlob } = usePhotoBookExport()
 const hasAnyAccess = computed(() => userAccess.value.length > 0)
+// ─── Dashboard header ─────────────────────────────────────────────────────────
+
+const greeting = computed(() => {
+  const h = new Date().getHours()
+  if (h < 12) return 'Good morning'
+  if (h < 18) return 'Good afternoon'
+  return 'Good evening'
+})
+
+const averageProgress = computed(() => {
+  if (!stories.value.length) return 0
+  const total = stories.value.reduce((sum, s) => sum + (s.progress || 0), 0)
+  return Math.round(total / stories.value.length)
+})
+
+const planLabel = computed(() => {
+  if (!hasAnyAccess.value) return 'Free'
+  if (hasAllStoriesAccess() && hasPrintAccess()) return 'Premium'
+  if (hasAllStoriesAccess()) return 'All'
+  return 'Paid'
+})
+
+const howItWorks = [
+  {
+    title: 'Choose a story',
+    body: 'Pick who you want to capture. Each type has its own questions.',
+  },
+  {
+    title: 'Answer at your own pace',
+    body: 'Type or record your voice. Everything autosaves as you go.',
+  },
+  {
+    title: 'Turn it into a keepsake',
+    body: 'Export a PDF or order a printed book with QR codes inside.',
+  },
+]
 
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL as string
 const POD_PACKAGE_ID = '0600X0900.FC.STD.PB.060UW444.MXX'
 
-// ─── TEMP: cover preview for testing Lulu dimensions before ordering ───────────
-// Remove once hardcover/dust jacket cover dimensions are confirmed working.
-async function previewCover(story: any, podId: string, pageCount: number) {
-  try {
-    const dimsResponse = await fetch(`${API_BASE}/lulu-cover-dimensions`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        pod_package_id: podId,
-        interior_page_count: pageCount,
-        unit: 'mm',
-      }),
-    })
 
-    if (!dimsResponse.ok) {
-      alert('Could not fetch dimensions from Lulu — check console.')
-      console.error(await dimsResponse.text())
-      return
-    }
-
-    const dims = await dimsResponse.json()
-    const luluWidth = parseFloat(dims.width)
-    const luluHeight = parseFloat(dims.height)
-    console.log('Preview — Lulu dimensions for', podId, ':', luluWidth, luluHeight)
-
-    const bindingType =
-      podId === '0600X0900.FC.PRE.LW.080CW444.GNG' ? 'dustjacket' :
-      podId === '0600X0900.FC.PRE.CW.080CW444.GXX' ? 'hardcover' :
-      'softcover'
-
-    const coverBlob = await generateCoverPDF({
-      title: story.title || 'Untitled Story',
-      subtitle: 'A life told through memories, moments, and love',
-      pageCount,
-      coverImageUrl: story.cover_image_url || '',
-      loadImageAsBase64,
-      luluWidth,
-      luluHeight,
-      bindingType,
-    })
-
-    const url = URL.createObjectURL(coverBlob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `cover-preview-${bindingType}-${luluWidth.toFixed(2)}x${luluHeight.toFixed(2)}mm.pdf`
-    document.body.appendChild(a)
-    a.click()
-    document.body.removeChild(a)
-    setTimeout(() => URL.revokeObjectURL(url), 5000)
-  } catch (err) {
-    console.error('Cover preview error:', err)
-    alert('Something went wrong generating the preview — check console.')
-  }
-}
 
 const shareResult    = ref<string>('')
 
@@ -671,17 +670,6 @@ function hasStoryAccess(storyType: string) {
     item => item.access_type === 'story' &&
       (item.story_type === storyType || item.story_type === 'all')
   )
-}
-
-function hasExportAccess() {
-  return userAccess.value.some(
-    item => item.access_type === 'export' &&
-      (item.variant === 'text_only' || item.variant === 'with_images')
-  )
-}
-
-function canExportStory(storyType: string) {
-  return hasStoryAccess(storyType) && hasExportAccess()
 }
 
 function hasAllStoriesAccess() {
@@ -1044,3 +1032,17 @@ onMounted(async () => {
 
 })
 </script>
+<style scoped>
+.font-display {
+  font-family: 'Playfair Display', Georgia, serif;
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.2s ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+</style>
