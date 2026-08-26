@@ -449,6 +449,64 @@
   </div>
 </section>
 
+<!-- ═══════════════════════════════════════ -->
+<!-- GIFT — buy for someone you love        -->
+<!-- ═══════════════════════════════════════ -->
+<section class="reveal bg-[#F5F0E8] px-5 py-16 sm:px-8 sm:py-20">
+  <div class="mx-auto max-w-6xl">
+    <div class="rounded-3xl border border-[#E8DDD0] bg-white px-6 py-10 sm:px-10 md:py-14">
+      <div class="grid items-center gap-8 md:grid-cols-2">
+
+        <!-- Left — copy -->
+        <div class="text-center md:text-left">
+          <div class="section-label">Give a meaningful gift</div>
+          <h2 class="mt-3 font-display text-2xl font-bold leading-tight tracking-[-0.02em] text-[#1C1917] sm:text-3xl">
+            Gift someone the chance<br/>
+            to tell their story
+          </h2>
+          <p class="mt-4 text-sm leading-relaxed text-[#5C534E]">
+            Buy Tell Me Your Story for a parent, grandparent, or anyone whose memories matter. They receive a personal link, create their account, and start capturing their story — with your message included.
+          </p>
+          <div class="mt-6 flex flex-col items-center gap-3 sm:flex-row md:justify-start">
+            <router-link
+              to="/gift"
+              class="rounded-full bg-[#7C5C3B] px-7 py-3 text-sm font-semibold text-white transition hover:opacity-90"
+            >
+              🎁 Buy as a gift — from £3.99
+            </router-link>
+          </div>
+          <p class="mt-4 text-xs text-[#8C847E]">
+            Perfect for birthdays, Mother's Day, Father's Day, Christmas, or just because.
+          </p>
+        </div>
+
+        <!-- Right — visual -->
+        <div class="flex justify-center">
+          <div class="relative max-w-xs">
+            <!-- Gift card mockup -->
+            <div class="rounded-2xl bg-[#2C2420] p-6 shadow-lg sm:p-8">
+              <p class="text-[10px] font-medium uppercase tracking-widest text-[#9C7C5C]">Tell Me Your Story</p>
+              <p class="mt-3 font-serif text-lg font-medium text-white">🎁 A gift for Mum</p>
+              <div class="mt-4 rounded-xl bg-[#3C3430] p-4">
+                <p class="font-serif text-xs italic leading-relaxed text-[#C4A882]">
+                  "I got you this because your stories matter more than you know. I want the kids to hear your voice telling them, long after we're all old and grey."
+                </p>
+              </div>
+              <div class="mt-4 flex items-center justify-between">
+                <p class="text-xs text-stone-400">Book + Photos</p>
+                <p class="font-serif text-lg font-bold text-white">£7.99</p>
+              </div>
+            </div>
+            <!-- Shadow accent -->
+            <div class="mx-6 h-3 rounded-b-xl bg-[#1C1917]/20"></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
     <!-- ═══════════════════════════════════════ -->
     <!-- PARTNERS                                -->
     <!-- ═══════════════════════════════════════ -->
