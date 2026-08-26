@@ -132,7 +132,7 @@ const videos: HelpVideo[] = [
     title: 'How to create your first story',
     description: 'Sign up, choose a story type, and answer your first question. See how your words start becoming a keepsake book in under a minute.',
     duration: '~2 min',
-    youtubeId: '',
+    youtubeId: '1JF2QckjWdc',
   },
   {
     id: 'voice-recording',
