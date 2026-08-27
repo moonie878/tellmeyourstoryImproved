@@ -2,242 +2,392 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://tellmeyourstory.uk/</loc>
+    <lastmod>2026-08-27</lastmod>
     <priority>1.0</priority>
-    <changefreq>weekly</changefreq>
+  </url>
+  <url>
+    <loc>https://tellmeyourstory.uk/60th-birthday-gift-ideas</loc>
+    <lastmod>2026-08-27</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://tellmeyourstory.uk/70th-birthday-gift-ideas</loc>
+    <lastmod>2026-08-27</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://tellmeyourstory.uk/80th-birthday-gift-ideas</loc>
+    <lastmod>2026-08-27</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://tellmeyourstory.uk/90th-birthday-gift-ideas</loc>
+    <lastmod>2026-08-27</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://tellmeyourstory.uk/anniversary-gift-ideas</loc>
+    <lastmod>2026-08-27</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://tellmeyourstory.uk/bereavement-gift-ideas</loc>
+    <lastmod>2026-08-27</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://tellmeyourstory.uk/blog/celebration-of-life-video</loc>
+    <lastmod>2026-08-27</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://tellmeyourstory.uk/blog/free-memorial-slideshow-maker</loc>
+    <lastmod>2026-08-27</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://tellmeyourstory.uk/blog/funeral-slideshow-ideas</loc>
+    <lastmod>2026-08-27</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://tellmeyourstory.uk/blog/how-to-make-a-memorial-tribute-video</loc>
+    <lastmod>2026-08-27</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://tellmeyourstory.uk/blog/how-to-record-your-parents-life-story</loc>
+    <lastmod>2026-08-27</lastmod>
+    <priority>0.6</priority>
   </url>
   <url>
     <loc>https://tellmeyourstory.uk/blog/questions-to-ask-your-parents</loc>
-    <priority>0.9</priority>
-    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-27</lastmod>
+    <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://tellmeyourstory.uk/questions-to-ask-your-mum</loc>
-    <priority>0.8</priority>
-    <changefreq>monthly</changefreq>
+    <loc>https://tellmeyourstory.uk/blog/what-to-do-when-a-parent-wont-open-up</loc>
+    <lastmod>2026-08-27</lastmod>
+    <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://tellmeyourstory.uk/questions-to-ask-your-grandparents</loc>
-    <priority>0.8</priority>
-    <changefreq>monthly</changefreq>
-  </url>
-  <url>
-  <loc>https://tellmeyourstory.uk/blog/how-to-record-your-parents-life-story</loc>
-  <priority>0.9</priority>
-  <changefreq>monthly</changefreq>
-</url>
-  <url>
-    <loc>https://tellmeyourstory.uk/questions-to-ask-your-grandma</loc>
-    <priority>0.8</priority>
-    <changefreq>monthly</changefreq>
-  </url> 
-  <url>
-  <loc>https://tellmeyourstory.uk/blog/what-to-do-when-a-parent-wont-open-up</loc>
-  <priority>0.9</priority>
-  <changefreq>monthly</changefreq>
-</url>
-  <url>
-    <loc>https://tellmeyourstory.uk/example</loc>
+    <loc>https://tellmeyourstory.uk/christmas</loc>
+    <lastmod>2026-08-27</lastmod>
     <priority>0.7</priority>
-    <changefreq>monthly</changefreq>
   </url>
   <url>
-  <loc>https://tellmeyourstory.uk/fathers-day</loc>
-  <priority>0.8</priority>
-  <changefreq>weekly</changefreq>
-</url>
-<url>
-  <loc>https://tellmeyourstory.uk/gift</loc>
-  <priority>0.7</priority>
-  <changefreq>monthly</changefreq>
-</url>
-<url>
-  <loc>https://tellmeyourstory.uk/register</loc>
-  <priority>0.6</priority>
-  <changefreq>yearly</changefreq>
-</url>
-   <url>
-    <loc>https://tellmeyourstory.uk/blog/how-to-make-a-memorial-tribute-video</loc>
-    <priority>0.9</priority>
-    <changefreq>monthly</changefreq>
+    <loc>https://tellmeyourstory.uk/christmas-gift-for-parents-who-have-everything</loc>
+    <lastmod>2026-08-27</lastmod>
+    <priority>0.7</priority>
   </url>
   <url>
-  <loc>https://tellmeyourstory.uk/pricing</loc>
-  <priority>0.8</priority>
-  <changefreq>monthly</changefreq>
-</url>
-<url>
-<loc>https://tellmeyourstory.uk/blog/free-memorial-slideshow-maker</loc>
-<priority>0.9</priority>
-<changefreq>monthly</changefreq>
-</url>
-<url>
-<loc>https://tellmeyourstory.uk/blog/funeral-slideshow-ideas</loc>
-<priority>0.9</priority>
-<changefreq>monthly</changefreq>
-</url>
-<url>
-<loc>https://tellmeyourstory.uk/blog/celebration-of-life-video</loc>
-<priority>0.9</priority>
-<changefreq>monthly</changefreq>
-</url>
-<url>
-  <loc>https://tellmeyourstory.uk/tribute</loc>
-  <priority>0.9</priority>
-  <changefreq>monthly</changefreq>
-</url>
+    <loc>https://tellmeyourstory.uk/christmas-gift-ideas-for-grandparents</loc>
+    <lastmod>2026-08-27</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://tellmeyourstory.uk/christmas-gifts-for-grandparents</loc>
+    <lastmod>2026-08-27</lastmod>
+    <priority>0.7</priority>
+  </url>
   <url>
     <loc>https://tellmeyourstory.uk/contact</loc>
-    <priority>0.4</priority>
-    <changefreq>yearly</changefreq>
-  </url>
-  <url>
-    <loc>https://tellmeyourstory.uk/privacy</loc>
-    <priority>0.2</priority>
-    <changefreq>yearly</changefreq>
-  </url>
-  <url>
-    <loc>https://tellmeyourstory.uk/terms</loc>
-    <priority>0.2</priority>
-    <changefreq>yearly</changefreq>
+    <lastmod>2026-08-27</lastmod>
+    <priority>0.3</priority>
   </url>
   <url>
     <loc>https://tellmeyourstory.uk/cookies</loc>
-    <priority>0.2</priority>
-    <changefreq>yearly</changefreq>
+    <lastmod>2026-08-27</lastmod>
+    <priority>0.3</priority>
+  </url>
+  <url>
+    <loc>https://tellmeyourstory.uk/dementia-life-story-book</loc>
+    <lastmod>2026-08-27</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://tellmeyourstory.uk/end-of-life-gift</loc>
+    <lastmod>2026-08-27</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://tellmeyourstory.uk/end-of-life-questions-to-ask-parents</loc>
+    <lastmod>2026-08-27</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://tellmeyourstory.uk/example</loc>
+    <lastmod>2026-08-27</lastmod>
+    <priority>0.3</priority>
+  </url>
+  <url>
+    <loc>https://tellmeyourstory.uk/family-history-book</loc>
+    <lastmod>2026-08-27</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://tellmeyourstory.uk/fathers-day</loc>
+    <lastmod>2026-08-27</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://tellmeyourstory.uk/fathers-day-gift-for-grandad</loc>
+    <lastmod>2026-08-27</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://tellmeyourstory.uk/gift</loc>
+    <lastmod>2026-08-27</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://tellmeyourstory.uk/gift-for-someone-who-has-everything</loc>
+    <lastmod>2026-08-27</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://tellmeyourstory.uk/gifts-for-parents-who-have-everything</loc>
+    <lastmod>2026-08-27</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://tellmeyourstory.uk/help</loc>
+    <lastmod>2026-08-27</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://tellmeyourstory.uk/how-to-capture-parents-life-story</loc>
+    <lastmod>2026-08-27</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://tellmeyourstory.uk/how-to-record-grandparents-story</loc>
+    <lastmod>2026-08-27</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://tellmeyourstory.uk/how-to-write-a-life-story</loc>
+    <lastmod>2026-08-27</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://tellmeyourstory.uk/how-to-write-an-obituary</loc>
+    <lastmod>2026-08-27</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://tellmeyourstory.uk/keepsake-book</loc>
+    <lastmod>2026-08-27</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://tellmeyourstory.uk/legacy-letter-to-children</loc>
+    <lastmod>2026-08-27</lastmod>
+    <priority>0.7</priority>
   </url>
   <url>
     <loc>https://tellmeyourstory.uk/life-story-book</loc>
-    <priority>0.9</priority>
-    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-27</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://tellmeyourstory.uk/life-story-interview-questions</loc>
+    <lastmod>2026-08-27</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://tellmeyourstory.uk/life-story-journal</loc>
+    <lastmod>2026-08-27</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://tellmeyourstory.uk/life-story-questions</loc>
+    <lastmod>2026-08-27</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://tellmeyourstory.uk/life-story-video</loc>
+    <lastmod>2026-08-27</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://tellmeyourstory.uk/life-story-work-in-care-homes</loc>
+    <lastmod>2026-08-27</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://tellmeyourstory.uk/meaningful-christmas-gifts</loc>
+    <lastmod>2026-08-27</lastmod>
+    <priority>0.7</priority>
   </url>
   <url>
     <loc>https://tellmeyourstory.uk/memorial-book</loc>
-    <priority>0.9</priority>
-    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-27</lastmod>
+    <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://tellmeyourstory.uk/unique-gift-for-elderly-parents</loc>
+    <loc>https://tellmeyourstory.uk/memory-book-vs-memory-box</loc>
+    <lastmod>2026-08-27</lastmod>
     <priority>0.8</priority>
-    <changefreq>monthly</changefreq>
   </url>
   <url>
-    <loc>https://tellmeyourstory.uk/storyworth-alternative</loc>
+    <loc>https://tellmeyourstory.uk/mothers-day-gift-ideas</loc>
+    <lastmod>2026-08-27</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://tellmeyourstory.uk/my-story</loc>
+    <lastmod>2026-08-27</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://tellmeyourstory.uk/oral-history-questions</loc>
+    <lastmod>2026-08-27</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://tellmeyourstory.uk/personalised-gift-for-grandparents</loc>
+    <lastmod>2026-08-27</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://tellmeyourstory.uk/pricing</loc>
+    <lastmod>2026-08-27</lastmod>
     <priority>0.9</priority>
-    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://tellmeyourstory.uk/privacy</loc>
+    <lastmod>2026-08-27</lastmod>
+    <priority>0.3</priority>
+  </url>
+  <url>
+    <loc>https://tellmeyourstory.uk/questions-about-childhood</loc>
+    <lastmod>2026-08-27</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://tellmeyourstory.uk/questions-about-family-history</loc>
+    <lastmod>2026-08-27</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://tellmeyourstory.uk/questions-to-ask-dying-parent</loc>
+    <lastmod>2026-08-27</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://tellmeyourstory.uk/questions-to-ask-elderly-parents</loc>
+    <lastmod>2026-08-27</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://tellmeyourstory.uk/questions-to-ask-your-dad</loc>
+    <lastmod>2026-08-27</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://tellmeyourstory.uk/questions-to-ask-your-grandad</loc>
+    <lastmod>2026-08-27</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://tellmeyourstory.uk/questions-to-ask-your-grandma</loc>
+    <lastmod>2026-08-27</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://tellmeyourstory.uk/questions-to-ask-your-grandparents</loc>
+    <lastmod>2026-08-27</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://tellmeyourstory.uk/questions-to-ask-your-mum</loc>
+    <lastmod>2026-08-27</lastmod>
+    <priority>0.7</priority>
   </url>
   <url>
     <loc>https://tellmeyourstory.uk/remento-alternative</loc>
-    <priority>0.9</priority>
-    <changefreq>monthly</changefreq>
-  </url>  
+    <lastmod>2026-08-27</lastmod>
+    <priority>0.8</priority>
+  </url>
   <url>
-  <loc>https://tellmeyourstory.uk/life-story-video</loc>
-  <priority>0.9</priority>
-  <changefreq>monthly</changefreq>
-</url>
-<url>
-  <loc>https://tellmeyourstory.uk/questions-to-ask-elderly-parents</loc>
-  <priority>0.9</priority>
-  <changefreq>monthly</changefreq>
-</url>
-<url>
-  <loc>https://tellmeyourstory.uk/70th-birthday-gift-ideas</loc>
-  <priority>0.8</priority>
-  <changefreq>monthly</changefreq>
-</url>
-<url>
-  <loc>https://tellmeyourstory.uk/80th-birthday-gift-ideas</loc>
-  <priority>0.8</priority>
-  <changefreq>monthly</changefreq>
-</url>
-<url>
-  <loc>https://tellmeyourstory.uk/dementia-life-story-book</loc>
-  <priority>0.9</priority>
-  <changefreq>monthly</changefreq>
-</url>
-<url>
-  <loc>https://tellmeyourstory.uk/end-of-life-gift</loc>
-  <priority>0.8</priority>
-  <changefreq>monthly</changefreq>
-</url>
-<url>
-  <loc>https://tellmeyourstory.uk/family-history-book</loc>
-  <priority>0.9</priority>
-  <changefreq>monthly</changefreq>
-</url>
-<url>
-  <loc>https://tellmeyourstory.uk/questions-to-ask-your-grandad</loc>
-  <priority>0.9</priority>
-  <changefreq>monthly</changefreq>
-</url>
-<url>
-  <loc>https://tellmeyourstory.uk/gifts-for-parents-who-have-everything</loc>
-  <priority>0.8</priority>
-  <changefreq>monthly</changefreq>
-</url>
-<url>
-  <loc>https://tellmeyourstory.uk/90th-birthday-gift-ideas</loc>
-  <priority>0.8</priority>
-  <changefreq>monthly</changefreq>
-</url>
-<url>
-  <loc>https://tellmeyourstory.uk/mothers-day-gift-ideas</loc>
-  <priority>0.7</priority>
-  <changefreq>monthly</changefreq>
-</url>
-<url>
-  <loc>https://tellmeyourstory.uk/keepsake-book</loc>
-  <priority>0.9</priority>
-  <changefreq>monthly</changefreq>
-</url>
-<url>
-  <loc>https://tellmeyourstory.uk/how-to-write-a-life-story</loc>
-  <priority>0.9</priority>
-  <changefreq>monthly</changefreq>
-</url>
-<url>
-  <loc>https://tellmeyourstory.uk/life-story-questions</loc>
-  <priority>0.9</priority>
-  <changefreq>monthly</changefreq>
-</url>
-<url><loc>https://tellmeyourstory.uk/storyworth-review</loc><priority>0.9</priority><changefreq>monthly</changefreq></url>
-<url><loc>https://tellmeyourstory.uk/remento-review</loc><priority>0.9</priority><changefreq>monthly</changefreq></url>
-<url><loc>https://tellmeyourstory.uk/how-to-capture-parents-life-story</loc><priority>0.9</priority><changefreq>monthly</changefreq></url>
-<url><loc>https://tellmeyourstory.uk/fathers-day-gift-for-grandad</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
-<url><loc>https://tellmeyourstory.uk/life-story-interview-questions</loc><priority>0.9</priority><changefreq>monthly</changefreq></url>
-<url><loc>https://tellmeyourstory.uk/60th-birthday-gift-ideas</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
-<url><loc>https://tellmeyourstory.uk/anniversary-gift-ideas</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
-<url><loc>https://tellmeyourstory.uk/what-is-a-life-story-book</loc><priority>0.9</priority><changefreq>monthly</changefreq></url>
-<url><loc>https://tellmeyourstory.uk/life-story-journal</loc><priority>0.9</priority><changefreq>monthly</changefreq></url>
-<url><loc>https://tellmeyourstory.uk/gift-for-someone-who-has-everything</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
-<url><loc>https://tellmeyourstory.uk/questions-to-ask-your-mum</loc><priority>0.8</priority></url>
-<url><loc>https://tellmeyourstory.uk/questions-to-ask-your-dad</loc><priority>0.8</priority></url>
-<url><loc>https://tellmeyourstory.uk/questions-to-ask-your-grandma</loc><priority>0.8</priority></url>
-<url><loc>https://tellmeyourstory.uk/questions-to-ask-dying-parent</loc><priority>0.8</priority></url>
-<url><loc>https://tellmeyourstory.uk/questions-about-childhood</loc><priority>0.8</priority></url>
-<url><loc>https://tellmeyourstory.uk/resources/50-questions-printable</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
-<url><loc>https://tellmeyourstory.uk/storykeeper-review</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
-<url><loc>https://tellmeyourstory.uk/storykeeper-alternative</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
-<url><loc>https://tellmeyourstory.uk/life-story-work-in-care-homes</loc><priority>0.9</priority><changefreq>monthly</changefreq></url>
-<url><loc>https://tellmeyourstory.uk/reminiscence-therapy-life-story</loc><priority>0.9</priority><changefreq>monthly</changefreq></url>
-<url><loc>https://tellmeyourstory.uk/bereavement-gift-ideas</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
-<url><loc>https://tellmeyourstory.uk/legacy-letter-to-children</loc><priority>0.9</priority><changefreq>monthly</changefreq></url>
-<url><loc>https://tellmeyourstory.uk/oral-history-questions</loc><priority>0.9</priority><changefreq>monthly</changefreq></url>
-<url><loc>https://tellmeyourstory.uk/how-to-record-grandparents-story</loc><priority>0.9</priority><changefreq>monthly</changefreq></url>
-<url><loc>https://tellmeyourstory.uk/storyworth-vs-remento</loc><priority>0.9</priority><changefreq>monthly</changefreq></url>
-<url><loc>https://tellmeyourstory.uk/storykeeper-vs-storyworth</loc><priority>0.9</priority><changefreq>monthly</changefreq></url>
-<url><loc>https://tellmeyourstory.uk/personalised-gift-for-grandparents</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
-<url><loc>https://tellmeyourstory.uk/questions-about-family-history</loc><priority>0.9</priority><changefreq>monthly</changefreq></url>
-<url><loc>https://tellmeyourstory.uk/storyworth-vs-tellmeyourstory</loc><changefreq>monthly</changefreq><priority>0.9</priority>
-</url>
-<url><loc>https://tellmeyourstory.uk/remento-vs-tellmeyourstory</loc><changefreq>monthly</changefreq><priority>0.9</priority>
-</url>
-<url><loc>https://tellmeyourstory.uk/end-of-life-questions-to-ask-parents</loc><changefreq>monthly</changefreq><priority>0.8</priority>
-</url>
-<url><loc>https://tellmeyourstory.uk/memory-book-vs-memory-box</loc><changefreq>monthly</changefreq><priority>0.8</priority>
-</url>
-<url><loc>https://tellmeyourstory.uk/how-to-write-an-obituary</loc><changefreq>monthly</changefreq><priority>0.8</priority>
-</url>
-<url><loc>https://tellmeyourstory.uk/write-your-own-life-story</loc><changefreq>monthly</changefreq><priority>0.8</priority>
-</url>
+    <loc>https://tellmeyourstory.uk/remento-review</loc>
+    <lastmod>2026-08-27</lastmod>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://tellmeyourstory.uk/remento-vs-tellmeyourstory</loc>
+    <lastmod>2026-08-27</lastmod>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://tellmeyourstory.uk/reminiscence-therapy-life-story</loc>
+    <lastmod>2026-08-27</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://tellmeyourstory.uk/resources/50-questions-printable</loc>
+    <lastmod>2026-08-27</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://tellmeyourstory.uk/storykeeper-alternative</loc>
+    <lastmod>2026-08-27</lastmod>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://tellmeyourstory.uk/storykeeper-review</loc>
+    <lastmod>2026-08-27</lastmod>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://tellmeyourstory.uk/storykeeper-vs-storyworth</loc>
+    <lastmod>2026-08-27</lastmod>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://tellmeyourstory.uk/storyworth-alternative</loc>
+    <lastmod>2026-08-27</lastmod>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://tellmeyourstory.uk/storyworth-review</loc>
+    <lastmod>2026-08-27</lastmod>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://tellmeyourstory.uk/storyworth-vs-remento</loc>
+    <lastmod>2026-08-27</lastmod>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://tellmeyourstory.uk/storyworth-vs-tellmeyourstory</loc>
+    <lastmod>2026-08-27</lastmod>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://tellmeyourstory.uk/terms</loc>
+    <lastmod>2026-08-27</lastmod>
+    <priority>0.3</priority>
+  </url>
+  <url>
+    <loc>https://tellmeyourstory.uk/tribute</loc>
+    <lastmod>2026-08-27</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://tellmeyourstory.uk/unique-gift-for-elderly-parents</loc>
+    <lastmod>2026-08-27</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://tellmeyourstory.uk/what-is-a-life-story-book</loc>
+    <lastmod>2026-08-27</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://tellmeyourstory.uk/write-your-own-life-story</loc>
+    <lastmod>2026-08-27</lastmod>
+    <priority>0.7</priority>
+  </url>
 </urlset>
