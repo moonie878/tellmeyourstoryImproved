@@ -172,7 +172,19 @@
         </div>
       </div>
     </section>
-
+<!-- Internal link — Christmas gifts -->
+<section class="px-5 pb-12 sm:px-8">
+  <div class="mx-auto max-w-2xl text-center">
+    <p class="text-[15px] leading-[1.8] text-[#5C534E]">
+      If you're looking for a way to ask these questions properly, a keepsake book
+      makes a good excuse — and a good present. See our guide to
+      <router-link
+        to="/christmas-gifts-for-grandparents"
+        class="font-medium text-[#7C5C3B] underline underline-offset-2"
+      >Christmas gifts for grandparents</router-link>.
+    </p>
+  </div>
+</section>
     <!-- CTA -->
     <section class="bg-[#1C1917] px-5 py-16 text-center sm:px-8 sm:py-20">
       <h2 class="font-display text-2xl font-bold text-white sm:text-3xl">Their stories won't keep themselves</h2>

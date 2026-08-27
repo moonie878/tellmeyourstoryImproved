@@ -196,6 +196,7 @@
 </div>
       </div>
     </section>
+    <ChristmasDeadlineBanner />
 <!-- ── Printed Book callout ──────────────────────────────────────── -->
 <section class="px-5 pb-8 sm:px-8">
   <div class="mx-auto max-w-6xl">

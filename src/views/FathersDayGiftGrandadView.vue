@@ -135,7 +135,19 @@
         </div>
       </div>
     </section>
-
+<!-- Internal link — Christmas gifts -->
+<section class="px-5 pb-12 sm:px-8">
+  <div class="mx-auto max-w-2xl text-center">
+    <p class="text-[15px] leading-[1.8] text-[#5C534E]">
+      Missed Father's Day, or thinking ahead? The same gift works at Christmas —
+      see
+      <router-link
+        to="/christmas-gifts-for-grandparents"
+        class="font-medium text-[#7C5C3B] underline underline-offset-2"
+      >Christmas gifts for grandparents</router-link>.
+    </p>
+  </div>
+</section>
     <!-- CTA -->
     <section class="bg-[#1C1917] px-5 py-16 text-center sm:px-8 sm:py-20">
       <p class="text-xs font-medium uppercase tracking-[0.22em] text-[#9C7C5C]">This Father's Day</p>

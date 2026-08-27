@@ -164,6 +164,27 @@
       </div>
     </section>
 
+    <!-- Internal link — Christmas gifts for grandparents -->
+<section class="px-5 pb-12 sm:px-8">
+  <div class="mx-auto max-w-3xl rounded-2xl border border-[#E8DDD0] bg-white p-6 sm:p-8">
+    <p class="text-[11px] font-medium uppercase tracking-[0.22em] text-[#9C7C5C]">
+      Buying for a grandparent?
+    </p>
+    <h2 class="mt-3 font-display text-xl font-semibold text-stone-900">
+      Grandparents are the hardest people to buy for
+    </h2>
+    <p class="mt-3 text-[15px] leading-[1.8] text-[#5C534E]">
+      They already have the slippers and the biscuit tin. If you're stuck this year,
+      we've written a guide to
+      <router-link
+        to="/christmas-gifts-for-grandparents"
+        class="font-medium text-[#7C5C3B] underline underline-offset-2"
+      >Christmas gifts for grandparents</router-link>
+      and why capturing their life story lands differently to anything else you could wrap.
+    </p>
+  </div>
+</section>
+
     <!-- CTA -->
     <section class="bg-[#1C1917] px-5 py-16 text-center sm:px-8 sm:py-20">
       <p class="text-xs font-medium uppercase tracking-[0.22em] text-[#9C7C5C]">Christmas 2026</p>

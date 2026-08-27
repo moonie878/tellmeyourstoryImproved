@@ -65,6 +65,7 @@
 
         </div>
       </div>
+      <ChristmasDeadlineBanner />
     </section>
 
     <!-- Gift cards -->
@@ -183,7 +184,19 @@
         </div>
       </div>
     </section>
-
+<!-- Internal link — Christmas -->
+<section class="px-5 pb-14 sm:px-8">
+  <div class="mx-auto max-w-3xl text-center">
+    <p class="text-[15px] leading-[1.8] text-[#5C534E]">
+      Buying for Christmas? Read our guide to
+      <router-link
+        to="/christmas-gifts-for-grandparents"
+        class="font-medium text-[#7C5C3B] underline underline-offset-2"
+      >Christmas gifts for grandparents</router-link>,
+      including the last order date for printed books.
+    </p>
+  </div>
+</section>
     <!-- Gift form modal -->
     <Transition name="fade">
       <div

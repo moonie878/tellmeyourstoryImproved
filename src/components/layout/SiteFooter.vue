@@ -21,6 +21,9 @@
   <router-link to="/terms" class="hover:text-stone-900">Terms</router-link>
   <router-link to="/cookies" class="hover:text-stone-900">Cookies</router-link>
   <router-link to="/contact" class="hover:text-stone-900">Contact</router-link>
+  <router-link to="/christmas-gifts-for-grandparents" class="hover:text-stone-900">
+  Christmas gifts for grandparents
+</router-link>
 
   <a
     href="https://www.tiktok.com/@tellmeyourstoryuk"

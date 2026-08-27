@@ -141,7 +141,14 @@
         </div>
       </div>
     </section>
-
+<p class="mt-4 text-[15px] leading-[1.8] text-[#5C534E]">
+  If you're buying for Christmas, we've also written up
+  <router-link
+    to="/meaningful-christmas-gifts"
+    class="font-medium text-[#7C5C3B] underline underline-offset-2"
+  >eight meaningful Christmas gift ideas</router-link>
+  that get kept rather than recycled.
+</p>
     <!-- Related -->
     <section class="px-5 py-12 sm:px-8">
       <div class="mx-auto max-w-3xl">

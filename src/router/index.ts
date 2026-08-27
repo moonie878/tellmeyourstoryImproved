@@ -65,7 +65,7 @@ const routes = [
 },
 { path: '/life-story-book',                    name: 'life-story-book',                    component: () => import('../views/LifeStoryBookView.vue') },
 { path: '/memorial-book',                      name: 'memorial-book',                      component: () => import('../views/MemorialBookView.vue') },
-{ path: '/christmas-gift-ideas-for-grandparents', name: 'christmas-gift-grandparents',     component: () => import('../views/ChristmasGiftGrandparentsView.vue') },
+{ path: '/christmas-gift-ideas-for-grandparents', name: 'christmas-gift-grandparents',     component: () => import('../views/ChristmasGiftsGrandparentsView.vue') },
 { path: '/unique-gift-for-elderly-parents',    name: 'unique-gift-elderly-parents',        component: () => import('../views/UniqueGiftElderlyParentsView.vue') },
 { path: '/life-story-video', name: 'life-story-video', component: () => import('../views/LifeStoryVideoView.vue') },
 { path: '/questions-to-ask-elderly-parents', name: 'questions-elderly-parents',  component: () => import('../views/QuestionsToAskElderlyParentsView.vue') },
@@ -113,6 +113,20 @@ const routes = [
   path: '/storyworth-vs-tellmeyourstory',
   name: 'storyworth-vs-tellmeyourstory',
   component: () => import('../views/StoryworthVsTellMeYourStoryView.vue'),
+},
+{
+  path: '/christmas-gift-for-parents-who-have-everything',
+  component: () => import('../views/ChristmasGiftParentsHaveEverythingView.vue'),
+  meta: {
+    title: 'Christmas Gifts for Parents Who Have Everything | Tell Me Your Story',
+  },
+},
+{
+  path: '/meaningful-christmas-gifts',
+  component: () => import('../views/MeaningfulChristmasGiftsView.vue'),
+  meta: {
+    title: 'Meaningful Christmas Gifts — 8 Ideas That Get Kept | Tell Me Your Story',
+  },
 },
 {
   path: '/remento-vs-tellmeyourstory',
@@ -252,6 +266,13 @@ const routes = [
   path: '/my-story',
   component: () => import('../views/MyStoryView.vue'),
   meta: { title: 'My Story — Tell Me Your Story' },
+},
+{
+  path: '/christmas-gifts-for-grandparents',
+  component: () => import('../views/ChristmasGiftsGrandparentsView.vue'),
+  meta: {
+    title: 'Christmas Gifts for Grandparents — Their Life Story in Their Own Voice',
+  },
 },
 {
   path: '/help',

@@ -122,7 +122,13 @@
         </div>
       </div>
     </section>
-
+<p class="mt-4 text-[15px] leading-[1.8] text-[#5C534E]">
+  Looking for a present rather than a conversation? See our guide to
+  <router-link
+    to="/christmas-gift-for-parents-who-have-everything"
+    class="font-medium text-[#7C5C3B] underline underline-offset-2"
+  >Christmas gifts for parents who have everything</router-link>.
+</p>
     <!-- CTA -->
     <section class="bg-[#1C1917] px-5 py-16 text-center sm:px-8 sm:py-20">
       <p class="text-xs font-medium uppercase tracking-[0.22em] text-[#9C7C5C]">Don't wait</p>
