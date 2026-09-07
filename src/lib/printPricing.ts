@@ -54,7 +54,7 @@ export const BINDING_CONFIGS: BindingConfig[] = [
       { maxPages: 280, price: 43.99 },
     ],
   },
-  {
+/*   {
     id: 'hardcover',
     label: 'Hardcover Case Wrap',
     desc: 'Hardcover · premium colour interior',
@@ -93,7 +93,7 @@ export const BINDING_CONFIGS: BindingConfig[] = [
       { maxPages: 180, price: 34.99 + 23 },
       { maxPages: 280, price: 43.99 + 23 },
     ],
-  },
+  }, */
 ]
 
 /**

@@ -90,13 +90,21 @@ function main() {
   const paths = extractRoutePaths(source)
 
   if (paths.length === 0) {
-    console.error('No routes found — aborting sitemap generation (refusing to overwrite with an empty file).')
+    console.error('No routes found — aborting sitemap generation.')
     process.exit(1)
   }
 
   const xml = buildSitemap(paths)
+
   fs.writeFileSync(OUTPUT_FILE, xml, 'utf-8')
-  console.log(`Generated ${OUTPUT_FILE} with ${paths.length} URLs.`)
+  console.log(`SITEMAP: wrote public/sitemap.xml with ${paths.length} URLs`)
+
+  // Belt and braces — if dist/ exists, write there too
+  const distDir = path.join(ROOT, 'dist')
+  if (fs.existsSync(distDir)) {
+    fs.writeFileSync(path.join(distDir, 'sitemap.xml'), xml, 'utf-8')
+    console.log(`SITEMAP: also wrote dist/sitemap.xml with ${paths.length} URLs`)
+  }
 }
 
 main()
