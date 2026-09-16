@@ -450,6 +450,15 @@
 </section>
 
 <!-- ═══════════════════════════════════════ -->
+<!-- EMAIL CAPTURE                           -->
+<!-- ═══════════════════════════════════════ -->
+<section class="reveal px-5 py-14 sm:px-8 sm:py-16">
+  <div class="mx-auto max-w-5xl">
+    <EmailCaptureForm source="homepage" />
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════ -->
 <!-- GIFT — buy for someone you love        -->
 <!-- ═══════════════════════════════════════ -->
 <section class="reveal bg-[#F5F0E8] px-5 py-16 sm:px-8 sm:py-20">
@@ -581,6 +590,7 @@
 <script setup lang="ts">
 import { track } from '../lib/analytics'
 import { useSeo } from '../composables/useSeo'
+import EmailCaptureForm from '../components/Marketing/EmailCaptureForm.vue'
 import PricingTable from '../components/pricing/PricingTable.vue'
 import { PRINTED_BOOK_FROM_PRICE } from '../lib/printPricing'
 

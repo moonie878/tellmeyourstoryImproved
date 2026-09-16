@@ -84,6 +84,15 @@
       </div>
     </section>
 
+    <!-- ═══════════════════════════════════════ -->
+<!-- EMAIL CAPTURE                           -->
+<!-- ═══════════════════════════════════════ -->
+<section class="reveal px-5 py-14 sm:px-8 sm:py-16">
+  <div class="mx-auto max-w-5xl">
+    <EmailCaptureForm source="Questions-childhood" />
+  </div>
+</section>
+
     <!-- Related pages -->
     <section class="px-5 py-12 sm:px-8">
       <div class="mx-auto max-w-3xl">

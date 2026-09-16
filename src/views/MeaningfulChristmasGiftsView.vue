@@ -121,6 +121,15 @@
       </div>
     </section>
 
+<!-- ═══════════════════════════════════════ -->
+<!-- EMAIL CAPTURE                           -->
+<!-- ═══════════════════════════════════════ -->
+<section class="reveal px-5 py-14 sm:px-8 sm:py-16">
+  <div class="mx-auto max-w-5xl">
+    <EmailCaptureForm source="Meaningful-christmas-gifts" />
+  </div>
+</section>
+
     <!-- CTA -->
     <section class="px-5 py-16 sm:px-8">
       <div class="mx-auto max-w-3xl">

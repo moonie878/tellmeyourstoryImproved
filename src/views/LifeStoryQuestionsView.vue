@@ -66,6 +66,15 @@
       </div>
     </section>
 
+    <!-- ═══════════════════════════════════════ -->
+<!-- EMAIL CAPTURE                           -->
+<!-- ═══════════════════════════════════════ -->
+<section class="reveal px-5 py-14 sm:px-8 sm:py-16">
+  <div class="mx-auto max-w-5xl">
+    <EmailCaptureForm source="Life-story-questions" />
+  </div>
+</section>
+
     <!-- CTA -->
     <section class="bg-[#1C1917] px-5 py-16 text-center sm:px-8 sm:py-20">
       <p class="text-xs font-medium uppercase tracking-[0.22em] text-[#9C7C5C]">Make it easy</p>

@@ -313,6 +313,84 @@ app.post('/register-contact', async (req, res) => {
   }
 })
 
+// ─── Lead magnet: 50 questions PDF ────────────────────────────────────────────
+app.post('/subscribe-questions', async (req, res) => {
+  try {
+    const { email, source } = req.body
+    if (!email) return res.status(400).json({ error: 'Email required' })
+
+    const trimmed = String(email).trim().toLowerCase()
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
+      return res.status(400).json({ error: 'Invalid email' })
+    }
+
+    // Add to Resend contacts (idempotent — safe to call for existing contacts)
+    await addToResendContacts(trimmed, '')
+
+    // Record the signup so we can see which page converts
+    try {
+      await supabaseAdmin.from('lead_magnet_signups').insert({
+        email: trimmed,
+        source: source || 'unknown',
+      })
+    } catch (dbErr) {
+      // Non-critical — don't fail the request over analytics
+      console.log('Lead magnet log note:', dbErr.message)
+    }
+
+    // Send the PDF
+    await resend.emails.send({
+      from: 'Mark at Tell Me Your Story <mark-griffiths@tellmeyourstory.uk>',
+      to: trimmed,
+      subject: 'Your 50 questions are here',
+      html: `
+        <div style="font-family: Georgia, serif; max-width: 600px; margin: 0 auto; padding: 40px 20px;">
+          <h1 style="font-size: 24px; color: #1C1917; margin: 0 0 20px;">Your 50 questions</h1>
+
+          <p style="font-size: 15px; color: #5C534E; line-height: 1.7;">
+            Here they are — 50 questions to ask a parent or grandparent about their life.
+          </p>
+
+          <div style="background: #F5F0E8; border-radius: 16px; padding: 24px; margin: 24px 0; text-align: center;">
+            <a href="https://tellmeyourstory.uk/downloads/50-questions.pdf"
+               style="display: inline-block; background: #7C5C3B; color: white; padding: 13px 32px; border-radius: 100px; font-size: 14px; text-decoration: none; font-weight: 500;">
+              Download the PDF
+            </a>
+            <p style="font-size: 12px; color: #8C847E; margin: 12px 0 0;">Print it, or keep it on your phone</p>
+          </div>
+
+          <p style="font-size: 15px; color: #5C534E; line-height: 1.7;">
+            One suggestion: don't try to do all fifty. Pick one, ask it over a cup of tea, and see where it goes. The good stuff is almost always in the follow-up rather than the answer itself.
+          </p>
+
+          <p style="font-size: 15px; color: #5C534E; line-height: 1.7;">
+            I'll send you a few more useful things over the next couple of weeks. If that's not what you want, unsubscribe at the bottom and no hard feelings.
+          </p>
+
+          <p style="font-size: 14px; color: #3C3530; margin-top: 28px;">
+            Mark<br>
+            <span style="color: #8C847E; font-size: 13px;">Founder, Tell Me Your Story</span>
+          </p>
+
+          <hr style="border: none; border-top: 1px solid #E8DDD0; margin: 32px 0 16px;">
+
+          <p style="font-size: 11px; color: #A8A29E; line-height: 1.6;">
+            You're getting this because you asked for the questions PDF at tellmeyourstory.uk.
+            <a href="{{{RESEND_UNSUBSCRIBE_URL}}}" style="color: #9C7C5C;">Unsubscribe</a> ·
+            <a href="https://tellmeyourstory.uk/privacy" style="color: #9C7C5C;">Privacy</a>
+          </p>
+        </div>
+      `,
+    })
+
+    console.log('Lead magnet sent to:', trimmed, '| source:', source)
+    res.json({ success: true })
+  } catch (err) {
+    console.error('Subscribe questions error:', err.message)
+    res.status(500).json({ error: 'Could not send. Please try again.' })
+  }
+})
+
 // ─── Nurture: gate email (cron) ───────────────────────────────────────────────
 app.get('/cron/nurture-gate-email', async (req, res) => {
   // Protect with a secret so only your cron service can call it

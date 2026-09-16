@@ -110,6 +110,15 @@
           </p>
         </div>
 
+<!-- ═══════════════════════════════════════ -->
+<!-- EMAIL CAPTURE                           -->
+<!-- ═══════════════════════════════════════ -->
+<section class="reveal px-5 py-14 sm:px-8 sm:py-16">
+  <div class="mx-auto max-w-5xl">
+    <EmailCaptureForm source="Blog-questions" />
+  </div>
+</section>
+
         <!-- CTA -->
         <div class="mt-12 rounded-3xl bg-[#1C1917] px-6 py-10 sm:px-8 sm:py-12 text-center">
           <p class="text-[11px] font-medium uppercase tracking-[0.22em] text-[#9C7C5C]">Tell Me Your Story</p>

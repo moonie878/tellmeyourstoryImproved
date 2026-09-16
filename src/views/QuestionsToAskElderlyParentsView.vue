@@ -136,6 +136,15 @@
       </div>
     </section>
 
+<!-- ═══════════════════════════════════════ -->
+<!-- EMAIL CAPTURE                           -->
+<!-- ═══════════════════════════════════════ -->
+<section class="reveal px-5 py-14 sm:px-8 sm:py-16">
+  <div class="mx-auto max-w-5xl">
+    <EmailCaptureForm source="Questions-elderly-parents" />
+  </div>
+</section>
+
     <!-- FAQ -->
     <section class="bg-[#F5F0E8] px-5 py-16 sm:px-8 sm:py-20">
       <div class="mx-auto max-w-3xl">

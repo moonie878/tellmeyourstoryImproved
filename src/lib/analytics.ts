@@ -36,6 +36,7 @@ type AnalyticsEvent =
    | 'upgrade_gate_shown'
    |'story_auto_created'
    |'checkout_from_register'
+   | 'lead_magnet_signup'
 
 
 type AnalyticsValue =
