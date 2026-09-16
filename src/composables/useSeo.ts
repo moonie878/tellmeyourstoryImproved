@@ -1,3 +1,4 @@
+import { useRoute } from 'vue-router'
 import { onMounted, onUnmounted, watchEffect } from 'vue'
 
 type SeoOptions = {
@@ -33,6 +34,9 @@ if (options.canonical) {
     document.head.appendChild(descriptionTag)
   }
   descriptionTag.setAttribute('content', options.description)
+const route = useRoute()
+  const SITE_ORIGIN = 'https://tellmeyourstory.uk'
+const ogUrl = `${SITE_ORIGIN}${route.path}`
 
   // Open Graph tags
   const ogTags: Record<string, string> = {
@@ -41,7 +45,7 @@ if (options.canonical) {
     'og:type': 'website',
     'og:site_name': 'Tell Me Your Story',
     'og:image': options.ogImage ?? 'https://tellmeyourstory.uk/logo/tell-me-your-story-logo.png',
-    'og:url': window.location.href,
+    'og:url': ogUrl,
     'twitter:card': 'summary_large_image',
     'twitter:title': options.title,
     'twitter:description': options.description,
