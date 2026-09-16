@@ -7,7 +7,7 @@
         Start free, upgrade when you're ready
       </h2>
       <p class="mx-auto mt-4 max-w-2xl text-center text-base leading-[1.8] text-[#5C534E]">
-        Begin writing for free with no time limit. Unlock the finished keepsake when you're ready to export.
+        Try 5 questions free — no card needed. Upgrade whenever you're ready to unlock all 100+ and create your keepsake.
       </p>
 
       <!-- Table — desktop -->

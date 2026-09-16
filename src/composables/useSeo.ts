@@ -44,12 +44,12 @@ const ogUrl = `${SITE_ORIGIN}${route.path}`
     'og:description': options.description,
     'og:type': 'website',
     'og:site_name': 'Tell Me Your Story',
-    'og:image': options.ogImage ?? 'https://tellmeyourstory.uk/logo/tell-me-your-story-logo.png',
+    'og:image': options.ogImage ?? 'https://tellmeyourstory.uk/images/example-story-hero-cover.jpg',
     'og:url': ogUrl,
     'twitter:card': 'summary_large_image',
     'twitter:title': options.title,
     'twitter:description': options.description,
-    'twitter:image': options.ogImage ?? 'https://tellmeyourstory.uk/logo/tell-me-your-story-logo.png',
+    'twitter:image': options.ogImage ?? 'https://tellmeyourstory.uk/images/example-story-hero-cover.jpg',
   }
 
   for (const [property, content] of Object.entries(ogTags)) {
