@@ -3,6 +3,7 @@ const Stripe = require('stripe')
 const cors = require('cors')
 const { createClient } = require('@supabase/supabase-js')
 const Groq = require('groq-sdk')
+const crypto = require('crypto')
 const multer = require('multer')
 const { Resend } = require('resend')
 require('dotenv').config()
@@ -313,6 +314,58 @@ app.post('/register-contact', async (req, res) => {
   }
 })
 
+// ─── Unsubscribe ──────────────────────────────────────────────────────────────
+
+function unsubscribeToken(email) {
+  return crypto
+    .createHmac('sha256', process.env.UNSUBSCRIBE_SECRET || 'change-me')
+    .update(email.toLowerCase())
+    .digest('hex')
+    .slice(0, 32)
+}
+
+function unsubscribeUrl(email) {
+  const e = encodeURIComponent(email.toLowerCase())
+  return `${process.env.SERVER_URL || 'https://tellmeyourstoryimproved.onrender.com'}/unsubscribe?e=${e}&t=${unsubscribeToken(email)}`
+}
+
+app.get('/unsubscribe', async (req, res) => {
+  const { e: email, t: token } = req.query
+
+  const page = (heading, body) => `
+    <!DOCTYPE html><html><head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>${heading}</title></head>
+    <body style="font-family:Georgia,serif;background:#F5F0E8;margin:0;padding:60px 20px;">
+      <div style="max-width:480px;margin:0 auto;background:#fff;border-radius:20px;padding:40px;text-align:center;">
+        <h1 style="font-size:22px;color:#1C1917;margin:0 0 14px;">${heading}</h1>
+        <p style="font-size:15px;color:#5C534E;line-height:1.7;margin:0;">${body}</p>
+        <a href="https://tellmeyourstory.uk" style="display:inline-block;margin-top:28px;background:#7C5C3B;color:#fff;padding:12px 28px;border-radius:100px;font-size:14px;text-decoration:none;">Back to Tell Me Your Story</a>
+      </div>
+    </body></html>`
+
+  if (!email || !token || token !== unsubscribeToken(String(email))) {
+    return res.status(400).send(page('Link not valid', 'That unsubscribe link looks incomplete. Reply to any of my emails and I\'ll remove you manually.'))
+  }
+
+  try {
+    await fetch(`https://api.resend.com/contacts/${encodeURIComponent(String(email))}`, {
+      method: 'PATCH',
+      headers: {
+        'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ unsubscribed: true }),
+    })
+
+    console.log('Unsubscribed:', email)
+    res.send(page('You\'re unsubscribed', 'You won\'t hear from me again. If it was a mistake, just sign up again on the site.'))
+  } catch (err) {
+    console.error('Unsubscribe error:', err.message)
+    res.status(500).send(page('Something went wrong', 'Reply to any of my emails and I\'ll remove you manually.'))
+  }
+})
+
 // ─── Lead magnet: 50 questions PDF ────────────────────────────────────────────
 app.post('/subscribe-questions', async (req, res) => {
   try {
@@ -375,12 +428,16 @@ app.post('/subscribe-questions', async (req, res) => {
           <hr style="border: none; border-top: 1px solid #E8DDD0; margin: 32px 0 16px;">
 
           <p style="font-size: 11px; color: #A8A29E; line-height: 1.6;">
-            You're getting this because you asked for the questions PDF at tellmeyourstory.uk.
-            <a href="{{{RESEND_UNSUBSCRIBE_URL}}}" style="color: #9C7C5C;">Unsubscribe</a> ·
-            <a href="https://tellmeyourstory.uk/privacy" style="color: #9C7C5C;">Privacy</a>
-          </p>
+  You're getting this because you asked for the questions PDF at tellmeyourstory.uk.
+  <a href="${unsubscribeUrl(trimmed)}" style="color: #9C7C5C;">Unsubscribe</a> ·
+  <a href="https://tellmeyourstory.uk/privacy" style="color: #9C7C5C;">Privacy</a>
+</p>
         </div>
       `,
+      headers: {
+  'List-Unsubscribe': `<${unsubscribeUrl(trimmed)}>`,
+  'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
+},
     })
 
     console.log('Lead magnet sent to:', trimmed, '| source:', source)
