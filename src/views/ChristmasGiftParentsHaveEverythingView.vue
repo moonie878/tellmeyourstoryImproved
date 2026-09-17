@@ -230,14 +230,9 @@ import { computed } from 'vue'
 import { PRINTED_BOOK_FROM_PRICE } from '../lib/printPricing'
 import { useSeo } from '../composables/useSeo'
 
-const PRINT_CUTOFF = new Date('2026-12-10T23:59:59')
-const PRINT_CUTOFF_LABEL = '10 December'
+import { PRINT_CUTOFF_LABEL, canStillOrderPrint } from '../lib/christmas'
 
-const showDeadline = computed(() => {
-  const now = new Date()
-  const seasonStart = new Date(now.getFullYear(), 8, 15)
-  return now >= seasonStart && now <= PRINT_CUTOFF
-})
+const showDeadline = computed(() => canStillOrderPrint())
 
 const pillars = [
   {

@@ -230,7 +230,7 @@ class="rounded-2xl px-4 py-3 text-stone-700 transition hover:bg-stone-100"
         </nav>
       </div>
     </header>
-
+<ChristmasBanner />
     <router-view />
     <SiteFooter />
     <CookieBanner />
@@ -244,6 +244,7 @@ import { useRouter } from 'vue-router'
 import { posthog } from './lib/posthog'
 import SiteFooter from './components/layout/SiteFooter.vue'
 import CookieBanner from './components/legal/CookieBanner.vue'
+import ChristmasBanner from './components/christmas/ChristmasDeadlineBanner.vue'
 
 const router = useRouter()
 const user = ref<any>(null)

@@ -265,9 +265,9 @@ useSeo({
  * so 10 December is the safe last order date. Update the year
  * each season, or move to a shared constant if other pages need it.
  */
-import { PRINT_CUTOFF_LABEL, isChristmasSeason } from '../lib/christmas'
+import { PRINT_CUTOFF_LABEL, canStillOrderPrint } from '../lib/christmas'
 
-const showDeadline = computed(() => isChristmasSeason())
+const showDeadline = computed(() => canStillOrderPrint())
 
 const reasons = [
   {

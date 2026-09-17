@@ -37,6 +37,7 @@ type AnalyticsEvent =
    |'story_auto_created'
    |'checkout_from_register'
    | 'lead_magnet_signup'
+   | 'christmas_banner_clicked'
 
 
 type AnalyticsValue =
