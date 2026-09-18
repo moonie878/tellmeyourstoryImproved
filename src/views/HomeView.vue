@@ -4,7 +4,7 @@
     <!-- ═══════════════════════════════════════ -->
     <!-- HERO                                    -->
     <!-- ═══════════════════════════════════════ -->
-    <section class="reveal hero relative overflow-hidden px-5 pb-0 pt-20 sm:px-8 sm:pt-28 md:pt-32">
+    <section class="hero relative overflow-hidden px-5 pb-0 pt-20 sm:px-8 sm:pt-28 md:pt-32">
       <div class="grain"></div>
       <div class="hero-circle"></div>
 
@@ -19,8 +19,8 @@
             </div>
 
             <h1 class="mt-5 font-display text-[2.6rem] font-bold leading-[1.1] tracking-[-0.02em] text-[#1C1917] sm:text-5xl md:text-[3.6rem]">
-              Turn memories into a keepsake
-              <em class="italic text-[#7C5C3B]">worth holding forever</em>
+              The memory book that
+              <em class="italic text-[#7C5C3B]">plays their voice</em>
             </h1>
 
             <p class="mx-auto mt-6 max-w-lg text-base leading-[1.8] text-[#5C534E] sm:text-lg md:mx-0">
@@ -48,13 +48,17 @@
             <div class="hero-image-frame">
               <img
                 src="/images/example-story-hero-cover.jpg"
-                alt="Tell Me Your Story keepsake preview"
+                alt="Printed Tell Me Your Story keepsake book"
                 class="hero-img"
+                width="1200"
+                height="630"
                 loading="eager"
+                fetchpriority="high"
+                decoding="async"
               />
               <!-- Floating badge — updated to voice -->
   <div class="hero-badge">
-  <span class="hero-badge-icon">🎙️</span>
+  <span class="hero-badge-icon" aria-hidden="true">🎙️</span>
   <div>
     <p class="hero-badge-title">Voice recording saved</p>
     <p class="hero-badge-sub">QR code in the printed book</p>
@@ -66,7 +70,6 @@
         </div>
       </div>
     </section>
-<ChristmasDeadlineBanner />
     <!-- ═══════════════════════════════════════ -->
     <!-- NEW FEATURES — voice, QR, print        -->
     <!-- ═══════════════════════════════════════ -->
@@ -612,42 +615,34 @@ onMounted(() => {
 })
 
 useSeo({
-  title: 'Tell Me Your Story | Life Story Keepsake Books | Free to Start',
+  title: 'Memory Book That Plays Their Voice | Tell Me Your Story UK',
   description:
-    'Answer guided questions about someone you love — by typing or speaking. Voice recordings are saved with QR codes in your printed keepsake book, so family can hear their stories forever.',
-  canonical: 'https://tellmeyourstory.uk', 
-    schema: {
+    'A memory book with their voice inside. Answer guided questions by speaking or typing, then print a book with QR codes that play each story. No subscription.',
+  // canonical omitted on purpose: defaults to https://tellmeyourstory.uk/
+  // Organization + WebSite schema live in index.html (sitewide).
+  schema: {
     '@context': 'https://schema.org',
-    '@graph': [
+    '@type': 'SoftwareApplication',
+    name: 'Tell Me Your Story',
+    url: 'https://tellmeyourstory.uk/',
+    applicationCategory: 'LifestyleApplication',
+    operatingSystem: 'Web',
+    publisher: { '@id': 'https://tellmeyourstory.uk/#organization' },
+    description:
+      "Capture a loved one's life story by typing or speaking. Voice recordings are saved with QR codes in printed keepsake books — family scan to hear their voice years from now.",
+    // Keep in sync with PricingTable — ideally import these from one prices file.
+    offers: [
+      { '@type': 'Offer', name: 'Free', price: '0', priceCurrency: 'GBP', description: 'Start any story and answer 5 guided questions free.' },
+      { '@type': 'Offer', name: 'Keepsake Book', price: '3.99', priceCurrency: 'GBP' },
+      { '@type': 'Offer', name: 'Book + Photos', price: '7.99', priceCurrency: 'GBP' },
+      { '@type': 'Offer', name: 'All Stories', price: '11.99', priceCurrency: 'GBP' },
+      { '@type': 'Offer', name: 'Premium Keepsake', price: '17.99', priceCurrency: 'GBP' },
       {
-        '@type': 'WebSite',
-        name: 'Tell Me Your Story',
-        url: 'https://tellmeyourstory.uk',
-        description: 'A guided app to capture a loved one\'s life story — by voice or text — and turn it into a beautiful keepsake book with QR codes that play their voice recordings.',
-        publisher: {
-          '@type': 'Organization',
-          name: 'Tell Me Your Story',
-          url: 'https://tellmeyourstory.uk',
-          logo: {
-            '@type': 'ImageObject',
-            url: 'https://tellmeyourstory.uk/logo/logo-full-new.png',
-          },
-        },
-      },
-      {
-        '@type': 'SoftwareApplication',
-        name: 'Tell Me Your Story',
-        url: 'https://tellmeyourstory.uk',
-        applicationCategory: 'LifestyleApplication',
-        operatingSystem: 'Web',
-        description: 'Capture a loved one\'s life story by typing or speaking. Voice recordings are saved with QR codes in printed keepsake books — family scan to hear their voice years from now.',
-        offers: [
-          { '@type': 'Offer', name: 'Free Trial', price: '0', priceCurrency: 'GBP', description: 'Start any story, answer 5 guided questions free, see your story as a book page.' },
-          { '@type': 'Offer', name: 'Single Story', price: '3.99', priceCurrency: 'GBP' },
-          { '@type': 'Offer', name: 'Story + Photos', price: '5.99', priceCurrency: 'GBP' },
-          { '@type': 'Offer', name: 'Full Collection', price: '11.99', priceCurrency: 'GBP' },
-          { '@type': 'Offer', name: 'Printed Book', price: String(PRINTED_BOOK_FROM_PRICE), priceCurrency: 'GBP', description: 'Professionally printed 6x9 softcover with QR voice codes, shipped UK-wide.' },
-        ],
+        '@type': 'Offer',
+        name: 'Printed Book',
+        price: PRINTED_BOOK_FROM_PRICE.toFixed(2),
+        priceCurrency: 'GBP',
+        description: 'Professionally printed 6x9 softcover with QR voice codes, shipped UK-wide.',
       },
     ],
   },
@@ -679,7 +674,7 @@ h1 { font-family: 'Playfair Display', Georgia, serif; }
 
 .hero-image-wrap { position: relative; z-index: 1; width: 100%; }
 .hero-image-frame { position: relative; display: inline-block; }
-.hero-img { width: 100%; max-width: 560px; border-radius: 24px; box-shadow: 0 32px 80px rgba(0,0,0,0.14), 0 8px 24px rgba(0,0,0,0.08); }
+.hero-img { width: 100%; height: auto; max-width: 560px; border-radius: 24px; box-shadow: 0 32px 80px rgba(0,0,0,0.14), 0 8px 24px rgba(0,0,0,0.08); }
 .hero-badge { position: absolute; bottom: 24px; left: -20px; display: flex; align-items: center; gap: 10px; background: white; border-radius: 16px; padding: 10px 16px; box-shadow: 0 8px 32px rgba(0,0,0,0.12); font-size: 13px; max-width: 200px; }
 .hero-badge-icon { font-size: 22px; flex-shrink: 0; }
 .hero-badge-title { font-weight: 600; color: #1C1917; line-height: 1.3; }
@@ -831,4 +826,8 @@ h1 { font-family: 'Playfair Display', Georgia, serif; }
 .reveal-delay-1 { transition-delay: 0.1s; }
 .reveal-delay-2 { transition-delay: 0.2s; }
 .reveal-delay-3 { transition-delay: 0.3s; }
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal { opacity: 1; transform: none; transition: none; }
+}
 </style>

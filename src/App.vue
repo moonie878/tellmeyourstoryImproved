@@ -2,235 +2,130 @@
   <div class="min-h-screen bg-stone-50 text-stone-900">
     <header class="sticky top-0 z-40 border-b border-stone-200 bg-stone-50/90 backdrop-blur">
       <div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6">
-        <router-link
-          to="/"
-          class="shrink-0"
-          @click="mobileMenuOpen = false"
-        >
+        <router-link to="/" class="shrink-0" aria-label="Tell Me Your Story home">
           <img
             src="/logo/logo-full-new.png"
             alt="Tell Me Your Story"
+            width="180"
+            height="48"
             class="h-10 w-auto object-contain transition hover:opacity-90 md:h-12"
           />
         </router-link>
 
         <!-- Desktop nav -->
-        <nav class="hidden items-center gap-6 text-sm font-medium md:flex">
-          <template v-if="user">
-            <router-link to="/dashboard" class="text-stone-600 transition hover:text-stone-900">
-              Dashboard
-            </router-link>
-            <router-link to="/account" class="text-stone-600 transition hover:text-stone-900">
-  Account
-</router-link>
-<router-link to="/tribute" class="text-stone-600 transition hover:text-stone-900">
-  Tribute Video
-</router-link>
-            <router-link to="/contact" class="text-stone-600 transition hover:text-stone-900">
-              Contact
-            </router-link>
-            <router-link to="/gift" class="text-stone-600 transition hover:text-stone-900">
-  Gift
-</router-link>
-            <router-link to="/help" class="text-stone-600 transition hover:text-stone-900">
-              Help & Guides
-            </router-link>
-<router-link to="/my-story" class="text-stone-600 transition hover:text-stone-900">
-  Our Story
-</router-link>
-            <button
-              @click="handleLogout"
-              class="rounded-full border border-stone-300 bg-white px-4 py-2 text-stone-900 transition hover:bg-stone-100"
-            >
-              Logout
-            </button>
-          </template>
+        <nav class="hidden items-center gap-6 text-sm font-medium md:flex" aria-label="Main">
+          <router-link
+            v-for="link in navLinks"
+            :key="link.to"
+            :to="link.to"
+            class="rounded text-stone-600 transition hover:text-stone-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stone-900 focus-visible:ring-offset-2"
+            active-class="text-stone-900"
+          >
+            {{ link.label }}
+          </router-link>
 
-          <template v-else>
-            <router-link to="/example" class="text-stone-600 transition hover:text-stone-900">
-              Example story
-            </router-link>
+          <button
+            v-if="user"
+            type="button"
+            class="rounded-full border border-stone-300 bg-white px-4 py-2 text-stone-900 transition hover:bg-stone-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stone-900 focus-visible:ring-offset-2"
+            @click="handleLogout"
+          >
+            Logout
+          </button>
 
-            <router-link to="/pricing" class="text-stone-600 transition hover:text-stone-900"           
-            >
-  Pricing
-</router-link>
-<router-link to="/gift" class="text-stone-600 transition hover:text-stone-900">
-  Gift
-</router-link>
-<router-link to="/tribute" class="text-stone-600 transition hover:text-stone-900">
-  Tribute Video
-</router-link>
-            
-<router-link to="/my-story" class="text-stone-600 transition hover:text-stone-900">
-  Our Story
-</router-link>
-            <router-link to="/contact" class="text-stone-600 transition hover:text-stone-900">
-              Contact
-            </router-link>
-            <router-link to="/help" class="text-stone-600 transition hover:text-stone-900">
-              Help & Guides
-            </router-link>
-
-            <router-link to="/login" class="text-stone-600 transition hover:text-stone-900">
-              Login
-            </router-link>
-
-            <router-link
-              to="/register"
-              class="rounded-full bg-stone-900 px-4 py-2 text-white transition hover:opacity-90"
-            >
-              Get started free
-            </router-link>
-          </template>
+          <router-link
+            v-else
+            to="/register"
+            class="rounded-full bg-stone-900 px-4 py-2 text-white transition hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stone-900 focus-visible:ring-offset-2"
+          >
+            Get started free
+          </router-link>
         </nav>
 
-        <!-- Mobile burger -->
-        <button
-          @click="mobileMenuOpen = !mobileMenuOpen"
-          class="flex h-11 w-11 items-center justify-center rounded-full border border-stone-300 bg-white md:hidden"
-          :aria-label="mobileMenuOpen ? 'Close menu' : 'Open menu'"
-          :aria-expanded="mobileMenuOpen"
-        >
-          <svg
-            v-if="!mobileMenuOpen"
-            xmlns="http://www.w3.org/2000/svg"
-            class="h-5 w-5 text-stone-900"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            stroke-width="1.8"
+        <!-- Mobile: primary CTA stays visible next to the burger -->
+        <div class="flex items-center gap-2 md:hidden">
+          <router-link
+            v-if="!user"
+            to="/register"
+            class="rounded-full bg-stone-900 px-4 py-2.5 text-sm font-medium text-white transition hover:opacity-90"
           >
-            <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
-          </svg>
+            Start free
+          </router-link>
 
-          <svg
-            v-else
-            xmlns="http://www.w3.org/2000/svg"
-            class="h-5 w-5 text-stone-900"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            stroke-width="1.8"
+          <button
+            type="button"
+            class="flex h-11 w-11 items-center justify-center rounded-full border border-stone-300 bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stone-900"
+            :aria-label="mobileMenuOpen ? 'Close menu' : 'Open menu'"
+            :aria-expanded="mobileMenuOpen"
+            aria-controls="mobile-menu"
+            @click="mobileMenuOpen = !mobileMenuOpen"
           >
-            <path stroke-linecap="round" stroke-linejoin="round" d="M6 6l12 12M18 6l-12 12" />
-          </svg>
-        </button>
+            <svg
+              v-if="!mobileMenuOpen"
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-5 w-5 text-stone-900"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              stroke-width="1.8"
+              aria-hidden="true"
+            >
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+            <svg
+              v-else
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-5 w-5 text-stone-900"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              stroke-width="1.8"
+              aria-hidden="true"
+            >
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 6l12 12M18 6l-12 12" />
+            </svg>
+          </button>
+        </div>
       </div>
 
       <!-- Mobile menu -->
       <div
         v-if="mobileMenuOpen"
+        id="mobile-menu"
         class="border-t border-stone-200 bg-white px-4 pb-5 pt-4 shadow-sm md:hidden"
       >
-        <nav class="flex flex-col gap-2 text-sm font-medium">
-          <template v-if="user">
-            <router-link
-              to="/dashboard"
-              class="rounded-2xl px-4 py-3 text-stone-700 transition hover:bg-stone-100"
-              @click="mobileMenuOpen = false"
-            >
-              Dashboard
-            </router-link>
-            <router-link
-  to="/account"
-  class="rounded-2xl px-4 py-3 text-stone-700 transition hover:bg-stone-100"
-  @click="mobileMenuOpen = false"
->
-  Account
-</router-link>
-<router-link to="/tribute"
-class="rounded-2xl px-4 py-3 text-stone-700 transition hover:bg-stone-100"
-              @click="mobileMenuOpen = false">
-  Tribute Video
-</router-link>
-            <router-link
-              to="/contact"
-              class="rounded-2xl px-4 py-3 text-stone-700 transition hover:bg-stone-100"
-              @click="mobileMenuOpen = false"
-            >
-              Contact
-            </router-link>
-            <router-link to="/gift" class="text-stone-600 transition hover:text-stone-900" @click="mobileMenuOpen = false">
-  Gift
-</router-link>
-<router-link
-  to="/my-story"
-  class="rounded-2xl px-4 py-3 text-stone-700 transition hover:bg-stone-100"
-  @click="mobileMenuOpen = false"
->
-  Our Story
-</router-link>
-            <button
-              @click="handleMobileLogout"
-              class="mt-2 rounded-2xl border border-stone-300 bg-white px-4 py-3 text-left text-stone-900 transition hover:bg-stone-100"
-            >
-              Logout
-            </button>
-          </template>
+        <nav class="flex flex-col gap-1 text-base font-medium" aria-label="Mobile">
+          <router-link
+            v-for="link in navLinks"
+            :key="link.to"
+            :to="link.to"
+            class="rounded-2xl px-4 py-3 text-stone-700 transition hover:bg-stone-100"
+            active-class="bg-stone-100 text-stone-900"
+          >
+            {{ link.label }}
+          </router-link>
 
-          <template v-else>
-            <router-link
-              to="/example"
-              class="rounded-2xl px-4 py-3 text-stone-700 transition hover:bg-stone-100"
-              @click="mobileMenuOpen = false"
-            >
-              Example story
-            </router-link>
-            <router-link 
-              to="/tribute"
-              class="rounded-2xl px-4 py-3 text-stone-700 transition hover:bg-stone-100"
-              @click="mobileMenuOpen = false"
-              >
-                Tribute Video
-            </router-link>
-            <router-link 
-              to="/pricing"
-              class="rounded-2xl px-4 py-3 text-stone-700 transition hover:bg-stone-100"
-              @click="mobileMenuOpen = false"
-            >
-              Pricing
-            </router-link>
-            <router-link to="/gift" class="text-stone-600 transition hover:text-stone-900">
-  Gift
-</router-link>
-<router-link
-  to="/my-story"
-  class="rounded-2xl px-4 py-3 text-stone-700 transition hover:bg-stone-100"
-  @click="mobileMenuOpen = false"
->
-  Our Story
-</router-link>
-            <router-link
-              to="/contact"
-              class="rounded-2xl px-4 py-3 text-stone-700 transition hover:bg-stone-100"
-              @click="mobileMenuOpen = false"
-            >
-              Contact
-            </router-link>
-<router-link to="/help" class="rounded-2xl px-4 py-3 text-stone-700 transition hover:bg-stone-100" @click="mobileMenuOpen = false">
-              Help & Guides
-            </router-link>
-            <router-link
-              to="/login"
-              class="rounded-2xl px-4 py-3 text-stone-700 transition hover:bg-stone-100"
-              @click="mobileMenuOpen = false"
-            >
-              Login
-            </router-link>
+          <button
+            v-if="user"
+            type="button"
+            class="mt-2 rounded-2xl border border-stone-300 bg-white px-4 py-3 text-left text-stone-900 transition hover:bg-stone-100"
+            @click="handleLogout"
+          >
+            Logout
+          </button>
 
-            <router-link
-              to="/register"
-              class="mt-2 rounded-2xl bg-stone-900 px-4 py-3 text-center text-white transition hover:opacity-90"
-              @click="mobileMenuOpen = false"
-            >
-              Get started free
-            </router-link>
-          </template>
+          <router-link
+            v-else
+            to="/register"
+            class="mt-2 rounded-2xl bg-stone-900 px-4 py-3 text-center text-white transition hover:opacity-90"
+          >
+            Get started free
+          </router-link>
         </nav>
       </div>
     </header>
-<ChristmasBanner />
+
+    <ChristmasBanner />
     <router-view />
     <SiteFooter />
     <CookieBanner />
@@ -238,77 +133,120 @@ class="rounded-2xl px-4 py-3 text-stone-700 transition hover:bg-stone-100"
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
+import type { User } from '@supabase/supabase-js'
 import { supabase } from './lib/supabase'
-import { useRouter } from 'vue-router'
 import { posthog } from './lib/posthog'
 import SiteFooter from './components/layout/SiteFooter.vue'
 import CookieBanner from './components/legal/CookieBanner.vue'
 import ChristmasBanner from './components/christmas/ChristmasDeadlineBanner.vue'
 
+interface NavLink {
+  to: string
+  label: string
+}
+
 const router = useRouter()
-const user = ref<any>(null)
+const route = useRoute()
+const user = ref<User | null>(null)
 const mobileMenuOpen = ref(false)
 
-function identifyPostHogUser(currentUser: any) {
-  if (!currentUser) return
+const loggedInLinks: NavLink[] = [
+  { to: '/dashboard', label: 'Dashboard' },
+  { to: '/account', label: 'Account' },
+  { to: '/gift', label: 'Gift' },
+  { to: '/tribute', label: 'Tribute Video' },
+  { to: '/my-story', label: 'Our Story' },
+  { to: '/help', label: 'Help & Guides' },
+  { to: '/contact', label: 'Contact' },
+]
 
-  posthog.identify(currentUser.id, {
-    email: currentUser.email,
+const loggedOutLinks: NavLink[] = [
+  { to: '/example', label: 'Example story' },
+  { to: '/pricing', label: 'Pricing' },
+  { to: '/gift', label: 'Gift' },
+  { to: '/tribute', label: 'Tribute Video' },
+  { to: '/my-story', label: 'Our Story' },
+  { to: '/help', label: 'Help & Guides' },
+  { to: '/contact', label: 'Contact' },
+  { to: '/login', label: 'Login' },
+]
+
+const navLinks = computed(() => (user.value ? loggedInLinks : loggedOutLinks))
+
+// Close the mobile menu on any navigation
+watch(
+  () => route.fullPath,
+  () => {
+    mobileMenuOpen.value = false
+  },
+)
+
+function onKeydown(e: KeyboardEvent) {
+  if (e.key === 'Escape') mobileMenuOpen.value = false
+}
+
+function identify(currentUser: User) {
+  // Only identify when the ID actually changes (not on every token refresh)
+  if (posthog.get_distinct_id?.() === currentUser.id) return
+  posthog.identify(currentUser.id, { email: currentUser.email })
+}
+
+function registerGoogleContactOnce(currentUser: User) {
+  const key = `tmys-contact-registered-${currentUser.id}`
+  if (localStorage.getItem(key)) return
+  localStorage.setItem(key, '1')
+
+  fetch(`${import.meta.env.VITE_API_BASE_URL}/register-contact`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email: currentUser.email, firstName: '' }),
+  }).catch(() => {
+    // Non-critical — allow a retry next session
+    localStorage.removeItem(key)
   })
 }
 
-async function getUser() {
-  const {
-    data: { user: currentUser },
-  } = await supabase.auth.getUser()
-
-  user.value = currentUser
-
-  if (currentUser) {
-    identifyPostHogUser(currentUser)
-  }
-}
-
 async function handleLogout() {
-  await supabase.auth.signOut()
-  posthog.reset()
-  user.value = null
   mobileMenuOpen.value = false
+  await supabase.auth.signOut()
+  // posthog.reset() runs in the SIGNED_OUT handler below
+  user.value = null
   router.push('/login')
 }
 
-async function handleMobileLogout() {
-  mobileMenuOpen.value = false
-  await handleLogout()
-}
+let unsubscribeAuth: (() => void) | null = null
 
 onMounted(() => {
-  getUser()
+  window.addEventListener('keydown', onKeydown)
 
-supabase.auth.onAuthStateChange(async (_event, session) => {
-  user.value = session?.user || null
+  // Fires INITIAL_SESSION immediately, so no separate getUser() call is needed.
+  // The callback is deliberately synchronous: awaiting inside it holds the
+  // Supabase auth lock and blocks other auth calls.
+  const { data } = supabase.auth.onAuthStateChange((event, session) => {
+    const currentUser = session?.user ?? null
+    user.value = currentUser
 
-  if (session?.user) {
-    posthog.identify(session.user.id, {
-      email: session.user.email,
-    })
+    if (currentUser) {
+      identify(currentUser)
 
-    // Add to Resend contacts on first Google sign in
-    if (_event === 'SIGNED_IN' && session.user.app_metadata?.provider === 'google') {
-      try {
-        await fetch(`${import.meta.env.VITE_API_BASE_URL}/register-contact`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email: session.user.email, firstName: '' }),
-        })
-      } catch {
-        // Non-critical
+      if (event === 'SIGNED_IN' && currentUser.app_metadata?.provider === 'google') {
+        setTimeout(() => registerGoogleContactOnce(currentUser), 0)
       }
+    } else if (event === 'SIGNED_OUT') {
+      // Only reset on a real sign-out. Resetting on INITIAL_SESSION would give
+      // every anonymous visitor a new PostHog ID on each full page load,
+      // breaking UTM attribution and funnels.
+      posthog.reset()
     }
-  } else {
-    posthog.reset()
-  }
+  })
+
+  unsubscribeAuth = () => data.subscription.unsubscribe()
 })
+
+onBeforeUnmount(() => {
+  window.removeEventListener('keydown', onKeydown)
+  unsubscribeAuth?.()
 })
 </script>

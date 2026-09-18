@@ -1,63 +1,89 @@
 <!doctype html>
-<html lang="en">
+<html lang="en-GB">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/png" href="/favicon-32x32.png" />
-    <link rel="shortcut icon" href="/favicon-32x32.png" />
-<link rel="apple-touch-icon" href="/favicon-32x32.png" />
-    <meta name="theme-color" content="#1c1917" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#1c1917" />
 
-    <title>Tell Me Your Story | Capture your parents' story</title>
+    <link rel="icon" type="image/png" href="/favicon-32x32.png" />
+    <link rel="apple-touch-icon" href="/favicon-32x32.png" />
 
+    <!--
+      Fallback head tags only. src/lib/seo.ts sets the real title, description,
+      canonical, robots, og:url and OG/Twitter tags per route, and the prerender
+      script bakes them into each page's HTML.
+      Do NOT add a canonical or og:url here — a static one points every page
+      at the homepage.
+    -->
+    <title>Memory Book That Plays Their Voice | Tell Me Your Story UK</title>
     <meta
       name="description"
-      content="Answer meaningful questions and transform memories into a beautifully finished keepsake you can save, print, and share."
+      content="A memory book with their voice inside. Answer guided questions by speaking or typing, then print a book with QR codes that play each story. No subscription."
     />
 
-    <!-- Canonical -->
-    <link rel="canonical" href="https://tellmeyourstory.uk/" />
-
-    <!-- Open Graph -->
-    <meta property="og:title" content="Tell Me Your Story | Capture your parents' story" />
-    <meta property="og:description" content="Answer meaningful questions and transform memories into a beautifully finished keepsake you can save, print, and share." />
-    <meta property="og:type" content="website" />
     <meta property="og:site_name" content="Tell Me Your Story" />
-    <meta property="og:url" content="https://tellmeyourstory.uk" />
-    <meta property="og:image" content="https://tellmeyourstory.uk/og-image.jpg" />
+    <meta property="og:locale" content="en_GB" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Memory Book That Plays Their Voice | Tell Me Your Story UK" />
+    <meta
+      property="og:description"
+      content="A memory book with their voice inside. Answer guided questions by speaking or typing, then print a book with QR codes that play each story. No subscription."
+    />
+    <meta property="og:image" content="https://tellmeyourstory.uk/images/example-story-hero-cover.jpg" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta property="og:image:alt" content="Tell Me Your Story — capture a loved one's life story" />
-    <meta property="og:locale" content="en_GB" />
 
-    <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Tell Me Your Story | Capture your parents' story" />
-    <meta name="twitter:description" content="Answer meaningful questions and transform memories into a beautifully finished keepsake you can save, print, and share." />
-    <meta name="twitter:image" content="https://tellmeyourstory.uk/og-image.jpg" />
+    <meta name="twitter:title" content="Memory Book That Plays Their Voice | Tell Me Your Story UK" />
+    <meta
+      name="twitter:description"
+      content="A memory book with their voice inside. Answer guided questions by speaking or typing, then print a book with QR codes that play each story. No subscription."
+    />
+    <meta name="twitter:image" content="https://tellmeyourstory.uk/images/example-story-hero-cover.jpg" />
     <meta name="twitter:image:alt" content="Tell Me Your Story — capture a loved one's life story" />
 
-    <!-- Fonts — preconnect first, then load. Replaces all @import in Vue components -->
-    <!-- Fonts -->
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link
-  rel="stylesheet"
-  href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap"
-/>
-<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
-    <noscript>
-      <link
-        rel="stylesheet"
-        href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap"
-      />
-    </noscript>
+    <!-- Fonts: one request for all three families -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=Lora:ital,wght@0,400;0,500;1,400&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap"
+    />
 
-    <!-- DNS prefetch for third parties -->
+    <!-- Third parties -->
     <link rel="dns-prefetch" href="https://jeyybcdnmezivjuvmmcu.supabase.co" />
     <link rel="dns-prefetch" href="https://js.stripe.com" />
     <link rel="dns-prefetch" href="https://app.posthog.com" />
 
+    <!-- Organisation + website structured data (valid on every page) -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "Organization",
+            "@id": "https://tellmeyourstory.uk/#organization",
+            "name": "Tell Me Your Story",
+            "url": "https://tellmeyourstory.uk/",
+            "logo": "https://tellmeyourstory.uk/logo/logo-full-new.png",
+            "sameAs": [
+              "https://www.tiktok.com/@tellmeyourstoryuk",
+              "https://www.facebook.com/profile.php?id=61563166074344",
+              "https://uk.trustpilot.com/review/tellmeyourstory.uk"
+            ]
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://tellmeyourstory.uk/#website",
+            "name": "Tell Me Your Story",
+            "url": "https://tellmeyourstory.uk/",
+            "inLanguage": "en-GB",
+            "publisher": { "@id": "https://tellmeyourstory.uk/#organization" }
+          }
+        ]
+      }
+    </script>
   </head>
 
   <body>
