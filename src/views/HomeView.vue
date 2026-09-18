@@ -53,7 +53,9 @@
           <!-- Right — hero image -->
           <div class="hero-image-wrap flex justify-center md:justify-end">
             <div class="hero-image-frame">
-              <img
+              <picture>
+                <source srcset="/images/example-story-hero-cover.webp" type="image/webp" />
+                <img
                 src="/images/example-story-hero-cover.jpg"
                 alt="Printed Tell Me Your Story keepsake book"
                 class="hero-img"
@@ -63,6 +65,7 @@
                 fetchpriority="high"
                 decoding="async"
               />
+              </picture>
               <div class="hero-badge">
                 <span class="hero-badge-icon" aria-hidden="true">🎙️</span>
                 <div>
@@ -162,7 +165,7 @@
       <!-- Large tile — Editor -->
       <div class="reveal reveal-delay-1 col-span-2 overflow-hidden rounded-2xl border border-stone-200 bg-[#FAFAF8]">
         <img
-          src="/images/Screenshots/editor.png"
+          src="/images/Screenshots/editor.webp"
           alt="Story editor showing a question with a typed answer"
           class="w-full"
           loading="lazy"
@@ -176,7 +179,7 @@
       <!-- Voice recording -->
       <div class="reveal reveal-delay-2 col-span-1 overflow-hidden rounded-2xl border border-stone-200 bg-[#FAFAF8]">
         <img
-          src="/images/Screenshots/voice-recording.png"
+          src="/images/Screenshots/voice-recording.webp"
           alt="Voice recording in progress with live transcription"
           class="w-full"
           loading="lazy"
@@ -190,7 +193,7 @@
       <!-- Book page preview -->
       <div class="reveal reveal-delay-1 col-span-1 overflow-hidden rounded-2xl border border-stone-200 bg-[#FAFAF8]">
         <img
-          src="/images/Screenshots/book-page.png"
+          src="/images/Screenshots/book-page.webp"
           alt="Formatted book page with question, answer and photo"
           class="w-full"
           loading="lazy"
@@ -204,7 +207,7 @@
       <!-- QR code -->
       <div class="reveal reveal-delay-2 col-span-1 overflow-hidden rounded-2xl border border-stone-200 bg-[#FAFAF8]">
         <img
-          src="/images/Screenshots/qr-code.png"
+          src="/images/Screenshots/qr-code.webp"
           alt="QR code printed in the book linking to voice recording"
           class="w-full"
           loading="lazy"
@@ -218,7 +221,7 @@
       <!-- Printed book — large -->
       <div class="reveal reveal-delay-3 col-span-2 lg:col-span-1 overflow-hidden rounded-2xl border border-stone-200 bg-[#FAFAF8]">
         <img
-          src="/images/Screenshots/printed-book.jpg"
+          src="/images/Screenshots/printed-book.webp"
           alt="Physical printed keepsake book"
           class="w-full"
           loading="lazy"
@@ -357,7 +360,7 @@
         aria-label="Visit Living Well Dying Well Training"
       >
         <img
-          src="/images/partners/lwdw-logo.png"
+          src="/images/partners/lwdw-logo.webp"
           alt="Living Well Dying Well — End of Life Doula Training"
           class="h-12 w-auto sm:h-14"
           loading="lazy"
@@ -535,7 +538,22 @@ import PricingTable from '../components/pricing/PricingTable.vue'
 import { PRINTED_BOOK_FROM_PRICE } from '../lib/printPricing'
 import { PRINT_CUTOFF_LABEL } from '../lib/christmas'
 
-import { onMounted } from 'vue'
+import { onMounted, onUnmounted } from 'vue'
+
+// Preload the hero image (the page's largest paint). Runs during setup, so the
+// prerender bakes this <link> into the homepage HTML.
+const HERO_IMAGE = '/images/example-story-hero-cover.webp'
+let heroPreload = document.head.querySelector<HTMLLinkElement>(`link[rel="preload"][href="${HERO_IMAGE}"]`)
+if (!heroPreload) {
+  heroPreload = document.createElement('link')
+  heroPreload.rel = 'preload'
+  heroPreload.as = 'image'
+  heroPreload.type = 'image/webp'
+  heroPreload.href = HERO_IMAGE
+  heroPreload.setAttribute('fetchpriority', 'high')
+  document.head.appendChild(heroPreload)
+}
+onUnmounted(() => heroPreload?.remove())
 
 onMounted(() => {
   const observer = new IntersectionObserver(
