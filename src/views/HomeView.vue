@@ -4,7 +4,7 @@
     <!-- ═══════════════════════════════════════ -->
     <!-- 1. HERO                                 -->
     <!-- ═══════════════════════════════════════ -->
-    <section class="hero relative overflow-hidden px-5 pb-0 pt-16 sm:px-8 sm:pt-24 md:pt-28">
+    <section ref="heroEl" class="hero relative overflow-hidden px-5 pb-0 pt-16 sm:px-8 sm:pt-24 md:pt-28">
       <div class="grain"></div>
       <div class="hero-circle"></div>
 
@@ -101,7 +101,7 @@
                 </span>
                 <div>
                   <h3 class="text-base font-semibold text-white">{{ step.title }}</h3>
-                  <p class="mt-1 text-sm leading-relaxed text-stone-300">{{ step.desc }}</p>
+                  <p class="mt-1 text-base leading-relaxed text-stone-300">{{ step.desc }}</p>
                 </div>
               </li>
             </ol>
@@ -172,7 +172,7 @@
         />
         <div class="px-5 py-4">
           <p class="text-sm font-semibold text-stone-900">Answer 100+ thoughtful questions</p>
-          <p class="mt-1 text-xs text-stone-500">Type your answer or tap the mic to speak — we transcribe it for you</p>
+          <p class="mt-1 text-sm leading-relaxed text-stone-500">Type your answer or tap the mic to speak — we transcribe it for you</p>
         </div>
       </div>
 
@@ -186,7 +186,7 @@
         />
         <div class="px-4 py-3">
           <p class="text-sm font-semibold text-stone-900">Record your voice</p>
-          <p class="mt-1 text-xs text-stone-500">Speak naturally — perfect for parents who find typing difficult</p>
+          <p class="mt-1 text-sm leading-relaxed text-stone-500">Speak naturally — perfect for parents who find typing difficult</p>
         </div>
       </div>
 
@@ -200,7 +200,7 @@
         />
         <div class="px-4 py-3">
           <p class="text-sm font-semibold text-stone-900">Every answer becomes a page</p>
-          <p class="mt-1 text-xs text-stone-500">Beautifully formatted with photos and serif typography</p>
+          <p class="mt-1 text-sm leading-relaxed text-stone-500">Beautifully formatted with photos and serif typography</p>
         </div>
       </div>
 
@@ -214,7 +214,7 @@
         />
         <div class="px-4 py-3">
           <p class="text-sm font-semibold text-stone-900">QR codes in the book</p>
-          <p class="mt-1 text-xs text-stone-500">Scan with your phone to hear their voice telling the story</p>
+          <p class="mt-1 text-sm leading-relaxed text-stone-500">Scan with your phone to hear their voice telling the story</p>
         </div>
       </div>
 
@@ -228,7 +228,7 @@
         />
         <div class="px-4 py-3">
           <p class="text-sm font-semibold text-stone-900">A real book you can hold</p>
-          <p class="mt-1 text-xs text-stone-500">Professionally printed and shipped to your door</p>
+          <p class="mt-1 text-sm leading-relaxed text-stone-500">Professionally printed and shipped to your door</p>
         </div>
       </div>
 
@@ -385,7 +385,7 @@
           <p class="font-display text-xl leading-snug text-[#1C1917] sm:text-2xl">
             "I built Tell Me Your Story so my own children would always have my voice and my stories."
           </p>
-          <p class="mt-3 text-sm text-[#5C534E]">
+          <p class="mt-3 text-base text-[#5C534E]">
             Mark, founder — a dad in Southampton who builds and runs it himself.
             <router-link to="/my-story" class="ml-1 font-medium text-[#7C5C3B] hover:underline">Read why →</router-link>
           </p>
@@ -409,7 +409,7 @@
             Gift someone the chance<br/>
             to tell their story
           </h2>
-          <p class="mt-4 text-sm leading-relaxed text-[#5C534E]">
+          <p class="mt-4 text-base leading-relaxed text-[#5C534E]">
             Buy Tell Me Your Story for a parent, grandparent, or anyone whose memories matter. They receive a personal link, create their account, and start capturing their story — with your message included.
           </p>
           <div class="mt-6 flex flex-col items-center gap-3 sm:flex-row md:justify-start">
@@ -471,7 +471,7 @@
               {{ item.q }}
               <span class="faq-icon flex-shrink-0 text-xl leading-none text-[#7C5C3B]" aria-hidden="true">+</span>
             </summary>
-            <p class="mt-3 text-sm leading-relaxed text-[#5C534E]">{{ item.a }}</p>
+            <p class="mt-3 text-base leading-relaxed text-[#5C534E]">{{ item.a }}</p>
           </details>
         </div>
       </div>
@@ -507,7 +507,7 @@
     <!-- ═══════════════════════════════════════ -->
     <!-- FINAL CTA                              -->
     <!-- ═══════════════════════════════════════ -->
-    <section class="reveal final-cta px-5 py-20 sm:px-8 sm:py-28">
+    <section ref="finalCtaEl" class="reveal final-cta px-5 py-20 sm:px-8 sm:py-28">
       <div class="grain"></div>
       <div class="relative mx-auto max-w-3xl text-center">
         <div class="why-ornament text-stone-400">— ◦ ○ ◦ —</div>
@@ -528,6 +528,23 @@
       </div>
     </section>
 
+    <!-- Mobile sticky CTA: appears once the hero has scrolled away,
+         hides again when the final call-to-action comes into view. -->
+    <Transition name="sticky-cta">
+      <div
+        v-if="showStickyCta"
+        class="sticky-cta fixed inset-x-0 bottom-0 z-40 border-t border-[#E8DDD0] bg-[#F5F0E8]/95 px-4 pt-3 backdrop-blur md:hidden"
+      >
+        <router-link
+          to="/register"
+          class="flex min-h-[52px] w-full items-center justify-center rounded-full bg-[#7C5C3B] text-base font-semibold text-white"
+          @click="trackStickyCta"
+        >
+          Try 5 questions free
+        </router-link>
+      </div>
+    </Transition>
+
   </main>
 </template>
 <script setup lang="ts">
@@ -538,7 +555,7 @@ import PricingTable from '../components/pricing/PricingTable.vue'
 import { PRINTED_BOOK_FROM_PRICE } from '../lib/printPricing'
 import { PRINT_CUTOFF_LABEL } from '../lib/christmas'
 
-import { onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 
 // Preload the hero image (the page's largest paint). Runs during setup, so the
 // prerender bakes this <link> into the homepage HTML.
@@ -557,6 +574,35 @@ if (!heroPreload) {
   document.head.appendChild(heroPreload)
 }
 onUnmounted(() => heroPreload?.remove())
+
+// ─── Mobile sticky CTA ─────────────────────────────────────────────────────
+const heroEl = ref<HTMLElement | null>(null)
+const finalCtaEl = ref<HTMLElement | null>(null)
+const heroVisible = ref(true)
+const reachedEnd = ref(false)
+const showStickyCta = computed(() => !heroVisible.value && !reachedEnd.value)
+let stickyObserver: IntersectionObserver | null = null
+
+function trackStickyCta() {
+  track('upgrade_clicked', { source: 'homepage_sticky_cta' })
+}
+
+onMounted(() => {
+  if (!('IntersectionObserver' in window)) return
+  stickyObserver = new IntersectionObserver((entries) => {
+    for (const entry of entries) {
+      if (entry.target === heroEl.value) heroVisible.value = entry.isIntersecting
+      if (entry.target === finalCtaEl.value) {
+        // In view, or already scrolled past it (footer area)
+        reachedEnd.value = entry.isIntersecting || entry.boundingClientRect.top < 0
+      }
+    }
+  })
+  if (heroEl.value) stickyObserver.observe(heroEl.value)
+  if (finalCtaEl.value) stickyObserver.observe(finalCtaEl.value)
+})
+
+onUnmounted(() => stickyObserver?.disconnect())
 
 onMounted(() => {
   const observer = new IntersectionObserver(
@@ -694,6 +740,14 @@ function trackPricing(plan: string) { track('upgrade_clicked', { source: 'home_p
 .story-chip:hover { opacity: 0.9; transform: translateY(-1px); }
 .story-chip:focus-visible { outline: 2px solid #1C1917; outline-offset: 2px; }
 
+/* ── Mobile sticky CTA ─────────────────────── */
+.sticky-cta { padding-bottom: max(12px, env(safe-area-inset-bottom)); }
+.sticky-cta-enter-active, .sticky-cta-leave-active { transition: transform 0.25s ease, opacity 0.25s ease; }
+.sticky-cta-enter-from, .sticky-cta-leave-to { transform: translateY(100%); opacity: 0; }
+@media (prefers-reduced-motion: reduce) {
+  .sticky-cta-enter-active, .sticky-cta-leave-active { transition: none; }
+}
+
 /* ── How it works title sits left on desktop ── */
 @media (min-width: 768px) { .how-title { margin-left: 0; } }
 
@@ -748,7 +802,7 @@ h1 { font-family: 'Playfair Display', Georgia, serif; }
 .feature-icon-qr { background: #9C7C5C; }
 .feature-icon-print { background: #5C4030; }
 .feature-title { margin-top: 16px; font-family: 'Playfair Display', Georgia, serif; font-size: 1.2rem; font-weight: 700; color: white; }
-.feature-desc { margin-top: 10px; font-size: 14px; line-height: 1.75; color: #A8A29E; }
+.feature-desc { margin-top: 10px; font-size: 16px; line-height: 1.75; color: #A8A29E; }
 .feature-tag { margin-top: 16px; display: inline-block; font-size: 11px; color: #7C5C3B; border: 1px solid #3C3430; border-radius: 100px; padding: 4px 12px; }
 .feature-tag-accent { color: #C4A882; border-color: #7C5C3B; background: rgba(124,92,59,0.1); }
 
@@ -759,7 +813,7 @@ h1 { font-family: 'Playfair Display', Georgia, serif; }
 .format-card-inner { padding: 32px 32px 24px; flex-shrink: 0; }
 .format-icon { font-size: 28px; }
 .format-title { margin-top: 12px; font-family: 'Playfair Display', Georgia, serif; font-size: 1.4rem; font-weight: 700; color: #1C1917; }
-.format-desc { margin-top: 10px; font-size: 14px; line-height: 1.7; color: #5C534E; }
+.format-desc { margin-top: 10px; font-size: 16px; line-height: 1.7; color: #5C534E; }
 .format-list { margin-top: 16px; list-style: none; padding: 0; font-size: 13px; color: #8C847E; }
 .format-list li { padding: 4px 0; padding-left: 18px; position: relative; }
 .format-list li::before { content: '✦'; position: absolute; left: 0; font-size: 8px; color: #7C5C3B; top: 7px; }
@@ -783,7 +837,7 @@ h1 { font-family: 'Playfair Display', Georgia, serif; }
 .step-card-accent { background: #F5F0E8; border-color: #D6CFC8; }
 .step-number { font-family: 'Playfair Display', Georgia, serif; font-size: 2rem; font-weight: 700; color: #D6CFC8; line-height: 1; }
 .step-title { margin-top: 14px; font-size: 1.05rem; font-weight: 600; color: #1C1917; }
-.step-desc { margin-top: 8px; font-size: 14px; line-height: 1.7; color: #5C534E; }
+.step-desc { margin-top: 8px; font-size: 16px; line-height: 1.7; color: #5C534E; }
 
 /* ── Gallery ────────────────────────────── */
 .gallery-item { border-radius: 16px; overflow: hidden; border: 1px solid #E8E0D8; background: #F5F0E8; }
@@ -852,7 +906,7 @@ h1 { font-family: 'Playfair Display', Georgia, serif; }
 .testimonial-card { background: white; border: 1px solid #E8E0D8; border-radius: 24px; padding: 28px 28px 32px; display: flex; flex-direction: column; gap: 16px; }
 .testimonial-card-accent { background: #1C1917; border-color: #2C2420; }
 .testimonial-stars { font-size: 14px; color: #7C5C3B; letter-spacing: 2px; }
-.testimonial-quote { font-size: 14px; line-height: 1.8; color: #5C534E; font-style: italic; flex: 1; }
+.testimonial-quote { font-size: 16px; line-height: 1.8; color: #5C534E; font-style: italic; flex: 1; }
 .testimonial-author { display: flex; align-items: center; gap: 12px; margin-top: auto; }
 .testimonial-avatar { width: 36px; height: 36px; border-radius: 50%; background: #E8E0D8; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 600; color: #5C534E; flex-shrink: 0; }
 .testimonial-name { font-size: 13px; font-weight: 600; color: #1C1917; }

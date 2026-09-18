@@ -399,10 +399,6 @@ import { PRINTED_BOOK_FROM_PRICE } from '../lib/printPricing'
 
 const router = useRouter()
 
-useSeo({
-  title: 'Pricing — Memory Book With Voice Recordings | Tell Me Your Story',
-  description: 'Start free with 5 questions, no time limit. Unlock a beautifully designed keepsake book or video when you\'re ready. One-time payment — no subscription, no renewal.',
-})
 
 // ─── Logged-in upgrade flow ──────────────────────────────────────────
 // Paid tiers need a projectId to check out (see useStoryCheckout.ts),
@@ -653,6 +649,54 @@ const faqs = [
   a: 'When you record a voice answer, a small QR code is printed next to that answer in your physical book. Family members scan it with their phone camera and hear your loved one\'s voice reading that memory — years from now, at Christmas, a birthday, or whenever they open the book.',
 },
 ]
+
+// ─── SEO + structured data ────────────────────────────────────────────────
+// Declared last so it can read mobilePlans and faqs. Offers are built from the
+// same plan list the page shows, so schema prices can never drift from the page.
+const toPrice = (label: string) => label.replace(/[^0-9.]/g, '') || '0'
+
+useSeo({
+  title: 'Pricing — Memory Book With Voice Recordings | Tell Me Your Story',
+  description: 'Start free with 5 questions, no time limit. Unlock a beautifully designed keepsake book or video when you\'re ready. One-time payment — no subscription, no renewal.',
+  schema: {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'Product',
+        name: 'Tell Me Your Story',
+        description: 'Guided life story questions answered by typing or voice, turned into a keepsake book with a QR code beside every recorded story.',
+        brand: { '@id': 'https://tellmeyourstory.uk/#organization' },
+        image: 'https://tellmeyourstory.uk/images/example-story-hero-cover.jpg',
+        offers: [
+          ...mobilePlans.map((plan) => ({
+            '@type': 'Offer',
+            name: plan.name,
+            price: toPrice(plan.price),
+            priceCurrency: 'GBP',
+            availability: 'https://schema.org/InStock',
+            url: 'https://tellmeyourstory.uk/pricing',
+          })),
+          {
+            '@type': 'Offer',
+            name: 'Printed book (softcover, per copy, plus UK shipping)',
+            price: PRINTED_BOOK_FROM_PRICE.toFixed(2),
+            priceCurrency: 'GBP',
+            availability: 'https://schema.org/InStock',
+            url: 'https://tellmeyourstory.uk/pricing',
+          },
+        ],
+      },
+      {
+        '@type': 'FAQPage',
+        mainEntity: faqs.map((f) => ({
+          '@type': 'Question',
+          name: f.q,
+          acceptedAnswer: { '@type': 'Answer', text: f.a },
+        })),
+      },
+    ],
+  },
+})
 </script>
 
 <style scoped>
