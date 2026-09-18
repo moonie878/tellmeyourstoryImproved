@@ -38,6 +38,7 @@ type AnalyticsEvent =
    |'checkout_from_register'
    | 'lead_magnet_signup'
    | 'christmas_banner_clicked'
+   | 'plan_selected'
 
 
 type AnalyticsValue =

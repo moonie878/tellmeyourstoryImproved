@@ -66,9 +66,11 @@
         <div class="space-y-4">
 
           <div>
-            <label class="text-sm font-medium text-[#1C1917]">Email</label>
+            <label for="register-email" class="text-sm font-medium text-[#1C1917]">Email</label>
             <input
+              id="register-email"
               v-model="email"
+              @keydown.enter="handleRegister"
               type="email"
               autocomplete="email"
               placeholder="your@email.com"
@@ -80,10 +82,12 @@
           </div>
 
           <div>
-            <label class="text-sm font-medium text-[#1C1917]">Password</label>
+            <label for="register-password" class="text-sm font-medium text-[#1C1917]">Password</label>
             <div class="relative mt-1">
               <input
+                id="register-password"
                 v-model="password"
+                @keydown.enter="handleRegister"
                 :type="showPassword ? 'text' : 'password'"
                 autocomplete="new-password"
                 placeholder="At least 8 characters"
@@ -96,6 +100,7 @@
                 @click="showPassword = !showPassword"
                 class="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600"
                 tabindex="-1"
+                :aria-label="showPassword ? 'Hide password' : 'Show password'"
               >
                 <svg v-if="!showPassword" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -126,20 +131,31 @@
           <!-- Success state -->
           <div v-if="success" class="rounded-2xl bg-[#F5F0E8] px-5 py-4 text-center">
             <p class="text-sm font-medium text-[#1C1917]">✓ Account created</p>
-            <p v-if="giftToken" class="mt-1 text-xs text-[#5C534E]">
+            <template v-if="needsConfirmation">
+              <p class="mt-1 text-xs text-[#5C534E]">
+                We've sent a confirmation link to <strong>{{ email }}</strong>.
+              </p>
+              <p class="mt-1 text-xs text-[#5C534E]">
+                <template v-if="giftToken">Click it to redeem your gift.</template>
+                <template v-else-if="selectedPlan">Click it and you'll go straight to checkout for {{ selectedPlan.name }}.</template>
+                <template v-else>Click it and you're good to go.</template>
+              </p>
+            </template>
+            <p v-else-if="giftToken" class="mt-1 text-xs text-[#5C534E]">
               Redirecting you to redeem your gift…
             </p>
-            <p v-else-if="planKey" class="mt-1 text-xs text-[#5C534E]">
+            <p v-else-if="selectedPlan" class="mt-1 text-xs text-[#5C534E]">
               Redirecting you to checkout…
             </p>
             <p v-else class="mt-1 text-xs text-[#5C534E]">
-              Check your email to confirm your account, then you're good to go.
+              Taking you to your dashboard…
             </p>
           </div>
 
           <!-- Submit button -->
           <button
             v-if="!success"
+            type="button"
             @click="handleRegister"
             :disabled="loading"
             class="w-full rounded-full bg-[#7C5C3B] px-4 py-3 text-sm font-semibold text-white transition hover:opacity-90 disabled:opacity-60 disabled:cursor-not-allowed"
@@ -207,7 +223,7 @@ const utmData = getCurrentUtmData()
 const route = useRoute()
 const router = useRouter()
 const giftToken = route.query.gift as string | undefined
-const planKey = route.query.plan as string | undefined
+const needsConfirmation = ref(false)
 
 const fieldErrors = ref<{ email: string; password: string }>({
   email: '',
@@ -225,12 +241,36 @@ const PLANS: Record<string, { name: string; price: string; desc: string }> = {
   tier4: { name: 'Premium Keepsake', price: '£17.99', desc: 'Everything — video, print layouts & more' },
 }
 
-const selectedPlan = computed(() => planKey ? PLANS[planKey] || null : null)
+// Reactive, so "Start free instead" actually clears it.
+// Only known plan keys count — anything else is treated as free.
+const planKey = computed(() => {
+  const raw = route.query.plan
+  return typeof raw === 'string' && raw in PLANS ? raw : undefined
+})
+
+const selectedPlan = computed(() => (planKey.value ? PLANS[planKey.value] : null))
+
+// Backup in case the query string is lost on the way to checkout.
+const PLAN_STORAGE_KEY = 'tmys-pending-plan'
+
+watch(
+  planKey,
+  (plan) => {
+    try {
+      if (plan) localStorage.setItem(PLAN_STORAGE_KEY, plan)
+      else localStorage.removeItem(PLAN_STORAGE_KEY)
+    } catch {
+      // storage unavailable — query string still works
+    }
+    if (plan) track('plan_selected', { plan, source: 'register_page' })
+  },
+  { immediate: true },
+)
 
 const loginRoute = computed(() => {
   const params: string[] = []
   if (giftToken) params.push(`gift=${giftToken}`)
-  if (planKey)   params.push(`plan=${planKey}`)
+  if (planKey.value) params.push(`plan=${planKey.value}`)
   return params.length ? `/login?${params.join('&')}` : '/login'
 })
 
@@ -280,16 +320,20 @@ function validateAll(): boolean {
 
 // ─── Auth ─────────────────────────────────────────────────────────────────────
 
-// Build the post-login redirect based on context
+// Build the post-signup redirect based on context
 function getRedirectPath() {
   if (giftToken) return `/gift/redeem/${giftToken}`
-  if (planKey)   return `/dashboard?plan=${planKey}`
+  if (planKey.value) return `/dashboard?plan=${planKey.value}`
   return '/dashboard'
+}
+
+function getRedirectUrl() {
+  return `${window.location.origin}${getRedirectPath()}`
 }
 
 async function handleGoogleLogin() {
   googleLoading.value = true
-  const redirectTo = `https://tellmeyourstory.uk${getRedirectPath()}`
+  const redirectTo = getRedirectUrl()
 
   const { error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
@@ -320,12 +364,15 @@ async function handleRegister() {
       )
     }
 
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email: email.value,
       password: password.value,
       options: {
+        // Where the confirmation email link lands — keeps the plan/gift.
+        emailRedirectTo: getRedirectUrl(),
         data: {
           email_opt_in: emailOptIn.value,
+          signup_plan: planKey.value || 'free',
         },
       },
     })
@@ -336,7 +383,7 @@ async function handleRegister() {
       success.value = true
       track('signup_completed', {
         source: 'register_page',
-        plan: planKey || 'free',
+        plan: planKey.value || 'free',
         ...utmData,
       })
 
@@ -352,10 +399,17 @@ async function handleRegister() {
         }
       }
 
-      // Redirect based on context
+      // No session = Supabase needs the email confirmed first. Stay here and
+      // show "check your email"; the link in that email carries the plan.
+      if (!data.session) {
+        needsConfirmation.value = true
+        return
+      }
+
+      // Logged in straight away → go on to checkout / gift / dashboard.
       setTimeout(() => {
         router.push(getRedirectPath())
-      }, 2000)
+      }, 1200)
     }
   } catch (err) {
     console.error(err)
