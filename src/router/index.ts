@@ -99,6 +99,7 @@ const routes: RouteRecordRaw[] = [
   // ── Product-type pages ────────────────────────────────────────────────────
   { path: '/life-story-book', name: 'life-story-book', component: () => import('../views/LifeStoryBookView.vue') },
   { path: '/what-is-a-life-story-book', name: 'what-is-a-life-story-book', component: () => import('../views/WhatIsALifeStoryBookView.vue') },
+  { path: '/tell-me-your-story-journal-alternative', name: 'journal-alternative', component: () => import('../views/JournalAlternativeView.vue') },
   { path: '/life-story-journal', name: 'life-story-journal', component: () => import('../views/LifeStoryJournalView.vue') },
   { path: '/life-story-video', name: 'life-story-video', component: () => import('../views/LifeStoryVideoView.vue') },
   { path: '/keepsake-book', name: 'keepsake-book', component: () => import('../views/KeepsakeBookView.vue') },
