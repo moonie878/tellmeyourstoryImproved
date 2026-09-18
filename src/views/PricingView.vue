@@ -49,7 +49,7 @@
                 </th>
 
                 <th class="w-[14%] bg-[#1C1917] px-4 py-6 text-center">
-                  <p class="text-[10px] font-medium uppercase tracking-[0.15em] text-[#9C7C5C]">Most popular</p>
+                  <p class="text-[10px] font-medium uppercase tracking-[0.15em] text-[#9C7C5C]">Recommended</p>
                   <p class="mt-1 text-base font-semibold text-white">Book + Photos</p>
                   <p class="mt-1 text-2xl font-bold text-white">£7.99</p>
                   <p class="mt-1 text-xs text-[#9C7C5C]">One-time</p>
@@ -151,7 +151,7 @@
               <p class="text-lg font-semibold" :class="plan.featured ? 'text-white' : 'text-[#1C1917]'">{{ plan.name }}</p>
               <p class="text-2xl font-bold" :class="plan.featured ? 'text-white' : 'text-[#1C1917]'">{{ plan.price }}</p>
             </div>
-            <p class="mt-1 text-xs" :class="plan.featured ? 'text-[#9C7C5C]' : 'text-[#8C847E]'">One-time payment</p>
+            <p class="mt-1 text-xs" :class="plan.featured ? 'text-[#9C7C5C]' : 'text-[#8C847E]'">{{ plan.tier ? 'One-time payment' : 'No card needed' }}</p>
             <ul class="mt-4 space-y-2">
               <li v-for="feature in plan.features" :key="feature"
                 class="flex items-start gap-2 text-sm"
@@ -196,7 +196,6 @@
 </div>
       </div>
     </section>
-    <ChristmasDeadlineBanner />
 <!-- ── Printed Book callout ──────────────────────────────────────── -->
 <section class="px-5 pb-8 sm:px-8">
   <div class="mx-auto max-w-6xl">
@@ -220,14 +219,14 @@
           </ul>
           <div class="mt-6 flex flex-wrap items-center gap-4">
             <router-link
-              to="/dashboard"
+              :to="isLoggedIn ? '/dashboard' : '/register'"
               class="rounded-full bg-[#1C1917] px-6 py-3 text-sm font-semibold text-white transition hover:opacity-90"
             >
-              Order your printed book
+              {{ isLoggedIn ? 'Order your printed book' : 'Start your book free' }}
             </router-link>
             <div>
               <p class="text-2xl font-bold text-[#1C1917]">£{{ PRINTED_BOOK_FROM_PRICE.toFixed(2) }}</p>
-              <p class="text-xs text-[#8C847E]">Includes UK shipping</p>
+              <p class="text-xs text-[#8C847E]">Per book, plus UK shipping</p>
             </div>
           </div>
         </div>
@@ -401,8 +400,8 @@ import { PRINTED_BOOK_FROM_PRICE } from '../lib/printPricing'
 const router = useRouter()
 
 useSeo({
-  title: 'Pricing | Tell Me Your Story',
-  description: 'Start free with no time limit. Unlock a beautifully designed keepsake book or video when you\'re ready. One-time payment — no subscription, no renewal.',
+  title: 'Pricing — Memory Book With Voice Recordings | Tell Me Your Story',
+  description: 'Start free with 5 questions, no time limit. Unlock a beautifully designed keepsake book or video when you\'re ready. One-time payment — no subscription, no renewal.',
 })
 
 // ─── Logged-in upgrade flow ──────────────────────────────────────────
@@ -481,7 +480,7 @@ const printedBookSteps = [
   { icon: '📖', title: 'Beautiful typeset layout', desc: 'The same design as your digital PDF — chapters, drop caps, quote pages, and photos.' },
   { icon: '🎙️', title: 'QR codes for voice recordings', desc: 'Each voice answer gets a QR code printed next to it. Family scan to hear their loved one speak.' },
   { icon: '📦', title: 'Printed and shipped', desc: 'Professionally printed by Lulu Press and shipped directly to your door in 10–14 days.' },
-  { icon: '💷', title: `From £${PRINTED_BOOK_FROM_PRICE.toFixed(2)} including delivery`, desc: `One copy or multiple — from £${PRINTED_BOOK_FROM_PRICE.toFixed(2)} per book plus £4.99 UK shipping.` },
+  { icon: '💷', title: `From £${PRINTED_BOOK_FROM_PRICE.toFixed(2)} per book`, desc: `One copy or multiple — from £${PRINTED_BOOK_FROM_PRICE.toFixed(2)} per book, plus UK shipping shown at checkout.` },
 ]
 
 const writingRows = [
@@ -491,7 +490,6 @@ const writingRows = [
   { label: 'Autosave', free: true, book: true, photos: true, all: true, premium: true },
   { label: 'Add photos per answer', free: true, book: true, photos: true, all: true, premium: true },
   { label: 'Voice recording per answer 🎙️', free: true, book: true, photos: true, all: true, premium: true },
-  { label: 'QR code in printed book', free: true, book: true, photos: true, all: true, premium: true },
 ]
 
 const bookRows = [
@@ -550,7 +548,7 @@ const mobilePlans = [
     name: 'Book + Photos',
     tier: 'tier2',
     price: '£7.99',
-    badge: 'Most popular',
+    badge: 'Recommended',
     featured: true,
     premium: false,
     cta: 'Get Book + Photos',
@@ -596,7 +594,6 @@ const mobilePlans = [
       'Video export (MP4)',
       'Tribute video creator (free)',
        'Voice recording per answer 🎙️',  // add
-    'QR codes in printed book',         // add
     `Order a printed book from £${PRINTED_BOOK_FROM_PRICE.toFixed(2)}`, // add
     ],
   },
@@ -621,7 +618,7 @@ const tributeSteps = [
 const faqs = [
   {
     q: 'Is it really free to start?',
-    a: 'Yes — completely free, no credit card needed. You can answer 5 questions and see your story start to take shape as a real book page. Upgrade any time to unlock all 100+ questions, voice recording, export, and printing.',
+    a: 'Yes — completely free, no credit card needed. You can answer 5 questions and see your story start to take shape as a real book page. Voice recording is included free. Upgrade any time to unlock all 100+ questions, export your keepsake, and order a printed book.',
   },
   {
     q: 'What\'s the difference between Keepsake Book and Book + Photos?',
@@ -645,7 +642,7 @@ const faqs = [
   },
   {
     q: 'What is the Tribute Video Creator?',
-    a: 'The Tribute Video Creator is a separate tool for creating memorial videos for someone you\'ve lost. Upload up to 30 photos, choose music, and generate a full HD MP4. It\'s free to preview and £9.99 to download — no account needed. It\'s included free with Premium Keepsake.',
+    a: 'The Tribute Video Creator is a separate tool for creating memorial videos for someone you\'ve lost. Upload up to 30 photos, choose music, and generate a full HD MP4. It\'s free to preview and £19.99 to download — no account needed. It\'s included free with Premium Keepsake.',
   },
   {
   q: 'Can I record voice answers?',

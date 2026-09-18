@@ -29,17 +29,17 @@
               <th class="w-[14%] px-4 py-5 text-center">
                 <p class="text-base font-semibold text-[#1C1917]">Keepsake Book</p>
                 <p class="mt-1 text-2xl font-bold text-[#1C1917]">£3.99</p>
-                <router-link to="/register" @click="$emit('track', 'book')"
+                <router-link to="/register?plan=tier1" @click="$emit('track', 'book')"
                   class="mt-3 block rounded-full border border-[#D6CFC8] px-3 py-2 text-xs font-medium text-[#1C1917] transition hover:bg-[#F5F0E8]">
                   Get started
                 </router-link>
               </th>
 
               <th class="w-[14%] bg-[#1C1917] px-4 py-5 text-center">
-                <p class="text-[10px] font-medium uppercase tracking-[0.15em] text-[#9C7C5C]">Most popular</p>
+                <p class="text-[10px] font-medium uppercase tracking-[0.15em] text-[#9C7C5C]">Recommended</p>
                 <p class="mt-1 text-base font-semibold text-white">Book + Photos</p>
                 <p class="mt-1 text-2xl font-bold text-white">£7.99</p>
-                <router-link to="/register" @click="$emit('track', 'photos')"
+                <router-link to="/register?plan=tier2" @click="$emit('track', 'photos')"
                   class="mt-3 block rounded-full bg-white px-3 py-2 text-xs font-semibold text-[#1C1917] transition hover:opacity-90">
                   Get started
                 </router-link>
@@ -48,7 +48,7 @@
               <th class="w-[14%] px-4 py-5 text-center">
                 <p class="text-base font-semibold text-[#1C1917]">All Stories</p>
                 <p class="mt-1 text-2xl font-bold text-[#1C1917]">£11.99</p>
-                <router-link to="/register" @click="$emit('track', 'all')"
+                <router-link to="/register?plan=tier3" @click="$emit('track', 'all')"
                   class="mt-3 block rounded-full border border-[#D6CFC8] px-3 py-2 text-xs font-medium text-[#1C1917] transition hover:bg-[#F5F0E8]">
                   Get started
                 </router-link>
@@ -58,7 +58,7 @@
                 <p class="text-[10px] font-medium uppercase tracking-[0.15em] text-[#7C5C3B]">✦ Premium</p>
                 <p class="text-base font-semibold text-[#1C1917]">Premium Keepsake</p>
                 <p class="mt-1 text-2xl font-bold text-[#1C1917]">£17.99</p>
-                <router-link to="/register" @click="$emit('track', 'premium')"
+                <router-link to="/register?plan=tier4" @click="$emit('track', 'premium')"
                   class="mt-3 block rounded-full bg-[#7C5C3B] px-3 py-2 text-xs font-semibold text-white transition hover:opacity-90">
                   Get started
                 </router-link>
@@ -143,7 +143,7 @@
               {{ feature }}
             </li>
           </ul>
-          <router-link to="/register" @click="$emit('track', plan.id)"
+          <router-link :to="plan.tier ? `/register?plan=${plan.tier}` : '/register'" @click="$emit('track', plan.id)"
             :class="['mt-5 block rounded-full px-4 py-2.5 text-center text-sm font-semibold transition',
               plan.featured ? 'bg-white text-[#1C1917] hover:opacity-90' :
               plan.premium ? 'bg-[#7C5C3B] text-white hover:opacity-90' :
@@ -233,7 +233,7 @@ defineEmits(['track'])
 
 const writingRows = [
   { label: 'Start any story type', free: true, book: true, photos: true, all: true, premium: true },
-  { label: 'All 100 guided questions', free: false, book: true, photos: true, all: true, premium: true },
+  { label: 'All 100+ guided questions', free: false, book: true, photos: true, all: true, premium: true },
   { label: 'Autosave', free: true, book: true, photos: true, all: true, premium: true },
   { label: 'Add photos per answer', free: true, book: true, photos: true, all: true, premium: true },
 ]
@@ -258,6 +258,7 @@ const extrasRows = [
 const mobilePlans = [
   {
     id: 'free',
+    tier: null,
     name: 'Free',
     price: '£0',
     badge: null,
@@ -266,12 +267,14 @@ const mobilePlans = [
     cta: 'Start free',
     features: [
       'Start any story type',
+      '5 guided questions to try',
       'Autosave',
       'Add photos per answer',
     ],
   },
   {
     id: 'book',
+    tier: 'tier1',
     name: 'Keepsake Book',
     price: '£3.99',
     badge: null,
@@ -280,7 +283,7 @@ const mobilePlans = [
     cta: 'Get Keepsake Book',
     features: [
       'Everything in Free',
-      'All 100 guided questions',
+      'All 100+ guided questions',
       'PDF keepsake export',
       'Chapters, drop caps & layouts',
       'Design themes',
@@ -288,9 +291,10 @@ const mobilePlans = [
   },
   {
     id: 'photos',
+    tier: 'tier2',
     name: 'Book + Photos',
     price: '£7.99',
-    badge: 'Most popular',
+    badge: 'Recommended',
     featured: true,
     premium: false,
     cta: 'Get Book + Photos',
@@ -302,6 +306,7 @@ const mobilePlans = [
   },
   {
     id: 'all',
+    tier: 'tier3',
     name: 'All Stories',
     price: '£11.99',
     badge: null,
@@ -316,6 +321,7 @@ const mobilePlans = [
   },
   {
     id: 'premium',
+    tier: 'tier4',
     name: 'Premium Keepsake',
     price: '£17.99',
     badge: '✦ Premium',

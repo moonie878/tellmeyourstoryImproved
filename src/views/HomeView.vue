@@ -104,7 +104,7 @@
     <p class="feature-desc">
       A QR code is printed next to each memory — family scan it to hear their voice, years from now.
     </p>
-    <div class="feature-tag feature-tag-accent">The only memory book that speaks</div>
+    <div class="feature-tag feature-tag-accent">No subscription, ever</div>
   </div>
 
   <!-- Feature 3 — Printed book -->
@@ -114,7 +114,7 @@
     </div>
     <h3 class="feature-title mt-4">Order a printed keepsake</h3>
     <p class="feature-desc">
-      Professionally printed, bound, and shipped to your door. From £{{ PRINTED_BOOK_FROM_PRICE.toFixed(2) }} including UK delivery.
+      Professionally printed, bound, and shipped to your door. From £{{ PRINTED_BOOK_FROM_PRICE.toFixed(2) }} per book, plus UK shipping.
     </p>
     <div class="feature-tag">Ships in 10–14 days</div>
   </div>
