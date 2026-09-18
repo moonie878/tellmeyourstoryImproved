@@ -555,12 +555,13 @@ onMounted(() => {
 const printFrom = `£${PRINTED_BOOK_FROM_PRICE.toFixed(2)}`
 
 // Hero "Whose story?" buttons → /register?type=…
+// `type` must match an id in src/data/storyTypes.ts (unknown ids are ignored).
 const storyOptions = [
   { type: 'mum', label: 'Mum' },
   { type: 'dad', label: 'Dad' },
-  { type: 'grandparent', label: 'Nan or Grandad' },
-  { type: 'partner', label: 'My partner' },
-  { type: 'self', label: 'My own' },
+  { type: 'grandma', label: 'Nan' },
+  { type: 'grandad', label: 'Grandad' },
+  { type: 'life', label: 'Someone else' },
 ]
 
 const howSteps = [

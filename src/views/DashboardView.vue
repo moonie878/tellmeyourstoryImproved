@@ -426,6 +426,7 @@ import { useRouter } from 'vue-router'
 import { supabase } from '../lib/supabase'
 import { track } from '../lib/analytics'
 import { STORY_TYPES } from '../data/storyTypes'
+import { isValidStoryType, takePendingStoryType } from '../lib/pendingStoryTypes'
 import { useStoryTrueBookExport } from '../composables/useTrueBookExport'
 import { generateCoverPDF } from '../lib/generateCoverPDF'
 import PrintOrderModal from '../components/print/PrintOrderModal.vue'
@@ -907,7 +908,7 @@ function onOrdered(printJobId: string) {
 
 // ─── CRUD ─────────────────────────────────────────────────────────────────────
 
-async function createStory(type: string) {
+async function createStory(type: string, source = 'dashboard') {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return
 
@@ -918,7 +919,7 @@ async function createStory(type: string) {
     .single()
 
   if (!error && data) {
-    track('story_started', { source: 'dashboard', story_type: type })
+    track('story_started', { source, story_type: type })
     router.push(`/story/${data.id}`)
   }
 }
@@ -997,13 +998,49 @@ onMounted(async () => {
   }
 
   // ─── Auto-checkout from register-as-premium flow ──────────────────────────
-  const planFromRegister = params.get('plan')
+  // Plan comes from ?plan= (register redirect / confirmation email link).
+  // Backup: RegisterView also saves it to localStorage, for people who confirm
+  // their email and then log in via /login instead of clicking the link.
+  // The backup is only trusted for a brand-new account (under 24h old) so a
+  // stale value can never send an existing user to checkout by surprise.
+  const VALID_PLANS = ['tier1', 'tier2', 'tier3', 'tier4']
+  const PLAN_STORAGE_KEY = 'tmys-pending-plan'
 
-  if (planFromRegister && ['tier1', 'tier2', 'tier3', 'tier4'].includes(planFromRegister)) {
+  let storedPlan: string | null = null
+  try {
+    storedPlan = localStorage.getItem(PLAN_STORAGE_KEY)
+    localStorage.removeItem(PLAN_STORAGE_KEY)
+  } catch {
+    // storage unavailable
+  }
+
+  const { data: { user: currentUser } } = await supabase.auth.getUser()
+  const isNewAccount =
+    !!currentUser?.created_at &&
+    Date.now() - new Date(currentUser.created_at).getTime() < 24 * 60 * 60 * 1000
+
+  // Story type picked on the homepage ("Whose story?") — same rules as the plan.
+  const queryType = params.get('type')
+  const storedType = takePendingStoryType()
+  const pendingStoryType = isValidStoryType(queryType)
+    ? queryType
+    : storedType && isNewAccount
+      ? storedType
+      : null
+
+  const queryPlan = params.get('plan')
+  const planFromRegister =
+    queryPlan && VALID_PLANS.includes(queryPlan)
+      ? queryPlan
+      : storedPlan && VALID_PLANS.includes(storedPlan) && isNewAccount
+        ? storedPlan
+        : null
+
+  if (planFromRegister) {
     // Clear the param so refresh doesn't re-trigger
-    window.history.replaceState({}, '', '/dashboard')
+    if (queryPlan || queryType) window.history.replaceState({}, '', '/dashboard')
 
-    const { data: { user } } = await supabase.auth.getUser()
+    const user = currentUser
     if (!user) return
 
     // If user has no stories yet, create a default one
@@ -1012,7 +1049,11 @@ onMounted(async () => {
     if (!targetStoryId) {
       const { data: newStory, error: storyErr } = await supabase
         .from('story_projects')
-        .insert([{ user_id: user.id, title: "Mum's Story", story_type: 'mum' }])
+        .insert([{
+          user_id: user.id,
+          title: getStoryTitle(pendingStoryType || 'mum'),
+          story_type: pendingStoryType || 'mum',
+        }])
         .select()
         .single()
 
@@ -1024,10 +1065,20 @@ onMounted(async () => {
       track('story_auto_created', { source: 'register_premium', plan: planFromRegister })
     }
 
-    track('checkout_from_register', { plan: planFromRegister })
+    track('checkout_from_register', { plan: planFromRegister, source: queryPlan ? 'query' : 'stored' })
 
     // Forward to editor with plan param — editor triggers checkout
     router.push(`/story/${targetStoryId}?plan=${planFromRegister}`)
+    return
+  }
+
+  // ─── Free signup from a homepage "Whose story?" button ───────────────────
+  // Brand-new user with no stories → open the story they picked straight away.
+  if (pendingStoryType) {
+    if (queryType) window.history.replaceState({}, '', '/dashboard')
+    if (stories.value.length === 0) {
+      await createStory(pendingStoryType, 'homepage_story_type')
+    }
   }
 
 })
