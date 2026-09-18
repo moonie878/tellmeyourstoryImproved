@@ -1,26 +1,40 @@
 /**
  * christmas.ts — shared Christmas season constants
  *
- * Lulu takes roughly 10–14 days to print and deliver within the UK, so
- * 10 December is the safe last order date for printed books. Digital
- * keepsakes have no deadline at all.
+ * Lulu takes roughly 10–14 days to print, and Royal Mail 2nd Class slows
+ * down in December, so 3 December is the safe last order date for printed
+ * books. Digital keepsakes have no deadline at all.
  *
- * Update CHRISTMAS_YEAR each season — everything else derives from it.
+ * Each season: update CHRISTMAS_YEAR. Change PRINT_CUTOFF_DAY or
+ * SEASON_START_MONTH here only — every label and page reads from this file.
  */
 
 export const CHRISTMAS_YEAR = 2026
 
-/** Last safe order date for printed books */
-export const PRINT_CUTOFF = new Date(`${CHRISTMAS_YEAR}-12-10T23:59:59`)
-export const PRINT_CUTOFF_LABEL = '10 December'
+/** Day in December after which printed books may not arrive in time */
+const PRINT_CUTOFF_DAY = 3
 
-/** Banner starts showing 1 October */
-export const SEASON_START = new Date(`${CHRISTMAS_YEAR}-08-01T00:00:00`)
+/** Month the banner starts showing (1 = Jan … 10 = Oct) */
+const SEASON_START_MONTH = 10
+
+const pad = (n: number) => String(n).padStart(2, '0')
+
+/** Last safe order date for printed books (end of that day, UK time on the visitor's clock) */
+export const PRINT_CUTOFF = new Date(`${CHRISTMAS_YEAR}-12-${pad(PRINT_CUTOFF_DAY)}T23:59:59`)
+
+/** e.g. "3 December" */
+export const PRINT_CUTOFF_LABEL = `${PRINT_CUTOFF_DAY} December`
+
+/** e.g. "3 Dec" — for tight spaces like the mobile banner */
+export const PRINT_CUTOFF_SHORT_LABEL = `${PRINT_CUTOFF_DAY} Dec`
+
+/** Banner starts showing on the 1st of SEASON_START_MONTH */
+export const SEASON_START = new Date(`${CHRISTMAS_YEAR}-${pad(SEASON_START_MONTH)}-01T00:00:00`)
 
 /** Digital gifts keep selling right up to the day */
 export const CHRISTMAS_DAY = new Date(`${CHRISTMAS_YEAR}-12-25T23:59:59`)
 
-/** True from 1 October to Christmas Day */
+/** True from SEASON_START to Christmas Day */
 export function isChristmasSeason(): boolean {
   const now = new Date()
   return now >= SEASON_START && now <= CHRISTMAS_DAY
@@ -46,10 +60,10 @@ export function daysUntilChristmas(): number {
 /**
  * Which message the banner should show.
  *
- *  'early'    — Oct to late Nov: gentle nudge, plenty of time
- *  'countdown'— final 14 days before print cutoff: urgency
- *  'digital'  — after print cutoff, before Christmas: digital only
- *  'off'      — outside the season entirely
+ *  'early'     — season start until 14 days before the print cutoff
+ *  'countdown' — final 14 days before the print cutoff: urgency
+ *  'digital'   — after the print cutoff, before Christmas: digital only
+ *  'off'       — outside the season entirely
  */
 export type ChristmasPhase = 'early' | 'countdown' | 'digital' | 'off'
 

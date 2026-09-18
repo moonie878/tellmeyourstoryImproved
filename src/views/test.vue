@@ -11,7 +11,7 @@
         </h1>
         <p class="hero-sub">
           Upload photos and video clips, add music, 
-          and create a beautiful memorial video in minutes — free to preview, £9.99 to download.
+          and create a beautiful memorial video in minutes — free to preview, £19.99 to download.
         </p>
         <div class="hero-trust">
           <span>✦ No account needed</span>

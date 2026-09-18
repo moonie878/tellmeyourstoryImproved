@@ -86,7 +86,7 @@
   <!-- Feature 1 — Voice -->
   <div class="reveal reveal-delay-1 feature-card">
     <div class="overflow-hidden rounded-xl border border-[#3C3430]">
-      <img src="/images/Screenshots/voice-recording.png" alt="Voice recording" class="w-full" loading="lazy" />
+      <img src="/images/Screenshots/voice-recording.png" alt="Recording a spoken answer in the app" class="w-full" loading="lazy" />
     </div>
     <h3 class="feature-title mt-4">Voice record your answers</h3>
     <p class="feature-desc">
@@ -98,7 +98,7 @@
   <!-- Feature 2 — QR code -->
   <div class="reveal reveal-delay-2 feature-card feature-card-accent">
     <div class="overflow-hidden rounded-xl border border-[#7C5C3B]">
-      <img src="/images/Screenshots/qr-code.png" alt="QR code in book" class="w-full" loading="lazy" />
+      <img src="/images/Screenshots/qr-code.png" alt="QR code printed beside a story in the book" class="w-full" loading="lazy" />
     </div>
     <h3 class="feature-title mt-4">Hear their voice in the book</h3>
     <p class="feature-desc">
@@ -110,7 +110,7 @@
   <!-- Feature 3 — Printed book -->
   <div class="reveal reveal-delay-3 feature-card">
     <div class="overflow-hidden rounded-xl border border-[#3C3430]">
-      <img src="/images/Screenshots/printed-book.jpg" alt="Printed book" class="w-full" loading="lazy" />
+      <img src="/images/Screenshots/printed-book.jpg" alt="Printed Tell Me Your Story keepsake book" class="w-full" loading="lazy" />
     </div>
     <h3 class="feature-title mt-4">Order a printed keepsake</h3>
     <p class="feature-desc">
@@ -269,7 +269,7 @@
       <div class="reveal reveal-delay-1 col-span-2 overflow-hidden rounded-2xl border border-stone-200 bg-[#FAFAF8]">
         <img
           src="/images/Screenshots/editor.png"
-          alt="Story editor showing a question and handwritten answer"
+          alt="Story editor showing a question with a typed answer"
           class="w-full"
           loading="lazy"
         />
@@ -566,7 +566,7 @@
     <!-- ═══════════════════════════════════════ -->
     <!-- FINAL CTA                              -->
     <!-- ═══════════════════════════════════════ -->
-    <section class="revealfinal-cta px-5 py-20 sm:px-8 sm:py-28">
+    <section class="reveal final-cta px-5 py-20 sm:px-8 sm:py-28">
       <div class="grain"></div>
       <div class="relative mx-auto max-w-3xl text-center">
         <div class="why-ornament text-stone-400">— ◦ ○ ◦ —</div>
