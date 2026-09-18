@@ -250,22 +250,14 @@
 import { computed } from 'vue'
 import { PRINTED_BOOK_FROM_PRICE } from '../lib/printPricing'
 import { useSeo } from '../composables/useSeo'
-
-
-
-useSeo({
-  title: 'Christmas Gift Ideas for Grandparents 2026 — Tell Me Your Story | Life Story Keepsake Book',
-  description: 'The best Christmas gift for Grandma or Grandad — capture their life story in their own words. Guided questions, voice recordings, and a beautifully printed keepsake book. UK delivery.',
-  canonical: 'https://tellmeyourstory.uk/christmas-gift-ideas-for-grandparents',
-})
-
-
-/**
- * Print cutoff — Lulu takes 10–14 days including UK shipping,
- * so 10 December is the safe last order date. Update the year
- * each season, or move to a shared constant if other pages need it.
- */
+// Print cutoff date lives in lib/christmas.ts — change it there.
 import { PRINT_CUTOFF_LABEL, canStillOrderPrint } from '../lib/christmas'
+
+// No canonical needed: it defaults to this page's own URL.
+useSeo({
+  title: 'Christmas Gifts for Grandparents 2026 | Tell Me Your Story',
+  description: 'The best Christmas gift for Grandma or Grandad — capture their life story in their own words. Guided questions, voice recordings, and a beautifully printed keepsake book. UK delivery.',
+})
 
 const showDeadline = computed(() => canStillOrderPrint())
 
