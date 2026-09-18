@@ -551,6 +551,9 @@ if (!heroPreload) {
   heroPreload.type = 'image/webp'
   heroPreload.href = HERO_IMAGE
   heroPreload.setAttribute('fetchpriority', 'high')
+  // On phones the hero image sits below the heading and buttons, so only
+  // preload it where it's actually the first thing on screen.
+  heroPreload.media = '(min-width: 768px)'
   document.head.appendChild(heroPreload)
 }
 onUnmounted(() => heroPreload?.remove())

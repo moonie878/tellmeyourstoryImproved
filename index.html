@@ -43,13 +43,22 @@
     <meta name="twitter:image" content="https://tellmeyourstory.uk/images/example-story-hero-cover.jpg" />
     <meta name="twitter:image:alt" content="Tell Me Your Story — capture a loved one's life story" />
 
-    <!-- Fonts: one request for all three families -->
+    <!-- Fonts: loaded WITHOUT blocking the first paint. Text shows straight away
+         in the fallback font, then swaps to the web font when it arrives. -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      rel="stylesheet"
+      rel="preload"
+      as="style"
       href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=Lora:ital,wght@0,400;0,500;1,400&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap"
+      onload="this.onload=null;this.rel='stylesheet'"
     />
+    <noscript>
+      <link
+        rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=Lora:ital,wght@0,400;0,500;1,400&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap"
+      />
+    </noscript>
 
     <!-- Third parties -->
     <link rel="dns-prefetch" href="https://jeyybcdnmezivjuvmmcu.supabase.co" />
