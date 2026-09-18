@@ -7,9 +7,12 @@ import { getCurrentUtmData } from './lib/utm'
 import { supabase } from './lib/supabase'
 import { installSeo, isNoindexPath } from './composables/useSeo'
 
-// Puppeteer (our build-time prerender) sets navigator.webdriver = true.
+// scripts/prerender.mjs sets window.__TMYS_PRERENDER__ before the app loads.
+// (navigator.webdriver alone isn't reliable — @sparticuz/chromium can hide it.)
 // Skip analytics and server pings so builds don't pollute PostHog or wake servers.
-const isPrerender = navigator.webdriver === true
+const isPrerender =
+  (window as unknown as { __TMYS_PRERENDER__?: boolean }).__TMYS_PRERENDER__ === true ||
+  navigator.webdriver === true
 
 // ─── Stale chunk recovery ────────────────────────────────────────────────────
 // After a deploy, old tabs request chunk files that no longer exist.

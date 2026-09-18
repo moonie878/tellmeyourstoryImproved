@@ -122,6 +122,10 @@ function startServer(shell) {
 
 async function newPage(browser) {
   const page = await browser.newPage()
+  // Tell the app it's being prerendered (read in src/main.ts).
+  await page.evaluateOnNewDocument(() => {
+    window.__TMYS_PRERENDER__ = true
+  })
   await page.setRequestInterception(true)
   page.on('request', (req) => {
     if (['image', 'font', 'media'].includes(req.resourceType())) req.abort()
@@ -132,11 +136,43 @@ async function newPage(browser) {
 
 async function getRoutes(browser) {
   const page = await newPage(browser)
-  await page.goto(`${BASE_URL}/`, { waitUntil: 'networkidle0', timeout: NAV_TIMEOUT })
-  await page.waitForFunction(() => Array.isArray(window.__TMYS_PRERENDER_ROUTES__), { timeout: SEO_TIMEOUT })
-  const routes = await page.evaluate(() => window.__TMYS_PRERENDER_ROUTES__)
-  await page.close()
-  return routes.map(normalisePath)
+  const problems = []
+  page.on('pageerror', (err) => problems.push(`JS error: ${err.message}`))
+  page.on('console', (msg) => {
+    if (msg.type() === 'error') problems.push(`console: ${msg.text()}`)
+  })
+  page.on('requestfailed', (req) => {
+    if (!['image', 'font', 'media'].includes(req.resourceType())) {
+      problems.push(`request failed: ${req.url()} (${req.failure()?.errorText})`)
+    }
+  })
+
+  try {
+    await page.goto(`${BASE_URL}/`, { waitUntil: 'networkidle0', timeout: NAV_TIMEOUT })
+    await page.waitForFunction(() => Array.isArray(window.__TMYS_PRERENDER_ROUTES__), {
+      timeout: SEO_TIMEOUT,
+    })
+    const routes = await page.evaluate(() => window.__TMYS_PRERENDER_ROUTES__)
+    return routes.map(normalisePath)
+  } catch (err) {
+    const state = await page
+      .evaluate(() => ({
+        prerenderFlag: window.__TMYS_PRERENDER__ === true,
+        appMounted: !!document.querySelector('#app')?.children.length,
+      }))
+      .catch(() => ({}))
+    console.error('\n  ✗ Could not read the route list from the app.')
+    console.error(`    prerender flag set: ${state.prerenderFlag}, app mounted: ${state.appMounted}`)
+    if (problems.length) {
+      console.error('    Problems on the page:')
+      for (const p of problems.slice(0, 10)) console.error(`      - ${p}`)
+    } else {
+      console.error('    No page errors — check src/main.ts is the new version (it sets __TMYS_PRERENDER_ROUTES__).')
+    }
+    throw err
+  } finally {
+    await page.close()
+  }
 }
 
 // ─── Render one route ─────────────────────────────────────────────────────────
