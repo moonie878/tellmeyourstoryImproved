@@ -66,6 +66,7 @@ const routes: RouteRecordRaw[] = [
   { path: '/storykeeper-review', name: 'storykeeper-review', component: () => import('../views/StorykeeperReviewView.vue') },
   { path: '/storykeeper-alternative', name: 'storykeeper-alternative', component: () => import('../views/StorykeeperAlternativeView.vue') },
   { path: '/storykeeper-vs-storyworth', name: 'storykeeper-vs-storyworth', component: () => import('../views/StorykeeperVsStoryworthView.vue') },
+  { path: '/best-memory-book-apps-uk', name: 'best-memory-book-apps-uk', component: () => import('../views/BestMemoryBookAppsView.vue') },
   { path: '/memory-book-vs-memory-box', name: 'memory-book-vs-memory-box', component: () => import('../views/MemoryBookVsMemoryBoxView.vue') },
 
   // ── Questions guides ──────────────────────────────────────────────────────

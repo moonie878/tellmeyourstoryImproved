@@ -4,20 +4,21 @@
     <!-- Hero -->
     <section class="bg-[#1C1917] px-5 py-16 sm:px-8 sm:py-20">
       <div class="mx-auto max-w-3xl text-center">
-        <p class="text-xs font-medium uppercase tracking-[0.22em] text-[#9C7C5C]">Remento Alternative 2026</p>
+        <p class="text-xs font-medium uppercase tracking-[0.22em] text-[#9C7C5C]">Remento alternative · UK</p>
         <h1 class="mt-4 font-display text-3xl font-bold leading-tight text-white sm:text-4xl md:text-5xl">
-          Looking for a Remento alternative?<br>
-          <em class="text-[#C4A882] italic">Same idea. No subscription. Built for the UK.</em>
+          Looking for a Remento alternative in the UK?<br>
+          <em class="text-[#C4A882] italic">Pay once. Keep their voice.</em>
         </h1>
         <p class="mx-auto mt-5 max-w-xl text-sm leading-7 text-[#A8A29E]">
-          Remento costs $99/year and rewrites your loved one's words with AI. Tell Me Your Story keeps their voice exactly as it is — with actual voice recordings, UK printing, and a one-time payment. Read our full <router-link to="/remento-review" class="text-[#C4A882] underline hover:no-underline">Remento review</router-link> for a detailed breakdown.
+          Remento is a yearly plan, priced in US dollars, where the storyteller records every answer. Tell Me Your Story is a one-time payment in pounds:
+          type or speak each answer, whichever suits, and every voice answer gets its own QR code in the printed book.
         </p>
         <div class="mt-8 flex flex-wrap justify-center gap-3">
           <router-link
             to="/register"
             class="rounded-full bg-[#C4A882] px-7 py-3 text-sm font-semibold text-[#1C1917] transition hover:opacity-90"
           >
-            Start free — no subscription →
+            Try 5 questions free →
           </router-link>
           <router-link
             to="/example"
@@ -29,22 +30,33 @@
       </div>
     </section>
 
-    <!-- Why people look for alternatives -->
+    <!-- Quick answer: which one fits -->
     <section class="px-5 py-16 sm:px-8 sm:py-20">
-      <div class="mx-auto max-w-3xl">
+      <div class="mx-auto max-w-4xl">
         <div class="text-center">
-          <p class="text-xs font-medium uppercase tracking-[0.22em] text-[#9C7C5C]">Why people look for alternatives</p>
-          <h2 class="mt-3 font-display text-2xl font-bold text-stone-900 sm:text-3xl">Common frustrations with Remento</h2>
+          <p class="text-xs font-medium uppercase tracking-[0.22em] text-[#9C7C5C]">The short answer</p>
+          <h2 class="mt-3 font-display text-2xl font-bold text-stone-900 sm:text-3xl">Which one is right for your family?</h2>
+          <p class="mx-auto mt-3 max-w-xl text-sm leading-7 text-stone-500">
+            Both are good ways to capture a life story. They suit different families.
+          </p>
         </div>
-        <div class="mt-10 space-y-4">
-          <div v-for="reason in reasons" :key="reason.title" class="rounded-2xl border border-stone-200 p-5">
-            <div class="flex items-start gap-4">
-              <span class="mt-0.5 text-xl flex-shrink-0">{{ reason.icon }}</span>
-              <div>
-                <p class="text-sm font-semibold text-stone-900">{{ reason.title }}</p>
-                <p class="mt-1 text-xs leading-5 text-stone-500">{{ reason.desc }}</p>
-              </div>
-            </div>
+
+        <div class="mt-10 grid gap-5 sm:grid-cols-2">
+          <div class="rounded-2xl border border-stone-200 p-6">
+            <p class="text-xs font-semibold uppercase tracking-wider text-stone-400">Choose Remento if…</p>
+            <ul class="mt-4 space-y-3 text-sm leading-6 text-stone-600">
+              <li v-for="item in whenThem" :key="item" class="flex gap-2">
+                <span class="text-stone-400" aria-hidden="true">•</span>{{ item }}
+              </li>
+            </ul>
+          </div>
+          <div class="rounded-2xl border border-[#7C5C3B] bg-[#FAF7F4] p-6">
+            <p class="text-xs font-semibold uppercase tracking-wider text-[#7C5C3B]">Choose Tell Me Your Story if…</p>
+            <ul class="mt-4 space-y-3 text-sm leading-6 text-stone-700">
+              <li v-for="item in whenUs" :key="item" class="flex gap-2">
+                <span class="text-[#7C5C3B]" aria-hidden="true">✓</span>{{ item }}
+              </li>
+            </ul>
           </div>
         </div>
       </div>
@@ -58,126 +70,107 @@
           <h2 class="mt-3 font-display text-2xl font-bold text-stone-900 sm:text-3xl">Remento vs Tell Me Your Story</h2>
         </div>
 
-        <div class="mt-10 overflow-hidden rounded-2xl border border-stone-200 bg-white">
-          <div class="grid grid-cols-3 border-b border-stone-200 bg-stone-50 px-5 py-3 text-xs font-semibold uppercase tracking-wider text-stone-500">
-            <span>Feature</span>
-            <span class="text-center">Remento</span>
-            <span class="text-center text-[#7C5C3B]">Tell Me Your Story</span>
-          </div>
-          <div
-            v-for="(row, i) in comparison"
-            :key="row.feature"
-            class="grid grid-cols-3 px-5 py-4 text-sm"
-            :class="i % 2 === 0 ? 'bg-white' : 'bg-stone-50'"
-          >
-            <span class="font-medium text-stone-700">{{ row.feature }}</span>
-            <span class="text-center" :class="row.themNegative ? 'text-red-500' : 'text-stone-600'">{{ row.them }}</span>
-            <span class="text-center font-medium" :class="row.usPositive ? 'text-green-600' : 'text-stone-600'">{{ row.us }}</span>
-          </div>
+        <!-- Scrolls sideways on small phones instead of squashing -->
+        <div class="mt-10 overflow-x-auto rounded-2xl border border-stone-200 bg-white">
+          <table class="w-full min-w-[560px] text-left text-sm">
+            <thead>
+              <tr class="border-b border-stone-200 bg-stone-50 text-xs font-semibold uppercase tracking-wider text-stone-500">
+                <th scope="col" class="px-5 py-3">Feature</th>
+                <th scope="col" class="px-5 py-3">Remento</th>
+                <th scope="col" class="px-5 py-3 text-[#7C5C3B]">Tell Me Your Story</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr
+                v-for="(row, i) in comparison"
+                :key="row.feature"
+                :class="i % 2 === 0 ? 'bg-white' : 'bg-stone-50'"
+              >
+                <th scope="row" class="px-5 py-4 align-top font-medium text-stone-700">{{ row.feature }}</th>
+                <td class="px-5 py-4 align-top text-stone-600">{{ row.them }}</td>
+                <td class="px-5 py-4 align-top font-medium" :class="row.usPositive ? 'text-green-700' : 'text-stone-700'">{{ row.us }}</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
-      </div>
-    </section>
 
-    <!-- Key difference — voice vs AI rewrite -->
-    <section class="px-5 py-16 sm:px-8 sm:py-20">
-      <div class="mx-auto max-w-3xl">
-        <div class="text-center">
-          <p class="text-xs font-medium uppercase tracking-[0.22em] text-[#9C7C5C]">The most important difference</p>
-          <h2 class="mt-3 font-display text-2xl font-bold text-stone-900 sm:text-3xl">Their words, not an AI's version of them</h2>
-        </div>
-        <div class="mt-8 grid gap-5 sm:grid-cols-2">
-          <div class="rounded-2xl border border-stone-200 bg-stone-50 p-6">
-            <p class="text-xs font-semibold uppercase tracking-wider text-stone-400">Remento</p>
-            <p class="mt-3 text-sm leading-6 text-stone-600">Records your loved one's voice, then uses AI to rewrite what they said into polished prose. The printed book contains the AI's version of their words — not their actual words.</p>
-          </div>
-          <div class="rounded-2xl border border-[#7C5C3B] bg-[#FAF7F4] p-6">
-            <p class="text-xs font-semibold uppercase tracking-wider text-[#7C5C3B]">Tell Me Your Story</p>
-            <p class="mt-3 text-sm leading-6 text-stone-700">Records their voice and preserves it exactly. The printed book contains their actual answers — typos, personality, and all. A QR code lets family scan and hear their real voice any time.</p>
-          </div>
-        </div>
-        <p class="mt-6 text-center text-sm text-stone-500">For a memory keepsake, authenticity matters. In 20 years, your family will want to read <em>their</em> words — not a polished AI summary. <router-link to="/remento-review" class="text-[#7C5C3B] underline hover:no-underline">Read our full Remento review →</router-link></p>
+        <p class="mt-4 text-center text-xs leading-5 text-stone-500">
+          Remento details checked {{ CHECKED_ON }} from
+          <a href="https://www.remento.co/faq" target="_blank" rel="noopener noreferrer" class="underline hover:no-underline">Remento's FAQ</a>.
+          Prices and features change — check their site before you buy.
+        </p>
       </div>
     </section>
 
     <!-- What you get -->
-    <section class="bg-[#F5F0E8] px-5 py-16 sm:px-8 sm:py-20">
+    <section class="px-5 py-16 sm:px-8 sm:py-20">
       <div class="mx-auto max-w-4xl">
         <div class="text-center">
-          <p class="text-xs font-medium uppercase tracking-[0.22em] text-[#9C7C5C]">What you get instead</p>
-          <h2 class="mt-3 font-display text-2xl font-bold text-stone-900 sm:text-3xl">Everything you need, nothing you don't</h2>
+          <p class="text-xs font-medium uppercase tracking-[0.22em] text-[#9C7C5C]">What you get with Tell Me Your Story</p>
+          <h2 class="mt-3 font-display text-2xl font-bold text-stone-900 sm:text-3xl">Built around their voice</h2>
         </div>
 
         <div class="mt-12 grid gap-6 sm:grid-cols-2 md:grid-cols-3">
-          <div class="rounded-2xl border border-stone-200 bg-white p-6">
-            <p class="text-2xl">🎙️</p>
-            <p class="mt-3 text-sm font-semibold text-stone-900">Real voice recordings</p>
-            <p class="mt-2 text-xs leading-5 text-stone-500">Record answers in their actual voice. QR codes in the printed book link back to the original recording — hear them speak any time.</p>
+          <div v-for="feature in features" :key="feature.title" class="rounded-2xl border border-stone-200 p-6">
+            <p class="text-2xl" aria-hidden="true">{{ feature.icon }}</p>
+            <h3 class="mt-3 text-sm font-semibold text-stone-900">{{ feature.title }}</h3>
+            <p class="mt-2 text-xs leading-5 text-stone-500">{{ feature.desc }}</p>
           </div>
-          <div class="rounded-2xl border border-stone-200 bg-white p-6">
-            <p class="text-2xl">📖</p>
-            <p class="mt-3 text-sm font-semibold text-stone-900">Their words, unchanged</p>
-            <p class="mt-2 text-xs leading-5 text-stone-500">No AI rewriting. Their answers go straight into the book exactly as written or spoken — personality, quirks, and all.</p>
-          </div>
-          <div class="rounded-2xl border border-stone-200 bg-white p-6">
-            <p class="text-2xl">📚</p>
-            <p class="mt-3 text-sm font-semibold text-stone-900">UK printed hardcover</p>
-            <p class="mt-2 text-xs leading-5 text-stone-500">Printed and shipped from the UK. No international shipping fees, no 3-week wait. Softcover from £21.99.</p>
-          </div>
-          <div class="rounded-2xl border border-stone-200 bg-white p-6">
-            <p class="text-2xl">💷</p>
-            <p class="mt-3 text-sm font-semibold text-stone-900">One-time payment</p>
-            <p class="mt-2 text-xs leading-5 text-stone-500">Pay once, own forever. No $99/year renewal. No being locked out of your family's stories if you miss a payment.</p>
-          </div>
-          <div class="rounded-2xl border border-stone-200 bg-white p-6">
-            <p class="text-2xl">✨</p>
-            <p class="mt-3 text-sm font-semibold text-stone-900">AI writing assist (optional)</p>
-            <p class="mt-2 text-xs leading-5 text-stone-500">Gentle prompts to help expand short answers — but only if they want it. The words always stay theirs.</p>
-          </div>
-          <div class="rounded-2xl border border-stone-200 bg-white p-6">
-            <p class="text-2xl">⏱️</p>
-            <p class="mt-3 text-sm font-semibold text-stone-900">No time pressure</p>
-            <p class="mt-2 text-xs leading-5 text-stone-500">Answer one question or a hundred — at their own pace, whenever they feel like it. No weekly prompts, no subscription running down.</p>
-          </div>
-          <div class="rounded-2xl border border-stone-200 p-6">
-  <p class="text-2xl">🎬</p>
-  <p class="mt-3 text-sm font-semibold text-stone-900">Story video export</p>
-  <p class="mt-2 text-xs leading-5 text-stone-500">Export the whole story as a beautiful 1080p video with photos and music — ready to share or play at a family gathering.</p>
-</div>
         </div>
       </div>
     </section>
 
     <!-- Pricing comparison -->
-    <section class="px-5 py-16 sm:px-8 sm:py-20">
+    <section class="bg-[#F5F0E8] px-5 py-16 sm:px-8 sm:py-20">
       <div class="mx-auto max-w-3xl text-center">
         <p class="text-xs font-medium uppercase tracking-[0.22em] text-[#9C7C5C]">The honest price comparison</p>
         <h2 class="mt-3 font-display text-2xl font-bold text-stone-900 sm:text-3xl">What you actually pay</h2>
+        <p class="mx-auto mt-3 max-w-xl text-sm leading-7 text-stone-500">
+          Remento includes a hardcover in the plan price. We keep the app cheap and charge for printing separately,
+          so you only pay for books you actually order. See our
+          <router-link to="/remento-review" class="text-[#7C5C3B] underline hover:no-underline">full Remento review</router-link>
+          for more detail.
+        </p>
 
         <div class="mt-10 grid gap-5 sm:grid-cols-2">
-          <div class="rounded-2xl border border-stone-200 bg-stone-50 p-6 text-left">
+          <div class="rounded-2xl border border-stone-200 bg-white p-6 text-left">
             <p class="text-xs font-semibold uppercase tracking-wider text-stone-400">Remento</p>
-            <p class="mt-3 text-2xl font-bold text-stone-900">$99/year</p>
-            <p class="mt-1 text-xs text-stone-500">Annual subscription · renews or content becomes read-only</p>
-            <ul class="mt-4 space-y-2 text-xs text-stone-500">
-              <li>+ $69–99 per extra book copy</li>
-              <li>+ $30 surcharge for books over 200 pages</li>
-              <li>+ $24.99 for PDF/ebook export</li>
-              <li>+ International shipping fees</li>
-              <li>+ $99 per additional storyteller</li>
+            <p class="mt-3 text-2xl font-bold text-stone-900">$99 a year</p>
+            <p class="mt-1 text-xs text-stone-500">Priced in US dollars · one colour hardcover included</p>
+            <ul class="mt-4 space-y-2 text-xs leading-5 text-stone-500">
+              <li>• Book up to 200 pages; $30 extra above that</li>
+              <li>• Extra copies $69 each ($99 for longer books)</li>
+              <li>• Designed e-book $49.99</li>
+              <li>• UK shipping charged extra; around 3 weeks to arrive</li>
             </ul>
           </div>
           <div class="rounded-2xl border border-[#7C5C3B] bg-[#FAF7F4] p-6 text-left">
             <p class="text-xs font-semibold uppercase tracking-wider text-[#7C5C3B]">Tell Me Your Story</p>
-            <p class="mt-3 text-2xl font-bold text-stone-900">From £3.99</p>
-            <p class="mt-1 text-xs text-stone-500">One-time payment · yours forever</p>
-            <ul class="mt-4 space-y-2 text-xs text-stone-600">
-              <li>✓ PDF export included</li>
-              <li>✓ UK shipping included in print price</li>
-              <li>✓ No per-page surcharges</li>
-              <li>✓ No renewal fees</li>
-              <li>✓ Your content is always yours</li>
+            <p class="mt-3 text-2xl font-bold text-stone-900">From £3.99, once</p>
+            <p class="mt-1 text-xs text-stone-500">One-time payment · no renewal</p>
+            <ul class="mt-4 space-y-2 text-xs leading-5 text-stone-600">
+              <li>✓ 5 questions free, no card needed</li>
+              <li>✓ Voice recording on every plan</li>
+              <li>✓ Printed softcover from {{ printFrom }} per copy, plus UK shipping</li>
+              <li>✓ Every copy costs the same — order one or ten</li>
             </ul>
           </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ (same text feeds the FAQ schema) -->
+    <section class="px-5 py-16 sm:px-8 sm:py-20">
+      <div class="mx-auto max-w-3xl">
+        <h2 class="text-center font-display text-2xl font-bold text-stone-900 sm:text-3xl">Common questions</h2>
+        <div class="mt-8 divide-y divide-stone-200 rounded-2xl border border-stone-200">
+          <details v-for="item in faqs" :key="item.q" class="faq-item px-5 py-4 sm:px-6">
+            <summary class="flex cursor-pointer list-none items-center justify-between gap-4 text-sm font-semibold text-stone-900 sm:text-base">
+              {{ item.q }}
+              <span class="faq-icon flex-shrink-0 text-xl leading-none text-[#7C5C3B]" aria-hidden="true">+</span>
+            </summary>
+            <p class="mt-3 text-sm leading-relaxed text-stone-600">{{ item.a }}</p>
+          </details>
         </div>
       </div>
     </section>
@@ -195,18 +188,18 @@
     <!-- Related pages -->
     <section class="px-5 py-12 sm:px-8">
       <div class="mx-auto max-w-3xl">
-        <p class="text-xs font-medium uppercase tracking-[0.22em] text-[#9C7C5C] mb-6">Related reading</p>
+        <p class="mb-6 text-xs font-medium uppercase tracking-[0.22em] text-[#9C7C5C]">Related reading</p>
         <div class="grid gap-4 sm:grid-cols-3">
-          <router-link to="/remento-review" class="rounded-2xl border border-stone-200 p-4 hover:border-[#7C5C3B] transition group">
+          <router-link to="/remento-review" class="group rounded-2xl border border-stone-200 p-4 transition hover:border-[#7C5C3B]">
             <p class="text-sm font-semibold text-stone-900 group-hover:text-[#7C5C3B]">Remento Review 2026</p>
-            <p class="mt-1 text-xs text-stone-500">Full honest review — does the AI rewriting work?</p>
+            <p class="mt-1 text-xs text-stone-500">Pros, cons and real costs</p>
           </router-link>
-          <router-link to="/storyworth-alternative" class="rounded-2xl border border-stone-200 p-4 hover:border-[#7C5C3B] transition group">
-            <p class="text-sm font-semibold text-stone-900 group-hover:text-[#7C5C3B]">Storyworth Alternative</p>
+          <router-link to="/storyworth-vs-remento" class="group rounded-2xl border border-stone-200 p-4 transition hover:border-[#7C5C3B]">
+            <p class="text-sm font-semibold text-stone-900 group-hover:text-[#7C5C3B]">Storyworth vs Remento</p>
             <p class="mt-1 text-xs text-stone-500">Also comparing Storyworth? Read this first</p>
           </router-link>
-          <router-link to="/life-story-questions" class="rounded-2xl border border-stone-200 p-4 hover:border-[#7C5C3B] transition group">
-            <p class="text-sm font-semibold text-stone-900 group-hover:text-[#7C5C3B]">150 Life Story Questions</p>
+          <router-link to="/life-story-questions" class="group rounded-2xl border border-stone-200 p-4 transition hover:border-[#7C5C3B]">
+            <p class="text-sm font-semibold text-stone-900 group-hover:text-[#7C5C3B]">Life Story Questions</p>
             <p class="mt-1 text-xs text-stone-500">The questions that unlock real stories</p>
           </router-link>
         </div>
@@ -215,15 +208,15 @@
 
     <!-- CTA -->
     <section class="bg-[#1C1917] px-5 py-16 text-center sm:px-8 sm:py-20">
-      <p class="text-xs font-medium uppercase tracking-[0.22em] text-[#9C7C5C]">The Remento alternative built for UK families</p>
-      <h2 class="mt-4 font-display text-2xl font-bold text-white sm:text-3xl">Their real voice. Their real words. Kept forever.</h2>
+      <p class="text-xs font-medium uppercase tracking-[0.22em] text-[#9C7C5C]">A Remento alternative for UK families</p>
+      <h2 class="mt-4 font-display text-2xl font-bold text-white sm:text-3xl">Start their story today — no subscription</h2>
       <p class="mx-auto mt-4 max-w-lg text-sm leading-7 text-[#A8A29E]">
-        No subscription, no AI rewrites, no international shipping fees. Just their story — in their words and their voice — printed beautifully and kept forever.
+        Guided questions, voice recordings with a QR code for every story, and a printed keepsake book when you're ready.
       </p>
       <router-link to="/register" class="mt-8 inline-block rounded-full bg-[#C4A882] px-8 py-3 text-sm font-semibold text-[#1C1917] transition hover:opacity-90">
-        Start free — no subscription →
+        Try 5 questions free →
       </router-link>
-      <p class="mt-4 text-xs text-[#9C7C5C]">Free to start · One-time payment · Printed books from £21.99</p>
+      <p class="mt-4 text-xs text-[#9C7C5C]">No card needed · One-time payment · Printed books from {{ printFrom }} plus UK shipping</p>
     </section>
 
   </main>
@@ -231,50 +224,85 @@
 
 <script setup lang="ts">
 import { useSeo } from '../composables/useSeo'
+import { PRINTED_BOOK_FROM_PRICE } from '../lib/printPricing'
 
-const reasons = [
-  {
-    icon: '🤖',
-    title: 'AI rewrites their words',
-    desc: 'Remento transcribes voice recordings and then uses AI to rewrite them into polished prose. The book you receive contains the AI\'s version of what your loved one said — not their actual words.',
-  },
-  {
-    icon: '💸',
-    title: '$99/year subscription',
-    desc: 'Remento charges $99/year and auto-renews. If you stop paying, your content becomes read-only. Multiple reviewers have described being locked out of their own family\'s stories.',
-  },
-  {
-    icon: '🌍',
-    title: 'US-focused product',
-    desc: 'Remento is built for the US market. UK customers face USD pricing, international shipping delays of up to 3 weeks, and no UK-based printing option.',
-  },
-  {
-    icon: '💰',
-    title: 'Hidden extra costs',
-    desc: 'PDF export costs $24.99 extra. Books over 200 pages incur a $30 surcharge. Each additional storyteller costs $99. The $99 headline price rarely reflects what families actually pay.',
-  },
+/** Update this whenever the Remento facts below are re-checked. */
+const CHECKED_ON = 'September 2026'
+
+const printFrom = `£${PRINTED_BOOK_FROM_PRICE.toFixed(2)}`
+
+const whenThem = [
+  'Your storyteller would rather speak (or record video) every answer than type',
+  "You'd like AI to turn recordings into polished written chapters",
+  'You want a full-colour hardcover included in one upfront price',
+]
+
+const whenUs = [
+  "You'd rather pay once, in pounds, than yearly in dollars",
+  'You want to type some answers and speak others — whichever suits',
+  'You want to try it properly first, free and without a card',
+  "You'd rather go at your own pace, with no year-long plan",
 ]
 
 const comparison = [
-  { feature: 'Pricing model',        them: '$99/year subscription', us: 'From £3.99 one-time',    themNegative: true,  usPositive: true  },
-  { feature: 'Voice recordings',     them: '✓ Yes',                 us: '✓ Yes',                  themNegative: false, usPositive: true  },
-  { feature: 'Words in book',        them: 'AI rewritten',          us: '✓ Their actual words',   themNegative: true,  usPositive: true  },
-  { feature: 'QR codes in book',     them: '✓ Yes',                 us: '✓ Yes',                  themNegative: false, usPositive: false },
-  { feature: 'UK printing',          them: '✗ US only',             us: '✓ UK printed',           themNegative: true,  usPositive: true  },
-  { feature: 'PDF export',           them: '$24.99 extra',          us: '✓ Included',             themNegative: true,  usPositive: true  },
-  { feature: 'Content ownership',    them: 'Read-only if lapsed',   us: '✓ Yours forever',        themNegative: true,  usPositive: true  },
-  { feature: 'No renewal needed',    them: '✗ Annual fee',          us: '✓ One-time payment',     themNegative: true,  usPositive: true  },
-  { feature: 'Answer at own pace',   them: 'Weekly prompts',        us: '✓ Any time',             themNegative: false, usPositive: true  },
-  { feature: 'Video export',          them: '✗ No',                 us: '✓ £19.99 one-time',      themNegative: true,  usPositive: true  },
+  { feature: 'How you pay',             them: '$99 a year (or $12 a month) in US dollars', us: 'One-time payment in pounds, from £3.99',        usPositive: true },
+  { feature: 'Try before you pay',      them: '30-day money-back guarantee',               us: '5 questions free, no card needed',              usPositive: true },
+  { feature: 'How they answer',         them: 'Record voice or video from a link',         us: 'Type or tap the microphone — their choice',     usPositive: true },
+  { feature: 'Words in the book',       them: 'Cleaned-up transcript or AI-written story', us: 'Their own typed or spoken words',               usPositive: false },
+  { feature: 'Hearing it in the book',  them: 'QR code with each story',                   us: 'QR code beside each voice-recorded story',      usPositive: false },
+  { feature: 'Printed book',            them: '8×10 colour hardcover included',            us: `Softcover from ${printFrom} plus UK shipping; hardcover available`, usPositive: false },
+  { feature: 'Extra copies',            them: '$69 each',                                  us: 'Same price as the first copy',                  usPositive: false },
+  { feature: 'Delivery to the UK',      them: 'Ships from the US; extra fee, about 3 weeks', us: 'Printed to order and delivered to UK addresses', usPositive: false },
+  { feature: 'If you stop paying',      them: 'Keep listening, reading and downloading; no new recordings', us: 'Nothing to renew',          usPositive: false },
+]
+
+const features = [
+  { icon: '📖', title: '100+ guided questions',  desc: 'Every chapter of life — childhood, family, work, love and the lessons learned. Answer in any order, at your own pace.' },
+  { icon: '🎙️', title: 'Type or speak',          desc: 'Tap the microphone and talk, or type — whichever suits each question. Recordings are kept, with a QR code beside that story in the printed book.' },
+  { icon: '📚', title: 'Printed keepsake books', desc: `Printed to order and delivered to UK addresses. Softcover from ${printFrom} plus shipping, with hardcover options.` },
+  { icon: '💷', title: 'One-time payment',        desc: 'Pay once, in pounds, for the plan you choose. No renewal date and nothing to cancel.' },
+  { icon: '✨', title: 'Writing help',            desc: 'Gentle prompts help expand short answers — the words always stay theirs.' },
+  { icon: '🤍', title: 'Family can read along',  desc: 'Share a link so the whole family can read the story as it grows, at no extra cost.' },
+]
+
+// Shown on the page AND used for the FAQPage schema, so they always match.
+const faqs = [
+  {
+    q: 'Is Remento available in the UK?',
+    a: 'Yes. Remento accepts UK customers and ships printed books to the UK for an extra fee. It is priced in US dollars — $99 a year — and books ship from the US, typically arriving in about three weeks.',
+  },
+  {
+    q: 'Does Remento rewrite what my parent says?',
+    a: "You choose. Remento can print a cleaned-up word-for-word transcript (with the ums and ahs removed) or use AI to turn the recording into a written narrative. With Tell Me Your Story, the book uses their own typed or spoken words, and any writing help is optional.",
+  },
+  {
+    q: 'Is Tell Me Your Story cheaper than Remento?',
+    a: `For one printed book, usually. Remento is $99 a year with a colour hardcover included, plus UK shipping. Tell Me Your Story starts free, with one-time plans from £3.99 and printed softcovers from ${printFrom} plus UK shipping. For several hardcover copies, compare the per-copy prices for your order.`,
+  },
+  {
+    q: 'Can my parent type answers instead of recording them?',
+    a: 'With Tell Me Your Story, yes — they can type any answer, record it by voice, or do both. Remento is built around recording each answer by voice or video.',
+  },
 ]
 
 useSeo({
-  title: 'Remento Alternative UK 2026 — Tell Me Your Story | No Subscription, Real Voice, UK Books',
-  description: 'Looking for a Remento alternative in the UK? Tell Me Your Story keeps your loved one\'s real words and voice — no AI rewrites, no annual subscription, UK-printed keepsake books.',
-  canonical: 'https://tellmeyourstory.uk/remento-alternative',
+  title: 'Remento Alternative UK (2026) — Pay Once, Type or Speak',
+  description: 'Comparing Remento in the UK? Tell Me Your Story is a one-time payment in pounds: type or speak each answer, with a QR code beside every recorded story. Try 5 questions free.',
+  schema: {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: faqs.map((f) => ({
+      '@type': 'Question',
+      name: f.q,
+      acceptedAnswer: { '@type': 'Answer', text: f.a },
+    })),
+  },
 })
 </script>
 
 <style scoped>
 .font-display { font-family: 'Playfair Display', Georgia, serif; }
+.faq-item summary::-webkit-details-marker { display: none; }
+.faq-item[open] .faq-icon { transform: rotate(45deg); }
+.faq-icon { transition: transform 0.2s; }
 </style>

@@ -626,6 +626,7 @@ const faqs = [
 
 const guides = [
   { to: '/blog/questions-to-ask-your-parents', label: '100 questions to ask your parents' },
+  { to: '/best-memory-book-apps-uk', label: 'Best memory book apps (UK)' },
   { to: '/storyworth-alternative', label: 'Storyworth alternative (UK)' },
   { to: '/life-story-work-in-care-homes', label: 'Life story work in care homes' },
   { to: '/legacy-letter-to-children', label: 'How to write a legacy letter' },

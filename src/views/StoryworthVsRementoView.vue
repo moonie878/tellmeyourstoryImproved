@@ -48,15 +48,15 @@
           <p class="text-xs font-medium uppercase tracking-[0.22em] text-[#9C7C5C]">Feature comparison</p>
           <h2 class="mt-3 font-display text-2xl font-bold text-stone-900 sm:text-3xl">Storyworth vs Remento vs Tell Me Your Story</h2>
         </div>
-        <div class="rounded-2xl border border-stone-200 bg-white overflow-hidden">
-          <div class="grid grid-cols-4 bg-[#1C1917] px-4 py-3 text-xs font-semibold text-white gap-2">
+        <div class="overflow-x-auto rounded-2xl border border-stone-200 bg-white">
+          <div class="grid min-w-[620px] grid-cols-4 gap-2 bg-[#1C1917] px-4 py-3 text-xs font-semibold text-white">
             <div>Feature</div>
             <div class="text-center">Storyworth</div>
             <div class="text-center">Remento</div>
             <div class="text-center text-[#C4A882]">Tell Me Your Story</div>
           </div>
           <div v-for="(row, i) in comparisonRows" :key="row.feature"
-            class="grid grid-cols-4 px-4 py-3 gap-2 text-xs border-t border-stone-100"
+            class="grid min-w-[620px] grid-cols-4 gap-2 border-t border-stone-100 px-4 py-3 text-xs"
             :class="i % 2 === 0 ? 'bg-white' : 'bg-stone-50'">
             <div class="text-stone-700 font-medium">{{ row.feature }}</div>
             <div class="text-center" :class="row.sw === '✓' ? 'text-green-600' : row.sw === '✗' ? 'text-stone-300' : 'text-stone-600'">{{ row.sw }}</div>
@@ -64,6 +64,12 @@
             <div class="text-center font-medium" :class="row.tm === '✓' ? 'text-[#7C5C3B]' : row.tm === '✗' ? 'text-stone-300' : 'text-[#7C5C3B]'">{{ row.tm }}</div>
           </div>
         </div>
+        <p class="mt-4 text-center text-xs leading-5 text-stone-500">
+          Details checked {{ CHECKED_ON }} from
+          <a href="https://welcome.storyworth.com/gb/faq" target="_blank" rel="noopener noreferrer" class="underline hover:no-underline">Storyworth's UK FAQ</a>
+          and <a href="https://www.remento.co/faq" target="_blank" rel="noopener noreferrer" class="underline hover:no-underline">Remento's FAQ</a>.
+          Check their sites for current prices before you buy.
+        </p>
       </div>
     </section>
 
@@ -152,7 +158,7 @@
       <h2 class="font-display text-2xl font-bold text-white sm:text-3xl">Try Tell Me Your Story free</h2>
       <p class="mx-auto mt-4 max-w-lg text-sm leading-7 text-[#A8A29E]">No subscription, no card needed. Start capturing a life story today and see the difference for yourself.</p>
       <router-link to="/register" class="mt-8 inline-block rounded-full bg-[#C4A882] px-8 py-3 text-sm font-semibold text-[#1C1917] transition hover:opacity-90">Start free →</router-link>
-      <p class="mt-4 text-xs text-[#9C7C5C]">Free to start · One-time payment · Printed book from £21.99</p>
+      <p class="mt-4 text-xs text-[#9C7C5C]">5 questions free · One-time payment · Printed book from {{ printFrom }} plus UK shipping</p>
     </section>
 
   </main>
@@ -160,28 +166,33 @@
 
 <script setup lang="ts">
 import { useSeo } from '../composables/useSeo'
+import { PRINTED_BOOK_FROM_PRICE } from '../lib/printPricing'
+
+/** Update whenever the Storyworth / Remento facts below are re-checked. */
+const CHECKED_ON = 'September 2026'
+
+const printFrom = `£${PRINTED_BOOK_FROM_PRICE.toFixed(2)}`
 
 const summaries = [
-  { name: 'Storyworth', desc: 'Weekly email questions, annual subscription model. Best known brand in the space. US-focused with UK availability.', price: 'From ~£79/year', featured: false },
-  { name: 'Remento', desc: 'Voice-first approach with AI transcription. Strong on audio quality. US-based, limited UK presence.', price: 'From ~£99/year', featured: false },
-  { name: 'Tell Me Your Story', desc: 'UK-native platform with voice recording, printed books, and a one-time payment model. No subscription.', price: 'Free to start · from £3.99', featured: true },
+  { name: 'Storyworth', desc: 'Weekly questions by email or text on an annual plan, with a hardcover included. The best-known brand in the space — a US company with a UK site priced in pounds.', price: 'From £49 a year', featured: false },
+  { name: 'Remento', desc: 'Voice and video first: the storyteller answers weekly prompts by speaking, and AI turns the recordings into written stories. US-based; ships books to the UK for an extra fee.', price: '$99 a year (US dollars)', featured: false },
+  { name: 'Tell Me Your Story', desc: 'Built in the UK. Type or speak your answers at your own pace, with a QR code beside every recorded story in the printed book. One-time payment.', price: '5 questions free · from £3.99', featured: true },
 ]
 
 const comparisonRows = [
-  { feature: 'UK-based service',         sw: '✗',          re: '✗',         tm: '✓' },
-  { feature: 'Free to start',            sw: '✗',          re: '✗',         tm: '✓' },
-  { feature: 'Subscription required',    sw: 'Annual',     re: 'Annual',    tm: 'No subscription' },
-  { feature: 'Voice recording',          sw: 'Limited',    re: '✓',         tm: '✓' },
-  { feature: 'Voice in printed book',    sw: '✗',          re: '✗',         tm: 'QR codes' },
-  { feature: 'Printed book available',   sw: '✓',          re: '✓',         tm: '✓' },
-  { feature: 'Hardcover option',         sw: '✓',          re: '✓',         tm: '✓' },
-  { feature: 'UK printing & delivery',   sw: '✗',          re: '✗',         tm: '✓' },
-  { feature: 'Photo support',            sw: '✓',          re: '✓',         tm: '✓' },
-  { feature: 'AI writing assist',        sw: '✓',          re: '✓',         tm: '✓' },
-  { feature: 'Guided questions',         sw: '✓',          re: '✓',         tm: '✓' },
-  { feature: 'Family collaboration',     sw: 'Limited',    re: 'Limited',   tm: '✓' },
-  { feature: 'Tribute video export',     sw: '✗',          re: '✗',         tm: '✓' },
-  { feature: 'One-time payment option',  sw: '✗',          re: '✗',         tm: '✓' },
+  { feature: 'Company',                  sw: 'US (UK site in £)',          re: 'US (priced in $)',         tm: 'UK' },
+  { feature: 'Free to start',            sw: '✗',                          re: '✗',                        tm: '✓ 5 questions' },
+  { feature: 'How you pay',              sw: 'Annual plan',                re: 'Annual plan',              tm: 'One-time payment' },
+  { feature: 'How they answer',          sw: 'Write; phone on upgraded plans', re: 'Speak or video',       tm: 'Type or speak' },
+  { feature: 'Voice in printed book',    sw: 'One QR code, last page',     re: 'QR codes in the book',     tm: 'QR code beside each story' },
+  { feature: 'Printed book',             sw: '✓ Included',                 re: '✓ Included',               tm: `From ${printFrom} + shipping` },
+  { feature: 'Hardcover',                sw: '✓',                          re: '✓',                        tm: '✓' },
+  { feature: 'Delivery to the UK',       sw: 'Shipping extra',             re: 'Shipping extra, ~3 weeks', tm: 'Delivered to UK addresses' },
+  { feature: 'Photo support',            sw: '✓',                          re: '✓',                        tm: '✓' },
+  { feature: 'AI help',                  sw: 'Interviews, proofreader',    re: 'Speech-to-Story',          tm: 'Writing assist' },
+  { feature: 'Guided questions',         sw: '✓',                          re: '✓',                        tm: '✓' },
+  { feature: 'Family involvement',       sw: 'Sharing, Family Calls',      re: 'Unlimited collaborators',  tm: 'Invite family by link' },
+  { feature: 'Tribute video export',     sw: '✗',                          re: '✗',                        tm: '✓' },
 ]
 
 const deepDive = [
@@ -189,103 +200,99 @@ const deepDive = [
     label: 'How Storyworth works',
     title: 'Storyworth — the email approach',
     paras: [
-      'Storyworth sends one question per week by email. The recipient replies to the email with their answer, and answers accumulate over the year into a book. At the end of the subscription, the answers are compiled into a printed hardcover book.',
-      'The weekly email format is Storyworth\'s biggest strength — it creates a gentle, low-pressure routine that works well for people who would never sit down to fill in a questionnaire. The questions come to them, they answer in their own time, and the book builds itself.',
-      'The main limitations are the subscription model (you pay annually whether you use it actively or not), the US focus (UK users pay in dollars and shipping from the US adds cost and time), and the lack of voice recording. Storyworth captures written answers only — you can\'t hear the person\'s voice in the finished book.',
-      'Storyworth is best suited to families where the person answering is comfortable with email, the annual subscription model suits the budget, and the voice isn\'t a priority.',
-    ]
+      'Storyworth sends a question each week by email or text. The storyteller replies, and the answers build up into a hardcover book, which is included in the plan.',
+      "The weekly routine is Storyworth's biggest strength — it's gentle and low-pressure, and it suits people who would never sit down to fill in a questionnaire. You can change how often questions arrive and answer as many as you like.",
+      'Storyworth sells to UK customers in pounds, from £49 a year. Books are printed in the US and Europe; shipping outside the US is charged when you order, and import fees may apply. On upgraded plans, storytellers can record by phone — even from a landline — and the book includes one QR code on the last page linking to the stories and recordings online.',
+      'Storyworth suits families where the storyteller is comfortable with email, a hardcover included in one price appeals, and a year-long plan fits.',
+    ],
   },
   {
     label: 'How Remento works',
     title: 'Remento — the voice-first approach',
     paras: [
-      'Remento\'s core proposition is voice. Rather than typing answers, users speak them into the app, and Remento\'s AI transcribes and tidies the response. The idea is to lower the barrier for people who find typing difficult or who express themselves better out loud.',
-      'The voice-first approach is genuinely differentiated and works well for the right user — particularly older people who struggle with typing but speak naturally and fluently. The AI transcription is good but not perfect, and answers sometimes need reviewing.',
-      'Remento is US-based and less well-known in the UK. The subscription pricing is higher than Storyworth, and the printed book, while good quality, ships from the US with corresponding lead times and costs.',
-      'Remento is best suited to families where the person answering prefers speaking to typing, budget is less of a concern, and a US shipping timeline is acceptable.',
-    ]
+      "Remento's core idea is voice. The storyteller answers weekly prompts by recording their voice or video — no app to download — and Remento's Speech-to-Story technology turns the recording into a written story, either close to word-for-word or as a polished narrative.",
+      'It works well for people who find typing hard but speak easily. The finished hardcover includes QR codes that play the original recordings, which is a lovely touch.',
+      'Remento costs $99 a year, billed in US dollars, with one hardcover included. Books ship from the US; UK delivery is charged extra and typically takes around three weeks, with no customs charges on arrival.',
+      'Remento suits families where the storyteller prefers speaking to typing, AI-written chapters appeal, and paying yearly in dollars is fine.',
+    ],
   },
   {
     label: 'How Tell Me Your Story compares',
-    title: 'Tell Me Your Story — the UK alternative',
+    title: 'Tell Me Your Story — the UK option',
     paras: [
-      'Tell Me Your Story is a UK-based platform that combines guided questions (like Storyworth) with voice recording (like Remento) and adds something neither competitor offers: QR codes in the printed book that play the original voice recordings. Family members scan the code next to an answer and hear the person speak it — their actual voice, preserved in the pages of a physical book.',
-      'The pricing model is also different. There\'s no subscription — you pay once when you\'re ready to export or print. Free to start, no card needed. This makes it accessible in a way neither Storyworth nor Remento are.',
-      'The printed book is produced and shipped in the UK, which means faster delivery, lower shipping costs, and no customs complications. Hardcover, softcover, and dust jacket options are available.',
-      'Tell Me Your Story is best suited to UK families who want voice recording integrated with a printed book, prefer a one-time payment to an annual subscription, and want UK printing and delivery.',
-    ]
+      'Tell Me Your Story combines guided questions (like Storyworth) with voice recording (like Remento). Storytellers can type or speak each answer, and every voice-recorded story gets its own QR code beside it in the printed book, so family can scan it and hear that exact story in their own voice.',
+      'There is no annual plan. You start with 5 questions free, no card needed, and pay once when you are ready — digital plans from £3.99, printed softcovers from ' + printFrom + ' plus UK shipping.',
+      'Printed books are made to order and delivered to UK addresses, typically within 10–14 days. Hardcover and dust-jacket options are available.',
+      'Tell Me Your Story suits UK families who want voice and a printed book together, prefer paying once in pounds, and want to go at their own pace.',
+    ],
   },
 ]
 
 const verdicts = [
   {
     name: 'Storyworth',
-    price: '~£79/year',
+    price: 'From £49 a year',
     bestIf: [
-      'You want a gentle weekly email format',
-      'The person answering is comfortable with email',
-      'Voice recording isn\'t a priority',
+      'You want a gentle weekly question by email or text',
+      'You want a hardcover included in one price',
+      'The storyteller is comfortable writing, or prefers the phone',
     ],
     considerOthers: [
-      'You\'re in the UK and want UK printing',
-      'You don\'t want an annual subscription',
-      'Voice is important to you',
-    ]
+      'You want voice recording without upgrading',
+      "You'd rather pay once than yearly",
+      'You want a QR code beside every recorded story',
+    ],
   },
   {
     name: 'Remento',
-    price: '~£99/year',
+    price: '$99 a year',
     bestIf: [
-      'The person prefers speaking to typing',
-      'Audio quality and AI transcription matter',
-      'Budget isn\'t the primary concern',
+      'The storyteller prefers speaking (or video) to typing',
+      'You like AI turning recordings into polished chapters',
+      'A hardcover included in one price appeals',
     ],
     considerOthers: [
-      'You\'re in the UK and want local printing',
-      'You want voice preserved in the physical book',
-      'You prefer a one-time payment',
-    ]
+      "You'd rather pay once, in pounds",
+      'You want the option to type answers as well as speak',
+      'You want to try it free before paying',
+    ],
   },
   {
     name: 'Tell Me Your Story',
-    price: 'Free to start · from £3.99',
+    price: '5 questions free · from £3.99',
     bestIf: [
-      'You\'re based in the UK',
-      'You want voice in the printed book via QR codes',
-      'You prefer one-time payment over subscription',
+      'You want to type or speak — whichever suits each answer',
+      'You want a QR code beside every recorded story',
+      'You prefer a one-time payment in pounds',
     ],
     considerOthers: [
-      'You specifically want weekly email prompts',
-      'The person answering prefers email to an app',
-    ]
+      'You specifically want questions emailed each week',
+      'The storyteller would rather use email or the phone than an app',
+    ],
   },
 ]
 
+// Shown on the page AND used for the FAQPage schema, so they always match.
 const faqs = [
-  { q: 'Is Storyworth available in the UK?', a: 'Yes, Storyworth accepts UK customers and ships books to the UK. However it\'s a US company, prices are in dollars, and shipping from the US adds cost and delivery time. UK-native alternatives like Tell Me Your Story offer UK printing and delivery as standard.' },
-  { q: 'Is Remento available in the UK?', a: 'Remento accepts UK customers but is primarily a US service. The app works in the UK but the printed book ships from the US. The service is less well-known in the UK than Storyworth.' },
-  { q: 'What is the main difference between Storyworth and Remento?', a: 'Storyworth sends weekly email questions and compiles written answers into a book. Remento is voice-first — users speak their answers and AI transcribes them. Both are US-based annual subscription services. Tell Me Your Story combines both approaches (written and voice) with a one-time payment model and UK printing.' },
-  { q: 'Which is cheaper — Storyworth or Remento?', a: 'Storyworth is generally cheaper at around £79/year versus Remento\'s higher-tier pricing. Both require annual subscriptions. Tell Me Your Story is free to start with one-time payments from £3.99 — no ongoing subscription.' },
-  { q: 'Is there a UK alternative to Storyworth and Remento?', a: 'Yes — Tell Me Your Story is a UK-native platform offering guided questions, voice recording with QR codes in the printed book, UK printing and delivery, and a one-time payment model with no subscription.' },
+  { q: 'Is Storyworth available in the UK?', a: 'Yes. Storyworth sells to UK customers in pounds, with plans from £49 a year. Books are printed in the US and Europe, shipping outside the US is charged when you order, and import fees may apply.' },
+  { q: 'Is Remento available in the UK?', a: 'Yes. Remento accepts UK customers and ships printed books to the UK for an extra fee. Pricing is in US dollars ($99 a year), and international deliveries typically arrive within about three weeks.' },
+  { q: 'What is the main difference between Storyworth and Remento?', a: 'Storyworth is built around weekly questions answered in writing, with phone recording on upgraded plans. Remento is voice and video first, with AI turning recordings into written stories and QR codes in the book that play them. Both are annual plans that include a hardcover.' },
+  { q: 'Which is cheaper — Storyworth or Remento?', a: "For UK buyers, Storyworth's entry plan is cheaper at £49 a year, but it is written answers with a black-and-white book. Remento is $99 a year. Both charge extra for UK shipping. Tell Me Your Story is free to start, with one-time plans from £3.99 and printed books from " + printFrom + ' plus UK shipping.' },
+  { q: 'Is there a UK alternative to Storyworth and Remento?', a: 'Yes — Tell Me Your Story is built and run in the UK, priced in pounds, with guided questions, voice recording on every plan, a QR code beside every recorded story in the printed book, and a one-time payment.' },
 ]
 
 useSeo({
-  title: 'Storyworth vs Remento — Honest Comparison 2026 | Tell Me Your Story',
-  description: 'An honest comparison of Storyworth vs Remento — how they work, what they cost, and who they\'re best for. Plus a UK-native alternative worth considering.',
-  canonical: 'https://tellmeyourstory.uk/storyworth-vs-remento',
+  title: 'Storyworth vs Remento (2026) — Honest UK Comparison',
+  description: 'Storyworth vs Remento compared for UK families: how they work, prices in pounds and dollars, voice recording, QR codes and UK delivery — plus a UK alternative.',
   schema: {
     '@context': 'https://schema.org',
-    '@graph': [
-      {
-        '@type': 'FAQPage',
-        mainEntity: [
-          { '@type': 'Question', name: 'What is the main difference between Storyworth and Remento?', acceptedAnswer: { '@type': 'Answer', text: 'Storyworth sends weekly email questions and compiles written answers. Remento is voice-first with AI transcription. Both are US-based annual subscriptions. Tell Me Your Story combines both with a one-time payment and UK printing.' } },
-          { '@type': 'Question', name: 'Is Storyworth available in the UK?', acceptedAnswer: { '@type': 'Answer', text: 'Yes, but it\'s a US company with dollar pricing and US shipping. UK-native alternatives like Tell Me Your Story offer UK printing and delivery as standard.' } },
-          { '@type': 'Question', name: 'Is there a UK alternative to Storyworth and Remento?', acceptedAnswer: { '@type': 'Answer', text: 'Yes — Tell Me Your Story is a UK-native platform with guided questions, voice recording, QR codes in the printed book, and a one-time payment model.' } },
-        ]
-      }
-    ]
-  }
+    '@type': 'FAQPage',
+    mainEntity: faqs.map((f) => ({
+      '@type': 'Question',
+      name: f.q,
+      acceptedAnswer: { '@type': 'Answer', text: f.a },
+    })),
+  },
 })
 </script>
 

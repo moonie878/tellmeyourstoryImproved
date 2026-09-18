@@ -4,20 +4,21 @@
     <!-- Hero -->
     <section class="bg-[#1C1917] px-5 py-16 sm:px-8 sm:py-20">
       <div class="mx-auto max-w-3xl text-center">
-        <p class="text-xs font-medium uppercase tracking-[0.22em] text-[#9C7C5C]">Storyworth Alternative 2026</p>
+        <p class="text-xs font-medium uppercase tracking-[0.22em] text-[#9C7C5C]">Storyworth alternative · UK</p>
         <h1 class="mt-4 font-display text-3xl font-bold leading-tight text-white sm:text-4xl md:text-5xl">
-          Looking for a Storyworth alternative?<br>
-          <em class="text-[#C4A882] italic">Here's why UK families choose us</em>
+          Looking for a Storyworth alternative in the UK?<br>
+          <em class="text-[#C4A882] italic">Pay once. Keep their voice.</em>
         </h1>
         <p class="mx-auto mt-5 max-w-xl text-sm leading-7 text-[#A8A29E]">
-          Storyworth costs $59–$199 per year and is built for the US market. Tell Me Your Story is a one-time payment, built for UK families, with voice recordings, QR codes, and printed books shipped from the UK. Read our full <router-link to="/storyworth-review" class="text-[#C4A882] underline hover:no-underline">Storyworth review</router-link> for a detailed breakdown.
+          Storyworth is a year-long plan built around weekly emailed questions. Tell Me Your Story is a one-time payment:
+          answer at your own pace by typing or speaking, and every voice answer gets its own QR code in the printed book.
         </p>
         <div class="mt-8 flex flex-wrap justify-center gap-3">
           <router-link
             to="/register"
             class="rounded-full bg-[#C4A882] px-7 py-3 text-sm font-semibold text-[#1C1917] transition hover:opacity-90"
           >
-            Start free — no subscription →
+            Try 5 questions free →
           </router-link>
           <router-link
             to="/example"
@@ -29,22 +30,33 @@
       </div>
     </section>
 
-    <!-- Why people leave Storyworth -->
+    <!-- Quick answer: which one fits -->
     <section class="px-5 py-16 sm:px-8 sm:py-20">
-      <div class="mx-auto max-w-3xl">
+      <div class="mx-auto max-w-4xl">
         <div class="text-center">
-          <p class="text-xs font-medium uppercase tracking-[0.22em] text-[#9C7C5C]">Why people look for alternatives</p>
-          <h2 class="mt-3 font-display text-2xl font-bold text-stone-900 sm:text-3xl">Common frustrations with Storyworth</h2>
+          <p class="text-xs font-medium uppercase tracking-[0.22em] text-[#9C7C5C]">The short answer</p>
+          <h2 class="mt-3 font-display text-2xl font-bold text-stone-900 sm:text-3xl">Which one is right for your family?</h2>
+          <p class="mx-auto mt-3 max-w-xl text-sm leading-7 text-stone-500">
+            Both are good ways to capture a life story. They suit different families.
+          </p>
         </div>
-        <div class="mt-10 space-y-4">
-          <div v-for="reason in reasons" :key="reason.title" class="rounded-2xl border border-stone-200 p-5">
-            <div class="flex items-start gap-4">
-              <span class="mt-0.5 text-xl flex-shrink-0">{{ reason.icon }}</span>
-              <div>
-                <p class="text-sm font-semibold text-stone-900">{{ reason.title }}</p>
-                <p class="mt-1 text-xs leading-5 text-stone-500">{{ reason.desc }}</p>
-              </div>
-            </div>
+
+        <div class="mt-10 grid gap-5 sm:grid-cols-2">
+          <div class="rounded-2xl border border-stone-200 p-6">
+            <p class="text-xs font-semibold uppercase tracking-wider text-stone-400">Choose Storyworth if…</p>
+            <ul class="mt-4 space-y-3 text-sm leading-6 text-stone-600">
+              <li v-for="item in whenThem" :key="item" class="flex gap-2">
+                <span class="text-stone-400" aria-hidden="true">•</span>{{ item }}
+              </li>
+            </ul>
+          </div>
+          <div class="rounded-2xl border border-[#7C5C3B] bg-[#FAF7F4] p-6">
+            <p class="text-xs font-semibold uppercase tracking-wider text-[#7C5C3B]">Choose Tell Me Your Story if…</p>
+            <ul class="mt-4 space-y-3 text-sm leading-6 text-stone-700">
+              <li v-for="item in whenUs" :key="item" class="flex gap-2">
+                <span class="text-[#7C5C3B]" aria-hidden="true">✓</span>{{ item }}
+              </li>
+            </ul>
           </div>
         </div>
       </div>
@@ -58,23 +70,36 @@
           <h2 class="mt-3 font-display text-2xl font-bold text-stone-900 sm:text-3xl">Storyworth vs Tell Me Your Story</h2>
         </div>
 
-        <div class="mt-10 overflow-hidden rounded-2xl border border-stone-200 bg-white">
-          <div class="grid grid-cols-3 border-b border-stone-200 bg-stone-50 px-5 py-3 text-xs font-semibold uppercase tracking-wider text-stone-500">
-            <span>Feature</span>
-            <span class="text-center">Storyworth</span>
-            <span class="text-center text-[#7C5C3B]">Tell Me Your Story</span>
-          </div>
-          <div
-            v-for="(row, i) in comparison"
-            :key="row.feature"
-            class="grid grid-cols-3 px-5 py-4 text-sm"
-            :class="i % 2 === 0 ? 'bg-white' : 'bg-stone-50'"
-          >
-            <span class="font-medium text-stone-700">{{ row.feature }}</span>
-            <span class="text-center" :class="row.themNegative ? 'text-red-500' : 'text-stone-600'">{{ row.them }}</span>
-            <span class="text-center font-medium" :class="row.usPositive ? 'text-green-600' : 'text-stone-600'">{{ row.us }}</span>
-          </div>
+        <!-- Scrolls sideways on small phones instead of squashing -->
+        <div class="mt-10 overflow-x-auto rounded-2xl border border-stone-200 bg-white">
+          <table class="w-full min-w-[560px] text-left text-sm">
+            <thead>
+              <tr class="border-b border-stone-200 bg-stone-50 text-xs font-semibold uppercase tracking-wider text-stone-500">
+                <th scope="col" class="px-5 py-3">Feature</th>
+                <th scope="col" class="px-5 py-3">Storyworth (UK)</th>
+                <th scope="col" class="px-5 py-3 text-[#7C5C3B]">Tell Me Your Story</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr
+                v-for="(row, i) in comparison"
+                :key="row.feature"
+                :class="i % 2 === 0 ? 'bg-white' : 'bg-stone-50'"
+              >
+                <th scope="row" class="px-5 py-4 align-top font-medium text-stone-700">{{ row.feature }}</th>
+                <td class="px-5 py-4 align-top text-stone-600">{{ row.them }}</td>
+                <td class="px-5 py-4 align-top font-medium" :class="row.usPositive ? 'text-green-700' : 'text-stone-700'">{{ row.us }}</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
+
+        <p class="mt-4 text-center text-xs leading-5 text-stone-500">
+          Storyworth details checked {{ CHECKED_ON }} from
+          <a href="https://welcome.storyworth.com/gb/faq" target="_blank" rel="noopener noreferrer" class="underline hover:no-underline">Storyworth's UK FAQ</a>
+          and <a href="https://www.storyworth.co.uk/" target="_blank" rel="noopener noreferrer" class="underline hover:no-underline">storyworth.co.uk</a>.
+          Prices and features change — check their site before you buy.
+        </p>
       </div>
     </section>
 
@@ -82,46 +107,16 @@
     <section class="px-5 py-16 sm:px-8 sm:py-20">
       <div class="mx-auto max-w-4xl">
         <div class="text-center">
-          <p class="text-xs font-medium uppercase tracking-[0.22em] text-[#9C7C5C]">What you get instead</p>
-          <h2 class="mt-3 font-display text-2xl font-bold text-stone-900 sm:text-3xl">Everything Storyworth offers, and more</h2>
+          <p class="text-xs font-medium uppercase tracking-[0.22em] text-[#9C7C5C]">What you get with Tell Me Your Story</p>
+          <h2 class="mt-3 font-display text-2xl font-bold text-stone-900 sm:text-3xl">Built around their voice</h2>
         </div>
 
         <div class="mt-12 grid gap-6 sm:grid-cols-2 md:grid-cols-3">
-          <div class="rounded-2xl border border-stone-200 p-6">
-            <p class="text-2xl">📖</p>
-            <p class="mt-3 text-sm font-semibold text-stone-900">100+ guided questions</p>
-            <p class="mt-2 text-xs leading-5 text-stone-500">Every chapter of life covered — childhood, family, work, relationships, and legacy. Answer at your own pace, no weekly email pressure.</p>
+          <div v-for="feature in features" :key="feature.title" class="rounded-2xl border border-stone-200 p-6">
+            <p class="text-2xl" aria-hidden="true">{{ feature.icon }}</p>
+            <h3 class="mt-3 text-sm font-semibold text-stone-900">{{ feature.title }}</h3>
+            <p class="mt-2 text-xs leading-5 text-stone-500">{{ feature.desc }}</p>
           </div>
-          <div class="rounded-2xl border border-stone-200 p-6">
-            <p class="text-2xl">🎙️</p>
-            <p class="mt-3 text-sm font-semibold text-stone-900">Voice recordings</p>
-            <p class="mt-2 text-xs leading-5 text-stone-500">Record answers by voice. A QR code in the printed book lets family scan and hear the story in their loved one's actual voice — forever.</p>
-          </div>
-          <div class="rounded-2xl border border-stone-200 p-6">
-            <p class="text-2xl">📚</p>
-            <p class="mt-3 text-sm font-semibold text-stone-900">UK printed books</p>
-            <p class="mt-2 text-xs leading-5 text-stone-500">Printed and shipped from the UK. No $20–40 international shipping fees. Softcover from £34.98, hardcover options available.</p>
-          </div>
-          <div class="rounded-2xl border border-stone-200 p-6">
-            <p class="text-2xl">💷</p>
-            <p class="mt-3 text-sm font-semibold text-stone-900">One-time payment</p>
-            <p class="mt-2 text-xs leading-5 text-stone-500">Pay once, own forever. No annual subscription. No renewal fees. No being locked out of your own family's stories.</p>
-          </div>
-          <div class="rounded-2xl border border-stone-200 p-6">
-            <p class="text-2xl">✨</p>
-            <p class="mt-3 text-sm font-semibold text-stone-900">AI writing assist</p>
-            <p class="mt-2 text-xs leading-5 text-stone-500">Gentle prompts help expand short answers — but the words always stay theirs. No AI rewrites, no losing their voice.</p>
-          </div>
-          <div class="rounded-2xl border border-stone-200 p-6">
-            <p class="text-2xl">🤍</p>
-            <p class="mt-3 text-sm font-semibold text-stone-900">Family can read along</p>
-            <p class="mt-2 text-xs leading-5 text-stone-500">Share a link so the whole family can read the story as it grows. No extra charge per person.</p>
-          </div>
-          <div class="rounded-2xl border border-stone-200 p-6">
-  <p class="text-2xl">🎬</p>
-  <p class="mt-3 text-sm font-semibold text-stone-900">Story video export</p>
-  <p class="mt-2 text-xs leading-5 text-stone-500">Export the whole story as a beautiful 1080p video with photos and music — ready to share or play at a family gathering.</p>
-</div>
         </div>
       </div>
     </section>
@@ -132,38 +127,57 @@
         <p class="text-xs font-medium uppercase tracking-[0.22em] text-[#9C7C5C]">The honest price comparison</p>
         <h2 class="mt-3 font-display text-2xl font-bold text-stone-900 sm:text-3xl">What you actually pay</h2>
         <p class="mx-auto mt-3 max-w-xl text-sm leading-7 text-stone-500">
-          Storyworth's headline price is $59–$109 but most families end up paying significantly more once you add colour printing, extra copies, and international shipping. See our <router-link to="/storyworth-review" class="text-[#7C5C3B] underline hover:no-underline">full Storyworth review</router-link> for the complete cost breakdown.
+          Storyworth includes a hardcover in the plan price. We keep the app cheap and charge for printing separately,
+          so you only pay for books you actually order. See our
+          <router-link to="/storyworth-review" class="text-[#7C5C3B] underline hover:no-underline">full Storyworth review</router-link>
+          for more detail.
         </p>
 
         <div class="mt-10 grid gap-5 sm:grid-cols-2">
           <div class="rounded-2xl border border-stone-200 bg-white p-6 text-left">
-            <p class="text-xs font-semibold uppercase tracking-wider text-stone-400">Storyworth</p>
-            <p class="mt-3 text-2xl font-bold text-stone-900">$59–$199/year</p>
-            <p class="mt-1 text-xs text-stone-500">Annual subscription · renews or content becomes read-only</p>
-            <ul class="mt-4 space-y-2 text-xs text-stone-500">
-              <li>+ $20–40 international shipping per book</li>
-              <li>+ $79 per extra colour copy</li>
-              <li>+ $20 per page over the limit</li>
-              <li>+ Pay again next year to keep editing</li>
+            <p class="text-xs font-semibold uppercase tracking-wider text-stone-400">Storyworth (UK)</p>
+            <p class="mt-3 text-2xl font-bold text-stone-900">From £49 a year</p>
+            <p class="mt-1 text-xs text-stone-500">Annual plan · one hardcover book included</p>
+            <ul class="mt-4 space-y-2 text-xs leading-5 text-stone-500">
+              <li>• Entry plan: written answers, black-and-white book</li>
+              <li>• Phone voice recording on upgraded plans</li>
+              <li>• Extra copies £29 (black and white) or £59 (colour)</li>
+              <li>• Shipping outside the US charged at checkout; import fees possible</li>
             </ul>
           </div>
           <div class="rounded-2xl border border-[#7C5C3B] bg-[#FAF7F4] p-6 text-left">
             <p class="text-xs font-semibold uppercase tracking-wider text-[#7C5C3B]">Tell Me Your Story</p>
-            <p class="mt-3 text-2xl font-bold text-stone-900">From £3.99</p>
-            <p class="mt-1 text-xs text-stone-500">One-time payment · yours forever</p>
-            <ul class="mt-4 space-y-2 text-xs text-stone-600">
-              <li>✓ UK shipping included in print price</li>
-              <li>✓ No annual renewal</li>
-              <li>✓ No per-page fees</li>
-              <li>✓ Your content is always yours</li>
+            <p class="mt-3 text-2xl font-bold text-stone-900">From £3.99, once</p>
+            <p class="mt-1 text-xs text-stone-500">One-time payment · no renewal</p>
+            <ul class="mt-4 space-y-2 text-xs leading-5 text-stone-600">
+              <li>✓ 5 questions free, no card needed</li>
+              <li>✓ Voice recording on every plan</li>
+              <li>✓ Printed softcover from {{ printFrom }} per copy, plus UK shipping</li>
+              <li>✓ Every copy costs the same — order one or ten</li>
             </ul>
           </div>
         </div>
       </div>
     </section>
 
+    <!-- FAQ (same text feeds the FAQ schema) -->
+    <section class="px-5 py-16 sm:px-8 sm:py-20">
+      <div class="mx-auto max-w-3xl">
+        <h2 class="text-center font-display text-2xl font-bold text-stone-900 sm:text-3xl">Common questions</h2>
+        <div class="mt-8 divide-y divide-stone-200 rounded-2xl border border-stone-200">
+          <details v-for="item in faqs" :key="item.q" class="faq-item px-5 py-4 sm:px-6">
+            <summary class="flex cursor-pointer list-none items-center justify-between gap-4 text-sm font-semibold text-stone-900 sm:text-base">
+              {{ item.q }}
+              <span class="faq-icon flex-shrink-0 text-xl leading-none text-[#7C5C3B]" aria-hidden="true">+</span>
+            </summary>
+            <p class="mt-3 text-sm leading-relaxed text-stone-600">{{ item.a }}</p>
+          </details>
+        </div>
+      </div>
+    </section>
+
     <!-- Quote -->
-    <section class="px-5 py-16 sm:px-8">
+    <section class="bg-[#F5F0E8] px-5 py-16 sm:px-8">
       <div class="mx-auto max-w-2xl text-center">
         <p class="font-display text-xl italic leading-relaxed text-stone-700 sm:text-2xl">
           "He told me about a motorbike he saved up for two years to buy. I never knew that about him."
@@ -175,18 +189,18 @@
     <!-- Related pages -->
     <section class="px-5 py-12 sm:px-8">
       <div class="mx-auto max-w-3xl">
-        <p class="text-xs font-medium uppercase tracking-[0.22em] text-[#9C7C5C] mb-6">Related reading</p>
+        <p class="mb-6 text-xs font-medium uppercase tracking-[0.22em] text-[#9C7C5C]">Related reading</p>
         <div class="grid gap-4 sm:grid-cols-3">
-          <router-link to="/storyworth-review" class="rounded-2xl border border-stone-200 p-4 hover:border-[#7C5C3B] transition group">
+          <router-link to="/storyworth-review" class="group rounded-2xl border border-stone-200 p-4 transition hover:border-[#7C5C3B]">
             <p class="text-sm font-semibold text-stone-900 group-hover:text-[#7C5C3B]">Storyworth Review 2026</p>
-            <p class="mt-1 text-xs text-stone-500">Full honest review — pros, cons, real costs</p>
+            <p class="mt-1 text-xs text-stone-500">Pros, cons and real costs</p>
           </router-link>
-          <router-link to="/remento-alternative" class="rounded-2xl border border-stone-200 p-4 hover:border-[#7C5C3B] transition group">
-            <p class="text-sm font-semibold text-stone-900 group-hover:text-[#7C5C3B]">Remento Alternative</p>
+          <router-link to="/storyworth-vs-remento" class="group rounded-2xl border border-stone-200 p-4 transition hover:border-[#7C5C3B]">
+            <p class="text-sm font-semibold text-stone-900 group-hover:text-[#7C5C3B]">Storyworth vs Remento</p>
             <p class="mt-1 text-xs text-stone-500">Also comparing Remento? Read this first</p>
           </router-link>
-          <router-link to="/life-story-questions" class="rounded-2xl border border-stone-200 p-4 hover:border-[#7C5C3B] transition group">
-            <p class="text-sm font-semibold text-stone-900 group-hover:text-[#7C5C3B]">150 Life Story Questions</p>
+          <router-link to="/life-story-questions" class="group rounded-2xl border border-stone-200 p-4 transition hover:border-[#7C5C3B]">
+            <p class="text-sm font-semibold text-stone-900 group-hover:text-[#7C5C3B]">Life Story Questions</p>
             <p class="mt-1 text-xs text-stone-500">The questions that unlock real stories</p>
           </router-link>
         </div>
@@ -195,15 +209,15 @@
 
     <!-- CTA -->
     <section class="bg-[#1C1917] px-5 py-16 text-center sm:px-8 sm:py-20">
-      <p class="text-xs font-medium uppercase tracking-[0.22em] text-[#9C7C5C]">The Storyworth alternative built for UK families</p>
-      <h2 class="mt-4 font-display text-2xl font-bold text-white sm:text-3xl">Start for free today — no subscription required</h2>
+      <p class="text-xs font-medium uppercase tracking-[0.22em] text-[#9C7C5C]">A Storyworth alternative for UK families</p>
+      <h2 class="mt-4 font-display text-2xl font-bold text-white sm:text-3xl">Start their story today — no subscription</h2>
       <p class="mx-auto mt-4 max-w-lg text-sm leading-7 text-[#A8A29E]">
-        Voice recordings, guided questions, beautiful keepsake books, and UK printing. Everything Storyworth offers — without the annual fee.
+        Guided questions, voice recordings with a QR code for every story, and a printed keepsake book when you're ready.
       </p>
       <router-link to="/register" class="mt-8 inline-block rounded-full bg-[#C4A882] px-8 py-3 text-sm font-semibold text-[#1C1917] transition hover:opacity-90">
-        Start free — no subscription →
+        Try 5 questions free →
       </router-link>
-      <p class="mt-4 text-xs text-[#9C7C5C]">Free to start · One-time payment · Printed books from £21.99</p>
+      <p class="mt-4 text-xs text-[#9C7C5C]">No card needed · One-time payment · Printed books from {{ printFrom }} plus UK shipping</p>
     </section>
 
   </main>
@@ -211,50 +225,85 @@
 
 <script setup lang="ts">
 import { useSeo } from '../composables/useSeo'
+import { PRINTED_BOOK_FROM_PRICE } from '../lib/printPricing'
 
-const reasons = [
-  {
-    icon: '💸',
-    title: 'Annual subscription that keeps renewing',
-    desc: 'Storyworth charges $59–$199 per year. If you stop paying, your content becomes read-only. Many families are surprised to find they can\'t edit their own stories without renewing.',
-  },
-  {
-    icon: '🌍',
-    title: 'Built for the US, not UK families',
-    desc: 'Storyworth is an American product. International shipping adds $20–40 per book, prices are in USD, and there\'s no UK-based printing. You\'re paying import costs for a book of your family\'s memories.',
-  },
-  {
-    icon: '📧',
-    title: 'Weekly email pressure',
-    desc: 'Storyworth sends one question per week by email. Many parents stop responding after a few months when it starts to feel like homework. There\'s no way to answer at your own pace.',
-  },
-  {
-    icon: '🔒',
-    title: 'Content locked behind subscription',
-    desc: 'When your subscription ends, you lose edit access. To keep working on the story, you have to pay for another year — even if you just want to fix a typo.',
-  },
+/** Update this whenever the Storyworth facts below are re-checked. */
+const CHECKED_ON = 'September 2026'
+
+const printFrom = `£${PRINTED_BOOK_FROM_PRICE.toFixed(2)}`
+
+const whenThem = [
+  'You want a hardcover book included in one upfront price',
+  'Your storyteller would rather answer by email, or by phone call — even a landline',
+  'You like the idea of a gentle weekly question over a whole year',
+]
+
+const whenUs = [
+  "You don't want a yearly plan — you'd rather pay once",
+  'Hearing their voice matters: every recorded story gets its own QR code in the book',
+  'You want to try it properly first, free and without a card',
+  "You'd rather sit down together and go at your own pace, with no deadline",
 ]
 
 const comparison = [
-  { feature: 'Pricing model',        them: '$59–$199/year',        us: 'From £3.99 one-time',    themNegative: true,  usPositive: true  },
-  { feature: 'UK printing',          them: '✗ US only',            us: '✓ UK printed & shipped', themNegative: true,  usPositive: true  },
-  { feature: 'Voice recordings',     them: 'Color plan only',      us: '✓ All plans',            themNegative: false, usPositive: true  },
-  { feature: 'QR codes in book',     them: '✗ No',                 us: '✓ Yes',                  themNegative: true,  usPositive: true  },
-  { feature: 'Answer at own pace',   them: 'Weekly email prompts', us: '✓ Answer any time',      themNegative: false, usPositive: true  },
-  { feature: 'Content ownership',    them: 'Read-only if lapsed',  us: '✓ Yours forever',        themNegative: true,  usPositive: true  },
-  { feature: 'International ship',   them: '$20–40 extra',         us: '✓ UK shipping included', themNegative: true,  usPositive: true  },
-  { feature: 'PDF export',           them: 'Not included',         us: '✓ Included',             themNegative: true,  usPositive: true  },
-  { feature: 'AI writing assist',    them: '✗ No',                 us: '✓ Yes',                  themNegative: true,  usPositive: true  },
-  { feature: 'Video export',          them: '✗ No',                 us: '✓ £17.99 one-time',      themNegative: true,  usPositive: true  },
+  { feature: 'How you pay',             them: 'Annual plan, from £49 (top plan renews automatically)', us: 'One-time payment, from £3.99',                      usPositive: true },
+  { feature: 'Try before you pay',      them: '30-day money-back guarantee',                           us: '5 questions free, no card needed',                  usPositive: true },
+  { feature: 'How questions arrive',    them: 'By email or text — weekly by default, can be changed',  us: 'In the app — answer as many as you like, any time', usPositive: false },
+  { feature: 'Voice recording',         them: 'By phone call, on upgraded plans',                      us: 'Tap the microphone — on every plan, including free', usPositive: true },
+  { feature: 'Hearing it in the book',  them: 'One QR code on the last page, linking to the stories online', us: 'A QR code beside every voice-recorded story',   usPositive: true },
+  { feature: 'Printed book',            them: 'Hardcover included in the plan',                        us: `Softcover from ${printFrom} plus UK shipping; hardcover available`, usPositive: false },
+  { feature: 'Extra copies',            them: '£29 black and white, £59 colour',                       us: 'Same price as the first copy',                      usPositive: false },
+  { feature: 'Where books come from',   them: 'Printed in the US and Europe; import fees possible',    us: 'Printed to order and delivered to UK addresses',    usPositive: false },
+  { feature: 'Digital copy',            them: 'Free e-book download',                                  us: 'PDF download on paid plans',                        usPositive: false },
+]
+
+const features = [
+  { icon: '📖', title: '100+ guided questions',  desc: 'Every chapter of life — childhood, family, work, love and the lessons learned. Answer in any order, at your own pace.' },
+  { icon: '🎙️', title: 'Voice recordings',       desc: 'Tap the microphone and talk. The words are typed up for you and the recording is kept, with a QR code beside that story in the printed book.' },
+  { icon: '📚', title: 'Printed keepsake books', desc: `Printed to order and delivered to UK addresses. Softcover from ${printFrom} plus shipping, with hardcover options.` },
+  { icon: '💷', title: 'One-time payment',        desc: 'Pay once for the plan you choose. No renewal date and nothing to cancel.' },
+  { icon: '✨', title: 'Writing help',            desc: 'Gentle prompts help expand short answers — the words always stay theirs.' },
+  { icon: '🤍', title: 'Family can read along',  desc: 'Share a link so the whole family can read the story as it grows, at no extra cost.' },
+]
+
+// Shown on the page AND used for the FAQPage schema, so they always match.
+const faqs = [
+  {
+    q: 'Is Storyworth available in the UK?',
+    a: 'Yes. Storyworth sells to UK customers in pounds, with plans from £49 a year. Its books are printed in the US and Europe, shipping outside the US is charged when you order, and import fees may apply depending on where a copy is sent from.',
+  },
+  {
+    q: 'Is Tell Me Your Story cheaper than Storyworth?',
+    a: `For one printed book, usually. A paid plan starts at £3.99 as a one-time payment, and a printed softcover starts at ${printFrom} plus UK shipping. Storyworth's plans start at £49 a year and include a hardcover. If you want several hardcover copies, compare the per-copy prices for your order.`,
+  },
+  {
+    q: 'Does Storyworth record voices?',
+    a: "Yes — on its upgraded plans, storytellers can record stories over the phone. Storyworth books include one QR code on the last page that links to the stories and recordings online. Tell Me Your Story puts a QR code beside each voice-recorded story instead, and voice recording is included on every plan.",
+  },
+  {
+    q: 'Do I need a subscription?',
+    a: 'No. Tell Me Your Story is a one-time payment for the plan you choose, with no renewal. You can start with 5 questions free and only pay if you want to unlock everything or order a printed book.',
+  },
 ]
 
 useSeo({
-  title: 'Storyworth Alternative UK 2026 — Tell Me Your Story | No Subscription, UK Printed Books',
-  description: 'Looking for a Storyworth alternative in the UK? Tell Me Your Story offers voice recordings, guided questions, and UK-printed keepsake books from a one-time payment. No annual subscription.',
-  canonical: 'https://tellmeyourstory.uk/storyworth-alternative',
+  title: 'Storyworth Alternative UK (2026) — Pay Once, Keep Their Voice',
+  description: `Comparing Storyworth in the UK? Tell Me Your Story is a one-time payment with voice recording on every plan and a QR code beside every story. Try 5 questions free.`,
+  schema: {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: faqs.map((f) => ({
+      '@type': 'Question',
+      name: f.q,
+      acceptedAnswer: { '@type': 'Answer', text: f.a },
+    })),
+  },
 })
 </script>
 
 <style scoped>
 .font-display { font-family: 'Playfair Display', Georgia, serif; }
+.faq-item summary::-webkit-details-marker { display: none; }
+.faq-item[open] .faq-icon { transform: rotate(45deg); }
+.faq-icon { transition: transform 0.2s; }
 </style>

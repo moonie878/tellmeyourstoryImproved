@@ -23,8 +23,8 @@
           <h2 class="mt-3 font-display text-2xl font-bold text-stone-900 sm:text-3xl">The original life story platform</h2>
         </div>
         <div class="mt-8 text-sm leading-7 text-stone-600 max-w-xl mx-auto">
-          <p>Storyworth was one of the first platforms to tackle the idea of capturing a parent or grandparent's life story through guided questions. Founded in the US in 2012, it works by sending one question per week by email — the recipient replies, and their answers are collected into a book at the end of the year.</p>
-          <p class="mt-4">It's a genuinely good idea, and for many American families it has worked well. But a lot has changed since 2012 — and for UK families in particular, there are some significant limitations worth knowing about before you pay. If you're also considering Remento, read our <router-link to="/remento-review" class="text-[#7C5C3B] underline hover:no-underline">Remento review</router-link> for a direct comparison.</p>
+          <p>Storyworth was one of the first platforms to capture a parent or grandparent's life story through guided questions. Founded in the US in 2012, it sends a question each week by email or text — the storyteller replies, and their answers are collected into a hardcover book. It now sells to UK customers in pounds.</p>
+          <p class="mt-4">It's a genuinely good idea and it has worked well for a huge number of families. There are still a few things UK families should know before paying — mainly how the pricing, voice recording and shipping work. If you're also considering Remento, read our <router-link to="/remento-review" class="text-[#7C5C3B] underline hover:no-underline">Remento review</router-link> for a direct comparison.</p>
         </div>
       </div>
     </section>
@@ -44,8 +44,8 @@
                 <p class="mt-1 text-xs text-stone-500">{{ rating.note }}</p>
               </div>
               <div class="flex items-center gap-1 flex-shrink-0">
-                <span v-for="i in 5" :key="i" class="text-lg" :class="i <= rating.score ? 'text-[#947449]' : 'text-stone-200'">★</span>
-                <span class="ml-2 text-sm font-medium text-stone-700">{{ rating.score }}/5</span>
+                <span v-for="i in 5" :key="i" aria-hidden="true" class="text-lg" :class="i <= rating.score ? 'text-[#947449]' : 'text-stone-200'">★</span>
+                <span class="ml-2 text-sm font-medium text-stone-700"><span class="sr-only">Rated </span>{{ rating.score }}/5</span>
               </div>
             </div>
           </div>
@@ -99,9 +99,15 @@
             <p class="text-sm font-semibold text-stone-900 flex-shrink-0" :class="cost.highlight ? 'text-red-600' : ''">{{ cost.price }}</p>
           </div>
           <div class="rounded-2xl bg-stone-800 p-4 flex justify-between items-center">
-            <p class="text-sm font-semibold text-white">Realistic total for a UK family</p>
-            <p class="text-sm font-bold text-[#C4A882]">$200–300+ per year</p>
+            <p class="text-sm font-semibold text-white">What to budget</p>
+            <p class="text-sm font-bold text-[#C4A882]">Plan + shipping + any extra copies</p>
           </div>
+          <p class="pt-2 text-center text-xs leading-5 text-stone-500">
+            Checked {{ CHECKED_ON }} from
+            <a href="https://welcome.storyworth.com/gb/faq" target="_blank" rel="noopener noreferrer" class="underline hover:no-underline">Storyworth's UK FAQ</a>
+            and <a href="https://www.storyworth.co.uk/" target="_blank" rel="noopener noreferrer" class="underline hover:no-underline">storyworth.co.uk</a>.
+            Prices change — check their site before you buy.
+          </p>
         </div>
       </div>
     </section>
@@ -117,20 +123,20 @@
           <div class="rounded-2xl border border-stone-200 p-6">
             <p class="text-sm font-semibold text-stone-900 mb-3">Storyworth works well if you…</p>
             <ul class="space-y-2 text-xs text-stone-500">
-              <li>✓ Are based in the US</li>
-              <li>✓ Want a weekly email cadence to prompt answers</li>
-              <li>✓ Are happy paying annually</li>
-              <li>✓ Don't need voice recordings</li>
+              <li>✓ Want a hardcover included in one upfront price</li>
+              <li>✓ Want questions to arrive by email or text each week</li>
+              <li>✓ Have a storyteller who'd rather talk on the phone than use an app</li>
+              <li>✓ Are happy with an annual plan</li>
             </ul>
           </div>
           <div class="rounded-2xl border border-[#7C5C3B] bg-[#FAF7F4] p-6">
             <p class="text-sm font-semibold text-stone-900 mb-3">Consider an alternative if you…</p>
             <ul class="space-y-2 text-xs text-stone-600">
-              <li>✓ Are based in the UK</li>
-              <li>✓ Want voice recordings in the printed book</li>
-              <li>✓ Prefer a one-time payment</li>
-              <li>✓ Want UK printing without extra shipping</li>
-              <li>✓ Don't want weekly email pressure</li>
+              <li>✓ Would rather pay once than yearly</li>
+              <li>✓ Want voice recording on any plan, not just upgraded ones</li>
+              <li>✓ Want a QR code beside every recorded story in the book</li>
+              <li>✓ Want to try it free first, without a card</li>
+              <li>✓ Prefer to go at your own pace, with no deadline</li>
             </ul>
             <router-link to="/storyworth-alternative" class="mt-4 inline-block text-xs text-[#7C5C3B] underline hover:no-underline">See the best Storyworth alternatives for UK families →</router-link>
           </div>
@@ -164,12 +170,12 @@
       <p class="text-xs font-medium uppercase tracking-[0.22em] text-[#9C7C5C]">The UK alternative</p>
       <h2 class="mt-4 font-display text-2xl font-bold text-white sm:text-3xl">Try Tell Me Your Story instead</h2>
       <p class="mx-auto mt-4 max-w-lg text-sm leading-7 text-[#A8A29E]">
-        Built for UK families. One-time payment. Voice recordings with QR codes in the printed book. No weekly emails, no annual subscription, no international shipping fees.
+        Built in the UK. One-time payment. Voice recording on every plan, with a QR code beside every recorded story in the printed book.
       </p>
       <router-link to="/register" class="mt-8 inline-block rounded-full bg-[#C4A882] px-8 py-3 text-sm font-semibold text-[#1C1917] transition hover:opacity-90">
         Start free — no subscription →
       </router-link>
-      <p class="mt-4 text-xs text-[#9C7C5C]">Free to start · One-time from £3.99 · Printed book from £21.99</p>
+      <p class="mt-4 text-xs text-[#9C7C5C]">5 questions free · One-time from £3.99 · Printed book from {{ printFrom }} plus UK shipping</p>
     </section>
 
   </main>
@@ -177,47 +183,51 @@
 
 <script setup lang="ts">
 import { useSeo } from '../composables/useSeo'
+import { PRINTED_BOOK_FROM_PRICE } from '../lib/printPricing'
+
+/** Update whenever the Storyworth facts below are re-checked. */
+const CHECKED_ON = 'September 2026'
+
+const printFrom = `£${PRINTED_BOOK_FROM_PRICE.toFixed(2)}`
 
 const ratings = [
-  { category: 'Ease of use',        score: 4, note: 'Simple email-based flow — easy for elderly parents to use' },
-  { category: 'Question quality',   score: 4, note: 'Good range of questions across different life chapters' },
-  { category: 'Value for UK users', score: 2, note: 'USD pricing, international shipping adds significant cost' },
-  { category: 'Voice recordings',   score: 2, note: 'Only available on higher-priced plans' },
-  { category: 'Print quality',      score: 3, note: 'Acceptable but US-printed, slow delivery to UK' },
-  { category: 'Flexibility',        score: 2, note: 'Weekly email cadence only — can\'t answer at own pace easily' },
+  { category: 'Ease of use',        score: 4, note: 'Questions arrive by email or text — nothing to install. Upgraded plans add phone recording, even from a landline.' },
+  { category: 'Question quality',   score: 4, note: 'A large library across every chapter of life, and you can edit questions or write your own.' },
+  { category: 'Value for UK users', score: 3, note: 'Sold in pounds from £49 a year with a hardcover included. Shipping to the UK is extra and import fees are possible.' },
+  { category: 'Voice recordings',   score: 3, note: 'Phone recording on upgraded plans. One QR code on the last page links to the stories and recordings online.' },
+  { category: 'Print quality',      score: 4, note: '6 × 9 inch hardcover, printed in the US and Europe. Colour interiors on the higher plans.' },
+  { category: 'Flexibility',        score: 3, note: 'Weekly by default, but you can change the frequency and answer as many questions as you like.' },
 ]
 
 const pros = [
-  'Established platform with a long track record',
-  'Simple email-based flow most parents can manage',
-  'Large question library across many life topics',
-  'Printed book quality is decent',
-  'Good for families who want weekly prompts',
+  'Established since 2012 with a very large customer base',
+  'Questions arrive by email or text — nothing to install',
+  'Upgraded plans let storytellers record by phone, even on a landline',
+  'A hardcover book is included in every plan',
+  'Free e-book downloads and a 30-day money-back guarantee',
+  'You can keep editing and order books after the plan year ends',
 ]
 
 const cons = [
-  'Annual subscription — content becomes read-only if you stop paying',
-  'USD pricing only — no GBP option for UK families',
-  'International shipping adds $20–40 per book',
-  'Weekly email cadence can feel like homework',
-  'Voice recordings only on more expensive plans',
-  'No QR codes linking to voice in the printed book',
-  'No UK-based printing option',
-  'Extra charges for additional copies and colour printing',
+  'An annual plan rather than a one-time payment — the top plan renews automatically',
+  'The entry plan is written answers only, with a black-and-white book',
+  'Voice recording needs an upgraded plan',
+  'One QR code at the back of the book, rather than one beside each story',
+  'Shipping to the UK is charged on top, and import fees are possible',
+  'Extra colour copies cost £59 each',
 ]
 
 const costs = [
-  { item: 'Annual subscription',        price: '$59–$199/yr', note: 'Basic to premium tier', highlight: false },
-  { item: 'International shipping',     price: '$20–40',      note: 'Per book to UK',        highlight: true },
-  { item: 'Extra colour copy',          price: '$79',         note: 'Per additional copy',    highlight: true },
-  { item: 'Pages over limit',           price: '$20+',        note: 'Per page overage',       highlight: false },
-  { item: 'Renewal next year',          price: '$59–$199',    note: 'Or lose edit access',    highlight: true },
+  { item: 'Basic plan',                     price: 'From £49/yr', note: 'Includes one black-and-white hardcover', highlight: false },
+  { item: 'Upgraded plans',                 price: 'More',        note: 'Colour book and phone voice recording',  highlight: false },
+  { item: 'Extra black-and-white copy',     price: '£29',         note: 'Per additional copy',                    highlight: false },
+  { item: 'Extra colour copy',              price: '£59',         note: 'Up to 300 pages; £79 above that',         highlight: true  },
+  { item: 'Shipping to the UK',             price: 'At checkout', note: 'Import fees possible on delivery',        highlight: true  },
 ]
 
 useSeo({
-  title: 'Storyworth UK Review 2026 — Is It Worth It? | Tell Me Your Story',
-  description: 'An honest Storyworth review for UK families in 2026. Pros, cons, real costs, and whether there\'s a better UK alternative. Updated June 2026.',
-  canonical: 'https://tellmeyourstory.uk/storyworth-review',
+  title: 'Storyworth UK Review (2026): Prices, Pros and Cons',
+  description: 'An honest Storyworth review for UK families: what it does well, where it falls short, what it really costs in pounds, and who it suits. Checked September 2026.',
 })
 </script>
 
