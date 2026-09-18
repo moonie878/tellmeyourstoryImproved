@@ -5,7 +5,7 @@ import './style.css'
 import { initPostHog, posthog } from './lib/posthog'
 import { getCurrentUtmData } from './lib/utm'
 import { supabase } from './lib/supabase'
-import { installSeo } from './composables/useSeo'
+import { installSeo, isNoindexPath } from './composables/useSeo'
 
 // Puppeteer (our build-time prerender) sets navigator.webdriver = true.
 // Skip analytics and server pings so builds don't pollute PostHog or wake servers.
@@ -98,6 +98,26 @@ if (!isPrerender) {
   } else {
     setTimeout(warmUpBackends, 1500)
   }
+}
+
+// ─── Prerender route list ────────────────────────────────────────────────────
+// scripts/prerender.mjs reads this to know which pages to render and put in
+// the sitemap, so the router is the single source of truth.
+if (isPrerender) {
+  const paths = router
+    .getRoutes()
+    .filter(
+      (r) =>
+        !r.redirect &&
+        !r.path.includes(':') &&
+        !r.meta.requiresAuth &&
+        r.meta.prerender !== false &&
+        !isNoindexPath(r.path),
+    )
+    .map((r) => r.path)
+  ;(window as unknown as { __TMYS_PRERENDER_ROUTES__: string[] }).__TMYS_PRERENDER_ROUTES__ = [
+    ...new Set(paths),
+  ]
 }
 
 // ─── Mount ───────────────────────────────────────────────────────────────────

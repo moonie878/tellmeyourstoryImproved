@@ -24,6 +24,9 @@ export interface SeoInput {
 declare module 'vue-router' {
   interface RouteMeta {
     seo?: SeoInput
+    requiresAuth?: boolean
+    /** Set false to exclude a public route from prerender + sitemap. */
+    prerender?: boolean
   }
 }
 
@@ -99,6 +102,8 @@ const NOINDEX_PREFIXES = [
   '/login',
   '/register',
   '/reset-password',
+  '/forgot-password',
+  '/gift/redeem',
   '/auth',
   '/story',
   '/editor',
@@ -106,6 +111,11 @@ const NOINDEX_PREFIXES = [
   '/checkout',
   '/success',
 ]
+
+export function isNoindexPath(path: string): boolean {
+  const p = normalisePath(path)
+  return NOINDEX_PREFIXES.some((prefix) => p === prefix || p.startsWith(`${prefix}/`))
+}
 
 export function normalisePath(path: string): string {
   const clean = path.split('?')[0].split('#')[0]
@@ -162,7 +172,7 @@ export function applySeo(input: SeoInput, routePath: string) {
   const imageAlt = input.imageAlt ?? DEFAULT_IMAGE_ALT
   const url = canonicalUrl(path)
   const noindex =
-    input.noindex ?? NOINDEX_PREFIXES.some((p) => path === p || path.startsWith(`${p}/`))
+    input.noindex ?? isNoindexPath(path)
 
   document.title = title
 
@@ -185,7 +195,9 @@ export function applySeo(input: SeoInput, routePath: string) {
   upsertMeta('name', 'twitter:image:alt', imageAlt)
 
   // Signal for the prerender script: head tags now match this path.
-  document.documentElement.setAttribute('data-seo-path', path)
+  // Uses the route path (not the canonical) so a page with a custom canonical
+  // still signals it's ready.
+  document.documentElement.setAttribute('data-seo-path', normalisePath(routePath))
 }
 
 function resolveRouteSeo(to: RouteLocationNormalized): SeoInput {

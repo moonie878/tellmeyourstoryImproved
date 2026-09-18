@@ -1,11 +1,19 @@
-{  
+
+
+{
+  "trailingSlash": false,
+  "redirects": [
+    { "source": "/christmas-gift-ideas-for-grandparents", "destination": "/christmas-gifts-for-grandparents", "permanent": true },
+    { "source": "/questions-to-ask-your-parents", "destination": "/blog/questions-to-ask-your-parents", "permanent": true },
+    { "source": "/example-story", "destination": "/example", "permanent": true },
+    { "source": "/price", "destination": "/pricing", "permanent": true },
+    { "source": "/plan", "destination": "/pricing", "permanent": true },
+    { "source": "/plans", "destination": "/pricing", "permanent": true },
+    { "source": "/subscriptions", "destination": "/pricing", "permanent": true },
+    { "source": "/billing", "destination": "/pricing", "permanent": true }
+  ],
   "rewrites": [
-    {
-      "source": "/((?!assets/).*)",
-      "destination": "/index.html"
-    },
-    
-      { "source": "/listen/:id", "destination": "/index.html" }
-    
+    { "source": "/(.*)", "destination": "/spa-shell.html" },
+    { "source": "/listen/:id", "destination": "/index.html" }
   ]
 }
