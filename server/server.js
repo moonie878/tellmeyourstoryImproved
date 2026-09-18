@@ -25,6 +25,44 @@ if (!process.env.TURNSTILE_SECRET_KEY)     throw new Error('Missing TURNSTILE_SE
 // ─── Clients ──────────────────────────────────────────────────────────────────
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
 const resend  = new Resend(process.env.RESEND_API_KEY)
+// ─── PostHog (server-side) ────────────────────────────────────────────────────
+// Records purchases from the Stripe webhook, so a payment is counted even if
+// the customer closes the tab before returning to the site.
+// Env on Render:
+//   POSTHOG_API_KEY — same project token as VITE_PUBLIC_POSTHOG_TOKEN
+//   POSTHOG_HOST    — same host as VITE_PUBLIC_POSTHOG_HOST (e.g. https://eu.i.posthog.com)
+// If either is missing, tracking is skipped silently.
+const POSTHOG_API_KEY = process.env.POSTHOG_API_KEY
+const POSTHOG_HOST    = (process.env.POSTHOG_HOST || '').replace(/\/+$/, '')
+
+/** Stable UUID from a string, so Stripe webhook retries don't double-count. */
+function uuidFrom(value) {
+  const h = crypto.createHash('sha256').update(value).digest('hex')
+  return `${h.slice(0, 8)}-${h.slice(8, 12)}-4${h.slice(13, 16)}-a${h.slice(17, 20)}-${h.slice(20, 32)}`
+}
+
+async function trackServerEvent({ event, distinctId, properties = {}, uuid, timestamp }) {
+  if (!POSTHOG_API_KEY || !POSTHOG_HOST || !distinctId) return
+  try {
+    const res = await fetch(`${POSTHOG_HOST}/capture/`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        api_key: POSTHOG_API_KEY,
+        event,
+        distinct_id: distinctId,
+        uuid,
+        timestamp,
+        properties: { ...properties, $lib: 'tmys-server' },
+      }),
+      signal: AbortSignal.timeout(3000),
+    })
+    if (!res.ok) console.error('PostHog capture failed:', res.status)
+  } catch (err) {
+    console.error('PostHog capture error:', err.message)
+  }
+}
+
 const supabaseAdmin = createClient(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_SERVICE_ROLE_KEY
@@ -124,6 +162,33 @@ app.post(
       const purchaseType = session.metadata?.purchaseType || 'single_story'
 
       console.log('Payment completed, purchaseType:', purchaseType, 'userId:', userId)
+
+      // ── Analytics: one purchase_completed event for every kind of payment ──
+      // distinct_id = Supabase user id, the same id the site passes to
+      // posthog.identify(), so this lands on the same person as their funnel.
+      // Gifts and tribute videos can be bought logged out → fall back to email.
+      const buyerEmailForTracking =
+        session.customer_details?.email || session.metadata?.buyerEmail || null
+      const kind =
+        session.metadata?.product === 'tribute-video' ? 'tribute_video' : purchaseType
+
+      await trackServerEvent({
+        event: 'purchase_completed',
+        distinctId: userId || buyerEmailForTracking,
+        uuid: uuidFrom(`stripe:${session.id}`),
+        timestamp: new Date(event.created * 1000).toISOString(),
+        properties: {
+          purchase_type:    kind,
+          story_type:       storyType,
+          amount_gbp:       (session.amount_total || 0) / 100,
+          discount_gbp:     (session.total_details?.amount_discount || 0) / 100,
+          currency:         session.currency,
+          promo_used:       (session.total_details?.amount_discount || 0) > 0,
+          gift_product:     session.metadata?.productKey || undefined,
+          stripe_session_id: session.id,
+          logged_in:        Boolean(userId),
+        },
+      })
 
       // ── Gift purchase ──────────────────────────────────────────────────────
       if (purchaseType === 'gift') {
