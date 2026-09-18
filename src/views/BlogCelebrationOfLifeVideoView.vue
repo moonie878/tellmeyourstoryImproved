@@ -263,7 +263,7 @@ useSeo({
             name: 'How do I create a celebration of life video for free?',
             acceptedAnswer: {
               '@type': 'Answer',
-              text: 'You can create and preview a celebration of life video for free at tellmeyourstory.uk/tribute. Upload up to 30 photos, add a tribute message, choose music (or upload your own MP3), and preview the full video at no cost. Download the HD version without watermark for £9.99 — no account needed.',
+              text: 'You can create and preview a celebration of life video for free at tellmeyourstory.uk/tribute. Upload up to 30 photos, add a tribute message, choose music (or upload your own MP3), and preview the full video at no cost. Download the HD version without watermark for £19.99 — no account needed.',
             },
           },
           {
