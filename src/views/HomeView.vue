@@ -2,9 +2,9 @@
   <main class="home bg-[#F5F0E8] text-[#1C1917]">
 
     <!-- ═══════════════════════════════════════ -->
-    <!-- HERO                                    -->
+    <!-- 1. HERO                                 -->
     <!-- ═══════════════════════════════════════ -->
-    <section class="hero relative overflow-hidden px-5 pb-0 pt-20 sm:px-8 sm:pt-28 md:pt-32">
+    <section class="hero relative overflow-hidden px-5 pb-0 pt-16 sm:px-8 sm:pt-24 md:pt-28">
       <div class="grain"></div>
       <div class="hero-circle"></div>
 
@@ -15,7 +15,7 @@
           <div class="hero-text pb-12 text-center md:text-left">
             <div class="eyebrow">
               <span class="eyebrow-dot"></span>
-              Preserve a loved one's story
+              No subscription · Printed in the UK
             </div>
 
             <h1 class="mt-5 font-display text-[2.6rem] font-bold leading-[1.1] tracking-[-0.02em] text-[#1C1917] sm:text-5xl md:text-[3.6rem]">
@@ -24,22 +24,29 @@
             </h1>
 
             <p class="mx-auto mt-6 max-w-lg text-base leading-[1.8] text-[#5C534E] sm:text-lg md:mx-0">
-  Record their voice. See it become a book. Scan the QR to hear them again — years from now.
-</p>
+              Ask them guided questions. They speak or type their answers. We turn it into a printed book with a QR code by every story — scan it, and hear them tell it.
+            </p>
 
-            <div class="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center md:justify-start">
-              <router-link to="/register" @click="trackStart" class="btn-primary">
-                Start your story — it's free
-              </router-link>
-              <router-link to="/example" @click="trackExampleStory" class="btn-hero-ghost">
-                See an example →
+            <!-- Whose story? -->
+            <p class="mt-8 text-sm font-semibold text-[#1C1917]">Whose story do you want to keep?</p>
+            <div class="mt-3 flex flex-wrap justify-center gap-2 md:justify-start" role="group" aria-label="Choose whose story to start">
+              <router-link
+                v-for="option in storyOptions"
+                :key="option.type"
+                :to="`/register?type=${option.type}`"
+                class="story-chip"
+                @click="trackStoryType(option.type)"
+              >
+                {{ option.label }}
               </router-link>
             </div>
 
-            <div class="mt-6 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs text-[#8C847E] md:justify-start">
-              <span class="flex items-center gap-1.5"><span class="check">✓</span> No subscription</span>
-              <span class="flex items-center gap-1.5"><span class="check">✓</span> Free to start</span>
-              <span class="flex items-center gap-1.5"><span class="check">✓</span> Printed book from £{{ PRINTED_BOOK_FROM_PRICE.toFixed(2) }}</span>
+            <div class="mt-5 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs text-[#8C847E] md:justify-start">
+              <span class="flex items-center gap-1.5"><span class="check">✓</span> 5 questions free</span>
+              <span class="flex items-center gap-1.5"><span class="check">✓</span> No card needed</span>
+              <router-link to="/example" class="font-medium text-[#7C5C3B] underline-offset-4 hover:underline" @click="trackExampleStory">
+                See a real example →
+              </router-link>
             </div>
           </div>
 
@@ -56,201 +63,88 @@
                 fetchpriority="high"
                 decoding="async"
               />
-              <!-- Floating badge — updated to voice -->
-  <div class="hero-badge">
-  <span class="hero-badge-icon" aria-hidden="true">🎙️</span>
-  <div>
-    <p class="hero-badge-title">Voice recording saved</p>
-    <p class="hero-badge-sub">QR code in the printed book</p>
-  </div>
-</div>
+              <div class="hero-badge">
+                <span class="hero-badge-icon" aria-hidden="true">🎙️</span>
+                <div>
+                  <p class="hero-badge-title">Voice recording saved</p>
+                  <p class="hero-badge-sub">QR code in the printed book</p>
+                </div>
+              </div>
             </div>
           </div>
 
         </div>
       </div>
     </section>
+
     <!-- ═══════════════════════════════════════ -->
-    <!-- NEW FEATURES — voice, QR, print        -->
+    <!-- 2. HOW IT WORKS (one section, not two)  -->
     <!-- ═══════════════════════════════════════ -->
-    <section class="reveal bg-[#1C1917] px-5 py-16 sm:px-8 sm:py-20">
+    <section id="how-it-works" class="reveal bg-[#1C1917] px-5 py-16 sm:px-8 sm:py-20">
       <div class="mx-auto max-w-6xl">
+        <div class="grid items-center gap-12 md:grid-cols-2">
 
-        <div class="section-label text-center text-[#9C7C5C]">What makes us different</div>
-        <h2 class="section-title mt-3 text-center text-white" style="margin-left:auto;margin-right:auto;">
-  The memory book that speaks
-</h2>
+          <!-- Left — steps -->
+          <div class="text-center md:text-left">
+            <div class="section-label text-[#9C7C5C]">How it works</div>
+            <h2 class="section-title how-title mt-3 text-white">
+              Record their voice today. Hear it in the book forever.
+            </h2>
 
-       <div class="mt-12 grid gap-5 md:grid-cols-3 md:gap-6">
+            <ol class="mt-8 space-y-6 text-left">
+              <li v-for="(step, i) in howSteps" :key="step.title" class="flex items-start gap-4">
+                <span class="mt-0.5 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-[#7C5C3B] text-sm font-bold text-white">
+                  {{ i + 1 }}
+                </span>
+                <div>
+                  <h3 class="text-base font-semibold text-white">{{ step.title }}</h3>
+                  <p class="mt-1 text-sm leading-relaxed text-stone-300">{{ step.desc }}</p>
+                </div>
+              </li>
+            </ol>
+          </div>
 
-  <!-- Feature 1 — Voice -->
-  <div class="reveal reveal-delay-1 feature-card">
-    <div class="overflow-hidden rounded-xl border border-[#3C3430]">
-      <img src="/images/Screenshots/voice-recording.png" alt="Recording a spoken answer in the app" class="w-full" loading="lazy" />
-    </div>
-    <h3 class="feature-title mt-4">Voice record your answers</h3>
-    <p class="feature-desc">
-      Tap the microphone and speak naturally. Your words appear as you talk — no typing needed.
-    </p>
-    <div class="feature-tag">Live transcription</div>
-  </div>
+          <!-- Right — book page with QR -->
+          <div class="flex justify-center py-4">
+            <div class="relative">
+              <div class="w-56 rounded-sm bg-white p-5 shadow-lg sm:w-64 sm:p-6" style="aspect-ratio: 6/9;">
+                <p class="text-[9px] font-medium uppercase tracking-widest text-[#7C5C3B]/60">Chapter 2 · Childhood</p>
+                <p class="mt-2 font-serif text-xs italic text-stone-500 sm:text-sm">"What did your childhood home smell like?"</p>
+                <p class="mt-2 font-serif text-[10px] leading-relaxed text-stone-700 sm:text-[11px]">
+                  It smelled of cooking, washing drying near the fire, and sometimes something sweet baking in the oven…
+                </p>
+                <div class="mt-4 flex items-center gap-2 rounded-lg bg-[#F5F0E8] p-2">
+                  <div class="flex h-9 w-9 items-center justify-center rounded bg-white">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-[#7C5C3B]" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                      <path d="M3 11V3h8v8H3zm2-2h4V5H5v4zm8-6h8v8h-8V3zm2 2v4h4V5h-4zM3 21v-8h8v8H3zm2-2h4v-4H5v4z"/>
+                    </svg>
+                  </div>
+                  <div>
+                    <p class="text-[9px] font-medium text-stone-700">Voice recording</p>
+                    <p class="text-[8px] text-stone-400">Scan to listen</p>
+                  </div>
+                </div>
+              </div>
 
-  <!-- Feature 2 — QR code -->
-  <div class="reveal reveal-delay-2 feature-card feature-card-accent">
-    <div class="overflow-hidden rounded-xl border border-[#7C5C3B]">
-      <img src="/images/Screenshots/qr-code.png" alt="QR code printed beside a story in the book" class="w-full" loading="lazy" />
-    </div>
-    <h3 class="feature-title mt-4">Hear their voice in the book</h3>
-    <p class="feature-desc">
-      A QR code is printed next to each memory — family scan it to hear their voice, years from now.
-    </p>
-    <div class="feature-tag feature-tag-accent">No subscription, ever</div>
-  </div>
-
-  <!-- Feature 3 — Printed book -->
-  <div class="reveal reveal-delay-3 feature-card">
-    <div class="overflow-hidden rounded-xl border border-[#3C3430]">
-      <img src="/images/Screenshots/printed-book.jpg" alt="Printed Tell Me Your Story keepsake book" class="w-full" loading="lazy" />
-    </div>
-    <h3 class="feature-title mt-4">Order a printed keepsake</h3>
-    <p class="feature-desc">
-      Professionally printed, bound, and shipped to your door. From £{{ PRINTED_BOOK_FROM_PRICE.toFixed(2) }} per book, plus UK shipping.
-    </p>
-    <div class="feature-tag">Ships in 10–14 days</div>
-  </div>
-
-</div>
-
-        
-
-       <!-- Voice → QR demo -->
-<div class="mt-10 rounded-2xl border border-[#2C2420] bg-[#2C2420] px-6 py-8 sm:px-10">
-  <div class="grid items-center gap-8 md:grid-cols-2">
-    
-    <!-- Left — the story -->
-    <div class="text-center md:text-left">
-      <p class="text-xs font-medium uppercase tracking-widest text-[#9C7C5C]">How it works</p>
-      <h3 class="mt-3 text-xl font-semibold text-white sm:text-2xl">
-        Record their voice today.<br/>
-        Hear it in the book forever.
-      </h3>
-      <div class="mt-5 space-y-3">
-        <div class="flex items-start gap-3">
-          <span class="mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-[#7C5C3B] text-xs font-bold text-white">1</span>
-          <p class="text-sm leading-relaxed text-stone-300">They tap the microphone and speak their answer naturally</p>
-        </div>
-        <div class="flex items-start gap-3">
-          <span class="mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-[#7C5C3B] text-xs font-bold text-white">2</span>
-          <p class="text-sm leading-relaxed text-stone-300">Their voice is saved and transcribed into text automatically</p>
-        </div>
-        <div class="flex items-start gap-3">
-          <span class="mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-[#7C5C3B] text-xs font-bold text-white">3</span>
-          <p class="text-sm leading-relaxed text-stone-300">A QR code is printed in the book — scan it to hear their voice, years from now</p>
-        </div>
-      </div>
-    </div>
-
-    <!-- Right — visual mockup -->
-    <div class="flex justify-center">
-      <div class="relative">
-        <!-- Book page with QR -->
-        <div class="w-48 rounded-sm bg-white p-4 shadow-lg sm:w-56 sm:p-5" style="aspect-ratio: 6/9;">
-          <p class="text-[8px] font-medium uppercase tracking-widest text-[#7C5C3B]/50">Chapter 2 · Childhood</p>
-          <p class="mt-2 font-serif text-[10px] italic text-stone-500 sm:text-xs">"What did your childhood home smell like?"</p>
-          <p class="mt-2 font-serif text-[9px] leading-relaxed text-stone-700 sm:text-[10px]">
-            It smelled of cooking, washing drying near the fire, and sometimes something sweet baking in the oven…
-          </p>
-          <div class="mt-3 flex items-center gap-2 rounded-lg bg-[#F5F0E8] p-2">
-            <div class="flex h-8 w-8 items-center justify-center rounded bg-white">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-[#7C5C3B]" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M3 11V3h8v8H3zm2-2h4V5H5v4zm8-6h8v8h-8V3zm2 2v4h4V5h-4zM3 21v-8h8v8H3zm2-2h4v-4H5v4z"/>
-              </svg>
-            </div>
-            <div>
-              <p class="text-[8px] font-medium text-stone-700">🎙️ Voice recording</p>
-              <p class="text-[7px] text-stone-400">Scan to listen</p>
+              <!-- Phone playing the recording -->
+              <div class="absolute -bottom-3 -right-6 w-24 rounded-xl border-2 border-stone-700 bg-stone-900 p-2 shadow-xl sm:-right-10 sm:w-28" aria-hidden="true">
+                <div class="rounded-lg bg-white p-2 text-center">
+                  <p class="text-[8px] font-medium text-stone-700">▶ Now playing</p>
+                  <p class="mt-0.5 text-[7px] text-stone-400">Nan's voice · 1:32</p>
+                  <div class="mt-1 h-0.5 w-full rounded-full bg-stone-100">
+                    <div class="h-0.5 w-2/3 rounded-full bg-[#7C5C3B]"></div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
 
-        <!-- Phone scanning overlay -->
-        <div class="absolute -bottom-3 -right-6 w-20 rounded-xl border-2 border-stone-700 bg-stone-900 p-1.5 shadow-xl sm:-right-8 sm:w-24 sm:p-2">
-          <div class="rounded-lg bg-white p-2 text-center">
-            <p class="text-[7px] font-medium text-stone-700">▶ Now playing</p>
-            <p class="mt-0.5 text-[6px] text-stone-400">Nan's voice · 1:32</p>
-            <div class="mt-1 h-0.5 w-full rounded-full bg-stone-100">
-              <div class="h-0.5 w-2/3 rounded-full bg-[#7C5C3B]"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-  </div>
-</div>
-
-      </div>
-    </section>   
-
-    <!-- ═══════════════════════════════════════ -->
-    <!-- HOW IT WORKS                           -->
-    <!-- ═══════════════════════════════════════ -->
-    <section class="reveal bg-[#F5F0E8] px-5 py-16 sm:px-8 sm:py-20">
-      <div class="mx-auto max-w-6xl">
-
-        <div class="section-label">How it works</div>
-        <h2 class="section-title mt-3">Simple to start, beautiful to finish</h2>
-
-        <div class="mt-12 grid gap-5 md:grid-cols-3 md:gap-6">
-          <div class="reveal reveal-delay-1 step-card">
-            <div class="step-number">01</div>
-            <h3 class="step-title">Choose a story type</h3>
-            <p class="step-desc">
-              Start with Mum, Dad, Grandparents, a Life Story, a Couple Story, or more. Each type has questions tailored to that person's experience.
-            </p>
-          </div>
-
-          <div class="reveal reveal-delay-2 step-card step-card-accent">
-            <div class="step-number text-[#7C5C3B]">02</div>
-            <h3 class="step-title">Answer by typing or speaking</h3>
-            <p class="step-desc">
-              Start with 5 free questions, then unlock 100+ across 10 chapters. Type your answers or tap the microphone and speak — your voice is recorded and saved alongside the text. Add photos to bring each memory to life.
-            </p>
-          </div>
-
-          <div class="reveal reveal-delay-3 step-card">
-            <div class="step-number">03</div>
-            <h3 class="step-title">Export, print, or share</h3>
-            <p class="step-desc">
-              Download a beautifully designed PDF, order a professionally printed book, or export a video with music — ready in minutes, kept forever.
-            </p>
-          </div>
-        </div>
-
-        <router-link
-          to="/blog/questions-to-ask-your-parents"
-          class="mt-8 inline-block text-sm text-[#7C5C3B] hover:underline"
-        >
-          Read: 100 questions to ask your parents before it's too late →
-        </router-link>
-
-        <div class="mt-4 flex flex-wrap gap-x-6 gap-y-2">
-          <router-link to="/life-story-work-in-care-homes" class="text-sm text-[#7C5C3B] hover:underline">
-            Life story work in care homes →
-          </router-link>
-          <router-link to="/legacy-letter-to-children" class="text-sm text-[#7C5C3B] hover:underline">
-            How to write a legacy letter →
-          </router-link>
-          <router-link to="/reminiscence-therapy-life-story" class="text-sm text-[#7C5C3B] hover:underline">
-            Reminiscence therapy →
-          </router-link>
-          <router-link to="/bereavement-gift-ideas" class="text-sm text-[#7C5C3B] hover:underline">
-            Bereavement gift ideas →
-          </router-link>
         </div>
       </div>
     </section>
 
+    <!-- ═══════════════════════════════════════ -->
+    <!-- 3. SEE IT IN ACTION                     -->
     <!-- ═══════════════════════════════════════ -->
 <!-- PRODUCT — see it in action             -->
 <!-- ═══════════════════════════════════════ -->
@@ -346,6 +240,7 @@
   </div>
 </section>
 
+    <!-- 4. WHY IT MATTERS -->
     <!-- ═══════════════════════════════════════ -->
     <!-- WHY IT MATTERS — emotional             -->
     <!-- ═══════════════════════════════════════ -->
@@ -370,6 +265,7 @@
       </div>
     </section>
 
+    <!-- 5. TESTIMONIALS + RECOMMENDED BY -->
     <!-- ═══════════════════════════════════════ -->
 <!-- TESTIMONIALS                           -->
 <!-- ═══════════════════════════════════════ -->
@@ -449,18 +345,52 @@
     <span class="text-xs text-stone-400">· 10 reviews</span>
   </a>
 </div>
+
+    <!-- Recommended by -->
+    <div class="mt-12 border-t border-[#E8DDD0] pt-8 text-center">
+      <p class="text-xs font-medium uppercase tracking-[0.15em] text-[#A89B8F]">Recommended by</p>
+      <a
+        href="https://lwdwtraining.uk/video/links/"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="mt-4 inline-block opacity-70 transition hover:opacity-100"
+        aria-label="Visit Living Well Dying Well Training"
+      >
+        <img
+          src="/images/partners/lwdw-logo.png"
+          alt="Living Well Dying Well — End of Life Doula Training"
+          class="h-12 w-auto sm:h-14"
+          loading="lazy"
+        />
+      </a>
+    </div>
   </div>
 </section>
 
-<!-- ═══════════════════════════════════════ -->
-<!-- EMAIL CAPTURE                           -->
-<!-- ═══════════════════════════════════════ -->
-<section class="reveal px-5 py-14 sm:px-8 sm:py-16">
-  <div class="mx-auto max-w-5xl">
-    <EmailCaptureForm source="homepage" />
-  </div>
-</section>
+    <!-- ═══════════════════════════════════════ -->
+    <!-- 6. FOUNDER                              -->
+    <!-- ═══════════════════════════════════════ -->
+    <section class="reveal bg-white px-5 py-14 sm:px-8 sm:py-16">
+      <div class="mx-auto flex max-w-3xl flex-col items-center gap-6 text-center sm:flex-row sm:text-left">
+        <!-- To use a real photo, replace the "M" circle with:
+             <img src="/images/founder/mark.jpg" alt="Mark, founder of Tell Me Your Story"
+                  width="80" height="80" class="h-20 w-20 flex-shrink-0 rounded-full object-cover" loading="lazy" /> -->
+        <div class="flex h-20 w-20 flex-shrink-0 items-center justify-center rounded-full bg-[#7C5C3B] font-display text-3xl font-bold text-white" aria-hidden="true">
+          M
+        </div>
+        <div>
+          <p class="font-display text-xl leading-snug text-[#1C1917] sm:text-2xl">
+            "I built Tell Me Your Story so my own children would always have my voice and my stories."
+          </p>
+          <p class="mt-3 text-sm text-[#5C534E]">
+            Mark, founder — a dad in Southampton who builds and runs it himself.
+            <router-link to="/my-story" class="ml-1 font-medium text-[#7C5C3B] hover:underline">Read why →</router-link>
+          </p>
+        </div>
+      </div>
+    </section>
 
+    <!-- 7. GIFT -->
 <!-- ═══════════════════════════════════════ -->
 <!-- GIFT — buy for someone you love        -->
 <!-- ═══════════════════════════════════════ -->
@@ -520,49 +450,57 @@
 </section>
 
     <!-- ═══════════════════════════════════════ -->
-    <!-- PARTNERS                                -->
+    <!-- 8. PRICING                             -->
     <!-- ═══════════════════════════════════════ -->
-    <section class="reveal bg-white px-5 py-12 sm:px-8 sm:py-14">
-      <div class="mx-auto max-w-4xl text-center">
-        <p class="text-xs font-medium uppercase tracking-[0.15em] text-[#A89B8F]">
-          Recommended by
-        </p>
-        <div class="mt-6 flex flex-wrap items-center justify-center gap-x-12 gap-y-6">
-          <a
-            href="https://lwdwtraining.uk/video/links/"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="opacity-70 transition hover:opacity-100"
-            aria-label="Visit Living Well Dying Well Training"
-          >
-            <img
-              src="/images/partners/lwdw-logo.png"
-              alt="Living Well Dying Well — End of Life Doula Training"
-              class="h-12 w-auto sm:h-14"
-              loading="lazy"
-            />
-          </a>
-         <!-- <a href="https://www.elm-online.co.uk/"
-  target="_blank"
-  rel="noopener noreferrer"
-  class="flex items-center justify-center"
->
-  <img
-    src="/images/partners/elm-legal.png"
-    alt="Recommended by ELM Legal Services"
-    class="h-16 w-auto object-contain opacity-80 transition hover:opacity-100"
-  />
-</a> -->
+    <PricingTable id="pricing" @track="trackPricing" />
+
+    <!-- ═══════════════════════════════════════ -->
+    <!-- 9. FAQ (same text feeds the FAQ schema) -->
+    <!-- ═══════════════════════════════════════ -->
+    <section class="reveal bg-[#F5F0E8] px-5 py-16 sm:px-8 sm:py-20">
+      <div class="mx-auto max-w-3xl">
+        <div class="section-label text-center">Questions</div>
+        <h2 class="section-title mt-3 text-center">Before you start</h2>
+
+        <div class="mt-10 divide-y divide-[#E8DDD0] rounded-2xl border border-[#E8DDD0] bg-white">
+          <details v-for="item in faqs" :key="item.q" class="faq-item px-5 py-4 sm:px-6">
+            <summary class="flex cursor-pointer list-none items-center justify-between gap-4 text-base font-semibold text-[#1C1917]">
+              {{ item.q }}
+              <span class="faq-icon flex-shrink-0 text-xl leading-none text-[#7C5C3B]" aria-hidden="true">+</span>
+            </summary>
+            <p class="mt-3 text-sm leading-relaxed text-[#5C534E]">{{ item.a }}</p>
+          </details>
         </div>
       </div>
     </section>
 
+    <!-- 10. EMAIL CAPTURE — the soft alternative -->
+<!-- ═══════════════════════════════════════ -->
+<!-- EMAIL CAPTURE                           -->
+<!-- ═══════════════════════════════════════ -->
+<section class="reveal px-5 py-14 sm:px-8 sm:py-16">
+  <div class="mx-auto max-w-5xl">
+    <EmailCaptureForm source="homepage" />
+  </div>
+</section>
 
     <!-- ═══════════════════════════════════════ -->
-    <!-- PRICING                                -->
+    <!-- 11. GUIDES (moved down from mid-page)   -->
     <!-- ═══════════════════════════════════════ -->
-    <PricingTable id="pricing" @track="trackPricing" />
+    <nav class="bg-[#F5F0E8] px-5 pb-14 sm:px-8" aria-label="Guides">
+      <div class="mx-auto max-w-5xl text-center">
+        <p class="text-xs font-medium uppercase tracking-[0.15em] text-[#A89B8F]">Guides</p>
+        <div class="mt-4 flex flex-wrap justify-center gap-x-6 gap-y-2">
+          <router-link v-for="g in guides" :key="g.to" :to="g.to" class="text-sm text-[#7C5C3B] hover:underline">
+            {{ g.label }}
+          </router-link>
+        </div>
+      </div>
+    </nav>
 
+    <!-- ═══════════════════════════════════════ -->
+    <!-- 12. FINAL CTA                          -->
+    <!-- ═══════════════════════════════════════ -->
     <!-- ═══════════════════════════════════════ -->
     <!-- FINAL CTA                              -->
     <!-- ═══════════════════════════════════════ -->
@@ -589,13 +527,13 @@
 
   </main>
 </template>
-
 <script setup lang="ts">
 import { track } from '../lib/analytics'
 import { useSeo } from '../composables/useSeo'
 import EmailCaptureForm from '../components/Marketing/EmailCaptureForm.vue'
 import PricingTable from '../components/pricing/PricingTable.vue'
 import { PRINTED_BOOK_FROM_PRICE } from '../lib/printPricing'
+import { PRINT_CUTOFF_LABEL } from '../lib/christmas'
 
 import { onMounted } from 'vue'
 
@@ -614,6 +552,65 @@ onMounted(() => {
   document.querySelectorAll('.reveal').forEach((el) => observer.observe(el))
 })
 
+const printFrom = `£${PRINTED_BOOK_FROM_PRICE.toFixed(2)}`
+
+// Hero "Whose story?" buttons → /register?type=…
+const storyOptions = [
+  { type: 'mum', label: 'Mum' },
+  { type: 'dad', label: 'Dad' },
+  { type: 'grandparent', label: 'Nan or Grandad' },
+  { type: 'partner', label: 'My partner' },
+  { type: 'self', label: 'My own' },
+]
+
+const howSteps = [
+  {
+    title: 'Choose whose story it is',
+    desc: "Mum, Dad, Nan or Grandad, a partner, or your own. Each story type has questions written for that person's life. Sit down together, or invite family to join in by link.",
+  },
+  {
+    title: 'Speak or type — we write it up',
+    desc: 'Tap the microphone and talk naturally. Your words are transcribed as you speak and the recording is kept. Start with 5 free questions, then unlock 100+ across 10 chapters, and add photos to any answer.',
+  },
+  {
+    title: 'Get a book that plays their voice',
+    desc: `Every answer becomes a page. Voice answers get a QR code in the printed book — scan it and hear them tell it. Download the PDF, or order a printed copy from ${printFrom}.`,
+  },
+]
+
+// Shown on the page AND used for the FAQPage schema, so they always match.
+const faqs = [
+  {
+    q: 'How do the QR codes work?',
+    a: 'Every answer recorded by voice gets its own QR code, printed next to that story in the book. Scan it with any phone camera and the recording plays in the browser — no app needed.',
+  },
+  {
+    q: 'What if they don’t like typing?',
+    a: 'They don’t have to. Tap the microphone and speak — the words are transcribed automatically and the recording is saved alongside the answer.',
+  },
+  {
+    q: 'Is it a subscription?',
+    a: `No. You pay once for the plan you choose — no renewal, nothing to cancel. Printed books are ordered separately, from ${printFrom} per book plus UK shipping.`,
+  },
+  {
+    q: 'How long does a printed book take?',
+    a: `Books are printed to order and usually arrive within 10–14 days in the UK. For Christmas, order your printed book by ${PRINT_CUTOFF_LABEL}.`,
+  },
+  {
+    q: 'Can I try it before paying?',
+    a: 'Yes. Start any story and answer 5 questions free, with no card needed. You only pay if you want to unlock all the questions, download your keepsake, or order a printed book.',
+  },
+]
+
+const guides = [
+  { to: '/blog/questions-to-ask-your-parents', label: '100 questions to ask your parents' },
+  { to: '/storyworth-alternative', label: 'Storyworth alternative (UK)' },
+  { to: '/life-story-work-in-care-homes', label: 'Life story work in care homes' },
+  { to: '/legacy-letter-to-children', label: 'How to write a legacy letter' },
+  { to: '/reminiscence-therapy-life-story', label: 'Reminiscence therapy' },
+  { to: '/bereavement-gift-ideas', label: 'Bereavement gift ideas' },
+]
+
 useSeo({
   title: 'Memory Book That Plays Their Voice | Tell Me Your Story UK',
   description:
@@ -622,6 +619,8 @@ useSeo({
   // Organization + WebSite schema live in index.html (sitewide).
   schema: {
     '@context': 'https://schema.org',
+    '@graph': [
+      {
     '@type': 'SoftwareApplication',
     name: 'Tell Me Your Story',
     url: 'https://tellmeyourstory.uk/',
@@ -642,19 +641,43 @@ useSeo({
         name: 'Printed Book',
         price: PRINTED_BOOK_FROM_PRICE.toFixed(2),
         priceCurrency: 'GBP',
-        description: 'Professionally printed 6x9 softcover with QR voice codes, shipped UK-wide.',
+        description: 'Professionally printed 6x9 softcover with QR voice codes. UK shipping extra.',
+      },
+    ],
+      },
+      {
+        '@type': 'FAQPage',
+        mainEntity: faqs.map((f) => ({
+          '@type': 'Question',
+          name: f.q,
+          acceptedAnswer: { '@type': 'Answer', text: f.a },
+        })),
       },
     ],
   },
 })
 
 function trackStart() { track('upgrade_clicked', { source: 'homepage' }) }
+function trackStoryType(type: string) { track('story_type_selected', { type, source: 'homepage_hero' }) }
 function trackExampleStory() { track('example_story_clicked', { source: 'homepage' }) }
 function trackPricing(plan: string) { track('upgrade_clicked', { source: 'home_pricing', plan }) }
 </script>
 
 <style scoped>
 .home { font-family: 'DM Sans', sans-serif; }
+
+/* ── Hero "Whose story?" buttons ─────────── */
+.story-chip { display: inline-flex; align-items: center; min-height: 44px; padding: 10px 20px; border-radius: 100px; background: #7C5C3B; color: white; font-size: 14px; font-weight: 500; text-decoration: none; transition: opacity 0.2s, transform 0.2s; }
+.story-chip:hover { opacity: 0.9; transform: translateY(-1px); }
+.story-chip:focus-visible { outline: 2px solid #1C1917; outline-offset: 2px; }
+
+/* ── How it works title sits left on desktop ── */
+@media (min-width: 768px) { .how-title { margin-left: 0; } }
+
+/* ── FAQ ──────────────────────────────────── */
+.faq-item summary::-webkit-details-marker { display: none; }
+.faq-item[open] .faq-icon { transform: rotate(45deg); }
+.faq-icon { transition: transform 0.2s; }
 .font-display { font-family: 'Playfair Display', Georgia, serif; }
 
 .grain {

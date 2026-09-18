@@ -40,6 +40,7 @@ type AnalyticsEvent =
    | 'christmas_banner_clicked'
    | 'plan_selected'
    | 'christmas_banner_dismissed'
+   | 'story_type_selected'
 
 
 type AnalyticsValue =

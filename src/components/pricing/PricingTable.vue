@@ -157,72 +157,18 @@
         One-time payment · No subscription · No renewal
       </p>
 
-      <!-- ── Tribute Video ────────────────────────────────────────────── -->
-      <div class="mt-12 overflow-hidden rounded-3xl border border-[#E8DDD0] bg-white">
-        <div class="grid md:grid-cols-2">
-
-          <!-- Left — info -->
-          <div class="p-8 sm:p-10">
-            <p class="section-label">Also available</p>
-            <h3 class="mt-3 font-display text-2xl font-bold text-[#1C1917] sm:text-3xl">
-              Tribute Video Creator
-            </h3>
-            <p class="mt-3 text-sm leading-7 text-[#5C534E]">
-              Create a beautiful memorial video for someone you've lost.
-              Upload photos, choose music, and generate a full HD MP4 — no
-              account needed.
-            </p>
-
-            <ul class="mt-5 space-y-2">
-              <li v-for="f in tributeFeatures" :key="f" class="flex items-start gap-2 text-sm text-[#3C3530]">
-                <span class="mt-0.5 flex-shrink-0 text-[#7C5C3B]">✓</span>
-                {{ f }}
-              </li>
-            </ul>
-
-            <div class="mt-6 flex flex-wrap items-center gap-4">
-              <router-link
-                to="/tribute"
-                @click="$emit('track', 'tribute')"
-                class="rounded-full bg-[#1C1917] px-6 py-3 text-sm font-semibold text-white transition hover:opacity-90"
-              >
-                Create a tribute video
-              </router-link>
-              <div class="text-right">
-                <p class="text-2xl font-bold text-[#1C1917]">£19.99</p>
-                <p class="text-xs text-[#8C847E]">Preview free · Pay to download</p>
-              </div>
-            </div>
-          </div>
-
-          <!-- Right — dark feature card -->
-          <div class="bg-[#1C1917] p-8 sm:p-10">
-            <p class="text-[10px] font-medium uppercase tracking-[0.2em] text-[#9C7C5C]">
-              How it works
-            </p>
-            <div class="mt-5 space-y-5">
-              <div v-for="step in tributeSteps" :key="step.title" class="flex items-start gap-4">
-                <div class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-[#2C2420] text-sm">
-                  {{ step.icon }}
-                </div>
-                <div>
-                  <p class="text-sm font-semibold text-[#E8DDD0]">{{ step.title }}</p>
-                  <p class="mt-0.5 text-xs leading-5 text-[#6C6460]">{{ step.desc }}</p>
-                </div>
-              </div>
-            </div>
-
-            <div class="mt-8 border-t border-[#2C2420] pt-6">
-              <p class="text-xs text-[#5C534E]">
-                No account required. Preview with watermark for free —
-                pay £19.99 to download the full HD version.
-                Included free with Premium Keepsake.
-              </p>
-            </div>
-          </div>
-
-        </div>
-      </div>
+      <!-- Tribute video lives on /tribute — memorial content doesn't belong
+           next to gift pricing. One quiet link keeps it discoverable. -->
+      <p class="mt-8 text-center text-sm text-[#8C847E]">
+        Lost someone?
+        <router-link
+          to="/tribute"
+          class="font-medium text-[#7C5C3B] hover:underline"
+          @click="$emit('track', 'tribute')"
+        >
+          Create a tribute video →
+        </router-link>
+      </p>
 
     </div>
   </section>
@@ -337,22 +283,6 @@ const mobilePlans = [
       'Tribute video creator (free)',
     ],
   },
-]
-
-const tributeFeatures = [
-  'Up to 30 photos in any order',
-  'Choose from curated music or upload your own',
-  'Fade, slow-fade or cut transitions',
-  'Personal tribute text as a quote slide',
-  'Full HD 1920×1080 MP4 download',
-  'No account needed',
-]
-
-const tributeSteps = [
-  { icon: '📸', title: 'Upload their photos', desc: 'Add up to 30 photos and arrange them in any order you like.' },
-  { icon: '🎵', title: 'Choose music', desc: 'Pick a curated gentle track or upload a song that was meaningful to them.' },
-  { icon: '👁', title: 'Preview free', desc: 'Generate a watermarked preview instantly to see how it looks.' },
-  { icon: '⬇', title: 'Download for £19.99', desc: 'Pay once to download the full HD clean version — yours to keep forever.' },
 ]
 </script>
 
