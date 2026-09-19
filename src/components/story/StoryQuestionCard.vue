@@ -152,40 +152,61 @@
         >
           <div class="flex items-center gap-4">
             <button
+              type="button"
               @click="toggleExistingPlayback"
-              class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-[#7C5C3B] text-white transition hover:opacity-90"
+              class="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full bg-[#7C5C3B] text-white transition hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1C1917] focus-visible:ring-offset-2"
+              :aria-label="isPlayingExisting ? 'Pause the recording' : 'Play the recording for this question'"
             >
-              <svg v-if="!isPlayingExisting" xmlns="http://www.w3.org/2000/svg" class="ml-0.5 h-3.5 w-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-              <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+              <svg v-if="!isPlayingExisting" xmlns="http://www.w3.org/2000/svg" class="ml-0.5 h-4 w-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
+              <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
             </button>
 
             <div class="min-w-0 flex-1">
-              <div class="h-1 w-full overflow-hidden rounded-full bg-[#E8DDD0]">
+              <div
+                class="h-1.5 w-full overflow-hidden rounded-full bg-[#E8DDD0]"
+                role="progressbar"
+                aria-label="Playback position"
+                aria-valuemin="0"
+                aria-valuemax="100"
+                :aria-valuenow="Math.round(existingProgress)"
+              >
                 <div class="h-full rounded-full bg-[#7C5C3B] transition-all" :style="{ width: `${existingProgress}%` }" />
               </div>
               <div class="mt-2 flex items-center justify-between gap-3">
-                <p class="text-[11px] text-stone-500">{{ existingRecording.duration_seconds }}s recording</p>
-                <div class="flex items-center gap-2">
-                  <span class="text-[11px] text-stone-500">QR in book</span>
-                  <button
-                    @click="toggleQR"
-                    class="relative inline-flex h-4 w-7 flex-shrink-0 cursor-pointer rounded-full transition-colors duration-200"
+                <p class="text-xs text-stone-500">
+                  {{ formatClock(Math.floor(existingCurrentTime)) }} / {{ formatClock(Math.round(existingDuration || existingRecording.duration_seconds || 0)) }}
+                </p>
+                <!-- Whole row is the tap target, not just the tiny switch -->
+                <button
+                  type="button"
+                  role="switch"
+                  :aria-checked="!!existingRecording.show_qr"
+                  aria-label="Print a QR code for this recording in the book"
+                  class="flex min-h-[44px] items-center gap-2 rounded-full px-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7C5C3B]"
+                  @click="toggleQR"
+                >
+                  <span class="text-xs text-stone-600">QR in book</span>
+                  <span
+                    class="relative inline-flex h-5 w-9 flex-shrink-0 rounded-full transition-colors duration-200"
                     :class="existingRecording.show_qr ? 'bg-[#7C5C3B]' : 'bg-stone-300'"
+                    aria-hidden="true"
                   >
                     <span
-                      class="mt-0.5 ml-0.5 inline-block h-3 w-3 transform rounded-full bg-white shadow transition duration-200"
-                      :class="existingRecording.show_qr ? 'translate-x-3' : 'translate-x-0'"
+                      class="mt-0.5 ml-0.5 inline-block h-4 w-4 transform rounded-full bg-white shadow transition duration-200"
+                      :class="existingRecording.show_qr ? 'translate-x-4' : 'translate-x-0'"
                     />
-                  </button>
-                </div>
+                  </span>
+                </button>
               </div>
             </div>
 
-            <canvas ref="qrCanvas" class="hidden flex-shrink-0 rounded sm:block" width="48" height="48" />
+            <canvas ref="qrCanvas" class="hidden flex-shrink-0 rounded sm:block" width="48" height="48" aria-hidden="true" />
 
             <button
+              type="button"
               @click="deleteExistingRecording"
-              class="flex-shrink-0 text-[11px] text-stone-400 transition hover:text-red-500"
+              class="min-h-[44px] flex-shrink-0 rounded-full px-2 text-xs text-stone-500 transition hover:text-red-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400"
+              aria-label="Remove this voice recording"
             >Remove</button>
           </div>
 

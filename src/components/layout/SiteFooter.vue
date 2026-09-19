@@ -99,6 +99,7 @@ const columns = [
       { to: '/how-to-write-a-life-story', label: 'How to write a life story' },
       { to: '/legacy-letter-to-children', label: 'Writing a legacy letter' },
       { to: '/resources/50-questions-printable', label: 'Free 50-question printable' },
+      { to: '/guides', label: 'All guides →' },
     ],
   },
   {

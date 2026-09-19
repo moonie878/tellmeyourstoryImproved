@@ -17,6 +17,7 @@ const routes: RouteRecordRaw[] = [
   { path: '/gift', name: 'gift', component: () => import('../views/GiftView.vue') },
   { path: '/tribute', name: 'tribute', component: () => import('../views/TributeView.vue'), meta: { public: true } },
   { path: '/my-story', name: 'my-story', component: () => import('../views/MyStoryView.vue'), meta: { seo: { title: 'My Story — Tell Me Your Story' } } },
+  { path: '/guides', name: 'guides', component: () => import('../views/GuidesView.vue') },
   { path: '/help', name: 'help', component: () => import('../views/HelpVideosView.vue'), meta: { seo: { title: 'Help & Guides — Tell Me Your Story' } } },
   { path: '/contact', name: 'contact', component: () => import('../views/ContactView.vue') },
   { path: '/christmas', name: 'christmas', component: () => import('../views/ChristmasView.vue') },

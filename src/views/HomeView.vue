@@ -678,6 +678,7 @@ const guides = [
   { to: '/legacy-letter-to-children', label: 'How to write a legacy letter' },
   { to: '/reminiscence-therapy-life-story', label: 'Reminiscence therapy' },
   { to: '/bereavement-gift-ideas', label: 'Bereavement gift ideas' },
+  { to: '/guides', label: 'All guides →' },
 ]
 
 useSeo({

@@ -1,5 +1,8 @@
 <template>
   <div class="min-h-screen bg-stone-50 text-stone-900">
+    <!-- Keyboard users can jump straight past the navigation -->
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+
     <header class="sticky top-0 z-40 border-b border-stone-200 bg-stone-50/90 backdrop-blur">
       <div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6">
         <router-link to="/" class="shrink-0" aria-label="Tell Me Your Story home">
@@ -126,7 +129,9 @@
     </header>
 
     <ChristmasBanner />
-    <router-view />
+    <div id="main-content" tabindex="-1" class="outline-none">
+      <router-view />
+    </div>
     <SiteFooter />
     <CookieBanner />
   </div>
@@ -250,3 +255,29 @@ onBeforeUnmount(() => {
   unsubscribeAuth?.()
 })
 </script>
+
+<style>
+/* Visible focus ring for keyboard users on every link, button and field.
+   Elements that already draw their own ring (focus-visible:ring-*) keep it. */
+:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: 2px solid #7C5C3B;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.skip-link {
+  position: absolute;
+  left: 12px;
+  top: -60px;
+  z-index: 100;
+  border-radius: 9999px;
+  background: #1C1917;
+  color: #fff;
+  padding: 10px 18px;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: top 0.15s ease;
+}
+.skip-link:focus { top: 12px; }
+</style>
