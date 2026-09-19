@@ -402,7 +402,7 @@
         <div class="upsell-card">
           <p class="upsell-eyebrow">Want more than a tribute video?</p>
           <h3 class="upsell-title">Capture their full life story with Tell Me Your Story</h3>
-          <p class="upsell-desc">100 guided questions across 10 chapters. Every answer turns into a beautifully designed keepsake book — a complete record of their life, in their own words.</p>
+          <p class="upsell-desc">100+ guided questions across 10 chapters. Every answer turns into a beautifully designed keepsake book — a complete record of their life, in their own words.</p>
           <router-link to="/register" class="upsell-btn">Start capturing their story — it's free →</router-link>
         </div>
       </div>

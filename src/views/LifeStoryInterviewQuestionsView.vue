@@ -100,18 +100,26 @@
     </section>
 
     <!-- CTA -->
+    <!-- Free printable: for readers not ready to start yet -->
+    <section class="px-5 py-14 sm:px-8 sm:py-16">
+      <div class="mx-auto max-w-5xl">
+        <EmailCaptureForm source="Life-story-interview" />
+      </div>
+    </section>
+
     <section class="bg-[#1C1917] px-5 py-16 text-center sm:px-8 sm:py-20">
       <p class="text-xs font-medium uppercase tracking-[0.22em] text-[#9C7C5C]">Start today</p>
       <h2 class="mt-4 font-display text-2xl font-bold text-white sm:text-3xl">100 questions already written. Free to start.</h2>
       <p class="mx-auto mt-4 max-w-lg text-sm leading-7 text-[#A8A29E]">No preparation needed. Just start — and let the questions do the work.</p>
       <router-link to="/register" class="mt-8 inline-block rounded-full bg-[#C4A882] px-8 py-3 text-sm font-semibold text-[#1C1917] transition hover:opacity-90">Start a life story free →</router-link>
-      <p class="mt-4 text-xs text-[#9C7C5C]">Free to start · One-time payment · Printed book from £34.98</p>
+      <p class="mt-4 text-xs text-[#9C7C5C]">Free to start · One-time payment · Printed book from £21.99</p>
     </section>
 
   </main>
 </template>
 
 <script setup lang="ts">
+import EmailCaptureForm from '../components/Marketing/EmailCaptureForm.vue'
 import { useSeo } from '../composables/useSeo'
 
 const interviewTips = [

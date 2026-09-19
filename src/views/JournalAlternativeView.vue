@@ -161,7 +161,7 @@
       <router-link to="/register" class="mt-8 inline-block rounded-full bg-[#C4A882] px-8 py-3 text-sm font-semibold text-[#1C1917] transition hover:opacity-90">
         Try 5 questions free →
       </router-link>
-      <p class="mt-4 text-xs text-[#9C7C5C]">No card needed · One-time from £3.99 · Printed book from {{ printFrom }} plus UK shipping</p>
+      <p class="mt-4 text-xs text-[#9C7C5C]">No card needed · One-time from £3.99 · Printed book from {{ printFrom }} including UK delivery</p>
     </section>
 
   </main>
@@ -189,7 +189,7 @@ const comparison = [
   { feature: 'Photos',               journal: 'Some have space to stick them in',      us: 'Add photos to any answer' },
   { feature: 'Copies',               journal: 'One — the journal itself',              us: 'Share a link with family; order as many printed copies as you like' },
   { feature: 'If it gets lost',      journal: 'The only copy is gone',                 us: 'Saved in your online account' },
-  { feature: 'Cost',                 journal: 'Usually the cheapest option',           us: `5 questions free; one-time from £3.99; print from ${printFrom} plus shipping` },
+  { feature: 'Cost',                 journal: 'Usually the cheapest option',           us: `5 questions free; one-time from £3.99; print from ${printFrom} including UK delivery` },
 ]
 
 const whenJournal = [
@@ -225,7 +225,7 @@ const faqs = [
   },
   {
     q: 'How much does it cost compared with a journal?',
-    a: `A paper journal is usually the cheapest option. Tell Me Your Story lets you answer 5 questions free, then pay once from £3.99. A printed book starts at ${printFrom} plus UK shipping.`,
+    a: `A paper journal is usually the cheapest option. Tell Me Your Story lets you answer 5 questions free, then pay once from £3.99. A printed book starts at ${printFrom} including UK delivery.`,
   },
 ]
 

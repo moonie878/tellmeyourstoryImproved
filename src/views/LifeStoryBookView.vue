@@ -109,8 +109,8 @@
           </div>
           <div class="rounded-2xl bg-white p-6">
             <p class="text-2xl">📚</p>
-            <p class="mt-3 text-sm font-semibold text-stone-900">UK printed hardcover</p>
-            <p class="mt-2 text-xs leading-5 text-stone-500">Professionally printed and bound in the UK. Softcover from £21.99, hardcover options available. Delivered to your door.</p>
+            <p class="mt-3 text-sm font-semibold text-stone-900">printed keepsake book</p>
+            <p class="mt-2 text-xs leading-5 text-stone-500">Professionally printed and bound. Softcover from £21.99 including UK delivery. Delivered to your door.</p>
           </div>
           <div class="rounded-2xl bg-white p-6">
             <p class="text-2xl">💷</p>
@@ -156,7 +156,7 @@
             class="rounded-3xl border p-5 text-center"
             :class="tier.featured ? 'border-[#7C5C3B] bg-white' : 'border-stone-200 bg-white'"
           >
-            <p v-if="tier.featured" class="mb-2 text-[10px] font-semibold uppercase tracking-wider text-[#7C5C3B]">Most popular</p>
+            <p v-if="tier.featured" class="mb-2 text-[10px] font-semibold uppercase tracking-wider text-[#7C5C3B]">Recommended</p>
             <p class="text-xs font-medium text-stone-500">{{ tier.name }}</p>
             <p class="mt-2 text-2xl font-bold text-stone-900">£{{ tier.price }}</p>
             <p class="mt-2 text-xs leading-5 text-stone-500">{{ tier.desc }}</p>
@@ -227,7 +227,7 @@ const chapters = [
 const steps = [
   { number: '1', title: 'Choose a story type',         desc: 'Pick from Mum\'s Story, Dad\'s Story, Grandad\'s Story, Life Story, and more. Each has 100 questions written for that person\'s life.' },
   { number: '2', title: 'Answer at your own pace',      desc: 'Write answers in the app, or record them by voice. Answer one question or a hundred — everything saves automatically.' },
-  { number: '3', title: 'Export or print your book',    desc: 'Download a beautifully designed PDF, or order a professionally printed and bound hardcover book delivered to your door.' },
+  { number: '3', title: 'Export or print your book',    desc: 'Download a beautifully designed PDF, or order a professionally printed and bound book delivered to your door.' },
 ]
 
 const tiers = [
@@ -239,7 +239,7 @@ const tiers = [
 
 useSeo({
   title: 'Create a Life Story Book — Capture Their Story in Their Own Words | Tell Me Your Story',
-  description: 'Create a life story book for a parent or grandparent. 100 guided questions, voice recordings, and a beautifully printed hardcover book. Free to start — UK delivery from £21.99.',
+  description: 'Create a life story book for a parent or grandparent. 100+ guided questions, voice recordings, and a beautifully printed book. Free to start — UK delivery from £21.99.',
   canonical: 'https://tellmeyourstory.uk/life-story-book',
 })
 </script>

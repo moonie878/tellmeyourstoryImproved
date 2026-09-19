@@ -82,7 +82,7 @@
         <p class="text-xs font-medium uppercase tracking-[0.22em] text-[#9C7C5C]">Two formats, one story</p>
         <h2 class="mt-3 font-display text-2xl font-bold text-stone-900 sm:text-3xl">A printed book and a video — from the same story</h2>
         <p class="mx-auto mt-4 max-w-xl text-sm leading-7 text-stone-500">
-          Unlike other platforms that only offer one format, Tell Me Your Story lets you export the same story as a beautifully designed PDF book, a printed hardcover, and a video — all from one set of answers.
+          Unlike other platforms that only offer one format, Tell Me Your Story lets you export the same story as a beautifully designed PDF book, a printed book, and a video — all from one set of answers.
         </p>
         <div class="mt-8 grid gap-5 sm:grid-cols-3">
           <div class="rounded-2xl border border-stone-200 bg-white p-5 text-center">
@@ -93,7 +93,7 @@
           <div class="rounded-2xl border border-[#7C5C3B] bg-[#FAF7F4] p-5 text-center">
             <p class="text-2xl">📚</p>
             <p class="mt-3 text-sm font-semibold text-stone-900">Printed book</p>
-            <p class="mt-1 text-xs text-stone-500">Order a hardcover delivered to your door</p>
+            <p class="mt-1 text-xs text-stone-500">Order a printed copy delivered to your door</p>
           </div>
           <div class="rounded-2xl border border-stone-200 bg-white p-5 text-center">
             <p class="text-2xl">🎬</p>
@@ -140,7 +140,7 @@
       <p class="text-xs font-medium uppercase tracking-[0.22em] text-[#9C7C5C]">Start today</p>
       <h2 class="mt-4 font-display text-2xl font-bold text-white sm:text-3xl">Their story deserves to be seen</h2>
       <p class="mx-auto mt-4 max-w-lg text-sm leading-7 text-[#A8A29E]">
-        Start a life story for free today. Export as a book, a printed hardcover, or a beautiful video — whenever you're ready.
+        Start a life story for free today. Export as a PDF, a printed book, or a beautiful video — whenever you're ready.
       </p>
       <router-link to="/register" class="mt-8 inline-block rounded-full bg-[#C4A882] px-8 py-3 text-sm font-semibold text-[#1C1917] transition hover:opacity-90">
         Start a life story free →

@@ -55,7 +55,7 @@
               <li>✓ Voice recordings preserved</li>
               <li>✓ Every chapter of their life</li>
               <li>✓ Personality, humour, wisdom</li>
-              <li>✓ Beautiful printed hardcover</li>
+              <li>✓ Beautiful printed book</li>
               <li>✓ QR codes linking to their voice</li>
             </ul>
           </div>
@@ -160,17 +160,17 @@ const chapters = [
 ]
 
 const features = [
-  { icon: '📖', title: '100 guided questions',    desc: 'Written for a life story — covering everything from childhood to legacy. No blank page, no pressure.' },
+  { icon: '📖', title: '100+ guided questions',    desc: 'Written for a life story — covering everything from childhood to legacy. No blank page, no pressure.' },
   { icon: '🎙️', title: 'Voice recordings',       desc: 'Capture their voice telling the stories, not just the words. QR codes in the book link to the recordings.' },
   { icon: '📸', title: 'Photos included',         desc: 'Add family photos alongside the answers they relate to — building a true visual family history.' },
-  { icon: '📚', title: 'UK printed hardcover',   desc: 'A professionally printed and bound book delivered to the door. Something to put on the family shelf.' },
+  { icon: '📚', title: 'Printed keepsake book',   desc: 'A professionally printed and bound book delivered to the door. Something to put on the family shelf.' },
   { icon: '🤍', title: 'Multiple storytellers',  desc: 'Create separate books for different family members — Mum\'s Story, Dad\'s Story, Grandma\'s Story.' },
   { icon: '💷', title: 'One-time payment',        desc: 'Pay once, own forever. No subscription, no annual fee. Your family history, permanently yours.' },
 ]
 
 useSeo({
   title: 'Family History Book UK — Capture the Stories Behind Your Family Tree | Tell Me Your Story',
-  description: 'Create a family history book that goes beyond names and dates. Guided questions, voice recordings, and a beautifully printed hardcover — the living memory of your family, preserved forever.',
+  description: 'Create a family history book that goes beyond names and dates. Guided questions, voice recordings, and a beautifully printed book — the living memory of your family, preserved forever.',
   canonical: 'https://tellmeyourstory.uk/family-history-book',
 })
 </script>

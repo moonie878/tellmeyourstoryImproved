@@ -82,7 +82,7 @@
         <!-- Mid CTA -->
         <div class="mt-10 rounded-3xl bg-[#F5F0E8] px-6 py-8 text-center">
           <p class="text-sm font-medium text-[#1C1917]">Create your celebration of life video</p>
-          <p class="mt-2 text-sm text-[#5C534E]">Upload photos, add their favourite music, preview free. Download for £9.99 — no account needed.</p>
+          <p class="mt-2 text-sm text-[#5C534E]">Upload photos, add their favourite music, preview free. Download for £19.99 — no account needed.</p>
           <router-link to="/tribute" class="mt-4 inline-block rounded-full bg-[#1C1917] px-6 py-3 text-sm font-semibold text-white transition hover:opacity-90">
             Start your free video →
           </router-link>
@@ -122,8 +122,8 @@
           <div class="step-item-card">
             <div class="step-num">5</div>
             <div>
-              <p class="tip-title">Preview free — download for £9.99</p>
-              <p class="tip-desc mt-1">Use our free tribute video creator at tellmeyourstory.uk/tribute. Preview the full video for free, then download the HD version for £9.99 when you're happy. No account needed.</p>
+              <p class="tip-title">Preview free — download for £19.99</p>
+              <p class="tip-desc mt-1">Use our free tribute video creator at tellmeyourstory.uk/tribute. Preview the full video for free, then download the HD version for £19.99 when you're happy. No account needed.</p>
             </div>
           </div>
         </div>
@@ -191,7 +191,7 @@
           <p class="text-[11px] font-medium uppercase tracking-[0.22em] text-[#9C7C5C]">Tell Me Your Story</p>
           <h3 class="mt-3 font-display text-2xl font-bold text-white sm:text-3xl">Create a celebration of life video today</h3>
           <p class="mx-auto mt-4 max-w-lg text-sm leading-7 text-[#A8A29E]">
-            Upload their photos, add their music, and create something beautiful — free to preview, £9.99 to download. No account needed, ready in minutes.
+            Upload their photos, add their music, and create something beautiful — free to preview, £19.99 to download. No account needed, ready in minutes.
           </p>
           <div class="mt-4 flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm text-[#9C7C5C]">
             <span>✦ Free to preview</span>
@@ -226,7 +226,7 @@ const comparisonRows = [
 
 useSeo({
   title: 'How to Create a Celebration of Life Video | Tell Me Your Story',
-  description: 'A complete guide to creating a celebration of life video — what to include, how to make it personal and joyful, and how to show it at the service. Free to preview, £9.99 to download.',
+  description: 'A complete guide to creating a celebration of life video — what to include, how to make it personal and joyful, and how to show it at the service. Free to preview, £19.99 to download.',
    canonical: 'https://tellmeyourstory.uk/blog/celebration-of-life-video',
   schema: {
     '@context': 'https://schema.org',

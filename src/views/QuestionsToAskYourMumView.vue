@@ -130,6 +130,13 @@
   >Christmas gifts for parents who have everything</router-link>.
 </p>
     <!-- CTA -->
+    <!-- Free printable: for readers not ready to start yet -->
+    <section class="px-5 py-14 sm:px-8 sm:py-16">
+      <div class="mx-auto max-w-5xl">
+        <EmailCaptureForm source="Questions-mum" />
+      </div>
+    </section>
+
     <section class="bg-[#1C1917] px-5 py-16 text-center sm:px-8 sm:py-20">
       <p class="text-xs font-medium uppercase tracking-[0.22em] text-[#9C7C5C]">Don't wait</p>
       <h2 class="mt-4 font-display text-2xl font-bold text-white sm:text-3xl">Her story is worth keeping</h2>
@@ -142,6 +149,7 @@
 </template>
 
 <script setup lang="ts">
+import EmailCaptureForm from '../components/Marketing/EmailCaptureForm.vue'
 import { useSeo } from '../composables/useSeo'
 
 const categories = [

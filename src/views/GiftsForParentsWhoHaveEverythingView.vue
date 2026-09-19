@@ -110,7 +110,7 @@
         <div class="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
           <div v-for="tier in tiers" :key="tier.name" class="rounded-3xl border p-5 text-center"
             :class="tier.featured ? 'border-[#7C5C3B] bg-[#FAF7F4]' : 'border-stone-200 bg-white'">
-            <p v-if="tier.featured" class="mb-2 text-[10px] font-semibold uppercase tracking-wider text-[#7C5C3B]">Most popular</p>
+            <p v-if="tier.featured" class="mb-2 text-[10px] font-semibold uppercase tracking-wider text-[#7C5C3B]">Recommended</p>
             <p class="text-xs font-medium text-stone-500">{{ tier.name }}</p>
             <p class="mt-2 text-2xl font-bold text-stone-900">£{{ tier.price }}</p>
             <p class="mt-2 text-xs leading-5 text-stone-500">{{ tier.desc }}</p>
@@ -120,7 +120,7 @@
             </router-link>
           </div>
         </div>
-        <p class="mt-4 text-xs text-stone-400">Add a printed hardcover book from £21.99 — delivered to their door</p>
+        <p class="mt-4 text-xs text-stone-400">Add a printed book from £21.99 including UK delivery</p>
       </div>
     </section>
 
@@ -169,7 +169,7 @@
 import { useSeo } from '../composables/useSeo'
 
 const gifts = [
-  { icon: '📖', title: 'A life story book — Tell Me Your Story', tag: 'Most meaningful', highlight: true, negative: false, desc: '100 guided questions, voice recordings, and a beautifully printed hardcover book. Their stories, their voice, preserved forever. A gift that lasts for generations.' },
+  { icon: '📖', title: 'A life story book — Tell Me Your Story', tag: 'Most meaningful', highlight: true, negative: false, desc: '100+ guided questions, voice recordings, and a beautifully printed book. Their stories, their voice, preserved forever. A gift that lasts for generations.' },
   { icon: '🌸', title: 'Flowers', tag: 'Gone in a week', highlight: false, negative: true, desc: 'A kind gesture, but short-lived. Better as an accompanying gift than a main one for parents who have everything.' },
   { icon: '🎁', title: 'Gift vouchers', tag: 'Often unused', highlight: false, negative: true, desc: 'Practical but impersonal. Many gift vouchers go unused. Not the answer when you want to give something truly memorable.' },
   { icon: '📸', title: 'Family photo book', tag: 'Sentimental', highlight: false, negative: false, desc: 'A lovely gift that captures moments — but not the stories behind them. Pair with Tell Me Your Story for something truly complete.' },
@@ -178,9 +178,9 @@ const gifts = [
 ]
 
 const features = [
-  { icon: '📖', title: '100 guided questions', desc: 'Covering every chapter of their life. No blank page, no pressure — just their stories, drawn out gently.' },
+  { icon: '📖', title: '100+ guided questions', desc: 'Covering every chapter of their life. No blank page, no pressure — just their stories, drawn out gently.' },
   { icon: '🎙️', title: 'Voice recordings', desc: 'Answer by speaking. A QR code in the printed book lets family hear their voice any time — forever.' },
-  { icon: '📚', title: 'UK printed hardcover', desc: 'Professionally printed and bound in the UK. Delivered to their door. From £21.99 including shipping.' },
+  { icon: '📚', title: 'Printed keepsake book', desc: 'Professionally printed and bound. Delivered to their door. From £21.99 including UK delivery.' },
   { icon: '💷', title: 'One-time payment', desc: 'Pay once, own forever. No subscription, no annual renewal, no being locked out.' },
   { icon: '⏱️', title: 'No pressure', desc: 'Answer one question at a time, at their own pace. No deadline, no weekly emails.' },
   { icon: '🤍', title: 'For the whole family', desc: 'Share with siblings, grandchildren, and extended family. A gift that brings everyone together.' },
@@ -204,7 +204,7 @@ const tiers = [
 
 useSeo({
   title: 'Gifts for Parents Who Have Everything UK 2026 — Tell Me Your Story',
-  description: 'The best gift for parents who have everything — capture their life story in a beautiful keepsake book. Guided questions, voice recordings, UK printed hardcover. From £3.99.',
+  description: 'The best gift for parents who have everything — capture their life story in a beautiful keepsake book. Guided questions, voice recordings, printed keepsake book. From £3.99.',
   canonical: 'https://tellmeyourstory.uk/gifts-for-parents-who-have-everything',
 })
 </script>

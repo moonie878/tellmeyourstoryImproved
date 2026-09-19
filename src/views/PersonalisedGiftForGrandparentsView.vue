@@ -72,11 +72,11 @@
         <div class="mt-8 text-sm leading-7 text-stone-600 max-w-xl mx-auto space-y-4">
           <p>The most personal gift you can give a grandparent isn't something you buy — it's something you create together. A life story book captures their memories, their voice, and the stories they've been carrying their whole lives — and turns them into something the whole family can hold and hear.</p>
           <p>Tell Me Your Story guides them through 100 questions covering every chapter of their life — childhood, school, work, love, family, hard times, and legacy. They answer by typing or speaking. Their voice is recorded and preserved with QR codes in the printed book, so family can hear them tell the stories in their own words, even years from now.</p>
-          <p>It's the most meaningful gift many families ever make. And it's free to start — no card needed, no subscription. The printed hardcover book is from £34.98 including UK delivery.</p>
+          <p>It's the most meaningful gift many families ever make. And it's free to start — no card needed, no subscription. The printed book is from £21.99 including UK delivery.</p>
         </div>
         <div class="mt-8 rounded-2xl bg-[#1C1917] p-8 text-center">
           <p class="font-display text-lg font-bold text-white">Create a life story book for your grandparent</p>
-          <p class="mt-2 text-sm text-stone-400">Free to start. 100 guided questions. Printed book from £34.98.</p>
+          <p class="mt-2 text-sm text-stone-400">Free to start. 100+ guided questions. Printed book from £21.99.</p>
           <router-link to="/register" class="mt-6 inline-block rounded-full bg-[#C4A882] px-7 py-3 text-sm font-semibold text-[#1C1917] transition hover:opacity-90">Start free →</router-link>
         </div>
       </div>
@@ -140,7 +140,7 @@
       <h2 class="font-display text-2xl font-bold text-white sm:text-3xl">Give them something that lasts</h2>
       <p class="mx-auto mt-4 max-w-lg text-sm leading-7 text-[#A8A29E]">Start a life story book for your grandparent today — free to start, no card needed.</p>
       <router-link to="/register" class="mt-8 inline-block rounded-full bg-[#C4A882] px-8 py-3 text-sm font-semibold text-[#1C1917] transition hover:opacity-90">Start free →</router-link>
-      <p class="mt-4 text-xs text-[#9C7C5C]">Free to start · One-time payment · Printed book from £34.98</p>
+      <p class="mt-4 text-xs text-[#9C7C5C]">Free to start · One-time payment · Printed book from £21.99</p>
     </section>
 
   </main>
@@ -153,7 +153,7 @@ const categories = [
   {
     icon: '📖', title: 'Memory and story gifts',
     gifts: [
-      { title: 'A life story book', desc: 'The most personal gift you can give — a beautifully printed book capturing their memories, voice, and stories in their own words. Tell Me Your Story guides them through 100 questions and produces a printed hardcover with voice QR codes. Free to start.', price: 'Free to start · Printed book from £34.98' },
+      { title: 'A life story book', desc: 'The most personal gift you can give — a beautifully printed book capturing their memories, voice, and stories in their own words. Tell Me Your Story guides them through 100 questions and produces a printed book with voice QR codes. Free to start.', price: 'Free to start · Printed book from £21.99' },
       { title: 'A personalised photo book', desc: 'A printed photo book with captions telling the story behind each image. Services like Photobox, Snapfish, and Cheerz let you design one online. The key is the captions — a photo without context is just a photo.', price: '£15–£40' },
       { title: 'A family recipe book', desc: 'Collect family recipes — from the grandparent and from other family members — and compile them into a printed book. Add photos and the stories behind each recipe. A lasting record of the family\'s food culture.', price: '£20–£60 to produce' },
       { title: 'A commissioned family portrait', desc: 'A hand-drawn or painted family portrait based on a favourite photograph. Several UK illustrators offer this service. Choose a style that suits the recipient — from realistic watercolour to charming illustration.', price: '£50–£200' },
@@ -200,7 +200,7 @@ const occasions = [
 const faqs = [
   { q: 'What is the best personalised gift for a grandparent?', a: 'The best personalised gifts for grandparents capture something specific about them — their history, their relationship with the family, or the memories they want to preserve. A life story book, a family portrait, a recipe book, or a personalised photo book all do this well. The key is specificity — something that could only be given to them.' },
   { q: 'What can you get a grandparent who has everything?', a: 'For grandparents who have everything they need materially, the most meaningful gifts are experiences, memories, or something that captures their story. A life story book, an afternoon tea at somewhere special, a day built entirely around them, or a charitable donation in their name.' },
-  { q: 'What is a good gift for a grandparent\'s 80th birthday?', a: 'An 80th birthday deserves something significant. A life story book — capturing 80 years of memories in a beautifully printed hardcover — is the most meaningful option. A family photoshoot, a commissioned portrait, or a personalised map of somewhere significant in their life also work well for milestone birthdays.' },
+  { q: 'What is a good gift for a grandparent\'s 80th birthday?', a: 'An 80th birthday deserves something significant. A life story book — capturing 80 years of memories in a beautifully printed book — is the most meaningful option. A family photoshoot, a commissioned portrait, or a personalised map of somewhere significant in their life also work well for milestone birthdays.' },
   { q: 'What personalised gifts do grandparents actually like?', a: 'Grandparents tend to appreciate gifts that involve the family — photos, family history, experiences shared together — over novelty items. The gifts that get used and treasured are ones that feel personal, not generic. A photo book with captions, a recipe collection, or a life story book all score highly.' },
 ]
 
@@ -216,7 +216,7 @@ useSeo({
         mainEntity: [
           { '@type': 'Question', name: 'What is the best personalised gift for a grandparent?', acceptedAnswer: { '@type': 'Answer', text: 'The best personalised gifts capture something specific about them. A life story book, a family portrait, a recipe book, or a personalised photo book all work well. The key is specificity — something that could only be given to them.' } },
           { '@type': 'Question', name: 'What can you get a grandparent who has everything?', acceptedAnswer: { '@type': 'Answer', text: 'For grandparents who have everything materially, the most meaningful gifts are experiences, memories, or something that captures their story. A life story book, an afternoon tea, or a charitable donation in their name.' } },
-          { '@type': 'Question', name: 'What is a good gift for a grandparent\'s 80th birthday?', acceptedAnswer: { '@type': 'Answer', text: 'A life story book capturing 80 years of memories in a beautifully printed hardcover is the most meaningful option. A family photoshoot, commissioned portrait, or personalised map also work well for milestone birthdays.' } },
+          { '@type': 'Question', name: 'What is a good gift for a grandparent\'s 80th birthday?', acceptedAnswer: { '@type': 'Answer', text: 'A life story book capturing 80 years of memories in a beautifully printed book is the most meaningful option. A family photoshoot, commissioned portrait, or personalised map also work well for milestone birthdays.' } },
         ]
       }
     ]

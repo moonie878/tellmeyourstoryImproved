@@ -97,7 +97,7 @@
             class="rounded-3xl border p-5 text-center"
             :class="tier.featured ? 'border-[#7C5C3B] bg-[#FAF7F4]' : 'border-stone-200 bg-white'"
           >
-            <p v-if="tier.featured" class="mb-2 text-[10px] font-semibold uppercase tracking-wider text-[#7C5C3B]">Most popular</p>
+            <p v-if="tier.featured" class="mb-2 text-[10px] font-semibold uppercase tracking-wider text-[#7C5C3B]">Recommended</p>
             <p class="text-xs font-medium text-stone-500">{{ tier.name }}</p>
             <p class="mt-2 text-2xl font-bold text-stone-900">£{{ tier.price }}</p>
             <p class="mt-2 text-xs leading-5 text-stone-500">{{ tier.desc }}</p>
@@ -107,7 +107,7 @@
             </router-link>
           </div>
         </div>
-        <p class="mt-4 text-xs text-stone-400">Add a printed hardcover book from £21.99 — delivered to their door</p>
+        <p class="mt-4 text-xs text-stone-400">Add a printed book from £21.99 including UK delivery</p>
       </div>
     </section>
 
@@ -161,9 +161,9 @@ const memories = [
 ]
 
 const features = [
-  { icon: '📖', title: '100 guided questions', desc: 'Written for their life — childhood, work, family, love, and legacy. No blank page, no pressure.' },
+  { icon: '📖', title: '100+ guided questions', desc: 'Written for their life — childhood, work, family, love, and legacy. No blank page, no pressure.' },
   { icon: '🎙️', title: 'Voice recordings', desc: 'Answer by speaking. A QR code in the printed book lets family hear their voice any time — forever.' },
-  { icon: '📚', title: 'UK printed hardcover', desc: 'Professionally printed and bound in the UK. Delivered to their door. From £21.99.' },
+  { icon: '📚', title: 'Printed keepsake book', desc: 'Professionally printed and bound. Delivered to their door. From £21.99.' },
   { icon: '⏱️', title: 'No time pressure', desc: 'Answer one question a day or ten at once. No subscription running down.' },
   { icon: '✨', title: 'Simple to use', desc: 'Works on phone, tablet, or computer. Simple enough for anyone.' },
   { icon: '🤍', title: 'The whole family', desc: 'Share a link so children, grandchildren, and great-grandchildren can all read along.' },
@@ -178,7 +178,7 @@ const tiers = [
 
 useSeo({
   title: '80th Birthday Gift Ideas 2026 — Tell Me Your Story | Life Story Keepsake Book',
-  description: 'The most meaningful 80th birthday gift for someone who has everything — capture 80 years of stories in a beautiful keepsake book. UK printed, voice recordings included. From £3.99.',
+  description: 'The most meaningful 80th birthday gift for someone who has everything — capture 80 years of stories in a beautiful keepsake book. printed book, voice recordings included. From £3.99.',
   canonical: 'https://tellmeyourstory.uk/80th-birthday-gift-ideas',
 })
 </script>

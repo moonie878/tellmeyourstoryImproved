@@ -47,7 +47,7 @@
         <div class="mt-12 grid gap-6 sm:grid-cols-2 md:grid-cols-3">
           <div class="rounded-2xl border border-stone-200 p-6">
             <p class="text-2xl">📖</p>
-            <p class="mt-3 text-sm font-semibold text-stone-900">100 guided questions</p>
+            <p class="mt-3 text-sm font-semibold text-stone-900">100+ guided questions</p>
             <p class="mt-2 text-xs leading-5 text-stone-500">From their earliest memories to the lessons they want to pass on. Written for every chapter of life.</p>
           </div>
           <div class="rounded-2xl border border-stone-200 p-6">
@@ -58,7 +58,7 @@
           <div class="rounded-2xl border border-stone-200 p-6">
             <p class="text-2xl">📚</p>
             <p class="mt-3 text-sm font-semibold text-stone-900">A beautiful printed book</p>
-            <p class="mt-2 text-xs leading-5 text-stone-500">Download a professionally designed PDF or order a printed hardcover delivered to the door.</p>
+            <p class="mt-2 text-xs leading-5 text-stone-500">Download a professionally designed PDF or order a printed book delivered to the door.</p>
           </div>
           <div class="rounded-2xl border border-stone-200 p-6">
             <p class="text-2xl">✨</p>
@@ -126,7 +126,7 @@
             class="rounded-3xl border p-5 text-center"
             :class="tier.featured ? 'border-[#7C5C3B] bg-[#FAF7F4]' : 'border-stone-200 bg-white'"
           >
-            <p v-if="tier.featured" class="mb-2 text-[10px] font-semibold uppercase tracking-wider text-[#7C5C3B]">Most popular</p>
+            <p v-if="tier.featured" class="mb-2 text-[10px] font-semibold uppercase tracking-wider text-[#7C5C3B]">Recommended</p>
             <p class="text-xs font-medium text-stone-500">{{ tier.name }}</p>
             <div class="mt-2 flex items-center justify-center gap-2">
               <span class="text-2xl font-bold text-stone-900">£{{ tier.price }}</span>
@@ -152,13 +152,13 @@
         <p class="text-xs font-medium uppercase tracking-[0.22em] text-[#9C7C5C]">Something to unwrap</p>
         <h2 class="mt-3 font-display text-2xl font-bold text-stone-900 sm:text-3xl">Order a printed book to put under the tree</h2>
         <p class="mx-auto mt-4 max-w-xl text-sm leading-7 text-stone-500">
-          Once the story is written, order a professionally printed and bound hardcover book delivered straight to your door. Something real to hold, keep, and pass down.
+          Once the story is written, order a professionally printed and bound book delivered straight to your door. Something real to hold, keep, and pass down.
         </p>
         <div class="mt-6 inline-flex items-center gap-3 rounded-2xl border border-stone-200 bg-white px-6 py-4 shadow-sm">
           <p class="text-2xl">📦</p>
           <div class="text-left">
-            <p class="text-sm font-semibold text-stone-900">Printed hardcover book</p>
-            <p class="mt-0.5 text-xs text-stone-500">From £29.98 · UK shipping included · Printed and shipped from the UK</p>
+            <p class="text-sm font-semibold text-stone-900">Printed book</p>
+            <p class="mt-0.5 text-xs text-stone-500">From £21.99 · UK delivery included</p>
           </div>
         </div>
       </div>
@@ -223,7 +223,7 @@ const giftFor = [
 
 useSeo({
   title: 'Christmas Gift Ideas 2026 — Give the Gift of Their Story | Tell Me Your Story',
-  description: 'The most meaningful Christmas gift — help a loved one capture their life story in their own words. Voice recordings, keepsake book, printed hardcover. Tell Me Your Story.',
+  description: 'The most meaningful Christmas gift — help a loved one capture their life story in their own words. Voice recordings and a printed keepsake book. Tell Me Your Story.',
   canonical: 'https://tellmeyourstory.uk/christmas',
 })
 </script>

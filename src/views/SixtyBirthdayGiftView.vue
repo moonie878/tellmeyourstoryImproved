@@ -91,14 +91,14 @@
         <p class="mt-3 text-sm text-stone-500">One-time payment. Gift link sent instantly. No subscription.</p>
         <div class="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
           <div v-for="tier in tiers" :key="tier.name" class="rounded-3xl border p-5 text-center" :class="tier.featured ? 'border-[#7C5C3B] bg-[#FAF7F4]' : 'border-stone-200 bg-white'">
-            <p v-if="tier.featured" class="mb-2 text-[10px] font-semibold uppercase tracking-wider text-[#7C5C3B]">Most popular</p>
+            <p v-if="tier.featured" class="mb-2 text-[10px] font-semibold uppercase tracking-wider text-[#7C5C3B]">Recommended</p>
             <p class="text-xs font-medium text-stone-500">{{ tier.name }}</p>
             <p class="mt-2 text-2xl font-bold text-stone-900">£{{ tier.price }}</p>
             <p class="mt-2 text-xs leading-5 text-stone-500">{{ tier.desc }}</p>
             <router-link to="/gift" class="mt-4 block rounded-full py-2 text-xs font-medium transition" :class="tier.featured ? 'bg-[#7C5C3B] text-white hover:opacity-90' : 'border border-stone-300 text-stone-700 hover:bg-stone-50'">Gift this →</router-link>
           </div>
         </div>
-        <p class="mt-4 text-xs text-stone-400">Add a printed hardcover from £21.99 — delivered to their door</p>
+        <p class="mt-4 text-xs text-stone-400">Add a printed book from £21.99 including UK delivery</p>
       </div>
     </section>
 
@@ -139,7 +139,7 @@
 import { useSeo } from '../composables/useSeo'
 
 const gifts = [
-  { icon: '📖', title: 'A life story book — Tell Me Your Story', tag: 'Most meaningful', highlight: true, desc: '100 guided questions, voice recordings, and a beautifully printed hardcover book. Their stories preserved forever.' },
+  { icon: '📖', title: 'A life story book — Tell Me Your Story', tag: 'Most meaningful', highlight: true, desc: '100+ guided questions, voice recordings, and a beautifully printed book. Their stories preserved forever.' },
   { icon: '✈️', title: 'Experience or trip', tag: 'Memorable', highlight: false, desc: 'A great treat for the adventurous 60-year-old — but the memory fades. Pair with a life story book for something lasting.' },
   { icon: '🍽️', title: 'Celebration dinner', tag: 'Enjoyable', highlight: false, desc: 'Everyone loves a good meal. A celebration the whole family enjoys — especially combined with a keepsake gift.' },
   { icon: '📸', title: 'Photo book', tag: 'Sentimental', highlight: false, desc: 'Captures the moments but not the stories behind them. A life story book gives those photos context and meaning.' },
@@ -147,9 +147,9 @@ const gifts = [
 ]
 
 const features = [
-  { icon: '📖', title: '100 guided questions', desc: 'Covering every chapter of sixty years — childhood, work, family, love, and legacy.' },
+  { icon: '📖', title: '100+ guided questions', desc: 'Covering every chapter of sixty years — childhood, work, family, love, and legacy.' },
   { icon: '🎙️', title: 'Voice recordings', desc: 'Their voice preserved via QR codes in the printed book — hear them tell the story forever.' },
-  { icon: '📚', title: 'UK printed hardcover', desc: 'Professionally printed and bound. Delivered to their door. From £21.99.' },
+  { icon: '📚', title: 'Printed keepsake book', desc: 'Professionally printed and bound. Delivered to their door. From £21.99.' },
   { icon: '⏱️', title: 'At their own pace', desc: 'No pressure, no deadline. Answer one question at a time.' },
   { icon: '✨', title: 'Simple to use', desc: 'Works on any phone, tablet, or computer.' },
   { icon: '🤍', title: 'For the whole family', desc: 'Share with children and grandchildren as the story grows.' },
@@ -164,7 +164,7 @@ const tiers = [
 
 useSeo({
   title: '60th Birthday Gift Ideas 2026 — Tell Me Your Story | Life Story Keepsake Book',
-  description: 'The most meaningful 60th birthday gift — capture sixty years of stories in a beautiful keepsake book. Guided questions, voice recordings, UK printed hardcover. From £3.99.',
+  description: 'The most meaningful 60th birthday gift — capture sixty years of stories in a beautiful keepsake book. Guided questions, voice recordings, printed keepsake book. From £3.99.',
   canonical: 'https://tellmeyourstory.uk/60th-birthday-gift-ideas',
 })
 </script>

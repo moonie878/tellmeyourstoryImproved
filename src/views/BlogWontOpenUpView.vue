@@ -2,6 +2,13 @@
   <main class="bg-white">
 
     <!-- Hero -->
+    <!-- Free printable: for readers not ready to start yet -->
+    <section class="px-5 py-14 sm:px-8 sm:py-16">
+      <div class="mx-auto max-w-5xl">
+        <EmailCaptureForm source="Blog-wont-open-up" />
+      </div>
+    </section>
+
     <section class="bg-[#F5F0E8] px-5 py-16 sm:px-8 sm:py-20">
       <div class="mx-auto max-w-3xl text-center">
         <p class="eyebrow">Tell Me Your Story · Guide</p>
@@ -341,6 +348,7 @@
 </template>
 
 <script setup lang="ts">
+import EmailCaptureForm from '../components/Marketing/EmailCaptureForm.vue'
 import { useSeo } from '../composables/useSeo'
 
 useSeo({

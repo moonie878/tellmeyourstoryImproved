@@ -171,7 +171,7 @@
       <router-link to="/register" class="mt-8 inline-block rounded-full bg-[#C4A882] px-8 py-3 text-sm font-semibold text-[#1C1917] transition hover:opacity-90">
         Try 5 questions free →
       </router-link>
-      <p class="mt-4 text-xs text-[#9C7C5C]">One-time from £3.99 · Printed book from {{ printFrom }} plus UK shipping</p>
+      <p class="mt-4 text-xs text-[#9C7C5C]">One-time from £3.99 · Printed book from {{ printFrom }} including UK delivery</p>
     </section>
 
   </main>
@@ -206,7 +206,7 @@ const apps: App[] = [
     name: 'Tell Me Your Story',
     short: 'Tell Me Your Story',
     bestFor: 'Best free way to start',
-    price: '5 questions free · one-time from £3.99 · print from ' + printFrom + ' + shipping',
+    price: '5 questions free · one-time from £3.99 · print from ' + printFrom + ' including UK delivery',
     ours: true,
     summary:
       'Built in Southampton. The storyteller answers guided questions by typing or tapping the microphone, at their own pace. Every voice-recorded story gets its own QR code beside it in the printed book. You can try 5 questions free, pay once when you are ready, and only pay for printing if you want a book.',
@@ -218,11 +218,11 @@ const apps: App[] = [
       'Tribute video option',
     ],
     cons: [
-      'Printing is extra — a hardcover is not included in the price',
+      'Printing is extra, and softcover only for now',
       'No phone-call or video recording',
       'A younger, smaller company than the others',
     ],
-    table: { based: 'UK', pay: 'One-time', start: 'Free, then £3.99+', answer: 'Type or voice', voice: 'QR per recorded story', book: `Extra, from ${printFrom}`, delivery: 'UK shipping extra' },
+    table: { based: 'UK', pay: 'One-time', start: 'Free, then £3.99+', answer: 'Type or voice', voice: 'QR per recorded story', book: `Extra, from ${printFrom}`, delivery: 'UK delivery included' },
   },
   {
     id: 'storykeeper',
@@ -338,7 +338,7 @@ const chooseQuestions = [
   },
   {
     q: 'Do you want a hardcover included in the price?',
-    a: `StoryKeeper, Storyworth and Remento include a hardcover. Tell Me Your Story keeps the app cheap and charges for printing separately (softcover from ${printFrom} plus UK shipping), so it costs less if you only want a digital keepsake or one softcover.`,
+    a: `StoryKeeper, Storyworth and Remento include a hardcover. Tell Me Your Story keeps the app cheap and charges for printing separately (softcover from ${printFrom} including UK delivery), so it costs less if you only want a digital keepsake or one softcover.`,
   },
 ]
 

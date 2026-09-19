@@ -80,8 +80,8 @@
           <div class="step-item-card">
             <div class="step-num">4</div>
             <div>
-              <p class="tip-title">Preview free — download for £9.99</p>
-              <p class="tip-desc mt-1">Preview your finished slideshow with a watermark at no cost. When you're happy, download the full HD version without watermark for £9.99. No account needed.</p>
+              <p class="tip-title">Preview free — download for £19.99</p>
+              <p class="tip-desc mt-1">Preview your finished slideshow with a watermark at no cost. When you're happy, download the full HD version without watermark for £19.99. No account needed.</p>
             </div>
           </div>
         </div>
@@ -132,7 +132,7 @@
           Tell Me Your Story is built specifically for memorial slideshows. Every design decision has already been made for you — elegant, warm, respectful. All you need to bring are the photos and the music. Everything else is handled.
         </p>
         <p class="article-p mt-4">
-          It's also the only tool that includes a dedicated tribute message slide — a place to write a few words about the person that becomes part of the video itself, not just a caption.
+          It also includes a dedicated tribute message slide — a place to write a few words about the person that becomes part of the video itself, not just a caption.
         </p>
 
         <h2 class="article-h2 mt-12">How much does a memorial slideshow cost?</h2>
@@ -140,7 +140,7 @@
           Previewing your memorial slideshow is completely free — no account, no credit card, no time limit. You can upload all your photos, choose your music, and watch the full preview as many times as you like.
         </p>
         <p class="article-p mt-4">
-          Downloading the full HD version without a watermark costs £9.99 — a one-time payment. No subscription, no renewal. The MP4 file is yours to keep, share, and play as many times as you like, forever.
+          Downloading the full HD version without a watermark costs £19.99 — a one-time payment. No subscription, no renewal. The MP4 file is yours to keep, share, and play as many times as you like, forever.
         </p>
         <p class="article-p mt-4">
           Professional tribute video services in the UK typically charge £150-500. Canva requires a subscription for video downloads. Tell Me Your Story is the most affordable way to create a professional-quality memorial slideshow in the UK.
@@ -170,7 +170,7 @@
           <p class="text-[11px] font-medium uppercase tracking-[0.22em] text-[#9C7C5C]">Tell Me Your Story</p>
           <h3 class="mt-3 font-display text-2xl font-bold text-white sm:text-3xl">Create a free memorial slideshow today</h3>
           <p class="mx-auto mt-4 max-w-lg text-sm leading-7 text-[#A8A29E]">
-            Upload photos, add music, and create a beautiful memorial slideshow in minutes. Free to preview — £9.99 to download. No account needed.
+            Upload photos, add music, and create a beautiful memorial slideshow in minutes. Free to preview — £19.99 to download. No account needed.
           </p>
           <div class="mt-4 flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm text-[#9C7C5C]">
             <span>✦ Free to preview</span>
@@ -196,7 +196,7 @@ import { useSeo } from '../composables/useSeo'
 
 useSeo({
   title: 'Free Memorial Slideshow Maker UK | Tell Me Your Story',
-  description: 'Create a beautiful memorial slideshow for a funeral or celebration of life. Free to preview, £9.99 to download. No account needed — upload photos, add music, ready in minutes.',
+  description: 'Create a beautiful memorial slideshow for a funeral or celebration of life. Free to preview, £19.99 to download. No account needed — upload photos, add music, ready in minutes.',
   canonical: 'https://tellmeyourstory.uk/blog/free-memorial-slideshow-maker',
   schema: {
     '@context': 'https://schema.org',
@@ -204,7 +204,7 @@ useSeo({
       {
         '@type': 'Article',
         headline: 'Free Memorial Slideshow Maker UK',
-        description: 'Create a beautiful memorial slideshow for a funeral or celebration of life. Free to preview, £9.99 to download.',
+        description: 'Create a beautiful memorial slideshow for a funeral or celebration of life. Free to preview, £19.99 to download.',
         author: { '@type': 'Person', name: 'Mark', url: 'https://tellmeyourstory.uk' },
         publisher: {
           '@type': 'Organization',
@@ -225,7 +225,7 @@ useSeo({
             name: 'Is there a free memorial slideshow maker in the UK?',
             acceptedAnswer: {
               '@type': 'Answer',
-              text: 'Yes — Tell Me Your Story offers a free memorial slideshow maker at tellmeyourstory.uk/tribute. You can upload up to 30 photos, add a tribute message, choose music, and preview the full slideshow for free. Downloading the HD version without a watermark costs £9.99 — no account needed.',
+              text: 'Yes — Tell Me Your Story offers a free memorial slideshow maker at tellmeyourstory.uk/tribute. You can upload up to 30 photos, add a tribute message, choose music, and preview the full slideshow for free. Downloading the HD version without a watermark costs £19.99 — no account needed.',
             },
           },
           {
@@ -233,7 +233,7 @@ useSeo({
             name: 'How much does a memorial slideshow cost in the UK?',
             acceptedAnswer: {
               '@type': 'Answer',
-              text: 'Professional memorial slideshow services in the UK typically charge £150-500. Tell Me Your Story offers a free preview with a £9.99 one-time download fee for the full HD version. No subscription, no renewal.',
+              text: 'Professional memorial slideshow services in the UK typically charge £150-500. Tell Me Your Story offers a free preview with a £19.99 one-time download fee for the full HD version. No subscription, no renewal.',
             },
           },
           {

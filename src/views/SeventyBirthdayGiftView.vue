@@ -116,7 +116,7 @@
             class="rounded-3xl border p-5 text-center"
             :class="tier.featured ? 'border-[#7C5C3B] bg-[#FAF7F4]' : 'border-stone-200 bg-white'"
           >
-            <p v-if="tier.featured" class="mb-2 text-[10px] font-semibold uppercase tracking-wider text-[#7C5C3B]">Most popular</p>
+            <p v-if="tier.featured" class="mb-2 text-[10px] font-semibold uppercase tracking-wider text-[#7C5C3B]">Recommended</p>
             <p class="text-xs font-medium text-stone-500">{{ tier.name }}</p>
             <p class="mt-2 text-2xl font-bold text-stone-900">£{{ tier.price }}</p>
             <p class="mt-2 text-xs leading-5 text-stone-500">{{ tier.desc }}</p>
@@ -126,7 +126,7 @@
             </router-link>
           </div>
         </div>
-        <p class="mt-4 text-xs text-stone-400">Add a printed hardcover book from £21.99 — delivered to their door</p>
+        <p class="mt-4 text-xs text-stone-400">Add a printed book from £21.99 including UK delivery</p>
       </div>
     </section>
 
@@ -190,9 +190,9 @@ const gifts = [
 ]
 
 const features = [
-  { icon: '📖', title: '100 guided questions', desc: 'Written for their life — childhood, work, family, love, and legacy. No blank page, no pressure.' },
+  { icon: '📖', title: '100+ guided questions', desc: 'Written for their life — childhood, work, family, love, and legacy. No blank page, no pressure.' },
   { icon: '🎙️', title: 'Voice recordings', desc: 'Answer by speaking. A QR code in the printed book lets family hear their voice any time — forever.' },
-  { icon: '📚', title: 'UK printed hardcover', desc: 'Professionally printed and bound in the UK. Delivered to their door. Softcover from £21.99.' },
+  { icon: '📚', title: 'Printed keepsake book', desc: 'Professionally printed and bound. Delivered to their door. Softcover from £21.99.' },
   { icon: '⏱️', title: 'Answer at their pace', desc: 'One question a day or ten at once. Everything saves automatically.' },
   { icon: '✨', title: 'Easy to use', desc: 'Simple enough for anyone. Works on phone, tablet, or computer.' },
   { icon: '🤍', title: 'Share with family', desc: 'The whole family can read along as the story grows.' },
@@ -202,7 +202,7 @@ const steps = [
   { number: '1', title: 'Choose a gift', desc: 'Pick from Story, Story + Photos, All Stories, or Premium. One-time payment, no subscription.' },
   { number: '2', title: 'Get your gift link instantly', desc: 'A unique gift link is emailed to you immediately. Share it on their birthday — or before.' },
   { number: '3', title: 'They start their story', desc: 'They open the link, create a free account, and start answering questions whenever they feel like it.' },
-  { number: '4', title: 'Order the printed book', desc: 'When they\'re ready, order a professionally printed hardcover delivered to the door.' },
+  { number: '4', title: 'Order the printed book', desc: 'When they\'re ready, order a professionally printed book delivered to the door.' },
 ]
 
 const tiers = [
@@ -214,7 +214,7 @@ const tiers = [
 
 useSeo({
   title: '70th Birthday Gift Ideas 2026 — Tell Me Your Story | Life Story Keepsake Book',
-  description: 'The most meaningful 70th birthday gift — capture 70 years of stories in a beautiful keepsake book. Guided questions, voice recordings, UK printed hardcover. From £3.99.',
+  description: 'The most meaningful 70th birthday gift — capture 70 years of stories in a beautiful keepsake book. Guided questions, voice recordings, printed keepsake book. From £3.99.',
   canonical: 'https://tellmeyourstory.uk/70th-birthday-gift-ideas',
 })
 </script>

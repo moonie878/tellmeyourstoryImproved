@@ -135,6 +135,13 @@
     </section>
 
     <!-- Related -->
+    <!-- Free printable: for readers not ready to start yet -->
+    <section class="px-5 py-14 sm:px-8 sm:py-16">
+      <div class="mx-auto max-w-5xl">
+        <EmailCaptureForm source="End-of-life-questions" />
+      </div>
+    </section>
+
     <section class="px-5 py-12 sm:px-8">
       <div class="mx-auto max-w-3xl">
         <p class="text-xs font-medium uppercase tracking-[0.22em] text-[#9C7C5C] mb-6">Related reading</p>
@@ -159,6 +166,7 @@
 </template>
 
 <script setup lang="ts">
+import EmailCaptureForm from '../components/Marketing/EmailCaptureForm.vue'
 import { useSeo } from '../composables/useSeo'
 import { PRINTED_BOOK_FROM_PRICE } from '../lib/printPricing'
 
@@ -225,7 +233,7 @@ const howToTips = [
 
 const features = [
   { icon: '🎙️', title: 'Type or record voice', desc: 'Capture their answers however feels natural — written or spoken, question by question.' },
-  { icon: '📚', title: 'UK printed keepsake', desc: 'Turn their wishes and words into a beautifully printed book the whole family can keep.' },
+  { icon: '📚', title: 'Printed keepsake book', desc: 'Turn their wishes and words into a beautifully printed book the whole family can keep.' },
   { icon: '👨‍👩‍👧', title: 'Family can contribute too', desc: 'Invite other family members to add their own questions or memories to the same project.' },
 ]
 

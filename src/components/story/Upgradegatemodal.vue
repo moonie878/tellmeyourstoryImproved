@@ -101,7 +101,7 @@
                 <span
                   v-if="tier.popular"
                   class="absolute -top-2 right-3 rounded-full bg-[#7C5C3B] px-2 py-0.5 text-[9px] font-medium text-white"
-                >Most popular</span>
+                >Recommended</span>
                 <p class="text-sm font-semibold text-stone-900">{{ tier.price }}</p>
                 <p class="mt-0.5 text-xs font-medium text-stone-700">{{ tier.name }}</p>
                 <p class="mt-1 text-[10px] leading-snug text-stone-400">{{ tier.desc }}</p>

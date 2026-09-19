@@ -95,14 +95,14 @@
         <p class="mt-3 text-sm text-stone-500">One-time payment. Gift link sent instantly. No subscription.</p>
         <div class="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
           <div v-for="tier in tiers" :key="tier.name" class="rounded-3xl border p-5 text-center" :class="tier.featured ? 'border-[#7C5C3B] bg-[#FAF7F4]' : 'border-stone-200 bg-white'">
-            <p v-if="tier.featured" class="mb-2 text-[10px] font-semibold uppercase tracking-wider text-[#7C5C3B]">Most popular</p>
+            <p v-if="tier.featured" class="mb-2 text-[10px] font-semibold uppercase tracking-wider text-[#7C5C3B]">Recommended</p>
             <p class="text-xs font-medium text-stone-500">{{ tier.name }}</p>
             <p class="mt-2 text-2xl font-bold text-stone-900">£{{ tier.price }}</p>
             <p class="mt-2 text-xs leading-5 text-stone-500">{{ tier.desc }}</p>
             <router-link to="/gift" class="mt-4 block rounded-full py-2 text-xs font-medium transition" :class="tier.featured ? 'bg-[#7C5C3B] text-white hover:opacity-90' : 'border border-stone-300 text-stone-700 hover:bg-stone-50'">Gift this →</router-link>
           </div>
         </div>
-        <p class="mt-4 text-xs text-stone-400">Add a printed hardcover from £21.99 — delivered to their door</p>
+        <p class="mt-4 text-xs text-stone-400">Add a printed book from £21.99 including UK delivery</p>
       </div>
     </section>
 
@@ -159,9 +159,9 @@ const chapters = [
 ]
 
 const features = [
-  { icon: '📖', title: '100 guided questions', desc: 'Questions written for a life story — covering their whole journey together and individually.' },
+  { icon: '📖', title: '100+ guided questions', desc: 'Questions written for a life story — covering their whole journey together and individually.' },
   { icon: '🎙️', title: 'Voice recordings',    desc: 'Their voices preserved in the printed book via QR codes — forever.' },
-  { icon: '📚', title: 'UK printed hardcover', desc: 'Professionally printed and bound. Delivered to their door. From £21.99.' },
+  { icon: '📚', title: 'Printed keepsake book', desc: 'Professionally printed and bound. Delivered to their door. From £21.99.' },
   { icon: '📸', title: 'Photos included',      desc: 'Add photos alongside the answers they relate to.' },
   { icon: '💷', title: 'One-time payment',     desc: 'Pay once, own forever. No subscription.' },
   { icon: '🤍', title: 'For the whole family', desc: 'Children and grandchildren can read along as the story grows.' },
@@ -176,7 +176,7 @@ const tiers = [
 
 useSeo({
   title: 'Anniversary Gift Ideas 2026 — Tell Me Your Story | Life Story Keepsake Book',
-  description: 'The most meaningful anniversary gift — capture a couple\'s love story in a beautiful keepsake book. Perfect for silver, golden and diamond anniversaries. UK printed, from £3.99.',
+  description: 'The most meaningful anniversary gift — capture a couple\'s love story in a beautiful keepsake book. Perfect for silver, golden and diamond anniversaries. printed book from £21.99, from £3.99.',
   canonical: 'https://tellmeyourstory.uk/anniversary-gift-ideas',
 })
 </script>

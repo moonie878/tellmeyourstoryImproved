@@ -87,7 +87,7 @@
       <div class="mx-auto max-w-3xl text-center">
         <p class="text-xs font-medium uppercase tracking-[0.22em] text-[#9C7C5C]">Preserve what you find</p>
         <h2 class="mt-3 font-display text-2xl font-bold text-white sm:text-3xl">Turn family history into a keepsake book</h2>
-        <p class="mx-auto mt-4 max-w-xl text-sm leading-7 text-[#A8A29E]">Tell Me Your Story turns your family history conversations into a beautifully printed keepsake book — 100 guided questions, voice recordings, photos, and professional UK printing. Free to start, no card needed.</p>
+        <p class="mx-auto mt-4 max-w-xl text-sm leading-7 text-[#A8A29E]">Tell Me Your Story turns your family history conversations into a beautifully printed keepsake book — 100+ guided questions, voice recordings, photos, and a professionally printed book. Free to start, no card needed.</p>
         <div class="mt-8 flex flex-wrap justify-center gap-3">
           <router-link to="/register" class="rounded-full bg-[#C4A882] px-7 py-3 text-sm font-semibold text-[#1C1917] transition hover:opacity-90">Start capturing family history free →</router-link>
           <router-link to="/example" class="rounded-full border border-white/20 px-7 py-3 text-sm font-medium text-white transition hover:bg-white/10">See an example</router-link>
@@ -134,6 +134,13 @@
     </section>
 
     <!-- CTA -->
+    <!-- Free printable: for readers not ready to start yet -->
+    <section class="px-5 py-14 sm:px-8 sm:py-16">
+      <div class="mx-auto max-w-5xl">
+        <EmailCaptureForm source="Questions-family-history" />
+      </div>
+    </section>
+
     <section class="bg-[#1C1917] px-5 py-16 text-center sm:px-8 sm:py-20">
       <h2 class="font-display text-2xl font-bold text-white sm:text-3xl">Your family history is waiting to be told</h2>
       <p class="mx-auto mt-4 max-w-lg text-sm leading-7 text-[#A8A29E]">Start capturing it today — free, in their own words, preserved forever.</p>
@@ -145,6 +152,7 @@
 </template>
 
 <script setup lang="ts">
+import EmailCaptureForm from '../components/Marketing/EmailCaptureForm.vue'
 import { useSeo } from '../composables/useSeo'
 
 const chapters = [

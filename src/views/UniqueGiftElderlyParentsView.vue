@@ -53,7 +53,7 @@
         <div class="mt-10 grid gap-6 sm:grid-cols-2 md:grid-cols-3">
           <div class="rounded-2xl bg-white p-6">
             <p class="text-2xl">📖</p>
-            <p class="mt-3 text-sm font-semibold text-stone-900">100 guided questions</p>
+            <p class="mt-3 text-sm font-semibold text-stone-900">100+ guided questions</p>
             <p class="mt-2 text-xs leading-5 text-stone-500">Thoughtful questions written for their life — childhood, work, family, values, and legacy. No blank page, no pressure, no interviewing skills needed.</p>
           </div>
           <div class="rounded-2xl bg-white p-6">
@@ -64,7 +64,7 @@
           <div class="rounded-2xl bg-white p-6">
             <p class="text-2xl">📚</p>
             <p class="mt-3 text-sm font-semibold text-stone-900">A real printed book</p>
-            <p class="mt-2 text-xs leading-5 text-stone-500">Professionally printed and bound in the UK. A hardcover book of their life — delivered to the door and kept on the shelf for generations.</p>
+            <p class="mt-2 text-xs leading-5 text-stone-500">Professionally printed and bound. A printed book of their life — delivered to the door and kept on the shelf for generations.</p>
           </div>
           <div class="rounded-2xl bg-white p-6">
             <p class="text-2xl">⏱️</p>
@@ -126,7 +126,7 @@
             class="rounded-3xl border p-5 text-center"
             :class="tier.featured ? 'border-[#7C5C3B] bg-[#FAF7F4]' : 'border-stone-200 bg-white'"
           >
-            <p v-if="tier.featured" class="mb-2 text-[10px] font-semibold uppercase tracking-wider text-[#7C5C3B]">Most popular</p>
+            <p v-if="tier.featured" class="mb-2 text-[10px] font-semibold uppercase tracking-wider text-[#7C5C3B]">Recommended</p>
             <p class="text-xs font-medium text-stone-500">{{ tier.name }}</p>
             <p class="mt-2 text-2xl font-bold text-stone-900">£{{ tier.price }}</p>
             <p class="mt-2 text-xs leading-5 text-stone-500">{{ tier.desc }}</p>
@@ -144,7 +144,7 @@
           <p class="text-2xl flex-shrink-0">📦</p>
           <div class="mt-3 sm:mt-0">
             <p class="text-sm font-semibold text-stone-900">Add a printed book — from £21.99</p>
-            <p class="mt-1 text-xs text-stone-500">Once the story is written, order a professionally printed and bound hardcover delivered to their door. UK shipping included.</p>
+            <p class="mt-1 text-xs text-stone-500">Once the story is written, order a professionally printed and bound book delivered to their door. UK shipping included.</p>
           </div>
         </div>
       </div>

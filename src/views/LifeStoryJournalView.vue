@@ -46,7 +46,7 @@
               <li class="flex gap-2"><span class="text-[#7C5C3B] flex-shrink-0">✓</span>Answer by typing or speaking</li>
               <li class="flex gap-2"><span class="text-[#7C5C3B] flex-shrink-0">✓</span>Everything saves automatically</li>
               <li class="flex gap-2"><span class="text-[#7C5C3B] flex-shrink-0">✓</span>Voice recordings preserved forever</li>
-              <li class="flex gap-2"><span class="text-[#7C5C3B] flex-shrink-0">✓</span>Turns into a printed hardcover book</li>
+              <li class="flex gap-2"><span class="text-[#7C5C3B] flex-shrink-0">✓</span>Turns into a printed book</li>
               <li class="flex gap-2"><span class="text-[#7C5C3B] flex-shrink-0">✓</span>Share with the whole family</li>
               <li class="flex gap-2"><span class="text-[#7C5C3B] flex-shrink-0">✓</span>Free to start</li>
             </ul>
@@ -109,7 +109,7 @@
         <h2 class="mt-3 font-display text-2xl font-bold text-stone-900 sm:text-3xl">Start free, pay once when you're ready</h2>
         <div class="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
           <div v-for="tier in tiers" :key="tier.name" class="rounded-3xl border p-5 text-center" :class="tier.featured ? 'border-[#7C5C3B] bg-[#FAF7F4]' : 'border-stone-200 bg-white'">
-            <p v-if="tier.featured" class="mb-2 text-[10px] font-semibold uppercase tracking-wider text-[#7C5C3B]">Most popular</p>
+            <p v-if="tier.featured" class="mb-2 text-[10px] font-semibold uppercase tracking-wider text-[#7C5C3B]">Recommended</p>
             <p class="text-xs font-medium text-stone-500">{{ tier.name }}</p>
             <p class="mt-2 text-2xl font-bold text-stone-900">£{{ tier.price }}</p>
             <p class="mt-2 text-xs leading-5 text-stone-500">{{ tier.desc }}</p>
@@ -172,7 +172,7 @@ const chapters = [
 const features = [
   { icon: '🎙️', title: 'Voice recordings',       desc: 'Answer questions by speaking. Their voice preserved in the printed book via QR codes.' },
   { icon: '📸', title: 'Photos alongside answers', desc: 'Add photos to bring memories to life on the page.' },
-  { icon: '📚', title: 'Becomes a printed book',  desc: 'The journal exports as a professionally designed PDF or printed hardcover.' },
+  { icon: '📚', title: 'Becomes a printed book',  desc: 'The journal exports as a professionally designed PDF or printed book.' },
   { icon: '💷', title: 'One-time payment',        desc: 'Pay once, own forever. No subscription or annual fee.' },
   { icon: '🤍', title: 'Share with family',       desc: 'The whole family can read along as the journal grows.' },
   { icon: '⏱️', title: 'No pressure',             desc: 'Answer one question at a time, whenever they feel like it.' },
@@ -187,7 +187,7 @@ const tiers = [
 
 useSeo({
   title: 'Life Story Journal UK — Create a Digital Journal That Becomes a Keepsake Book | Tell Me Your Story',
-  description: 'A digital life story journal with 100 guided questions — answer by typing or voice, and turn every answer into a beautifully printed keepsake book. Free to start.',
+  description: 'A digital life story journal with 100+ guided questions — answer by typing or voice, and turn every answer into a beautifully printed keepsake book. Free to start.',
   canonical: 'https://tellmeyourstory.uk/life-story-journal',
 })
 </script>

@@ -15,7 +15,7 @@
           <div class="hero-text pb-12 text-center md:text-left">
             <div class="eyebrow">
               <span class="eyebrow-dot"></span>
-              No subscription · Printed in the UK
+              No subscription · Built in the UK
             </div>
 
             <h1 class="mt-5 font-display text-[2.6rem] font-bold leading-[1.1] tracking-[-0.02em] text-[#1C1917] sm:text-5xl md:text-[3.6rem]">
@@ -332,7 +332,7 @@
       <span class="flex items-center gap-2"><span class="text-[#7C5C3B]">✓</span> No subscription</span>
       <span class="flex items-center gap-2"><span class="text-[#7C5C3B]">✓</span> Voice recording included</span>
       <span class="flex items-center gap-2"><span class="text-[#7C5C3B]">✓</span> Printed book available</span>
-      <span class="flex items-center gap-2"><span class="text-[#7C5C3B]">✓</span> QR codes in every book</span>
+      <span class="flex items-center gap-2"><span class="text-[#7C5C3B]">✓</span> A QR code for every recorded story</span>
     </div>
 <!-- Trustpilot link badge -->
 <div class="mt-6 flex justify-center">
@@ -658,7 +658,7 @@ const faqs = [
   },
   {
     q: 'Is it a subscription?',
-    a: `No. You pay once for the plan you choose — no renewal, nothing to cancel. Printed books are ordered separately, from ${printFrom} per book plus UK shipping.`,
+    a: `No. You pay once for the plan you choose — no renewal, nothing to cancel. Printed books are ordered separately, from ${printFrom} per book including UK delivery.`,
   },
   {
     q: 'How long does a printed book take?',
@@ -711,7 +711,7 @@ useSeo({
         name: 'Printed Book',
         price: PRINTED_BOOK_FROM_PRICE.toFixed(2),
         priceCurrency: 'GBP',
-        description: 'Professionally printed 6x9 softcover with QR voice codes. UK shipping extra.',
+        description: 'Professionally printed 6x9 softcover with QR voice codes. UK delivery included.',
       },
     ],
       },

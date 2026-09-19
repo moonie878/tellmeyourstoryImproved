@@ -226,7 +226,7 @@
             </router-link>
             <div>
               <p class="text-2xl font-bold text-[#1C1917]">£{{ PRINTED_BOOK_FROM_PRICE.toFixed(2) }}</p>
-              <p class="text-xs text-[#8C847E]">Per book, plus UK shipping</p>
+              <p class="text-xs text-[#8C847E]">Per book, including UK delivery</p>
             </div>
           </div>
         </div>
@@ -476,7 +476,7 @@ const printedBookSteps = [
   { icon: '📖', title: 'Beautiful typeset layout', desc: 'The same design as your digital PDF — chapters, drop caps, quote pages, and photos.' },
   { icon: '🎙️', title: 'QR codes for voice recordings', desc: 'Each voice answer gets a QR code printed next to it. Family scan to hear their loved one speak.' },
   { icon: '📦', title: 'Printed and shipped', desc: 'Professionally printed by Lulu Press and shipped directly to your door in 10–14 days.' },
-  { icon: '💷', title: `From £${PRINTED_BOOK_FROM_PRICE.toFixed(2)} per book`, desc: `One copy or multiple — from £${PRINTED_BOOK_FROM_PRICE.toFixed(2)} per book, plus UK shipping shown at checkout.` },
+  { icon: '💷', title: `From £${PRINTED_BOOK_FROM_PRICE.toFixed(2)} per book`, desc: `One copy or multiple — from £${PRINTED_BOOK_FROM_PRICE.toFixed(2)} per book, including UK delivery.` },
 ]
 
 const writingRows = [
@@ -682,7 +682,7 @@ useSeo({
           })),
           {
             '@type': 'Offer',
-            name: 'Printed book (softcover, per copy, plus UK shipping)',
+            name: 'Printed book (softcover, per copy, including UK delivery)',
             price: PRINTED_BOOK_FROM_PRICE.toFixed(2),
             priceCurrency: 'GBP',
             availability: 'https://schema.org/InStock',

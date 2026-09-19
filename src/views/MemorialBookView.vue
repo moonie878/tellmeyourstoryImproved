@@ -119,29 +119,16 @@
     <section class="px-5 py-16 sm:px-8 sm:py-20">
       <div class="mx-auto max-w-3xl text-center">
         <p class="text-xs font-medium uppercase tracking-[0.22em] text-[#9C7C5C]">The finished book</p>
-        <h2 class="mt-3 font-display text-2xl font-bold text-stone-900 sm:text-3xl">A real book, printed and bound in the UK</h2>
+        <h2 class="mt-3 font-display text-2xl font-bold text-stone-900 sm:text-3xl">A real book, printed and bound for you</h2>
         <p class="mx-auto mt-4 max-w-xl text-sm leading-7 text-stone-500">
-          Once the memorial book is written, order a professionally printed and bound hardcover copy delivered to your door. Something physical to hold, share, and pass down through the family.
+          Once the memorial book is written, order a professionally printed and bound copy delivered to your door. Something physical to hold, share, and pass down through the family.
         </p>
-        <div class="mt-8 grid gap-4 sm:grid-cols-3">
-          <div class="rounded-2xl border border-stone-200 p-5 text-center">
-            <p class="text-sm font-semibold text-stone-900">Softcover</p>
-            <p class="mt-1 text-2xl font-bold text-stone-900">£21.99</p>
-            <p class="mt-1 text-xs text-stone-500">UK shipping included</p>
-          </div>
-          <div class="rounded-2xl border border-[#7C5C3B] bg-[#FAF7F4] p-5 text-center">
-            <p class="text-[10px] font-semibold uppercase tracking-wider text-[#7C5C3B]">Popular</p>
-            <p class="text-sm font-semibold text-stone-900">Hardcover</p>
-            <p class="mt-1 text-2xl font-bold text-stone-900">£44.98</p>
-            <p class="mt-1 text-xs text-stone-500">UK shipping included</p>
-          </div>
-          <div class="rounded-2xl border border-stone-200 p-5 text-center">
-            <p class="text-sm font-semibold text-stone-900">Dust Jacket</p>
-            <p class="mt-1 text-2xl font-bold text-stone-900">£49.98</p>
-            <p class="mt-1 text-xs text-stone-500">UK shipping included</p>
-          </div>
+        <div class="mx-auto mt-8 max-w-xs rounded-2xl border border-[#7C5C3B] bg-[#FAF7F4] p-5 text-center">
+          <p class="text-sm font-semibold text-stone-900">Printed softcover</p>
+          <p class="mt-1 text-2xl font-bold text-stone-900">From £{{ PRINTED_BOOK_FROM_PRICE.toFixed(2) }}</p>
+          <p class="mt-1 text-xs text-stone-600">UK delivery included · price depends on page count</p>
         </div>
-        <p class="mt-4 text-xs text-stone-400">Printed in the UK · 10–14 day delivery · No international shipping fees</p>
+        <p class="mt-4 text-xs text-stone-400">Softcover · 10–14 day UK delivery included</p>
       </div>
     </section>
 
@@ -183,6 +170,7 @@
 </template>
 
 <script setup lang="ts">
+import { PRINTED_BOOK_FROM_PRICE } from '../lib/printPricing'
 import { useSeo } from '../composables/useSeo'
 
 const contents = [
@@ -199,7 +187,7 @@ const contents = [
 
 useSeo({
   title: 'Memorial Book UK — Preserve a Loved One\'s Life Story | Tell Me Your Story',
-  description: 'Create a memorial book that captures a loved one\'s life, memories, and voice. Guided questions, voice recordings, and a beautifully printed hardcover. UK printed and shipped.',
+  description: 'Create a memorial book that captures a loved one\'s life, memories, and voice. Guided questions, voice recordings, and a beautifully printed book delivered to your door.',
   canonical: 'https://tellmeyourstory.uk/memorial-book',
 })
 </script>

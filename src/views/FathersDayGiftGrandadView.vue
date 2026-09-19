@@ -95,7 +95,7 @@
         <div class="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
           <div v-for="tier in tiers" :key="tier.name" class="rounded-3xl border p-5 text-center"
             :class="tier.featured ? 'border-[#7C5C3B] bg-[#FAF7F4]' : 'border-stone-200 bg-white'">
-            <p v-if="tier.featured" class="mb-2 text-[10px] font-semibold uppercase tracking-wider text-[#7C5C3B]">Most popular</p>
+            <p v-if="tier.featured" class="mb-2 text-[10px] font-semibold uppercase tracking-wider text-[#7C5C3B]">Recommended</p>
             <p class="text-xs font-medium text-stone-500">{{ tier.name }}</p>
             <p class="mt-2 text-2xl font-bold text-stone-900">£{{ tier.price }}</p>
             <p class="mt-2 text-xs leading-5 text-stone-500">{{ tier.desc }}</p>
@@ -103,7 +103,7 @@
               :class="tier.featured ? 'bg-[#7C5C3B] text-white hover:opacity-90' : 'border border-stone-300 text-stone-700 hover:bg-stone-50'">Gift this →</router-link>
           </div>
         </div>
-        <p class="mt-4 text-xs text-stone-400">Add a printed hardcover from £34.98 — delivered to his door</p>
+        <p class="mt-4 text-xs text-stone-400">Add a printed book from £21.99 including UK delivery</p>
       </div>
     </section>
 
@@ -154,7 +154,7 @@
       <h2 class="mt-4 font-display text-2xl font-bold text-white sm:text-3xl">Give Grandad the gift of being heard</h2>
       <p class="mx-auto mt-4 max-w-lg text-sm leading-7 text-[#A8A29E]">His stories are irreplaceable. This Father's Day, give him something that lasts long after the day is over.</p>
       <router-link to="/gift" class="mt-8 inline-block rounded-full bg-[#C4A882] px-8 py-3 text-sm font-semibold text-[#1C1917] transition hover:opacity-90">Gift a life story today →</router-link>
-      <p class="mt-4 text-xs text-[#9C7C5C]">Gift link sent instantly · One-time payment · Printed book from £34.98</p>
+      <p class="mt-4 text-xs text-[#9C7C5C]">Gift link sent instantly · One-time payment · Printed book from £21.99</p>
     </section>
 
   </main>
@@ -164,9 +164,9 @@
 import { useSeo } from '../composables/useSeo'
 
 const features = [
-  { icon: '📖', title: '100 guided questions', desc: 'Written for his life — childhood, work, adventures, family, and the wisdom he wants to pass on.' },
+  { icon: '📖', title: '100+ guided questions', desc: 'Written for his life — childhood, work, adventures, family, and the wisdom he wants to pass on.' },
   { icon: '🎙️', title: 'His voice, preserved', desc: 'Answer by speaking. A QR code in the printed book lets the family hear him tell the story himself — forever.' },
-  { icon: '📚', title: 'UK printed hardcover', desc: 'Professionally printed and bound in the UK. Delivered to his door. From £34.98 including shipping.' },
+  { icon: '📚', title: 'Printed keepsake book', desc: 'Professionally printed and bound. Delivered to his door. From £21.99 including UK delivery.' },
   { icon: '⏱️', title: 'At his own pace', desc: 'No weekly email pressure. Answer one question at a time, whenever he feels like it.' },
   { icon: '✨', title: 'Simple to use', desc: 'Works on any phone, tablet, or computer. Simple enough for any grandad.' },
   { icon: '🤍', title: 'For the whole family', desc: 'The grandchildren, the cousins, the whole family can read along as the story grows.' },
@@ -187,7 +187,7 @@ const steps = [
   { number: '1', title: 'Choose a gift', desc: 'Pick from Story, Story + Photos, All Stories, or Premium. One-time payment, no subscription.' },
   { number: '2', title: 'Get your gift link instantly', desc: 'A unique gift link is emailed to you immediately. Share it with Grandad on Father\'s Day.' },
   { number: '3', title: 'He starts his story', desc: 'He opens the link, tries 5 questions free, and upgrades when he is hooked.' },
-  { number: '4', title: 'Order the printed book', desc: 'When he\'s ready, order a professionally printed hardcover delivered to the door.' },
+  { number: '4', title: 'Order the printed book', desc: 'When he\'s ready, order a professionally printed book delivered to the door.' },
 ]
 
 const tiers = [
@@ -199,7 +199,7 @@ const tiers = [
 
 useSeo({
   title: 'Father\'s Day Gift for Grandad 2026 — Tell Me Your Story | Life Story Keepsake Book',
-  description: 'The most meaningful Father\'s Day gift for Grandad — capture his life story in his own words and voice. 100 guided questions, UK printed hardcover. Gift link sent instantly. From £3.99.',
+  description: 'The most meaningful Father\'s Day gift for Grandad — capture his life story in his own words and voice. 100+ guided questions, printed keepsake book. Gift link sent instantly. From £3.99.',
   canonical: 'https://tellmeyourstory.uk/fathers-day-gift-for-grandad',
 })
 </script>

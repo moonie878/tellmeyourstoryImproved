@@ -89,7 +89,7 @@
         <!-- Mid article CTA -->
         <div class="mt-10 rounded-3xl bg-[#F5F0E8] px-6 py-8 text-center">
           <p class="text-sm font-medium text-[#1C1917]">Ready to create your funeral slideshow?</p>
-          <p class="mt-2 text-sm text-[#5C534E]">Upload photos, add your own music, preview free. Download for £9.99 — no account needed.</p>
+          <p class="mt-2 text-sm text-[#5C534E]">Upload photos, add your own music, preview free. Download for £19.99 — no account needed.</p>
           <router-link to="/tribute" class="mt-4 inline-block rounded-full bg-[#1C1917] px-6 py-3 text-sm font-semibold text-white transition hover:opacity-90">
             Start your free slideshow →
           </router-link>
@@ -180,7 +180,7 @@
           <p class="text-[11px] font-medium uppercase tracking-[0.22em] text-[#9C7C5C]">Tell Me Your Story</p>
           <h3 class="mt-3 font-display text-2xl font-bold text-white sm:text-3xl">Create your funeral slideshow today</h3>
           <p class="mx-auto mt-4 max-w-lg text-sm leading-7 text-[#A8A29E]">
-            Upload photos, add music, and preview your tribute slideshow for free. Download the full HD version for £9.99 — no account needed, ready in minutes.
+            Upload photos, add music, and preview your tribute slideshow for free. Download the full HD version for £19.99 — no account needed, ready in minutes.
           </p>
           <div class="mt-4 flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm text-[#9C7C5C]">
             <span>✦ Free to preview</span>

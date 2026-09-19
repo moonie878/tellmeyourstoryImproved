@@ -91,14 +91,14 @@
         <p class="mt-3 text-sm text-stone-500">One-time payment. Gift link sent instantly. No subscription.</p>
         <div class="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
           <div v-for="tier in tiers" :key="tier.name" class="rounded-3xl border p-5 text-center" :class="tier.featured ? 'border-[#7C5C3B] bg-[#FAF7F4]' : 'border-stone-200 bg-white'">
-            <p v-if="tier.featured" class="mb-2 text-[10px] font-semibold uppercase tracking-wider text-[#7C5C3B]">Most popular</p>
+            <p v-if="tier.featured" class="mb-2 text-[10px] font-semibold uppercase tracking-wider text-[#7C5C3B]">Recommended</p>
             <p class="text-xs font-medium text-stone-500">{{ tier.name }}</p>
             <p class="mt-2 text-2xl font-bold text-stone-900">£{{ tier.price }}</p>
             <p class="mt-2 text-xs leading-5 text-stone-500">{{ tier.desc }}</p>
             <router-link to="/gift" class="mt-4 block rounded-full py-2 text-xs font-medium transition" :class="tier.featured ? 'bg-[#7C5C3B] text-white hover:opacity-90' : 'border border-stone-300 text-stone-700 hover:bg-stone-50'">Gift this →</router-link>
           </div>
         </div>
-        <p class="mt-4 text-xs text-stone-400">Add a printed hardcover from £21.99 — delivered to their door</p>
+        <p class="mt-4 text-xs text-stone-400">Add a printed book from £21.99 including UK delivery</p>
       </div>
     </section>
 
@@ -139,7 +139,7 @@
 import { useSeo } from '../composables/useSeo'
 
 const gifts = [
-  { icon: '📖', title: 'A life story book — Tell Me Your Story', tag: 'Most meaningful', highlight: true, negative: false, desc: '100 guided questions, voice recordings, and a beautifully printed hardcover. Their stories preserved forever. A gift that lasts for generations.' },
+  { icon: '📖', title: 'A life story book — Tell Me Your Story', tag: 'Most meaningful', highlight: true, negative: false, desc: '100+ guided questions, voice recordings, and a beautifully printed book. Their stories preserved forever. A gift that lasts for generations.' },
   { icon: '🌸', title: 'Flowers', tag: 'Gone in a week', highlight: false, negative: true, desc: 'A kind gesture but short-lived. Better as an accompanying gift.' },
   { icon: '🎁', title: 'Gift vouchers', tag: 'Often unused', highlight: false, negative: true, desc: 'Practical but impersonal. Many go unused. Not the answer for a meaningful occasion.' },
   { icon: '✈️', title: 'Experience day', tag: 'Enjoyable', highlight: false, negative: false, desc: 'Fun in the moment but the memory fades. The story behind it is worth capturing too.' },
@@ -147,9 +147,9 @@ const gifts = [
 ]
 
 const features = [
-  { icon: '📖', title: '100 guided questions', desc: 'Covering every chapter of their life — no blank page, no pressure.' },
+  { icon: '📖', title: '100+ guided questions', desc: 'Covering every chapter of their life — no blank page, no pressure.' },
   { icon: '🎙️', title: 'Voice recordings',    desc: 'Their voice preserved in the printed book via QR codes — forever.' },
-  { icon: '📚', title: 'UK printed hardcover', desc: 'Professionally printed and bound. Delivered to their door. From £21.99.' },
+  { icon: '📚', title: 'Printed keepsake book', desc: 'Professionally printed and bound. Delivered to their door. From £21.99.' },
   { icon: '💷', title: 'One-time payment',     desc: 'Pay once, own forever. No subscription.' },
   { icon: '⏱️', title: 'No pressure',          desc: 'Answer at their own pace. No weekly emails, no deadline.' },
   { icon: '🤍', title: 'For the whole family', desc: 'Share with everyone so the whole family can read along.' },
@@ -164,7 +164,7 @@ const tiers = [
 
 useSeo({
   title: 'Gift for Someone Who Has Everything UK 2026 — Tell Me Your Story',
-  description: 'The best gift for someone who has everything — capture their life story in a beautiful keepsake book. Guided questions, voice recordings, UK printed hardcover. From £3.99.',
+  description: 'The best gift for someone who has everything — capture their life story in a beautiful keepsake book. Guided questions, voice recordings, printed keepsake book. From £3.99.',
   canonical: 'https://tellmeyourstory.uk/gift-for-someone-who-has-everything',
 })
 </script>

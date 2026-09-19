@@ -135,6 +135,13 @@
     </section>
 
     <!-- CTA -->
+    <!-- Free printable: for readers not ready to start yet -->
+    <section class="px-5 py-14 sm:px-8 sm:py-16">
+      <div class="mx-auto max-w-5xl">
+        <EmailCaptureForm source="Oral-history" />
+      </div>
+    </section>
+
     <section class="bg-[#1C1917] px-5 py-16 text-center sm:px-8 sm:py-20">
       <h2 class="font-display text-2xl font-bold text-white sm:text-3xl">Their stories won't tell themselves</h2>
       <p class="mx-auto mt-4 max-w-lg text-sm leading-7 text-[#A8A29E]">Start capturing their oral history today — free, in their own words, preserved forever.</p>
@@ -146,6 +153,7 @@
 </template>
 
 <script setup lang="ts">
+import EmailCaptureForm from '../components/Marketing/EmailCaptureForm.vue'
 import { useSeo } from '../composables/useSeo'
 
 const chapters = [

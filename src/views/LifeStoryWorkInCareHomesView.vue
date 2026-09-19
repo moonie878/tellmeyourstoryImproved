@@ -123,12 +123,12 @@
         </div>
         <div class="mt-8 text-sm leading-7 text-stone-600 max-w-xl mx-auto space-y-4">
           <p>You don't need to wait for a care home to initiate life story work. Families can start the process themselves — and often produce something far richer than what a care home's standard admission paperwork captures.</p>
-          <p>Tell Me Your Story guides your loved one through 100 questions — by typing or speaking — and turns their answers into a beautifully designed document that works both as a care home resource and as a family keepsake. You can share a private link with care staff or order a professionally printed hardcover to keep at the home.</p>
+          <p>Tell Me Your Story guides your loved one through 100 questions — by typing or speaking — and turns their answers into a beautifully designed document that works both as a care home resource and as a family keepsake. You can share a private link with care staff or order a professionally printed book to keep at the home.</p>
           <p>The best time to start is before they move into care, while they can still contribute in their own words. But it's never too late — family members can fill in answers from their own memories at any stage.</p>
         </div>
         <div class="mt-8 rounded-2xl bg-[#1C1917] p-8 text-center">
           <p class="font-display text-lg font-bold text-white">Start a life story book today</p>
-          <p class="mt-2 text-sm text-stone-400">Free to start. 100 guided questions. Printed book from £21.99.</p>
+          <p class="mt-2 text-sm text-stone-400">Free to start. 100+ guided questions. Printed book from £21.99.</p>
           <router-link to="/register" class="mt-6 inline-block rounded-full bg-[#C4A882] px-7 py-3 text-sm font-semibold text-[#1C1917] transition hover:opacity-90">Create a life story book free →</router-link>
         </div>
       </div>

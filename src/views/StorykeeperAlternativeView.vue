@@ -151,7 +151,7 @@
             <ul class="mt-4 space-y-2 text-xs leading-5 text-stone-600">
               <li>✓ 5 questions free, no card needed</li>
               <li>✓ Voice recording on every plan</li>
-              <li>✓ Printed softcover from {{ printFrom }} per copy, plus UK shipping</li>
+              <li>✓ Printed softcover from {{ printFrom }} per copy, including UK delivery</li>
               <li>✓ Every copy costs the same — order one or ten</li>
             </ul>
           </div>
@@ -216,7 +216,7 @@
       <router-link to="/register" class="mt-8 inline-block rounded-full bg-[#C4A882] px-8 py-3 text-sm font-semibold text-[#1C1917] transition hover:opacity-90">
         Try 5 questions free →
       </router-link>
-      <p class="mt-4 text-xs text-[#9C7C5C]">No card needed · One-time payment · Printed books from {{ printFrom }} plus UK shipping</p>
+      <p class="mt-4 text-xs text-[#9C7C5C]">No card needed · One-time payment · Printed books from {{ printFrom }} including UK delivery</p>
     </section>
 
   </main>
@@ -251,7 +251,7 @@ const comparison = [
   { feature: 'How they answer',         them: 'Write, dictate, or record audio or video',   us: 'Type or tap the microphone',                         usPositive: false },
   { feature: 'Phone-call recording',    them: 'On StoryKeeper Plus (£99)',                  us: 'Not available',                                      usPositive: false },
   { feature: 'Hearing it in the book',  them: 'QR code per chapter',                        us: 'QR code beside each voice-recorded story',           usPositive: false },
-  { feature: 'Printed book',            them: 'A5 hardcover included; free UK delivery',    us: `Softcover from ${printFrom} plus UK shipping; hardcover available`, usPositive: false },
+  { feature: 'Printed book',            them: 'A5 hardcover included; free UK delivery',    us: `Softcover from ${printFrom} including UK delivery`, usPositive: false },
   { feature: 'Family contributors',     them: 'Unlimited on Plus; one storyteller on Classic', us: 'Invite family by link',                          usPositive: false },
   { feature: 'Tribute video',           them: 'Not offered',                                us: 'Available',                                          usPositive: true },
 ]
@@ -259,7 +259,7 @@ const comparison = [
 const features = [
   { icon: '📖', title: '100+ guided questions',  desc: 'Every chapter of life — childhood, family, work, love and the lessons learned. Answer in any order, at your own pace.' },
   { icon: '🎙️', title: 'Type or speak',          desc: 'Tap the microphone and talk, or type — whichever suits each question. Recordings get a QR code beside that story in the printed book.' },
-  { icon: '📚', title: 'Print only if you want', desc: `Keep it digital, or order a printed copy: softcover from ${printFrom} plus shipping, with hardcover options.` },
+  { icon: '📚', title: 'Print only if you want', desc: `Keep it digital, or order a printed copy: softcover from ${printFrom} including UK delivery.` },
   { icon: '💷', title: 'Free to start',           desc: 'Answer 5 questions free, then pay once from £3.99. No renewal date and nothing to cancel.' },
   { icon: '🎬', title: 'Tribute video',           desc: 'Turn photos, music and a message into a video keepsake — for a celebration of life or family far away.' },
   { icon: '🤍', title: 'Family can read along',  desc: 'Share a link so the whole family can read the story as it grows, at no extra cost.' },
@@ -277,7 +277,7 @@ const faqs = [
   },
   {
     q: 'Is Tell Me Your Story cheaper than StoryKeeper?',
-    a: `To start, yes — you can answer 5 questions free and one-time plans begin at £3.99. A printed softcover starts at ${printFrom} plus UK shipping. If you want a hardcover included in one price, StoryKeeper's £79 plan may be better value.`,
+    a: `To start, yes — you can answer 5 questions free and one-time plans begin at £3.99. A printed softcover starts at ${printFrom} including UK delivery. If you want a hardcover included in one price, StoryKeeper's £79 plan may be better value.`,
   },
   {
     q: 'Do both put their voice in the book?',

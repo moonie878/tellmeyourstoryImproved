@@ -51,7 +51,7 @@
         <div class="text-center">
           <p class="text-xs font-medium uppercase tracking-[0.22em] text-[#9C7C5C]">What makes ours different</p>
           <h2 class="mt-3 font-display text-2xl font-bold text-stone-900 sm:text-3xl">The keepsake book that speaks</h2>
-          <p class="mx-auto mt-4 max-w-xl text-sm leading-7 text-stone-500">Most keepsake books are photo albums or fill-in-the-blanks journals. Tell Me Your Story is different — it's the only keepsake book that captures their actual voice alongside their written answers.</p>
+          <p class="mx-auto mt-4 max-w-xl text-sm leading-7 text-stone-500">Most keepsake books are photo albums or fill-in-the-blanks journals. Tell Me Your Story is different — it captures their actual voice alongside their written answers, with a QR code beside every recorded story.</p>
         </div>
         <div class="mt-10 grid gap-6 sm:grid-cols-2 md:grid-cols-3">
           <div v-for="feature in features" :key="feature.title" class="rounded-2xl bg-white border border-stone-200 p-6">
@@ -91,7 +91,7 @@
         <div class="mt-8 text-sm leading-7 text-stone-600 max-w-xl mx-auto space-y-4">
           <p>There's no deadline and no pressure. You can answer as many or as few questions as you like — every answer adds to the book. Some people complete their story in a single afternoon. Others return to it over weeks or months, answering a question or two at a time.</p>
           <p>The questions are already written — 100 across 10 chapters of life. You answer them by typing or speaking. Your answers save automatically, so you can pick it up and put it down whenever suits you.</p>
-          <p>Once you're ready to export, your book is generated instantly as a beautifully designed PDF. Ordering a printed hardcover or softcover takes a few clicks, and the book is printed and delivered within 10-14 days.</p>
+          <p>Once you're ready to export, your book is generated instantly as a beautifully designed PDF. Ordering a printed copy takes a few clicks, and the book is printed and delivered within 10-14 days.</p>
         </div>
         <div class="mt-10 grid gap-4 sm:grid-cols-3">
           <div v-for="step in steps" :key="step.title" class="rounded-2xl bg-white p-5 text-center">
@@ -120,7 +120,7 @@
         <div class="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
           <div v-for="tier in tiers" :key="tier.name" class="rounded-3xl border p-5 text-center"
             :class="tier.featured ? 'border-[#7C5C3B] bg-white' : 'border-stone-200 bg-white'">
-            <p v-if="tier.featured" class="mb-2 text-[10px] font-semibold uppercase tracking-wider text-[#7C5C3B]">Most popular</p>
+            <p v-if="tier.featured" class="mb-2 text-[10px] font-semibold uppercase tracking-wider text-[#7C5C3B]">Recommended</p>
             <p class="text-xs font-medium text-stone-500">{{ tier.name }}</p>
             <p class="mt-2 text-2xl font-bold text-stone-900">£{{ tier.price }}</p>
             <p class="mt-2 text-xs leading-5 text-stone-500">{{ tier.desc }}</p>
@@ -193,18 +193,18 @@ const storyTypes = [
 ]
 
 const features = [
-  { icon: '📖', title: '100 guided questions', desc: 'Covering every chapter of life — from earliest memories to legacy. No blank page, no pressure. The questions do the hard work.' },
+  { icon: '📖', title: '100+ guided questions', desc: 'Covering every chapter of life — from earliest memories to legacy. No blank page, no pressure. The questions do the hard work.' },
   { icon: '🎙️', title: 'Voice recordings with QR codes', desc: 'Record answers by speaking. A QR code is printed in the physical book next to each memory — family scan it to hear them speak, years from now.' },
   { icon: '📸', title: 'Photos alongside answers', desc: 'Add photos to bring every memory to life on the page. Photos sit alongside the answers they belong to — not in a separate album.' },
-  { icon: '📚', title: 'Professionally printed hardcover', desc: 'A beautifully bound hardcover or softcover book printed in the UK and delivered to your door. From £21.99 including delivery.' },
+  { icon: '📚', title: 'Professionally printed book', desc: 'A beautifully bound softcover book delivered to your door. From £21.99 including delivery.' },
   { icon: '💷', title: 'One-time payment, no subscription', desc: 'Pay once when you\'re ready to export or print. No annual fee, no monthly charge. Yours to keep forever.' },
   { icon: '🤍', title: 'Family collaboration', desc: 'Share a link with family so everyone can read along and add comments as the story grows.' },
 ]
 
 const steps = [
-  { number: '01', title: 'Answer the questions', desc: 'Type or speak your answers across 100 guided questions and 10 chapters of life.' },
+  { number: '01', title: 'Answer the questions', desc: 'Type or speak your answers across 100+ guided questions and 10 chapters of life.' },
   { number: '02', title: 'Add photos and voice', desc: 'Add photos to answers and record voice so family can hear them in the book.' },
-  { number: '03', title: 'Export or print', desc: 'Download a beautiful PDF or order a printed hardcover delivered to your door.' },
+  { number: '03', title: 'Export or print', desc: 'Download a beautiful PDF or order a printed book delivered to your door.' },
 ]
 
 const tiers = [
@@ -218,15 +218,15 @@ const faqs = [
   { q: 'What is a life story keepsake book?', a: 'A life story keepsake book is a structured record of someone\'s life, told in their own words, organised into chapters — from childhood and teenage years through to love, family, work, and legacy. It\'s more than a photo album — it captures who they actually were, what they thought, what they loved, and what they want to pass on.' },
   { q: 'How long does it take to create a keepsake book?', a: 'There\'s no deadline. You answer as many or as few questions as you like — every answer adds to the book. Some people complete their story in an afternoon. Others return to it over weeks or months. Everything saves automatically.' },
   { q: 'Can elderly parents use it if they\'re not good with technology?', a: 'Yes. The platform is designed to be simple. They can answer by speaking rather than typing — just tap the microphone and talk. Family members often sit with them and help with the typing while they speak their answers.' },
-  { q: 'What does the printed book look like?', a: 'A professionally printed 6×9 book with chapters, elegant typography, photos alongside answers, and QR codes that play voice recordings. Available as a softcover or hardcover. You can see a full example at tellmeyourstory.uk/example.' },
-  { q: 'How much does a printed keepsake book cost?', a: 'The printed book starts from £21.99 for a softcover including UK delivery. Hardcover options are available from £44.98. You also need a digital tier (from £3.99) to export the content. Free to start — no payment needed to begin.' },
+  { q: 'What does the printed book look like?', a: 'A professionally printed 6×9 book with chapters, elegant typography, photos alongside answers, and QR codes that play voice recordings. Printed as a softcover. You can see a full example at tellmeyourstory.uk/example.' },
+  { q: 'How much does a printed keepsake book cost?', a: 'The printed book starts from £21.99 for a softcover including UK delivery. You also need a digital tier (from £3.99) to export the content. Free to start — no payment needed to begin.' },
   { q: 'Can I order multiple copies?', a: 'Yes. Once your book is created you can order as many printed copies as you like. Many families order copies for each child or sibling.' },
-  { q: 'What makes Tell Me Your Story different from other keepsake book services?', a: 'Three things: voice recordings with QR codes printed in the book so family can hear them speak; 100 guided questions that cover every chapter of life so you\'re never staring at a blank page; and professional UK printing delivered to your door. No other service combines all three.' },
+  { q: 'What makes Tell Me Your Story different from other keepsake book services?', a: 'Three things: voice recordings with QR codes printed in the book so family can hear them speak; 100+ guided questions that cover every chapter of life so you\'re never staring at a blank page; and a professionally printed book delivered to your door, with UK delivery included.' },
 ]
 
 useSeo({
   title: 'Life Story Keepsake Book UK — In Their Own Words | Tell Me Your Story',
-  description: 'Create a life story keepsake book for a parent or grandparent — 100 guided questions, voice recordings, photos, and a professionally printed hardcover delivered to your door. Free to start.',
+  description: 'Create a life story keepsake book for a parent or grandparent — 100+ guided questions, voice recordings, photos, and a professionally printed book delivered to your door. Free to start.',
   canonical: 'https://tellmeyourstory.uk/keepsake-book',
   schema: {
     '@context': 'https://schema.org',
@@ -236,9 +236,9 @@ useSeo({
         mainEntity: [
           { '@type': 'Question', name: 'What is a life story keepsake book?', acceptedAnswer: { '@type': 'Answer', text: 'A life story keepsake book is a structured record of someone\'s life, told in their own words, organised into chapters — from childhood and teenage years through to love, family, work, and legacy.' } },
           { '@type': 'Question', name: 'How long does it take to create a keepsake book?', acceptedAnswer: { '@type': 'Answer', text: 'There\'s no deadline. You answer as many or as few questions as you like — every answer adds to the book. Some people complete their story in an afternoon. Others return to it over weeks or months.' } },
-          { '@type': 'Question', name: 'How much does a printed keepsake book cost?', acceptedAnswer: { '@type': 'Answer', text: 'The printed book starts from £21.99 for a softcover including UK delivery. Hardcover options are available from £44.98. Free to start — no payment needed to begin.' } },
+          { '@type': 'Question', name: 'How much does a printed keepsake book cost?', acceptedAnswer: { '@type': 'Answer', text: 'The printed book starts from £21.99 for a softcover including UK delivery. Free to start — no payment needed to begin.' } },
           { '@type': 'Question', name: 'Can elderly parents use it if they\'re not good with technology?', acceptedAnswer: { '@type': 'Answer', text: 'Yes. They can answer by speaking rather than typing — just tap the microphone and talk. Family members often sit with them and help with the typing while they speak their answers.' } },
-          { '@type': 'Question', name: 'What makes Tell Me Your Story different?', acceptedAnswer: { '@type': 'Answer', text: 'Voice recordings with QR codes printed in the book, 100 guided questions across 10 chapters, and professional UK printing. No other service combines all three.' } },
+          { '@type': 'Question', name: 'What makes Tell Me Your Story different?', acceptedAnswer: { '@type': 'Answer', text: 'Voice recordings with QR codes printed in the book, 100+ guided questions across 10 chapters, and a professionally printed book with UK delivery included.' } },
         ]
       }
     ]

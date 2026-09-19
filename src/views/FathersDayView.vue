@@ -45,7 +45,7 @@
         <div class="mt-12 grid gap-6 sm:grid-cols-2 md:grid-cols-3">
           <div class="rounded-2xl border border-stone-200 p-6">
             <p class="text-2xl">📖</p>
-            <p class="mt-3 text-sm font-semibold text-stone-900">100 guided questions</p>
+            <p class="mt-3 text-sm font-semibold text-stone-900">100+ guided questions</p>
             <p class="mt-2 text-xs leading-5 text-stone-500">From his earliest memories to what he wants to be remembered for. Written for a Dad's life.</p>
           </div>
           <div class="rounded-2xl border border-stone-200 p-6">
@@ -98,7 +98,7 @@
 
         <div class="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
           <div v-for="tier in tiers" :key="tier.name" class="rounded-3xl border p-5 text-center" :class="tier.featured ? 'border-[#7C5C3B] bg-[#FAF7F4]' : 'border-stone-200 bg-white'">
-            <p v-if="tier.featured" class="mb-2 text-[10px] font-semibold uppercase tracking-wider text-[#7C5C3B]">Most popular</p>
+            <p v-if="tier.featured" class="mb-2 text-[10px] font-semibold uppercase tracking-wider text-[#7C5C3B]">Recommended</p>
             <p class="text-xs font-medium text-stone-500">{{ tier.name }}</p>
             <div class="mt-2 flex items-center justify-center gap-2">
               <span class="text-2xl font-bold text-stone-900">£{{ tier.salePrice }}</span>

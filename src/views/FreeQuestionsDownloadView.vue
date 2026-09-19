@@ -88,7 +88,7 @@
       <div class="mx-auto max-w-3xl text-center">
         <p class="text-xs font-medium uppercase tracking-[0.22em] text-[#9C7C5C]">Want to go further?</p>
         <h2 class="mt-3 font-display text-2xl font-bold text-stone-900 sm:text-3xl">Turn their answers into a keepsake book</h2>
-        <p class="mx-auto mt-4 max-w-xl text-sm leading-7 text-stone-500">The printable is a great starting point. Tell Me Your Story takes it further — 100 guided questions, voice recordings, photos, and a beautifully printed hardcover book with QR codes so family can hear their voice forever.</p>
+        <p class="mx-auto mt-4 max-w-xl text-sm leading-7 text-stone-500">The printable is a great starting point. Tell Me Your Story takes it further — 100+ guided questions, voice recordings, photos, and a beautifully printed book with QR codes so family can hear their voice forever.</p>
         <div class="mt-8 grid gap-5 sm:grid-cols-3">
           <div v-for="feature in features" :key="feature.title" class="rounded-2xl bg-white p-5 text-center">
             <p class="text-2xl">{{ feature.icon }}</p>
@@ -153,7 +153,7 @@ const sampleQuestions = [
 
 const features = [
   { icon: '🎙️', title: 'Voice recordings',       desc: 'Record answers by speaking. Their voice preserved via QR codes in the printed book.' },
-  { icon: '📚', title: 'UK printed hardcover',    desc: 'Professionally printed and delivered to your door. From £21.99.' },
+  { icon: '📚', title: 'Printed keepsake book',    desc: 'Professionally printed and delivered to your door. From £21.99.' },
   { icon: '📸', title: 'Photos and chapters',     desc: 'Add photos alongside answers. Beautiful layouts across 10 chapters.' },
 ]
 

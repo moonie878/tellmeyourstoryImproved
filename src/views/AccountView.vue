@@ -309,7 +309,7 @@ const tierFeatures = computed(() => [
   { label: 'PDF export',                       included: hasExportAccess.value || hasFullAccess.value },
   { label: 'Image export',                     included: hasPrintAccess.value || hasFullAccess.value },
   { label: 'Voice recordings',                 included: true },
-  { label: 'Printed hardcover book',           included: hasPrintAccess.value },
+  { label: 'Printed book',           included: hasPrintAccess.value },
   { label: 'True Book premium export',         included: hasPrintAccess.value },
 ])
 

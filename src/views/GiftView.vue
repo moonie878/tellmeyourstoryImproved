@@ -81,7 +81,7 @@
         </h2>
         <p class="mx-auto mt-3 max-w-lg text-sm leading-6 text-stone-500">
           Every gift includes 100+ guided questions and voice recording, with a QR code beside each recorded story
-          if they order a printed book (from £{{ printFrom }} plus UK shipping).
+          if they order a printed book (from £{{ printFrom }} including UK delivery).
         </p>
       </div>
 
@@ -395,7 +395,7 @@ const products = computed<GiftProduct[]>(() => {
       'All story types and photos',
       'Premium layouts and cover design',
       'Tribute video creator',
-      'Print-ready layouts for hardback',
+      'Print-ready premium layouts',
     ],
     featured: false,
     discountPercent: campaignDiscount,

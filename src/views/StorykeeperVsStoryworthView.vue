@@ -158,7 +158,7 @@
       <h2 class="font-display text-2xl font-bold text-white sm:text-3xl">Try Tell Me Your Story free</h2>
       <p class="mx-auto mt-4 max-w-lg text-sm leading-7 text-[#A8A29E]">Answer 5 questions free, no card needed. See how it compares for yourself.</p>
       <router-link to="/register" class="mt-8 inline-block rounded-full bg-[#C4A882] px-8 py-3 text-sm font-semibold text-[#1C1917] transition hover:opacity-90">Start free →</router-link>
-      <p class="mt-4 text-xs text-[#9C7C5C]">5 questions free · One-time payment · Printed book from {{ printFrom }} plus UK shipping</p>
+      <p class="mt-4 text-xs text-[#9C7C5C]">5 questions free · One-time payment · Printed book from {{ printFrom }} including UK delivery</p>
     </section>
 
   </main>
@@ -188,8 +188,8 @@ const comparisonRows = [
   { feature: 'How they answer',          sk: 'Write, dictate, audio, video', sw: 'Write; phone on upgraded plans', tm: 'Type or voice' },
   { feature: 'Phone-call recording',     sk: 'Plus plan (£99)',         sw: 'Upgraded plans',              tm: '✗' },
   { feature: 'Voice in printed book',    sk: 'QR code per chapter',     sw: 'One QR code, last page',      tm: 'QR code per recorded story' },
-  { feature: 'Printed book',             sk: '✓ Hardcover included',    sw: '✓ Hardcover included',        tm: `From ${printFrom} + shipping` },
-  { feature: 'Delivery to the UK',       sk: 'Free',                    sw: 'Charged at checkout',         tm: 'UK shipping extra' },
+  { feature: 'Printed book',             sk: '✓ Hardcover included',    sw: '✓ Hardcover included',        tm: `From ${printFrom} inc. UK delivery` },
+  { feature: 'Delivery to the UK',       sk: 'Free',                    sw: 'Charged at checkout',         tm: 'UK delivery included' },
   { feature: 'Family contributors',      sk: 'Plus plan: unlimited',    sw: 'Sharing, Family Calls',       tm: 'Invite by link' },
   { feature: 'Tribute video export',     sk: '✗',                       sw: '✗',                           tm: '✓' },
 ]
@@ -219,7 +219,7 @@ const deepDive = [
     paras: [
       'Tell Me Your Story is built in Southampton. The main difference from both is how you start: answer 5 questions free, with no card, before paying anything. After that you pay once — from £3.99 for a digital keepsake — and only pay for printing if and when you want a book.',
       'Storytellers type or speak each answer. Every voice-recorded story gets its own QR code beside it in the printed book, so family can scan it and hear that exact story in their voice.',
-      `A printed softcover starts at ${printFrom} plus UK shipping, with hardcover options. If a hardcover included in one price matters most, StoryKeeper or Storyworth may suit you better; if you want to try first and keep costs low, we're the cheaper place to begin.`,
+      `A printed softcover starts at ${printFrom} including UK delivery. If a hardcover included in one price matters most, StoryKeeper or Storyworth may suit you better; if you want to try first and keep costs low, we're the cheaper place to begin.`,
     ],
   },
 ]
@@ -273,7 +273,7 @@ const faqs = [
   { q: 'Which is better — StoryKeeper or Storyworth?', a: 'It depends on the storyteller. StoryKeeper suits families who want to pay once, record voice or video, and take as long as they like. Storyworth suits families who want a steady weekly email routine and a well-known brand. If you want to try before paying anything, Tell Me Your Story lets you answer 5 questions free.' },
   { q: 'Is StoryKeeper a UK company?', a: 'Yes. StoryKeeper is based in London and has a UK store priced in pounds, with free UK delivery.' },
   { q: 'Do StoryKeeper or Storyworth offer voice recording?', a: 'Yes, both do. StoryKeeper lets storytellers record audio or video online on either plan, with phone-call recording on StoryKeeper Plus. Storyworth offers phone recording on its upgraded plans. Tell Me Your Story includes voice recording on every plan, including the free questions.' },
-  { q: 'Is there a cheaper alternative to StoryKeeper and Storyworth?', a: `Tell Me Your Story is free to start and one-time plans begin at £3.99. A printed softcover starts at ${printFrom} plus UK shipping, so the total for one book is usually lower — though StoryKeeper and Storyworth include a hardcover in their price.` },
+  { q: 'Is there a cheaper alternative to StoryKeeper and Storyworth?', a: `Tell Me Your Story is free to start and one-time plans begin at £3.99. A printed softcover starts at ${printFrom} including UK delivery, so the total for one book is usually lower — though StoryKeeper and Storyworth include a hardcover in their price.` },
 ]
 
 useSeo({

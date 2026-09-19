@@ -151,7 +151,7 @@
             <ul class="mt-4 space-y-2 text-xs leading-5 text-stone-600">
               <li>✓ 5 questions free, no card needed</li>
               <li>✓ Voice recording on every plan</li>
-              <li>✓ Printed softcover from {{ printFrom }} per copy, plus UK shipping</li>
+              <li>✓ Printed softcover from {{ printFrom }} per copy, including UK delivery</li>
               <li>✓ Every copy costs the same — order one or ten</li>
             </ul>
           </div>
@@ -216,7 +216,7 @@
       <router-link to="/register" class="mt-8 inline-block rounded-full bg-[#C4A882] px-8 py-3 text-sm font-semibold text-[#1C1917] transition hover:opacity-90">
         Try 5 questions free →
       </router-link>
-      <p class="mt-4 text-xs text-[#9C7C5C]">No card needed · One-time payment · Printed books from {{ printFrom }} plus UK shipping</p>
+      <p class="mt-4 text-xs text-[#9C7C5C]">No card needed · One-time payment · Printed books from {{ printFrom }} including UK delivery</p>
     </section>
 
   </main>
@@ -250,7 +250,7 @@ const comparison = [
   { feature: 'How they answer',         them: 'Record voice or video from a link',         us: 'Type or tap the microphone — their choice',     usPositive: true },
   { feature: 'Words in the book',       them: 'Cleaned-up transcript or AI-written story', us: 'Their own typed or spoken words',               usPositive: false },
   { feature: 'Hearing it in the book',  them: 'QR code with each story',                   us: 'QR code beside each voice-recorded story',      usPositive: false },
-  { feature: 'Printed book',            them: '8×10 colour hardcover included',            us: `Softcover from ${printFrom} plus UK shipping; hardcover available`, usPositive: false },
+  { feature: 'Printed book',            them: '8×10 colour hardcover included',            us: `Softcover from ${printFrom} including UK delivery`, usPositive: false },
   { feature: 'Extra copies',            them: '$69 each',                                  us: 'Same price as the first copy',                  usPositive: false },
   { feature: 'Delivery to the UK',      them: 'Ships from the US; extra fee, about 3 weeks', us: 'Printed to order and delivered to UK addresses', usPositive: false },
   { feature: 'If you stop paying',      them: 'Keep listening, reading and downloading; no new recordings', us: 'Nothing to renew',          usPositive: false },
@@ -259,7 +259,7 @@ const comparison = [
 const features = [
   { icon: '📖', title: '100+ guided questions',  desc: 'Every chapter of life — childhood, family, work, love and the lessons learned. Answer in any order, at your own pace.' },
   { icon: '🎙️', title: 'Type or speak',          desc: 'Tap the microphone and talk, or type — whichever suits each question. Recordings are kept, with a QR code beside that story in the printed book.' },
-  { icon: '📚', title: 'Printed keepsake books', desc: `Printed to order and delivered to UK addresses. Softcover from ${printFrom} plus shipping, with hardcover options.` },
+  { icon: '📚', title: 'Printed keepsake books', desc: `Printed to order and delivered to UK addresses. Softcover from ${printFrom} including UK delivery.` },
   { icon: '💷', title: 'One-time payment',        desc: 'Pay once, in pounds, for the plan you choose. No renewal date and nothing to cancel.' },
   { icon: '✨', title: 'Writing help',            desc: 'Gentle prompts help expand short answers — the words always stay theirs.' },
   { icon: '🤍', title: 'Family can read along',  desc: 'Share a link so the whole family can read the story as it grows, at no extra cost.' },
@@ -277,7 +277,7 @@ const faqs = [
   },
   {
     q: 'Is Tell Me Your Story cheaper than Remento?',
-    a: `For one printed book, usually. Remento is $99 a year with a colour hardcover included, plus UK shipping. Tell Me Your Story starts free, with one-time plans from £3.99 and printed softcovers from ${printFrom} plus UK shipping. For several hardcover copies, compare the per-copy prices for your order.`,
+    a: `For one printed book, usually. Remento is $99 a year with a colour hardcover included; UK shipping is extra. Tell Me Your Story starts free, with one-time plans from £3.99 and printed softcovers from ${printFrom} including UK delivery. For several hardcover copies, compare the per-copy prices for your order.`,
   },
   {
     q: 'Can my parent type answers instead of recording them?',

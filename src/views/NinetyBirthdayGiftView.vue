@@ -68,7 +68,7 @@
         <div class="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
           <div v-for="tier in tiers" :key="tier.name" class="rounded-3xl border p-5 text-center"
             :class="tier.featured ? 'border-[#7C5C3B] bg-[#FAF7F4]' : 'border-stone-200 bg-white'">
-            <p v-if="tier.featured" class="mb-2 text-[10px] font-semibold uppercase tracking-wider text-[#7C5C3B]">Most popular</p>
+            <p v-if="tier.featured" class="mb-2 text-[10px] font-semibold uppercase tracking-wider text-[#7C5C3B]">Recommended</p>
             <p class="text-xs font-medium text-stone-500">{{ tier.name }}</p>
             <p class="mt-2 text-2xl font-bold text-stone-900">£{{ tier.price }}</p>
             <p class="mt-2 text-xs leading-5 text-stone-500">{{ tier.desc }}</p>
@@ -76,7 +76,7 @@
               :class="tier.featured ? 'bg-[#7C5C3B] text-white hover:opacity-90' : 'border border-stone-300 text-stone-700 hover:bg-stone-50'">Gift this →</router-link>
           </div>
         </div>
-        <p class="mt-4 text-xs text-stone-400">Add a printed hardcover book from £21.99 — delivered to their door</p>
+        <p class="mt-4 text-xs text-stone-400">Add a printed book from £21.99 including UK delivery</p>
       </div>
     </section>
 
@@ -117,9 +117,9 @@
 import { useSeo } from '../composables/useSeo'
 
 const features = [
-  { icon: '📖', title: '100 guided questions', desc: 'Covering every chapter of nine decades — childhood, work, family, love, and legacy.' },
+  { icon: '📖', title: '100+ guided questions', desc: 'Covering every chapter of nine decades — childhood, work, family, love, and legacy.' },
   { icon: '🎙️', title: 'Voice recordings', desc: 'Answer by speaking. Their voice preserved in the printed book via QR codes — forever.' },
-  { icon: '📚', title: 'UK printed hardcover', desc: 'Professionally printed and bound. Delivered to their door. From £21.99.' },
+  { icon: '📚', title: 'Printed keepsake book', desc: 'Professionally printed and bound. Delivered to their door. From £21.99.' },
   { icon: '⏱️', title: 'At their own pace', desc: 'One question at a time, no pressure, no deadline. Everything saves automatically.' },
   { icon: '✨', title: 'Simple to use', desc: 'Works on any phone, tablet, or computer. Simple enough for anyone at any age.' },
   { icon: '🤍', title: 'For the whole family', desc: 'Share with children, grandchildren, and great-grandchildren — all reading together.' },
@@ -134,7 +134,7 @@ const tiers = [
 
 useSeo({
   title: '90th Birthday Gift Ideas 2026 — Tell Me Your Story | Life Story Keepsake Book',
-  description: 'The most meaningful 90th birthday gift — capture nine decades of stories in a beautiful keepsake book. Guided questions, voice recordings, UK printed hardcover. From £3.99.',
+  description: 'The most meaningful 90th birthday gift — capture nine decades of stories in a beautiful keepsake book. Guided questions, voice recordings, printed keepsake book. From £3.99.',
   canonical: 'https://tellmeyourstory.uk/90th-birthday-gift-ideas',
 })
 </script>

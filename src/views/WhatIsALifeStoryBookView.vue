@@ -140,7 +140,7 @@
     <section class="bg-[#1C1917] px-5 py-16 text-center sm:px-8 sm:py-20">
       <p class="text-xs font-medium uppercase tracking-[0.22em] text-[#9C7C5C]">Create one today</p>
       <h2 class="mt-4 font-display text-2xl font-bold text-white sm:text-3xl">Start a life story book for free</h2>
-      <p class="mx-auto mt-4 max-w-lg text-sm leading-7 text-[#A8A29E]">100 questions already written. Voice recordings built in. Beautifully printed hardcover delivered to your door. Free to start.</p>
+      <p class="mx-auto mt-4 max-w-lg text-sm leading-7 text-[#A8A29E]">100 questions already written. Voice recordings built in. Beautifully printed book delivered to your door. Free to start.</p>
       <router-link to="/register" class="mt-8 inline-block rounded-full bg-[#C4A882] px-8 py-3 text-sm font-semibold text-[#1C1917] transition hover:opacity-90">Create a life story book free →</router-link>
       <p class="mt-4 text-xs text-[#9C7C5C]">Free to start · One-time payment · Printed book from £21.99</p>
     </section>

@@ -32,7 +32,7 @@
           When someone is approaching the end of their life, there is often a deep human desire to be remembered — to feel that their life mattered and their stories will outlast them.
         </p>
         <p class="mx-auto mt-4 max-w-xl text-sm leading-7 text-stone-500">
-          Tell Me Your Story gives them a structured, gentle way to share those stories. 100 guided questions, answered at their own pace, in their own words — turned into a beautifully printed keepsake book their family will treasure forever.
+          Tell Me Your Story gives them a structured, gentle way to share those stories. 100+ guided questions, answered at their own pace, in their own words — turned into a beautifully printed keepsake book their family will treasure forever.
         </p>
         <div class="mx-auto mt-6 max-w-xl flex flex-wrap justify-center gap-3">
           <router-link to="/dementia-life-story-book" class="text-xs text-[#7C5C3B] underline hover:no-underline">Dementia life story books →</router-link>
@@ -133,9 +133,9 @@
 import { useSeo } from '../composables/useSeo'
 
 const features = [
-  { icon: '📖', title: '100 guided questions', desc: 'Covering every chapter of life — from earliest memories to the legacy they want to leave. Gentle, open-ended questions that draw out the stories that matter most.' },
+  { icon: '📖', title: '100+ guided questions', desc: 'Covering every chapter of life — from earliest memories to the legacy they want to leave. Gentle, open-ended questions that draw out the stories that matter most.' },
   { icon: '🎙️', title: 'Voice recordings', desc: 'They can answer by speaking naturally. A QR code in the printed book lets family hear their actual voice telling the story — forever.' },
-  { icon: '📚', title: 'UK printed hardcover', desc: 'A professionally printed and bound hardcover book delivered to the door. Something physical to hold, share, and pass down.' },
+  { icon: '📚', title: 'Printed keepsake book', desc: 'A professionally printed and bound book delivered to the door. Something physical to hold, share, and pass down.' },
   { icon: '⏱️', title: 'No pressure or deadline', desc: 'Answer one question at a time, over as many sessions as needed. Everything saves automatically. No subscription running down.' },
   { icon: '📸', title: 'Photos alongside answers', desc: 'Add photos next to the memories they relate to — bringing each story to life on the page.' },
   { icon: '🤍', title: 'Share with family', desc: 'A link lets the whole family read along as the story grows — connecting people across distances at a time when that matters most.' },
@@ -150,7 +150,7 @@ const tips = [
 
 useSeo({
   title: 'End of Life Gift UK — Capture Their Life Story | Tell Me Your Story',
-  description: 'A meaningful end of life gift — help someone capture their memories, voice, and stories in a beautiful keepsake book. Guided questions, voice recordings, UK printed hardcover.',
+  description: 'A meaningful end of life gift — help someone capture their memories, voice, and stories in a beautiful keepsake book. Guided questions, voice recordings, printed keepsake book.',
   canonical: 'https://tellmeyourstory.uk/end-of-life-gift',
 })
 </script>

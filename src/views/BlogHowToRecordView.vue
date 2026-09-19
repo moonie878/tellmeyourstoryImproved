@@ -2,6 +2,13 @@
   <main class="bg-white">
 
     <!-- Hero -->
+    <!-- Free printable: for readers not ready to start yet -->
+    <section class="px-5 py-14 sm:px-8 sm:py-16">
+      <div class="mx-auto max-w-5xl">
+        <EmailCaptureForm source="Blog-how-to-record" />
+      </div>
+    </section>
+
     <section class="bg-[#F5F0E8] px-5 py-16 sm:px-8 sm:py-20">
       <div class="mx-auto max-w-3xl text-center">
         <p class="eyebrow">Tell Me Your Story · Guide</p>
@@ -132,7 +139,7 @@
               This is what Tell Me Your Story was built for. Instead of coordinating questions, recording sessions, and then somehow turning it all into something presentable — the app does all of that for you.
             </p>
             <p class="article-p mt-3">
-              Your parent works through 100 guided questions at their own pace — on their phone or computer, answering as much or as little as they want. Every answer saves automatically. They can add photos alongside each one. And when they're ready, everything turns into a beautifully designed keepsake book or video.
+              Your parent works through 100+ guided questions at their own pace — on their phone or computer, answering as much or as little as they want. Every answer saves automatically. They can add photos alongside each one. And when they're ready, everything turns into a beautifully designed keepsake book or video.
             </p>
             <p class="article-p mt-3">
               <span class="font-medium text-[#1C1917]">Best for:</span> Families who want a finished keepsake, not just recordings. Parents who are comfortable typing on their phone. Situations where distance makes in-person conversations difficult.
@@ -248,7 +255,7 @@
             The easiest way to capture their story
           </h3>
           <p class="mx-auto mt-4 max-w-lg text-sm leading-7 text-[#A8A29E]">
-            100 guided questions, automatic saving, and a beautifully designed keepsake book or video at the end. Free to start — no credit card needed.
+            100+ guided questions, automatic saving, and a beautifully designed keepsake book or video at the end. Free to start — no credit card needed.
           </p>
           <div class="mt-4 flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm text-[#9C7C5C]">
             <span>✦ Free to start</span>
@@ -278,6 +285,7 @@
 </template>
 
 <script setup lang="ts">
+import EmailCaptureForm from '../components/Marketing/EmailCaptureForm.vue'
 import { useSeo } from '../composables/useSeo'
 
 useSeo({

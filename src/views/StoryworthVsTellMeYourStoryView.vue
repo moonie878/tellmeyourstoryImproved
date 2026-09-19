@@ -155,7 +155,7 @@
       <h2 class="font-display text-2xl font-bold text-white sm:text-3xl">Try Tell Me Your Story free</h2>
       <p class="mx-auto mt-4 max-w-lg text-sm leading-7 text-[#A8A29E]">No subscription, no card needed. See how it compares for yourself.</p>
       <router-link to="/register" class="mt-8 inline-block rounded-full bg-[#C4A882] px-8 py-3 text-sm font-semibold text-[#1C1917] transition hover:opacity-90">Start free →</router-link>
-      <p class="mt-4 text-xs text-[#9C7C5C]">5 questions free · One-time payment · Printed book from {{ printFrom }} plus UK shipping</p>
+      <p class="mt-4 text-xs text-[#9C7C5C]">5 questions free · One-time payment · Printed book from {{ printFrom }} including UK delivery</p>
     </section>
 
   </main>
@@ -182,8 +182,8 @@ const comparisonRows = [
   { feature: 'Question format',          sw: 'Weekly email or text (adjustable)', tm: 'Guided app, your own pace' },
   { feature: 'Voice recording',          sw: 'By phone, upgraded plans',        tm: '✓ Every plan' },
   { feature: 'Voice in printed book',    sw: 'One QR code, last page',          tm: 'QR code beside each story' },
-  { feature: 'Printed book',             sw: '✓ Included in plan',              tm: `From ${printFrom} + shipping` },
-  { feature: 'Hardcover option',         sw: '✓',                               tm: '✓' },
+  { feature: 'Printed book',             sw: '✓ Included in plan',              tm: `From ${printFrom} inc. UK delivery` },
+  { feature: 'Hardcover option',         sw: '✓',                               tm: 'Softcover for now' },
   { feature: 'Delivery to the UK',       sw: 'Printed US/Europe, shipping extra', tm: 'Delivered to UK addresses' },
   { feature: 'Photo support',            sw: '✓',                               tm: '✓' },
   { feature: 'AI help',                  sw: 'Guided interviews, proofreader',  tm: 'Writing assist' },
@@ -209,8 +209,8 @@ const deepDive = [
     title: 'Tell Me Your Story — built in the UK, with voice at the centre',
     paras: [
       'Tell Me Your Story was built around the idea that voice matters as much as the written word. Tap the microphone and talk; the words are typed up and the recording is kept. In the printed book, a QR code sits beside every voice-recorded story, so anyone holding the book can scan it and hear that exact story in their own voice.',
-      `There's no annual plan. You start with 5 questions free, no card required, and go at your own pace. When you're ready, you pay once: digital plans start from £3.99 and a printed softcover starts from ${printFrom} plus UK shipping.`,
-      'Printed books are made to order and delivered to UK addresses, typically within 10–14 days. Hardcover and dust-jacket options are available.',
+      `There's no annual plan. You start with 5 questions free, no card required, and go at your own pace. When you're ready, you pay once: digital plans start from £3.99 and a printed softcover starts from ${printFrom} including UK delivery.`,
+      'Printed books are made to order and delivered to UK addresses, typically within 10–14 days.',
       'Tell Me Your Story also offers a tribute video — turning photos, music and a message into a video keepsake, which many families use at a celebration of life or to share with relatives abroad.',
     ],
   },
@@ -250,7 +250,7 @@ const verdicts = [
 // Shown on the page AND used for the FAQPage schema, so they always match.
 const faqs = [
   { q: 'What is the main difference between Storyworth and Tell Me Your Story?', a: 'Storyworth is an annual plan built around weekly questions by email or text, with a hardcover included and phone voice recording on upgraded plans. Tell Me Your Story is a one-time payment: you answer in the app at your own pace, voice recording is on every plan, and every recorded story gets its own QR code in the printed book.' },
-  { q: 'Is Tell Me Your Story cheaper than Storyworth?', a: `For one printed book, usually. Storyworth's UK plans start at £49 a year and include a hardcover. Tell Me Your Story is free to start, with one-time plans from £3.99 and printed softcovers from ${printFrom} plus UK shipping. If you want several hardcover copies, compare the per-copy prices for your order.` },
+  { q: 'Is Tell Me Your Story cheaper than Storyworth?', a: `For one printed book, usually. Storyworth's UK plans start at £49 a year and include a hardcover. Tell Me Your Story is free to start, with one-time plans from £3.99 and printed softcovers from ${printFrom} including UK delivery. If you want several hardcover copies, compare the per-copy prices for your order.` },
   { q: 'Does Storyworth offer voice recording?', a: 'Yes, on its upgraded plans — storytellers can record stories over the phone and they are transcribed. The printed book has one QR code on the last page linking to the stories and recordings online. Tell Me Your Story includes voice recording on every plan and prints a QR code beside each recorded story.' },
   { q: 'Is there a UK alternative to Storyworth?', a: 'Yes — Tell Me Your Story is built and run in the UK, priced in pounds, with printed books delivered to UK addresses, voice recording on every plan and no annual plan.' },
   { q: 'Can I try Tell Me Your Story before paying?', a: 'Yes. You can answer 5 questions free with no card required, and your answers are saved if you decide to upgrade.' },

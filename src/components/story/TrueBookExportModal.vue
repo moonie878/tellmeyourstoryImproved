@@ -70,7 +70,7 @@
       </p>
       <p class="mt-1 text-xs leading-5 text-stone-500">
         Once you've downloaded your True Book PDF, you can order a professionally
-        printed and bound hardcover or softcover book delivered to your door.
+        printed and bound softcover book delivered to your door.
         Available from the dashboard after export.
       </p>
     </div>

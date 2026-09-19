@@ -162,7 +162,7 @@
       <router-link to="/register" class="mt-8 inline-block rounded-full bg-[#C4A882] px-8 py-3 text-sm font-semibold text-[#1C1917] transition hover:opacity-90">
         Try 5 questions free →
       </router-link>
-      <p class="mt-4 text-xs text-[#9C7C5C]">5 questions free · One-time from £3.99 · Printed book from {{ printFrom }} plus UK shipping</p>
+      <p class="mt-4 text-xs text-[#9C7C5C]">5 questions free · One-time from £3.99 · Printed book from {{ printFrom }} including UK delivery</p>
     </section>
 
   </main>

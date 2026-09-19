@@ -174,7 +174,7 @@
       <h2 class="font-display text-2xl font-bold text-white sm:text-3xl">Your story is worth telling</h2>
       <p class="mx-auto mt-4 max-w-lg text-sm leading-7 text-[#A8A29E]">Start capturing it today — free, in your own words, at your own pace. A legacy worth keeping.</p>
       <router-link to="/register" class="mt-8 inline-block rounded-full bg-[#C4A882] px-8 py-3 text-sm font-semibold text-[#1C1917] transition hover:opacity-90">Start your story free →</router-link>
-      <p class="mt-4 text-xs text-[#9C7C5C]">Free to start · One-time payment · Printed book from £34.98</p>
+      <p class="mt-4 text-xs text-[#9C7C5C]">Free to start · One-time payment · Printed book from £21.99</p>
     </section>
 
   </main>
@@ -252,7 +252,7 @@ const faqs = [
   { q: 'How long should a legacy letter be?', a: 'There\'s no right length. Some of the most powerful legacy letters are a single page. Others run to many pages. What matters is that it\'s honest and specific — not how long it is. Write as much as you have to say and no more.' },
   { q: 'When should you write a legacy letter?', a: 'Now. Don\'t wait until you\'re facing illness or the end of your life. A legacy letter is more useful and more honest when written from the middle of a life — and it can be updated and added to over the years. Many people find writing one clarifies what they actually believe and value.' },
   { q: 'Should I give my legacy letter to my children now or leave it with my will?', a: 'Both approaches work. Sharing it now opens a conversation and lets you discuss it together — which can be deeply meaningful. Leaving it with your will means they receive it at the moment it may mean most. Some people do both: share a version now and leave a fuller or updated version for later.' },
-  { q: 'Can Tell Me Your Story help me write a legacy letter?', a: 'Yes. Tell Me Your Story\'s 100 guided questions cover every chapter of life — including values, lessons, hopes, and what you want to pass on. The answers become a beautifully printed keepsake book that works as a comprehensive legacy letter and life story combined.' },
+  { q: 'Can Tell Me Your Story help me write a legacy letter?', a: 'Yes. Tell Me Your Story\'s 100+ guided questions cover every chapter of life — including values, lessons, hopes, and what you want to pass on. The answers become a beautifully printed keepsake book that works as a comprehensive legacy letter and life story combined.' },
 ]
 
 useSeo({

@@ -179,8 +179,8 @@
           <div class="step-item-card">
             <div class="step-num">4</div>
             <div>
-              <p class="tip-title">Preview free, download for £9.99</p>
-              <p class="tip-desc mt-1">Preview your tribute video with a watermark at no cost. When you're happy with it, download the full HD version for £9.99 — no account needed.</p>
+              <p class="tip-title">Preview free, download for £19.99</p>
+              <p class="tip-desc mt-1">Preview your tribute video with a watermark at no cost. When you're happy with it, download the full HD version for £19.99 — no account needed.</p>
             </div>
           </div>
         </div>
@@ -278,7 +278,7 @@
             Create a memorial tribute video today
           </h3>
           <p class="mx-auto mt-4 max-w-lg text-sm leading-7 text-[#A8A29E]">
-            Upload photos, add music, and create a beautiful tribute in minutes. Free to preview — £9.99 to download the full HD version. No account needed.
+            Upload photos, add music, and create a beautiful tribute in minutes. Free to preview — £19.99 to download the full HD version. No account needed.
           </p>
           <div class="mt-4 flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm text-[#9C7C5C]">
             <span>✦ Free to preview</span>
@@ -344,7 +344,7 @@ useSeo({
             name: 'How much does a memorial tribute video cost?',
             acceptedAnswer: {
               '@type': 'Answer',
-              text: 'You can create and preview a memorial tribute video for free using Tell Me Your Story. Downloading the full HD version without a watermark costs £9.99 — a one-time payment with no account required.',
+              text: 'You can create and preview a memorial tribute video for free using Tell Me Your Story. Downloading the full HD version without a watermark costs £19.99 — a one-time payment with no account required.',
             },
           },
           {

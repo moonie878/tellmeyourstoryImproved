@@ -247,9 +247,9 @@ const careHomeItems = [
 ]
 
 const features = [
-  { icon: '📖', title: '100 guided questions', desc: 'Covering every chapter of life — from earliest memories to legacy. Questions that draw out the stories families never thought to ask, designed to work across different levels of ability.' },
+  { icon: '📖', title: '100+ guided questions', desc: 'Covering every chapter of life — from earliest memories to legacy. Questions that draw out the stories families never thought to ask, designed to work across different levels of ability.' },
   { icon: '🎙️', title: 'Voice recordings with QR codes', desc: 'They can answer by speaking rather than typing. A QR code is printed in the book so family can hear their voice any time — even years later, however the illness progresses.' },
-  { icon: '📚', title: 'Professionally printed hardcover', desc: 'A beautifully printed and bound book delivered to the door. Something physical to hold, share with carers, and pass down to the family.' },
+  { icon: '📚', title: 'Professionally printed book', desc: 'A beautifully printed and bound book delivered to the door. Something physical to hold, share with carers, and pass down to the family.' },
   { icon: '🤍', title: 'Share with carers', desc: 'Share a private link so care home staff can read the life story online. Helps carers provide more personalised, person-centred support.' },
   { icon: '📸', title: 'Photos alongside answers', desc: 'Add photos next to the answers they relate to — familiar faces and places that can also serve as memory prompts during care.' },
   { icon: '⏱️', title: 'No pressure, no deadline', desc: 'Answer one question at a time, over as many sessions as needed. Everything saves automatically. Come back to it whenever they\'re having a good day.' },
