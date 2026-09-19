@@ -753,58 +753,83 @@ app.get('/cron/nurture-gate-email', async (req, res) => {
 })
 
 // ─── Nurture: Trustpilot review request (cron) ───────────────────────────────
+// Asks engaged users (10+ answered questions, account at least 7 days old) for an
+// honest review, once. Skips anyone who opted out at signup or unsubscribed.
+// Call daily: GET /cron/trustpilot-ask?key=CRON_SECRET   (add &dry=1 to preview)
+const REVIEW_MIN_ANSWERS = 10
+const REVIEW_MIN_ACCOUNT_DAYS = 7
+
 app.get('/cron/trustpilot-ask', async (req, res) => {
   if (req.query.key !== process.env.CRON_SECRET) {
     return res.status(401).json({ error: 'Unauthorized' })
   }
 
+  const dryRun = req.query.dry === '1'
+  const report = []
+
   try {
-    // Find users with 10+ answers (engaged, likely paid)
-    const { data: engagedUsers, error: queryErr } = await supabaseAdmin
-      .rpc('get_engaged_users_for_review', {})
-
-    // Fallback: manual query if RPC doesn't exist
-    // Get all users with 10+ story answers
-    const { data: answerCounts, error: countErr } = await supabaseAdmin
-      .from('story_answers')
-      .select('user_id')
-
-    if (countErr) {
-      console.error('Trustpilot cron query error:', countErr.message)
-      return res.status(500).json({ error: countErr.message })
+    // story_answers has no user_id — count non-empty answers per story,
+    // then map each story to its owner.
+    // Supabase returns at most 1,000 rows per request, so page through
+    const answerRows = []
+    for (let from = 0; ; from += 1000) {
+      const { data, error: answersErr } = await supabaseAdmin
+        .from('story_answers')
+        .select('project_id, answer')
+        .not('answer', 'is', null)
+        .range(from, from + 999)
+      if (answersErr) throw answersErr
+      answerRows.push(...(data || []))
+      if (!data || data.length < 1000) break
     }
 
-    // Count answers per user
-    const userCounts = {}
-    for (const row of answerCounts || []) {
-      userCounts[row.user_id] = (userCounts[row.user_id] || 0) + 1
+    const answersPerProject = {}
+    for (const row of answerRows || []) {
+      if (row.answer && row.answer.trim()) {
+        answersPerProject[row.project_id] = (answersPerProject[row.project_id] || 0) + 1
+      }
     }
 
-    // Filter to users with 5+ answers
-    const qualifiedUserIds = Object.entries(userCounts)
-      .filter(([_, count]) => count >= 5)
+    const projectIds = Object.keys(answersPerProject)
+    if (!projectIds.length) return res.json({ sent: 0, message: 'No answers yet' })
+
+    const answersPerUser = {}
+    for (let i = 0; i < projectIds.length; i += 200) {
+      const { data: projects } = await supabaseAdmin
+        .from('story_projects')
+        .select('id, user_id')
+        .in('id', projectIds.slice(i, i + 200))
+      for (const p of projects || []) {
+        if (!p.user_id) continue
+        answersPerUser[p.user_id] = (answersPerUser[p.user_id] || 0) + (answersPerProject[p.id] || 0)
+      }
+    }
+
+    const qualifiedUserIds = Object.entries(answersPerUser)
+      .filter(([, count]) => count >= REVIEW_MIN_ANSWERS)
       .map(([userId]) => userId)
-
-    if (qualifiedUserIds.length === 0) {
-      return res.json({ sent: 0, message: 'No qualified users' })
-    }
 
     let sentCount = 0
 
     for (const userId of qualifiedUserIds) {
-      // Check we haven't already sent this email
       const { data: alreadySent } = await supabaseAdmin
         .from('nurture_emails')
         .select('id')
         .eq('user_id', userId)
         .eq('email_type', 'trustpilot_ask')
         .maybeSingle()
-
       if (alreadySent) continue
 
-      // Get user email
       const { data: { user } } = await supabaseAdmin.auth.admin.getUserById(userId)
       if (!user?.email) continue
+
+      const ageDays = (Date.now() - new Date(user.created_at).getTime()) / 86_400_000
+      if (ageDays < REVIEW_MIN_ACCOUNT_DAYS) continue
+      if (user.user_metadata?.email_opt_in === false) continue
+      if (await isUnsubscribed(user.email)) continue
+
+      report.push({ email: user.email, answers: answersPerUser[userId] })
+      if (dryRun) continue
 
       const firstName = user.user_metadata?.full_name?.split(' ')[0]
         || user.user_metadata?.name?.split(' ')[0]
@@ -814,36 +839,37 @@ app.get('/cron/trustpilot-ask', async (req, res) => {
         await resend.emails.send({
           from: 'Mark at Tell Me Your Story <mark-griffiths@tellmeyourstory.uk>',
           to: user.email,
-          subject: 'Could I ask a small favour? 💛',
+          subject: 'Could I ask a small favour?',
           html: `
             <div style="font-family: Georgia, serif; max-width: 600px; margin: 0 auto; padding: 40px 20px;">
-              <h1 style="font-size: 24px; color: #1C1917;">Hi${firstName ? ` ${firstName}` : ''} 💛</h1>
+              <h1 style="font-size: 24px; color: #1C1917;">Hi${firstName ? ` ${escapeHtml(firstName)}` : ''}</h1>
               <p style="font-size: 15px; color: #5C534E; line-height: 1.7;">
-                It's Mark from Tell Me Your Story.
+                It's Mark from Tell Me Your Story. You've answered ${answersPerUser[userId]} questions so far — thank you for trusting me with those memories.
               </p>
               <p style="font-size: 15px; color: #5C534E; line-height: 1.7;">
-                I'm building this on my own — no team, no investors, just me — and honest reviews make a huge difference to a small business like this. They help other families feel confident enough to start capturing their stories too.
+                I'm building this on my own, and honest reviews make a huge difference to a small business. They help other families decide whether it's right for them.
               </p>
               <p style="font-size: 15px; color: #5C534E; line-height: 1.7;">
-                If you've had a good experience so far, would you mind leaving a quick review on Trustpilot? Even a sentence or two goes a long way.
+                Would you share your honest experience on Trustpilot — whatever it has been? Even a sentence or two helps.
               </p>
               <div style="background: #F5F0E8; border-radius: 16px; padding: 24px; margin: 24px 0; text-align: center;">
-                <a href="https://uk.trustpilot.com/evaluate/tellmeyourstory.uk" style="display: inline-block; background: #7C5C3B; color: white; padding: 12px 32px; border-radius: 100px; font-size: 14px; text-decoration: none; font-weight: 500;">Leave a review on Trustpilot</a>
-                <p style="font-size: 12px; color: #8C847E; margin-top: 10px;">Takes about 30 seconds</p>
+                <a href="https://uk.trustpilot.com/evaluate/tellmeyourstory.uk" style="display: inline-block; background: #7C5C3B; color: white; padding: 12px 32px; border-radius: 100px; font-size: 14px; text-decoration: none; font-weight: 500;">Write a review on Trustpilot</a>
+                <p style="font-size: 12px; color: #8C847E; margin-top: 10px;">Takes about a minute</p>
               </div>
               <p style="font-size: 15px; color: #5C534E; line-height: 1.7;">
-                Thank you — and if there's anything I can improve, just reply to this email. I read every message myself.
+                And if there's anything I could do better, just reply to this email. I read every message myself.
               </p>
               <p style="font-size: 14px; color: #3C3530; margin-top: 28px;">
-                Warm wishes,<br>
-                Mark<br>
-                Founder, Tell Me Your Story
+                Warm wishes,<br>Mark<br>
+                <span style="color: #8C847E; font-size: 13px;">Founder, Tell Me Your Story</span>
               </p>
-              <p style="font-size: 12px; color: #A8A29E; margin-top: 32px;">
-                Tell Me Your Story · <a href="https://tellmeyourstory.uk" style="color: #7C5C3B;">tellmeyourstory.uk</a>
-              </p>
+              ${gateEmailFooter(user.email)}
             </div>
           `,
+          headers: {
+            'List-Unsubscribe': `<${unsubscribeUrl(user.email)}>`,
+            'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
+          },
         })
 
         await supabaseAdmin
@@ -857,7 +883,7 @@ app.get('/cron/trustpilot-ask', async (req, res) => {
       }
     }
 
-    res.json({ sent: sentCount, checked: qualifiedUserIds.length })
+    res.json({ sent: sentCount, checked: qualifiedUserIds.length, dryRun, ...(dryRun ? { wouldSend: report } : {}) })
   } catch (err) {
     console.error('Trustpilot cron error:', err.message)
     res.status(500).json({ error: err.message })
