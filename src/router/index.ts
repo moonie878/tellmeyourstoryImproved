@@ -1,8 +1,5 @@
 import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
 import { supabase } from '../lib/supabase'
-import ForgotPasswordView from '../views/ForgotPasswordView.vue'
-import ResetPasswordView from '../views/ResetPasswordView.vue'
-import ContactView from '../views/ContactView.vue'
 
 /**
  * Every public route here is prerendered and added to the sitemap
@@ -21,7 +18,7 @@ const routes: RouteRecordRaw[] = [
   { path: '/tribute', name: 'tribute', component: () => import('../views/TributeView.vue'), meta: { public: true } },
   { path: '/my-story', name: 'my-story', component: () => import('../views/MyStoryView.vue'), meta: { seo: { title: 'My Story — Tell Me Your Story' } } },
   { path: '/help', name: 'help', component: () => import('../views/HelpVideosView.vue'), meta: { seo: { title: 'Help & Guides — Tell Me Your Story' } } },
-  { path: '/contact', name: 'contact', component: ContactView },
+  { path: '/contact', name: 'contact', component: () => import('../views/ContactView.vue') },
   { path: '/christmas', name: 'christmas', component: () => import('../views/ChristmasView.vue') },
   { path: '/fathers-day', name: 'fathers-day', component: () => import('../views/FathersDayView.vue') },
 
@@ -33,8 +30,8 @@ const routes: RouteRecordRaw[] = [
   // ── Auth (noindex, not prerendered) ───────────────────────────────────────
   { path: '/login', name: 'login', component: () => import('../views/LoginView.vue') },
   { path: '/register', name: 'register', component: () => import('../views/RegisterView.vue') },
-  { path: '/forgot-password', name: 'forgot-password', component: ForgotPasswordView },
-  { path: '/reset-password', name: 'reset-password', component: ResetPasswordView },
+  { path: '/forgot-password', name: 'forgot-password', component: () => import('../views/ForgotPasswordView.vue') },
+  { path: '/reset-password', name: 'reset-password', component: () => import('../views/ResetPasswordView.vue') },
 
   // ── App (logged in) ───────────────────────────────────────────────────────
   { path: '/dashboard', name: 'dashboard', component: () => import('../views/DashboardView.vue'), meta: { requiresAuth: true } },

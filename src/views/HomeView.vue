@@ -41,7 +41,7 @@
               </router-link>
             </div>
 
-            <div class="mt-5 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs text-[#8C847E] md:justify-start">
+            <div class="mt-5 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs text-[#716963] md:justify-start">
               <span class="flex items-center gap-1.5"><span class="check">✓</span> 5 questions free</span>
               <span class="flex items-center gap-1.5"><span class="check">✓</span> No card needed</span>
               <router-link to="/example" class="font-medium text-[#7C5C3B] underline-offset-4 hover:underline" @click="trackExampleStory">
@@ -67,7 +67,7 @@
               />
               </picture>
               <div class="hero-badge">
-                <span class="hero-badge-icon" aria-hidden="true">🎙️</span>
+                <span class="hero-badge-icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="17" x2="12" y2="22"/></svg></span>
                 <div>
                   <p class="hero-badge-title">Voice recording saved</p>
                   <p class="hero-badge-sub">QR code in the printed book</p>
@@ -277,13 +277,13 @@
 
     <div class="section-label text-center">What families say</div>
     <h2 class="section-title mt-3 text-center">
-      Stories that matter, kept forever
+      Stories that matter, kept for the family
     </h2>
 
     <div class="mt-12 grid gap-5 md:grid-cols-3 md:gap-6">
 
       <div class="reveal reveal-delay-1 testimonial-card">
-  <div class="testimonial-stars">★★★★★</div>
+  <div class="testimonial-stars" role="img" aria-label="5 out of 5 stars">★★★★★</div>
   <p class="testimonial-quote">
     "I wasn't sure what to expect at first, but I found the app really easy to use. It guides you through everything step by step. I loved being able to add memories and stories in my own way, and seeing it all come together was really special."
   </p>
@@ -297,7 +297,7 @@
 </div>
 
 <div class="reveal reveal-delay-2 testimonial-card testimonial-card-accent">
-  <div class="testimonial-stars" style="color:#C4A882;">★★★★★</div>
+  <div class="testimonial-stars" role="img" aria-label="5 out of 5 stars" style="color:#C4A882;">★★★★★</div>
   <p class="testimonial-quote" style="color:#E8E0D8;">
     "An amazing app to use to record your memories and make stories for your family to cherish! It's made to what you want and how you want to tell them. We absolutely love the ones we have made!"
   </p>
@@ -305,13 +305,13 @@
     <div class="testimonial-avatar" style="background:#7C5C3B;">H</div>
     <div>
       <p class="testimonial-name" style="color:white;">Hollie</p>
-      <p class="testimonial-detail" style="color:#8C847E;">Verified Trustpilot review</p>
+      <p class="testimonial-detail" style="color:#716963;">Verified Trustpilot review</p>
     </div>
   </div>
 </div>
 
 <div class="reveal reveal-delay-3 testimonial-card">
-  <div class="testimonial-stars">★★★★★</div>
+  <div class="testimonial-stars" role="img" aria-label="5 out of 5 stars">★★★★★</div>
   <p class="testimonial-quote">
     "This app takes you through every step to create lovely memories and tributes. Such a lovely idea to create something truly special for family and friends to look back on."
   </p>
@@ -327,7 +327,7 @@
     </div>
 
     <!-- Trust bar -->
-    <div class="mt-12 flex flex-wrap items-center justify-center gap-x-8 gap-y-4 text-sm text-[#8C847E]">
+    <div class="mt-12 flex flex-wrap items-center justify-center gap-x-8 gap-y-4 text-sm text-[#716963]">
       <span class="flex items-center gap-2"><span class="text-[#7C5C3B]">✓</span> Free to start</span>
       <span class="flex items-center gap-2"><span class="text-[#7C5C3B]">✓</span> No subscription</span>
       <span class="flex items-center gap-2"><span class="text-[#7C5C3B]">✓</span> Voice recording included</span>
@@ -342,7 +342,7 @@
     rel="noopener noreferrer"
     class="inline-flex items-center gap-2 rounded-full border border-[#E8DDD0] bg-white px-5 py-2.5 text-sm text-stone-600 transition hover:border-[#00B67A]"
   >
-    <span class="text-base" style="color: #00B67A;">★★★★★</span>
+    <span class="text-base" style="color: #00B67A;" aria-hidden="true">★★★★★</span>
     <span>Rated <strong class="text-stone-900">5.0</strong> on</span>
     <span class="font-semibold" style="color: #00B67A;">Trustpilot</span>
     <span class="text-xs text-stone-400">· 10 reviews</span>
@@ -351,7 +351,7 @@
 
     <!-- Recommended by -->
     <div class="mt-12 border-t border-[#E8DDD0] pt-8 text-center">
-      <p class="text-xs font-medium uppercase tracking-[0.15em] text-[#A89B8F]">Recommended by</p>
+      <p class="text-xs font-medium uppercase tracking-[0.15em] text-[#716963]">Recommended by</p>
       <a
         href="https://lwdwtraining.uk/video/links/"
         target="_blank"
@@ -417,10 +417,10 @@
               to="/gift"
               class="rounded-full bg-[#7C5C3B] px-7 py-3 text-sm font-semibold text-white transition hover:opacity-90"
             >
-              🎁 Buy as a gift — from £3.99
+              <span class="inline-flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13"/><path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/><path d="M7.5 8a2.5 2.5 0 0 1 0-5C10 3 12 8 12 8s2-5 4.5-5a2.5 2.5 0 0 1 0 5"/></svg> Buy as a gift — from £3.99</span>
             </router-link>
           </div>
-          <p class="mt-4 text-xs text-[#8C847E]">
+          <p class="mt-4 text-xs text-[#716963]">
             Perfect for birthdays, Mother's Day, Father's Day, Christmas, or just because.
           </p>
         </div>
@@ -431,7 +431,7 @@
             <!-- Gift card mockup -->
             <div class="rounded-2xl bg-[#2C2420] p-6 shadow-lg sm:p-8">
               <p class="text-[10px] font-medium uppercase tracking-widest text-[#9C7C5C]">Tell Me Your Story</p>
-              <p class="mt-3 font-serif text-lg font-medium text-white">🎁 A gift for Mum</p>
+              <p class="mt-3 flex items-center gap-2 font-serif text-lg font-medium text-white"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-[#C4A882]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13"/><path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/><path d="M7.5 8a2.5 2.5 0 0 1 0-5C10 3 12 8 12 8s2-5 4.5-5a2.5 2.5 0 0 1 0 5"/></svg> A gift for Mum</p>
               <div class="mt-4 rounded-xl bg-[#3C3430] p-4">
                 <p class="font-serif text-xs italic leading-relaxed text-[#C4A882]">
                   "I got you this because your stories matter more than you know. I want the kids to hear your voice telling them, long after we're all old and grey."
@@ -492,7 +492,7 @@
     <!-- ═══════════════════════════════════════ -->
     <nav class="bg-[#F5F0E8] px-5 pb-14 sm:px-8" aria-label="Guides">
       <div class="mx-auto max-w-5xl text-center">
-        <p class="text-xs font-medium uppercase tracking-[0.15em] text-[#A89B8F]">Guides</p>
+        <p class="text-xs font-medium uppercase tracking-[0.15em] text-[#716963]">Guides</p>
         <div class="mt-4 flex flex-wrap justify-center gap-x-6 gap-y-2">
           <router-link v-for="g in guides" :key="g.to" :to="g.to" class="text-sm text-[#7C5C3B] hover:underline">
             {{ g.label }}
@@ -515,7 +515,7 @@
           Their story deserves to be kept.
         </h2>
         <p class="mx-auto mt-5 max-w-xl text-base leading-[1.8] text-stone-300 sm:text-lg">
-          Try 5 questions free, speak or type your answers, and turn meaningful memories into a book your family can hold — and hear — forever.
+          Try 5 questions free, speak or type your answers, and turn meaningful memories into a book your family can hold — and hear — for years to come.
         </p>
         <div class="mt-10 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
           <router-link to="/register" @click="trackStart" class="btn-primary-light">
@@ -767,7 +767,7 @@ function trackPricing(plan: string) { track('upgrade_clicked', { source: 'home_p
 .hero-circle { position: absolute; top: -120px; right: -180px; width: 600px; height: 600px; border-radius: 50%; background: radial-gradient(circle, #E8DDD0 0%, transparent 70%); pointer-events: none; }
 .hero-text { position: relative; z-index: 1; }
 
-.eyebrow { display: inline-flex; align-items: center; gap: 8px; font-size: 11px; font-weight: 500; letter-spacing: 0.22em; text-transform: uppercase; color: #8C847E; }
+.eyebrow { display: inline-flex; align-items: center; gap: 8px; font-size: 11px; font-weight: 500; letter-spacing: 0.22em; text-transform: uppercase; color: #716963; }
 .eyebrow-dot { width: 6px; height: 6px; border-radius: 50%; background: #7C5C3B; flex-shrink: 0; }
 h1 { font-family: 'Playfair Display', Georgia, serif; }
 .check { color: #7C5C3B; font-weight: 600; }
@@ -776,9 +776,9 @@ h1 { font-family: 'Playfair Display', Georgia, serif; }
 .hero-image-frame { position: relative; display: inline-block; }
 .hero-img { width: 100%; height: auto; max-width: 560px; border-radius: 24px; box-shadow: 0 32px 80px rgba(0,0,0,0.14), 0 8px 24px rgba(0,0,0,0.08); }
 .hero-badge { position: absolute; bottom: 24px; left: -20px; display: flex; align-items: center; gap: 10px; background: white; border-radius: 16px; padding: 10px 16px; box-shadow: 0 8px 32px rgba(0,0,0,0.12); font-size: 13px; max-width: 200px; }
-.hero-badge-icon { font-size: 22px; flex-shrink: 0; }
+.hero-badge-icon { display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; flex-shrink: 0; border-radius: 100px; background: #F5F0E8; color: #7C5C3B; }
 .hero-badge-title { font-weight: 600; color: #1C1917; line-height: 1.3; }
-.hero-badge-sub { font-size: 11px; color: #8C847E; margin-top: 1px; }
+.hero-badge-sub { font-size: 11px; color: #716963; margin-top: 1px; }
 
 .btn-primary { display: inline-block; background: #7C5C3B; color: white; font-size: 14px; font-weight: 500; padding: 14px 28px; border-radius: 100px; text-decoration: none; transition: opacity 0.2s; white-space: nowrap; }
 .btn-primary:hover { opacity: 0.88; }
@@ -791,7 +791,7 @@ h1 { font-family: 'Playfair Display', Georgia, serif; }
 .btn-hero-ghost { display: inline-block; color: #5C534E; font-size: 14px; font-weight: 500; padding: 14px 24px; border-radius: 100px; text-decoration: none; border: 1px solid #C4B9AD; transition: border-color 0.2s, color 0.2s; white-space: nowrap; }
 .btn-hero-ghost:hover { border-color: #7C5C3B; color: #1C1917; }
 
-.section-label { font-size: 11px; font-weight: 500; letter-spacing: 0.22em; text-transform: uppercase; color: #8C847E; }
+.section-label { font-size: 11px; font-weight: 500; letter-spacing: 0.22em; text-transform: uppercase; color: #716963; }
 .section-title { font-family: 'Playfair Display', Georgia, serif; font-size: clamp(1.8rem, 3vw, 2.6rem); font-weight: 700; line-height: 1.15; letter-spacing: -0.02em; color: #1C1917; max-width: 640px; margin-left: auto; margin-right: auto; }
 
 /* ── New feature cards ───────────────────── */
@@ -851,7 +851,7 @@ h1 { font-family: 'Playfair Display', Georgia, serif; }
 .why-ornament { font-size: 14px; letter-spacing: 0.1em; color: #5C534E; }
 .why-quote { margin-top: 20px; font-family: 'Playfair Display', Georgia, serif; font-size: clamp(1.3rem, 2.5vw, 2rem); font-weight: 400; line-height: 1.5; color: #E8E0D8; font-style: normal; }
 .why-quote em { font-style: italic; color: #C4A882; }
-.why-sub { font-size: 16px; color: #8C847E; }
+.why-sub { font-size: 16px; color: #716963; }
 
 /* ── Story type chips ───────────────────── */
 .story-type-chip {
@@ -910,7 +910,7 @@ h1 { font-family: 'Playfair Display', Georgia, serif; }
 .testimonial-author { display: flex; align-items: center; gap: 12px; margin-top: auto; }
 .testimonial-avatar { width: 36px; height: 36px; border-radius: 50%; background: #E8E0D8; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 600; color: #5C534E; flex-shrink: 0; }
 .testimonial-name { font-size: 13px; font-weight: 600; color: #1C1917; }
-.testimonial-detail { font-size: 11px; color: #9C7C5C; margin-top: 1px; }
+.testimonial-detail { font-size: 12px; color: #86664A; margin-top: 1px; }
 
 /* ── Scroll reveal ─────────────────────── */
 .reveal {
