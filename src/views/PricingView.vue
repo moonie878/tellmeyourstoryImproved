@@ -648,6 +648,10 @@ const faqs = [
   q: 'What are QR codes in the printed book?',
   a: 'When you record a voice answer, a small QR code is printed next to that answer in your physical book. Family members scan it with their phone camera and hear your loved one\'s voice reading that memory — years from now, at Christmas, a birthday, or whenever they open the book.',
 },
+  {
+    q: 'Will the recordings and QR codes still work in years to come?',
+    a: 'Your recordings are stored securely in your account, and every QR code in the book links through tellmeyourstory.uk. You can also download all of your recordings as audio files, with the typed-up answers, from your account page at any time — so your family always has its own copy.',
+  },
 ]
 
 // ─── SEO + structured data ────────────────────────────────────────────────

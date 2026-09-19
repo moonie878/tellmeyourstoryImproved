@@ -79,10 +79,38 @@
             <p class="mt-1 text-sm text-stone-500">Books ordered</p>
           </div>
           <div class="rounded-2xl bg-[#F5F0E8] p-5">
-            <p class="text-3xl font-bold text-[#7C5C3B]">{{ stats.avgProgress }}%</p>
-            <p class="mt-1 text-sm text-stone-500">Average story progress</p>
+            <p class="text-3xl font-bold text-[#7C5C3B]">{{ stats.avgProgress }}</p>
+            <p class="mt-1 text-sm text-stone-500">Answers per story (average)</p>
           </div>
         </div>
+      </section>
+
+      <!-- Recordings: download everything -->
+      <section class="rounded-[2rem] border border-stone-200 bg-white p-5 shadow-sm sm:p-6 md:p-8">
+        <p class="text-xs font-medium uppercase tracking-[0.25em] text-stone-500">Your recordings</p>
+        <h2 class="mt-2 text-xl font-bold text-stone-900">Keep a copy of every voice</h2>
+        <p class="mt-3 max-w-2xl text-base leading-relaxed text-stone-600">
+          Your recordings are always yours. Download them all as audio files, with the typed-up answers,
+          to keep on your computer or share with family.
+        </p>
+
+        <div class="mt-5 flex flex-wrap items-center gap-4">
+          <button
+            type="button"
+            class="min-h-[48px] rounded-full bg-[#7C5C3B] px-6 text-sm font-semibold text-white transition hover:opacity-90 disabled:opacity-50"
+            :disabled="isZipping || stats.voices === 0"
+            @click="downloadAllRecordings"
+          >
+            {{ isZipping ? zipProgress : 'Download all recordings (.zip)' }}
+          </button>
+          <p v-if="stats.voices === 0 && !statsLoading" class="text-sm text-stone-500">
+            No recordings yet — tap Speak on any question to record one.
+          </p>
+          <p v-else-if="!statsLoading" class="text-sm text-stone-500">
+            {{ stats.voices }} {{ stats.voices === 1 ? 'recording' : 'recordings' }}
+          </p>
+        </div>
+        <p v-if="zipError" class="mt-3 text-sm text-red-600" role="alert">{{ zipError }}</p>
       </section>
 
       <!-- Orders -->
@@ -280,7 +308,7 @@ const tierFeatures = computed(() => [
   { label: 'Full story access (all chapters)', included: hasFullAccess.value },
   { label: 'PDF export',                       included: hasExportAccess.value || hasFullAccess.value },
   { label: 'Image export',                     included: hasPrintAccess.value || hasFullAccess.value },
-  { label: 'Voice recordings',                 included: hasExportAccess.value || hasFullAccess.value },
+  { label: 'Voice recordings',                 included: true },
   { label: 'Printed hardcover book',           included: hasPrintAccess.value },
   { label: 'True Book premium export',         included: hasPrintAccess.value },
 ])
@@ -408,6 +436,123 @@ async function loadAccount() {
 
   statsLoading.value  = false
   ordersLoading.value = false
+}
+
+// ─── Download all recordings ──────────────────────────────────────────────────
+
+const isZipping   = ref(false)
+const zipProgress = ref('')
+const zipError    = ref('')
+
+function safeName(value: string, max = 60) {
+  return (value || 'Untitled')
+    .replace(/[\\/:*?"<>|]+/g, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, max) || 'Untitled'
+}
+
+function extFromUrl(url: string) {
+  const match = url.split('?')[0].match(/\.(webm|mp4|m4a|ogg|mp3|wav)$/i)
+  return match ? match[1].toLowerCase() : 'webm'
+}
+
+async function downloadAllRecordings() {
+  zipError.value = ''
+  const projectIds = userProjects.value.map((p) => p.id)
+  if (!projectIds.length) return
+
+  isZipping.value = true
+  zipProgress.value = 'Preparing…'
+
+  try {
+    const { data: recs, error } = await supabase
+      .from('voice_recordings')
+      .select('id, project_id, section_id, audio_url, transcript, created_at')
+      .in('project_id', projectIds)
+    if (error) throw error
+    if (!recs?.length) { zipError.value = 'No recordings found.'; return }
+
+    const { data: sections } = await supabase
+      .from('story_sections')
+      .select('id, question, chapter, order_index')
+      .in('id', recs.map((r: any) => r.section_id))
+    const sectionById = new Map((sections || []).map((s: any) => [s.id, s]))
+    const titleById = new Map(userProjects.value.map((p) => [p.id, p.title || 'Untitled story']))
+
+    // Loaded only when needed, so it doesn't slow down the rest of the site
+    const { default: JSZip } = await import('jszip')
+    const zip = new JSZip()
+
+    const sorted = [...recs].sort((a: any, b: any) =>
+      (sectionById.get(a.section_id)?.order_index ?? 0) - (sectionById.get(b.section_id)?.order_index ?? 0),
+    )
+
+    const counters: Record<string, number> = {}
+    let done = 0
+    let failed = 0
+
+    for (const rec of sorted as any[]) {
+      done++
+      zipProgress.value = `Adding recording ${done} of ${sorted.length}…`
+
+      const section = sectionById.get(rec.section_id)
+      const folder = safeName(titleById.get(rec.project_id) || 'Story')
+      counters[folder] = (counters[folder] || 0) + 1
+      const number = String(counters[folder]).padStart(2, '0')
+      const base = `${number} - ${safeName(section?.question || 'Recording', 70)}`
+
+      try {
+        const response = await fetch(rec.audio_url)
+        if (!response.ok) throw new Error(String(response.status))
+        zip.file(`${folder}/${base}.${extFromUrl(rec.audio_url)}`, await response.blob())
+      } catch {
+        failed++
+        continue
+      }
+
+      const transcriptText = [
+        section?.chapter ? `Chapter: ${section.chapter}` : '',
+        `Question: ${section?.question || ''}`,
+        `Recorded: ${new Date(rec.created_at).toLocaleDateString('en-GB')}`,
+        '',
+        rec.transcript || '(No typed version)',
+      ].filter((line, i) => line || i > 2).join('\n')
+      zip.file(`${folder}/${base}.txt`, transcriptText)
+    }
+
+    zip.file(
+      'README.txt',
+      [
+        'Your Tell Me Your Story recordings',
+        '',
+        'Each recording has a matching .txt file with the question and the typed-up answer.',
+        'The audio files play on most computers and phones; if one will not open, try VLC (free).',
+        '',
+        `Downloaded ${new Date().toLocaleDateString('en-GB')} from tellmeyourstory.uk`,
+      ].join('\n'),
+    )
+
+    zipProgress.value = 'Creating zip file…'
+    const blob = await zip.generateAsync({ type: 'blob' })
+
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `tell-me-your-story-recordings-${new Date().toISOString().slice(0, 10)}.zip`
+    document.body.appendChild(a)
+    a.click()
+    a.remove()
+    setTimeout(() => URL.revokeObjectURL(url), 10_000)
+
+    if (failed) zipError.value = `${failed} recording${failed === 1 ? '' : 's'} couldn't be downloaded. Please try again later.`
+  } catch (err) {
+    console.error('Download all recordings failed:', err)
+    zipError.value = "Something went wrong preparing your download. Please try again."
+  } finally {
+    isZipping.value = false
+    zipProgress.value = ''
+  }
 }
 
 async function signOut() {

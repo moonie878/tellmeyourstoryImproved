@@ -49,13 +49,16 @@
               v-if="voiceRecording.isRecording.value"
               class="mb-3 flex items-center gap-2"
             >
-              <span class="inline-block h-1.5 w-1.5 animate-pulse rounded-full bg-red-500" />
-              <p class="text-xs font-medium text-red-600">Recording — speak naturally</p>
+              <span class="inline-block h-2 w-2 animate-pulse rounded-full bg-red-500" aria-hidden="true" />
+              <p class="text-sm font-medium text-red-600" role="status">
+                Recording {{ formatClock(voiceRecording.elapsedSeconds.value) }} — speak naturally, tap Stop when you're done
+              </p>
             </div>
             <p
               v-else-if="voiceRecording.isTranscribing.value"
-              class="mb-3 text-xs text-stone-400"
-            >Transcribing your recording…</p>
+              class="mb-3 text-sm text-stone-500"
+              role="status"
+            >Typing up what you said…</p>
           </Transition>
 
           <textarea
@@ -71,13 +74,43 @@
             :readonly="voiceRecording.isRecording.value"
           />
 
-          <p v-if="voiceRecording.error.value" class="mt-2 text-xs text-red-500">
-            {{ voiceRecording.error.value }}
+          <!-- Microphone problems: explain how to fix it, and offer typing -->
+          <div
+            v-if="voiceRecording.errorCode.value"
+            class="mt-3 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm leading-relaxed text-stone-700"
+            role="alert"
+          >
+            <p class="font-semibold text-stone-900">{{ voiceRecording.error.value }}</p>
+            <template v-if="voiceRecording.errorCode.value === 'denied'">
+              <p class="mt-2">To turn it back on:</p>
+              <ul class="mt-1 list-disc space-y-1 pl-5">
+                <li v-for="step in micHelpSteps" :key="step">{{ step }}</li>
+              </ul>
+              <p class="mt-2">Then come back and tap Speak again.</p>
+            </template>
+            <div class="mt-3 flex flex-wrap gap-2">
+              <button
+                v-if="voiceRecording.errorCode.value !== 'unsupported' && voiceRecording.errorCode.value !== 'insecure'"
+                type="button"
+                class="min-h-[44px] rounded-full bg-[#7C5C3B] px-5 text-sm font-semibold text-white transition hover:opacity-90"
+                @click="handleVoiceToggle"
+              >Try again</button>
+              <button
+                type="button"
+                class="min-h-[44px] rounded-full border border-stone-300 bg-white px-5 text-sm font-medium text-stone-800 transition hover:bg-stone-50"
+                @click="typeInstead"
+              >Type instead</button>
+            </div>
+          </div>
+
+          <!-- Recording saved but couldn't be typed up -->
+          <p v-if="transcriptionNotice" class="mt-3 rounded-xl bg-[#FAF7F4] p-3 text-sm leading-relaxed text-stone-600" role="status">
+            {{ transcriptionNotice }}
           </p>
 
           <!-- Word count + voice button -->
           <div class="mt-4 flex items-center justify-between border-t border-stone-100 pt-4">
-            <p class="text-xs text-stone-400">
+            <p class="text-sm text-stone-400">
               <template v-if="wordCount">{{ wordCount }} {{ wordCount === 1 ? 'word' : 'words' }}</template>
               <template v-else-if="voiceRecording.speechSupported">
                 Type, or tap Speak to talk it through
@@ -96,12 +129,12 @@
                 type="button"
                 @click="handleVoiceToggle"
                 :disabled="voiceRecording.isSaving.value || voiceRecording.isTranscribing.value"
-                class="inline-flex items-center gap-2 rounded-full border px-4 py-2 text-xs font-semibold transition disabled:opacity-40"
+                class="inline-flex min-h-[48px] items-center gap-2 rounded-full border px-5 text-sm font-semibold transition disabled:opacity-40"
                 :class="voiceRecording.isRecording.value
                   ? 'border-red-200 bg-red-50 text-red-700 hover:bg-red-100'
                   : 'border-stone-200 text-stone-700 hover:border-[#7C5C3B] hover:text-[#7C5C3B]'"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="currentColor">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                   <path d="M12 1a4 4 0 0 1 4 4v6a4 4 0 0 1-8 0V5a4 4 0 0 1 4-4zm0 2a2 2 0 0 0-2 2v6a2 2 0 0 0 4 0V5a2 2 0 0 0-2-2zm-1 14.93V20H9v2h6v-2h-2v-2.07A8 8 0 0 0 20 11h-2a6 6 0 0 1-12 0H4a8 8 0 0 0 7 7.93z"/>
                 </svg>
                 {{ voiceRecording.isRecording.value ? 'Stop' : existingRecording ? 'Re-record' : 'Speak' }}
@@ -326,20 +359,21 @@
         <div class="sticky bottom-0 mt-6 border-t border-stone-100 bg-white/90 px-6 py-3.5 backdrop-blur-sm sm:px-10">
           <div class="flex items-center justify-between gap-3">
             <button
-              @click="$emit('previous')"
-              :disabled="currentIndex === 0"
-              class="rounded-full px-4 py-2 text-sm font-medium text-stone-500 transition hover:bg-stone-50 hover:text-stone-800 disabled:pointer-events-none disabled:opacity-25"
+              @click="handlePreviousClick"
+              :disabled="currentIndex === 0 || voiceRecording.isTranscribing.value || voiceRecording.isSaving.value"
+              class="min-h-[44px] rounded-full px-4 text-sm font-medium text-stone-500 transition hover:bg-stone-50 hover:text-stone-800 disabled:pointer-events-none disabled:opacity-25"
             >
               ← Previous
             </button>
 
-            <span class="font-display text-xs text-stone-400">
-              {{ currentIndex + 1 }} <span class="text-stone-300">of</span> {{ totalSections }}
+            <span class="font-display text-sm text-stone-500">
+              Question {{ currentIndex + 1 }} <span class="text-stone-400">of</span> {{ totalSections }}
             </span>
 
             <button
               @click="handleNextClick"
-              class="rounded-full bg-[#7C5C3B] px-6 py-2.5 text-sm font-semibold text-white transition hover:opacity-90"
+              :disabled="voiceRecording.isTranscribing.value || voiceRecording.isSaving.value"
+              class="min-h-[44px] rounded-full bg-[#7C5C3B] px-6 text-sm font-semibold text-white transition hover:opacity-90 disabled:opacity-50"
             >
               {{ currentIndex === totalSections - 1 ? 'Finish' : 'Next' }} →
             </button>
@@ -477,12 +511,47 @@ watch(
   { flush: 'post' }
 )
 
+// What the answer looked like when recording started, so a new recording
+// adds to typed text instead of wiping it.
+const answerBeforeRecording = ref('')
+const transcriptBeforeRecording = ref('')
+const transcriptionNotice = ref('')
+
+/**
+ * Combine the new transcript with what was already there:
+ *  - empty answer            → just the transcript
+ *  - answer was the previous
+ *    recording's transcript  → replace it (a re-record)
+ *  - anything else (typed)   → keep it and add the transcript underneath
+ */
+function mergeAnswer(before: string, previousTranscript: string, transcript: string) {
+  const b = before.trim()
+  if (!b) return transcript
+  if (previousTranscript && b === previousTranscript.trim()) return transcript
+  return `${b}\n\n${transcript}`
+}
+
 async function handleVoiceToggle() {
+  transcriptionNotice.value = ''
+
   if (voiceRecording.isRecording.value) {
+    const section = props.section
     const result = await voiceRecording.stopRecording()
-    if (!result || !props.section) return
-    emit('update-answer', result.transcript)
-    const saved = await voiceRecording.saveRecording(result.blob, result.transcript, result.durationSeconds, props.section.id, props.projectId)
+    if (!result || !section) return
+
+    if (!result.transcriptionFailed) {
+      emit('update-answer', mergeAnswer(answerBeforeRecording.value, transcriptBeforeRecording.value, result.transcript))
+    } else {
+      transcriptionNotice.value = "Your recording is saved, but we couldn't type it up this time. You can type the answer yourself, or record it again."
+    }
+
+    const saved = await voiceRecording.saveRecording(
+      result.blob,
+      result.transcript,
+      result.durationSeconds,
+      section.id,
+      props.projectId,
+    )
     if (saved) {
       existingRecording.value = null
       await nextTick()
@@ -491,9 +560,54 @@ async function handleVoiceToggle() {
       await new Promise(resolve => setTimeout(resolve, 100))
     }
   } else {
+    answerBeforeRecording.value = props.section?.answer || ''
+    transcriptBeforeRecording.value = existingRecording.value?.transcript || ''
     await voiceRecording.startRecording(props.section?.answer || '')
   }
 }
+
+/**
+ * Called by the editor before ANY navigation (next, previous, story map),
+ * so a recording in progress is saved to this question instead of lost.
+ */
+async function finishRecordingIfActive() {
+  if (voiceRecording.isRecording.value) await handleVoiceToggle()
+}
+
+defineExpose({ finishRecordingIfActive })
+
+function typeInstead() {
+  voiceRecording.clearError()
+  textareaRef.value?.focus()
+}
+
+function formatClock(seconds: number) {
+  const m = Math.floor(seconds / 60)
+  const s = seconds % 60
+  return `${m}:${s.toString().padStart(2, '0')}`
+}
+
+// Device-specific steps for re-enabling the microphone
+const micHelpSteps = computed(() => {
+  const ua = navigator.userAgent
+  if (/iPhone|iPad|iPod/.test(ua)) {
+    return [
+      'Tap "aA" (or the icon) on the left of the address bar, then Website Settings',
+      'Set Microphone to Allow',
+      'If that does not appear: Settings app → Safari → Microphone → Allow',
+    ]
+  }
+  if (/Android/.test(ua)) {
+    return [
+      'Tap the icon on the left of the address bar',
+      'Tap Permissions (or Site settings) → Microphone → Allow',
+    ]
+  }
+  return [
+    'Click the icon on the left of the address bar',
+    'Set Microphone to Allow, then refresh the page',
+  ]
+})
 
 function toggleExistingPlayback() {
   if (!existingAudioRef.value) return
@@ -523,16 +637,25 @@ function onAnswerInput(event: Event) {
   emit('update-answer', target.value)
 }
 
-function handleNextClick() {
-  if (voiceRecording.isRecording.value) voiceRecording.cancelRecording()
+// Save any recording in progress before moving on (it used to be discarded).
+async function handleNextClick() {
+  await finishRecordingIfActive()
   if (props.currentIndex === props.totalSections - 1) emit('finish')
   else emit('next')
+}
+
+async function handlePreviousClick() {
+  await finishRecordingIfActive()
+  emit('previous')
 }
 
 watch(
   () => props.section?.id,
   async () => {
+    // Safety net only — the editor saves recordings before navigating.
     if (voiceRecording.isRecording.value) voiceRecording.cancelRecording()
+    voiceRecording.clearError()
+    transcriptionNotice.value = ''
     existingRecording.value = null
     writingAssistSuggestions.value = []
     writingAssistError.value = ''
@@ -559,7 +682,7 @@ onUnmounted(() => { voiceRecording.cancelRecording() })
 /* The writing surface — a page, not a form field */
 .prose-answer {
   font-family: 'Lora', Georgia, serif;
-  font-size: 17px;
+  font-size: 18px;
   line-height: 1.9;
   letter-spacing: 0.005em;
 }

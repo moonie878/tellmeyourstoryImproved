@@ -260,13 +260,14 @@
         </div>
 
         <!-- Question card -->
-        <div class="lg:order-2">
+        <div class="lg:order-2 scroll-mt-20" data-question-card>
           <div v-if="showHintBanner" class="mb-3 flex items-center justify-between rounded-2xl border border-stone-100 bg-white px-4 py-3">
             <p class="text-xs text-stone-400">💛 Answer as many or as few questions as you like — every answer adds to your story.</p>
             <button @click="showHintBanner = false" class="ml-3 flex-shrink-0 text-stone-300 transition hover:text-stone-500">✕</button>
           </div>
 
           <StoryQuestionCard
+            ref="questionCardRef"
             :section="currentSection"
             :current-index="currentSectionIndex"
             :total-sections="sections.length"
@@ -400,6 +401,7 @@ const projectId = route.params.id as string
 // ── UI state ───────────────────────────────────────────────────────────────────
 const showMoreActions     = ref(false)
 const showMobileMap       = ref(false)
+const questionCardRef     = ref<{ finishRecordingIfActive: () => Promise<void> } | null>(null)
 const showHintBanner      = ref(true)
 const showPremiumPreview  = ref(false)
 const showPdfCustomizer   = ref(false)
@@ -761,6 +763,7 @@ function upgradeFromGate(tier: string) {
 }
 
 async function goToSectionByIndex(index: number) {
+  await questionCardRef.value?.finishRecordingIfActive()
   if (currentSection.value) await saveAnswer(currentSection.value)
 
   // If free user at limit, only allow navigating to already-answered questions
@@ -776,6 +779,14 @@ async function goToSectionByIndex(index: number) {
   currentSectionIndex.value = index
   const chapter = sections.value[index]?.chapter
   if (chapter) openChapters.value[chapter] = true
+
+  // On phones the map sits above the question — close it and bring the
+  // question into view so it's obvious the jump worked.
+  if (showMobileMap.value && window.matchMedia('(max-width: 1023px)').matches) {
+    showMobileMap.value = false
+    await nextTick()
+    document.querySelector('[data-question-card]')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
 }
 
 async function loadSections() {
@@ -934,6 +945,7 @@ async function exportWordHandler() {
 
 async function goToNextSection() {
   if (!currentSection.value) return
+  await questionCardRef.value?.finishRecordingIfActive()
   await saveAnswer(currentSection.value)
 
   // Check if free user is at the limit
@@ -948,12 +960,22 @@ async function goToNextSection() {
 
 async function goToPreviousSection() {
   if (!currentSection.value) return
+  await questionCardRef.value?.finishRecordingIfActive()
   await saveAnswer(currentSection.value)
   if (currentSectionIndex.value > 0) currentSectionIndex.value--
 }
 
-async function saveAnswer(section: StorySection) {
-  if (isSavingAnswer.value) return
+// Saves run one after another. Previously a save that started while another
+// was in progress was silently skipped — so clicking Next during an autosave
+// could leave the latest words unsaved.
+let saveChain: Promise<void> = Promise.resolve()
+
+function saveAnswer(section: StorySection): Promise<void> {
+  saveChain = saveChain.then(() => performSave(section)).catch(() => {})
+  return saveChain
+}
+
+async function performSave(section: StorySection) {
   isSavingAnswer.value = true
   saveError.value = ''
   const { error } = await supabase.from('story_answers').upsert(
