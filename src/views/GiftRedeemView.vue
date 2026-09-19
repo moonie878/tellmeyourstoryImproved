@@ -89,6 +89,8 @@ import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { supabase } from '../lib/supabase'
 
+const SERVER_URL = import.meta.env.VITE_SERVER_URL || 'https://tellmeyourstoryimproved.onrender.com'
+
 const route = useRoute()
 const token = route.params.token as string
 
@@ -107,7 +109,7 @@ onMounted(async () => {
 
   // Validate gift token
   try {
-    const response = await fetch(`https://tellmeyourstoryimproved.onrender.com/gift/${token}`)
+    const response = await fetch(`${SERVER_URL}/gift/${token}`)
     const data = await response.json()
 
     if (!response.ok) {
@@ -130,16 +132,26 @@ async function redeemGift() {
   redeemError.value = ''
 
   try {
-    const response = await fetch('https://tellmeyourstoryimproved.onrender.com/redeem-gift', {
+    // The server works out who you are from your login, not from the request
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session) {
+      redeemError.value = 'Please sign in again to redeem your gift.'
+      return
+    }
+
+    const response = await fetch(`${SERVER_URL}/redeem-gift`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ token, userId: user.value.id }),
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${session.access_token}`,
+      },
+      body: JSON.stringify({ token }),
     })
 
     const data = await response.json()
 
     if (data.success) {
-        gift.value = null  // ← add this
+      gift.value = null
       redeemed.value = true
     } else {
       redeemError.value = data.error || 'Redemption failed. Please try again.'

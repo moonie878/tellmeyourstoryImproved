@@ -7,6 +7,10 @@
       <p class="mt-3 text-sm leading-6 text-stone-600">
         We're sending your gift link to your email now. Share it with them whenever you're ready.
       </p>
+      <p class="mt-3 text-sm leading-6 text-stone-600">
+        Giving it in person? Print the email or write the link in a card — it works whenever they open it,
+        and there's no deadline to use it.
+      </p>
       <p class="mt-4 text-xs text-stone-400">
         Can't find the email? Check your spam folder or contact
         <a href="mailto:hello@tellmeyourstory.uk" class="text-[#7C5C3B] hover:underline">hello@tellmeyourstory.uk</a>
@@ -39,7 +43,7 @@
             <div class="mt-7 flex flex-wrap justify-center gap-x-5 gap-y-2 text-xs text-[#8C847E] md:justify-start">
               <span>✦ One-time payment</span>
               <span>✦ No subscription</span>
-              <span>✦ Instant gift link</span>
+              <span>✦ Instant gift link — no waiting for delivery</span>
             </div>
           </div>
 
@@ -65,7 +69,6 @@
 
         </div>
       </div>
-      <ChristmasDeadlineBanner />
     </section>
 
     <!-- Gift cards -->
@@ -77,7 +80,8 @@
           Pick what feels right
         </h2>
         <p class="mx-auto mt-3 max-w-lg text-sm leading-6 text-stone-500">
-          Every gift includes 100+ guided questions, voice recording, and QR codes printed in the book.
+          Every gift includes 100+ guided questions and voice recording, with a QR code beside each recorded story
+          if they order a printed book (from £{{ printFrom }} plus UK shipping).
         </p>
       </div>
 
@@ -95,7 +99,7 @@
             v-if="product.featured"
             class="absolute -top-3 left-6 rounded-full bg-[#7C5C3B] px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-white"
           >
-            Most popular
+            Recommended
           </div>
 
           <p class="text-xs font-medium uppercase tracking-wider text-stone-400">{{ product.label }}</p>
@@ -202,7 +206,7 @@
       <div
         v-if="selectedProduct"
         class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4"
-        @click.self="selectedProduct = null"
+        @click.self="selectedKey = null"
       >
         <div class="w-full max-w-md overflow-hidden rounded-3xl bg-white shadow-2xl">
 
@@ -251,7 +255,7 @@
 
             <div class="mt-5 flex gap-3">
               <button
-                @click="selectedProduct = null"
+                @click="selectedKey = null"
                 class="flex-1 rounded-full border border-stone-200 py-3 text-sm text-stone-600 transition hover:bg-stone-50"
               >Cancel</button>
               <button
@@ -276,20 +280,30 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
+import { PRINTED_BOOK_FROM_PRICE } from '../lib/printPricing'
+
+const SERVER_URL = import.meta.env.VITE_SERVER_URL || 'https://tellmeyourstoryimproved.onrender.com'
+const printFrom = PRINTED_BOOK_FROM_PRICE.toFixed(2)
 
 const route = useRoute()
 
-// Campaign discounts — add new campaigns here
-const CAMPAIGNS: Record<string, number> = {
-  'mothers-day': 25,
-  'fathers-day': 25,
-  'christmas': 20,
-}
+// Campaign discounts live on the SERVER (GIFT_CAMPAIGNS in server.js), so the
+// price charged can't be changed from the browser. We only ask the server
+// what the discount is, to display it.
+const campaignKey = typeof route.query.campaign === 'string' ? route.query.campaign : undefined
+const campaignDiscountRef = ref(0)
 
-const campaignKey = route.query.campaign as string | undefined
-const campaignDiscount = campaignKey ? (CAMPAIGNS[campaignKey] || 0) : 0
+onMounted(async () => {
+  if (!campaignKey) return
+  try {
+    const r = await fetch(`${SERVER_URL}/gift-campaign/${encodeURIComponent(campaignKey)}`)
+    if (r.ok) campaignDiscountRef.value = Number((await r.json()).percent) || 0
+  } catch {
+    // No discount shown if the server can't be reached — full price is charged anyway
+  }
+})
 
 const occasions = [
   'Birthdays',
@@ -315,12 +329,13 @@ interface GiftProduct {
 }
 
 function price(base: number): string {
-  return campaignDiscount
-    ? (base * (1 - campaignDiscount / 100)).toFixed(2)
-    : base.toFixed(2)
+  const d = campaignDiscountRef.value
+  return d ? (base * (1 - d / 100)).toFixed(2) : base.toFixed(2)
 }
 
-const products: GiftProduct[] = [
+const products = computed<GiftProduct[]>(() => {
+  const campaignDiscount = campaignDiscountRef.value
+  return [
   {
     key: 'single-story',
     label: 'Keepsake Book',
@@ -386,8 +401,11 @@ const products: GiftProduct[] = [
     discountPercent: campaignDiscount,
   },
 ]
+})
 
-const selectedProduct = ref<GiftProduct | null>(null)
+const selectedKey = ref<string | null>(null)
+// Recomputed if the campaign discount arrives after a product was picked
+const selectedProduct = computed(() => products.value.find((p) => p.key === selectedKey.value) || null)
 const loading = ref(false)
 const formError = ref('')
 
@@ -398,7 +416,7 @@ const form = ref({
 })
 
 function selectProduct(product: GiftProduct) {
-  selectedProduct.value = product
+  selectedKey.value = product.key
   formError.value = ''
 }
 
@@ -416,7 +434,7 @@ async function handleGiftCheckout() {
   formError.value = ''
 
   try {
-    const response = await fetch('https://tellmeyourstoryimproved.onrender.com/create-gift-checkout', {
+    const response = await fetch(`${SERVER_URL}/create-gift-checkout`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -424,7 +442,7 @@ async function handleGiftCheckout() {
         buyerEmail:      form.value.buyerEmail,
         recipientName:   form.value.recipientName,
         giftMessage:     form.value.giftMessage,
-        discountPercent: selectedProduct.value!.discountPercent,
+        campaign:        campaignKey,
       }),
     })
 

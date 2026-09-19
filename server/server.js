@@ -513,123 +513,239 @@ app.post('/subscribe-questions', async (req, res) => {
   }
 })
 
-// ─── Nurture: gate email (cron) ───────────────────────────────────────────────
+// ─── Nurture: gate emails (cron) ──────────────────────────────────────────────
+// Two emails to free users who answered 5+ questions but haven't paid:
+//   gate_nudge    — 1–3 days after signup: shows one of their own answers back to them
+//   gate_nudge_2  — 5–8 days after signup: short reminder that everything is saved
+// Skips anyone who paid, opted out at signup, or unsubscribed.
+// Call daily: GET /cron/nurture-gate-email?key=CRON_SECRET
+
+const GATE_EMAILS = [
+  { type: 'gate_nudge',   minHours: 24,  maxHours: 72 },
+  { type: 'gate_nudge_2', minHours: 120, maxHours: 192 },
+]
+
+function escapeHtml(value) {
+  return String(value || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+}
+
+function excerpt(text, max = 240) {
+  const clean = String(text || '').replace(/\s+/g, ' ').trim()
+  if (clean.length <= max) return clean
+  const cut = clean.slice(0, max)
+  return cut.slice(0, cut.lastIndexOf(' ')) + '…'
+}
+
+/** All auth users, paging through (listUsers returns at most 1000 at a time). */
+async function listAllUsers() {
+  const all = []
+  for (let page = 1; page <= 20; page++) {
+    const { data, error } = await supabaseAdmin.auth.admin.listUsers({ page, perPage: 1000 })
+    if (error) throw error
+    all.push(...data.users)
+    if (data.users.length < 1000) break
+  }
+  return all
+}
+
+/** True if this address unsubscribed via any of our emails (stored on the Resend contact). */
+async function isUnsubscribed(email) {
+  try {
+    const r = await fetch(`https://api.resend.com/contacts/${encodeURIComponent(email)}`, {
+      headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}` },
+    })
+    if (!r.ok) return false
+    const contact = await r.json()
+    return contact?.unsubscribed === true || contact?.data?.unsubscribed === true
+  } catch {
+    return false
+  }
+}
+
+function gateEmailFooter(email) {
+  return `
+    <hr style="border: none; border-top: 1px solid #E8DDD0; margin: 32px 0 16px;">
+    <p style="font-size: 11px; color: #A8A29E; line-height: 1.6;">
+      You're getting this because you started a story at tellmeyourstory.uk.
+      <a href="${unsubscribeUrl(email)}" style="color: #9C7C5C;">Unsubscribe</a> ·
+      <a href="https://tellmeyourstory.uk/privacy" style="color: #9C7C5C;">Privacy</a>
+    </p>`
+}
+
+function gateEmailOne({ firstName, total, question, answerExcerpt, storyUrl, email }) {
+  const quote = answerExcerpt
+    ? `
+      <div style="border-left: 3px solid #C4A882; padding: 4px 0 4px 18px; margin: 24px 0;">
+        <p style="font-size: 13px; color: #9C7C5C; margin: 0 0 8px; font-style: italic;">${escapeHtml(question)}</p>
+        <p style="font-size: 16px; color: #3C3530; line-height: 1.7; margin: 0;">“${escapeHtml(answerExcerpt)}”</p>
+      </div>`
+    : ''
+
+  return {
+    subject: `Your story is taking shape — ${total} questions answered`,
+    html: `
+      <div style="font-family: Georgia, serif; max-width: 600px; margin: 0 auto; padding: 40px 20px;">
+        <h1 style="font-size: 24px; color: #1C1917;">Your story is taking shape${firstName ? `, ${escapeHtml(firstName)}` : ''}</h1>
+        <p style="font-size: 15px; color: #5C534E; line-height: 1.7;">
+          You've answered ${total} questions so far — memories that weren't written down anywhere before. Here's one of them:
+        </p>
+        ${quote}
+        <p style="font-size: 15px; color: #5C534E; line-height: 1.7;">
+          Everything is saved. There are 100+ more questions across every chapter of a life — childhood, family, work, love, and the lessons learned along the way.
+        </p>
+        <div style="background: #F5F0E8; border-radius: 16px; padding: 24px; margin: 24px 0; text-align: center;">
+          <a href="${storyUrl}" style="display: inline-block; background: #7C5C3B; color: white; padding: 12px 32px; border-radius: 100px; font-size: 14px; text-decoration: none; font-weight: 500;">Carry on with the story</a>
+          <p style="font-size: 13px; color: #8C847E; margin: 12px 0 0;">Unlock every question from £3.99 — a one-time payment</p>
+        </div>
+        <p style="font-size: 15px; color: #5C534E; line-height: 1.7;">
+          If anything's holding you back, just reply — I read every message.
+        </p>
+        <p style="font-size: 14px; color: #3C3530; margin-top: 28px;">
+          Warm wishes,<br>Mark<br>
+          <span style="color: #8C847E; font-size: 13px;">Founder, Tell Me Your Story</span>
+        </p>
+        ${gateEmailFooter(email)}
+      </div>`,
+  }
+}
+
+function gateEmailTwo({ firstName, total, storyUrl, email }) {
+  return {
+    subject: 'Your answers are still saved',
+    html: `
+      <div style="font-family: Georgia, serif; max-width: 600px; margin: 0 auto; padding: 40px 20px;">
+        <p style="font-size: 15px; color: #5C534E; line-height: 1.7;">Hi${firstName ? ` ${escapeHtml(firstName)}` : ''},</p>
+        <p style="font-size: 15px; color: #5C534E; line-height: 1.7;">
+          Just a quick note — the ${total} answers you wrote are safe, exactly where you left them.
+        </p>
+        <p style="font-size: 15px; color: #5C534E; line-height: 1.7;">
+          When you're ready, you can unlock the rest of the questions from £3.99. It's a one-time payment — no subscription, and no deadline to finish.
+          Every voice answer gets its own QR code in the printed book, so the family can hear it years from now.
+        </p>
+        <div style="margin: 28px 0; text-align: center;">
+          <a href="${storyUrl}" style="display: inline-block; background: #7C5C3B; color: white; padding: 12px 32px; border-radius: 100px; font-size: 14px; text-decoration: none; font-weight: 500;">Open your story</a>
+        </div>
+        <p style="font-size: 15px; color: #5C534E; line-height: 1.7;">
+          And if it's not for you, that's completely fine — reply and tell me why. It genuinely helps.
+        </p>
+        <p style="font-size: 14px; color: #3C3530; margin-top: 28px;">
+          Mark<br><span style="color: #8C847E; font-size: 13px;">Founder, Tell Me Your Story</span>
+        </p>
+        ${gateEmailFooter(email)}
+      </div>`,
+  }
+}
+
 app.get('/cron/nurture-gate-email', async (req, res) => {
   // Protect with a secret so only your cron service can call it
   if (req.query.key !== process.env.CRON_SECRET) {
     return res.status(401).json({ error: 'Unauthorized' })
   }
 
+  const dryRun = req.query.dry === '1' // ?dry=1 → report who WOULD be emailed, send nothing
+  const report = []
+
   try {
-    // Find users created 24-72 hours ago
-    const now = new Date()
-    const ago24 = new Date(now - 24 * 60 * 60 * 1000).toISOString()
-    const ago72 = new Date(now - 72 * 60 * 60 * 1000).toISOString()
-
-    // Get all users created in that window
-    const { data: { users } } = await supabaseAdmin.auth.admin.listUsers({ perPage: 1000 })
-    const recentUsers = users.filter(u => {
-      const created = new Date(u.created_at)
-      return created >= new Date(ago72) && created <= new Date(ago24)
+    const now = Date.now()
+    const oldest = Math.max(...GATE_EMAILS.map((g) => g.maxHours))
+    const users = (await listAllUsers()).filter((u) => {
+      const ageHours = (now - new Date(u.created_at).getTime()) / 3_600_000
+      return u.email && ageHours >= 24 && ageHours <= oldest
     })
-
-    if (recentUsers.length === 0) {
-      return res.json({ sent: 0, message: 'No users in window' })
-    }
 
     let sentCount = 0
 
-    for (const user of recentUsers) {
-      // Check they have 5+ answers (hit the gate)
-      const { count: answerCount } = await supabaseAdmin
-        .from('story_answers')
-        .select('*', { count: 'exact', head: true })
-        .eq('user_id', user.id)
+    for (const user of users) {
+      const ageHours = (now - new Date(user.created_at).getTime()) / 3_600_000
+      const due = GATE_EMAILS.find((g) => ageHours >= g.minHours && ageHours <= g.maxHours)
+      if (!due) continue
 
-      if (answerCount < 5) continue
+      // Opted out of emails at signup
+      if (user.user_metadata?.email_opt_in === false) continue
 
-      // Check they're still free (no paid access)
-      const { count: accessCount } = await supabaseAdmin
-        .from('user_access')
-        .select('*', { count: 'exact', head: true })
-        .eq('user_id', user.id)
-
-      if (accessCount > 0) continue
-
-      // Check we haven't already sent this email
+      // Already sent this one?
       const { data: alreadySent } = await supabaseAdmin
         .from('nurture_emails')
         .select('id')
         .eq('user_id', user.id)
-        .eq('email_type', 'gate_nudge')
+        .eq('email_type', due.type)
         .maybeSingle()
-
       if (alreadySent) continue
 
-      // Get their story content for the preview line
-      const { data: answers } = await supabaseAdmin
-        .from('story_answers')
+      // Paid already?
+      const { count: accessCount } = await supabaseAdmin
+        .from('user_access')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user.id)
+      if ((accessCount || 0) > 0) continue
+
+      // Their answers (story_answers is keyed by project, not user)
+      const { data: projects } = await supabaseAdmin
+        .from('story_projects')
         .select('id')
         .eq('user_id', user.id)
+      const projectIds = (projects || []).map((p) => p.id)
+      if (!projectIds.length) continue
 
-      const totalAnswers = answers?.length || 0
-      const firstName = user.user_metadata?.full_name?.split(' ')[0]
-        || user.user_metadata?.name?.split(' ')[0]
-        || ''
+      const { data: answerRows } = await supabaseAdmin
+        .from('story_answers')
+        .select('project_id, section_id, answer')
+        .in('project_id', projectIds)
+      const answered = (answerRows || []).filter((a) => a.answer && a.answer.trim())
+      if (answered.length < 5) continue
 
-      // Send the nudge
+      if (await isUnsubscribed(user.email)) continue
+
+      // Their longest answer makes the best preview
+      const best = answered.reduce((a, b) => (b.answer.length > a.answer.length ? b : a))
+      const { data: section } = await supabaseAdmin
+        .from('story_sections')
+        .select('question')
+        .eq('id', best.section_id)
+        .maybeSingle()
+
+      const firstName =
+        user.user_metadata?.full_name?.split(' ')[0] || user.user_metadata?.name?.split(' ')[0] || ''
+      const details = {
+        firstName,
+        total: answered.length,
+        question: section?.question || '',
+        answerExcerpt: excerpt(best.answer),
+        storyUrl: `https://tellmeyourstory.uk/story/${best.project_id}`,
+        email: user.email,
+      }
+      const message = due.type === 'gate_nudge' ? gateEmailOne(details) : gateEmailTwo(details)
+
+      report.push({ email: user.email, type: due.type, answers: answered.length })
+      if (dryRun) continue
+
       try {
         await resend.emails.send({
-          from:    'Mark at Tell Me Your Story <mark-griffiths@tellmeyourstory.uk>',
-          to:      user.email,
-          subject: `Your story is waiting — ${totalAnswers} pages written so far`,
-          html: `
-            <div style="font-family: Georgia, serif; max-width: 600px; margin: 0 auto; padding: 40px 20px;">
-              <h1 style="font-size: 26px; color: #1C1917;">Your story is taking shape${firstName ? `, ${firstName}` : ''} 💛</h1>
-              <p style="font-size: 15px; color: #5C534E; line-height: 1.7;">
-                You've already answered ${totalAnswers} questions — that's ${totalAnswers} pages of memories that didn't exist before you started.
-              </p>
-              <p style="font-size: 15px; color: #5C534E; line-height: 1.7;">
-                I know life gets busy, but those answers are safely saved and waiting for you. There are 100+ questions covering every chapter of a life — childhood, family, career, lessons, and the stories only you can tell.
-              </p>
-              <div style="background: #F5F0E8; border-radius: 16px; padding: 24px; margin: 24px 0; text-align: center;">
-                <p style="font-size: 12px; color: #9C7C5C; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.1em;">Pick up where you left off</p>
-                <a href="https://tellmeyourstory.uk/dashboard" style="display: inline-block; background: #7C5C3B; color: white; padding: 12px 32px; border-radius: 100px; font-size: 14px; text-decoration: none; font-weight: 500;">Continue your story</a>
-                <p style="font-size: 13px; color: #8C847E; margin-top: 12px;">
-                  Upgrade from just £3.99 to unlock all questions
-                </p>
-              </div>
-              <p style="font-size: 15px; color: #5C534E; line-height: 1.7;">
-                Every question you answer becomes a page in a book your family can hold forever. Some people finish in a weekend, others take months — there's no rush, just start where it feels right.
-              </p>
-              <p style="font-size: 15px; color: #5C534E; line-height: 1.7;">
-                If anything's holding you back, just reply — I read every message.
-              </p>
-              <p style="font-size: 14px; color: #3C3530; margin-top: 28px;">
-                Warm wishes,<br>
-                Mark<br>
-                Founder, Tell Me Your Story
-              </p>
-              <p style="font-size: 12px; color: #A8A29E; margin-top: 32px;">
-                Tell Me Your Story · <a href="https://tellmeyourstory.uk" style="color: #7C5C3B;">tellmeyourstory.uk</a>
-              </p>
-            </div>
-          `,
+          from: 'Mark at Tell Me Your Story <mark-griffiths@tellmeyourstory.uk>',
+          to: user.email,
+          subject: message.subject,
+          html: message.html,
+          headers: {
+            'List-Unsubscribe': `<${unsubscribeUrl(user.email)}>`,
+            'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
+          },
         })
 
-        // Record it so we don't send again
-        await supabaseAdmin
-          .from('nurture_emails')
-          .insert({ user_id: user.id, email_type: 'gate_nudge' })
+        await supabaseAdmin.from('nurture_emails').insert({ user_id: user.id, email_type: due.type })
 
-        console.log('Gate nudge sent to:', user.email)
+        console.log(`${due.type} sent to:`, user.email)
         sentCount++
       } catch (emailErr) {
-        console.error('Gate nudge email error:', user.email, emailErr.message)
+        console.error('Gate email error:', user.email, emailErr.message)
       }
     }
 
-    res.json({ sent: sentCount, checked: recentUsers.length })
+    res.json({ sent: sentCount, checked: users.length, dryRun, ...(dryRun ? { wouldSend: report } : {}) })
   } catch (err) {
     console.error('Nurture cron error:', err.message)
     res.status(500).json({ error: err.message })
@@ -935,17 +1051,42 @@ app.get('/stripe-session/:sessionId', async (req, res) => {
 })
 
 // ─── Gift endpoints ───────────────────────────────────────────────────────────
+// ─── Gift campaign discounts ──────────────────────────────────────────────────
+// Discounts are decided HERE, never by the browser. (Previously the page sent a
+// discount percentage and the server trusted it, so anyone could edit the
+// request and buy a gift for a few pence.)
+// A campaign only applies between its start and end dates — update each year.
+const GIFT_CAMPAIGNS = {
+  'christmas':   { percent: 20, start: '2026-09-01', end: '2026-12-31' },
+  'mothers-day': { percent: 25, start: '2027-02-01', end: '2027-03-31' },
+  'fathers-day': { percent: 25, start: '2027-05-15', end: '2027-06-30' },
+}
+
+function activeCampaignPercent(key) {
+  const c = key && GIFT_CAMPAIGNS[String(key)]
+  if (!c) return 0
+  const now = new Date()
+  const start = new Date(`${c.start}T00:00:00Z`)
+  const end = new Date(`${c.end}T23:59:59Z`)
+  return now >= start && now <= end ? c.percent : 0
+}
+
+// The gift page asks this to display the discount; it can't set it.
+app.get('/gift-campaign/:key', (req, res) => {
+  res.json({ percent: activeCampaignPercent(req.params.key) })
+})
+
 app.post('/create-gift-checkout', async (req, res) => {
   try {
-    const { productKey, buyerEmail, recipientEmail, recipientName, giftMessage, discountPercent } = req.body
+    const { productKey, buyerEmail, recipientEmail, recipientName, giftMessage, campaign } = req.body
 
     if (!productKey || !GIFT_PRODUCTS[productKey]) return res.status(400).json({ error: 'Invalid product' })
 
-    const product    = GIFT_PRODUCTS[productKey]
-    let unitAmount   = product.amount
-    if (discountPercent && discountPercent > 0 && discountPercent <= 100) {
-      unitAmount = Math.round(product.amount * (1 - discountPercent / 100))
-    }
+    const product         = GIFT_PRODUCTS[productKey]
+    const discountPercent = activeCampaignPercent(campaign)
+    const unitAmount      = discountPercent
+      ? Math.round(product.amount * (1 - discountPercent / 100))
+      : product.amount
 
     const session = await stripe.checkout.sessions.create({
       mode: 'payment',
@@ -975,7 +1116,8 @@ app.post('/create-gift-checkout', async (req, res) => {
         accessType:      product.accessType,
         variant:         product.variant,
         storyType:       product.storyType,
-        discountPercent: String(discountPercent || 0),
+        discountPercent: String(discountPercent),
+        campaign:        discountPercent ? String(campaign) : '',
       },
     })
 
@@ -1009,17 +1151,34 @@ app.get('/gift/:token', async (req, res) => {
 
 app.post('/redeem-gift', async (req, res) => {
   try {
-    const { token, userId } = req.body
-    if (!token || !userId) return res.status(400).json({ error: 'Missing token or userId' })
+    const { token } = req.body
 
+    // Who is redeeming comes from their login token, not from the request body
+    // (previously any userId could be sent, and access granted to that account).
+    const authHeader = req.headers.authorization || ''
+    const accessToken = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null
+    if (!token || !accessToken) return res.status(400).json({ error: 'Please sign in to redeem your gift' })
+
+    const { data: authData, error: authError } = await supabaseAdmin.auth.getUser(accessToken)
+    if (authError || !authData?.user) return res.status(401).json({ error: 'Please sign in to redeem your gift' })
+    const userId = authData.user.id
+
+    // Claim the gift in one step, so two clicks can't redeem it twice
     const { data: gift, error: giftError } = await supabaseAdmin
       .from('gift_purchases')
-      .select('*')
+      .update({ redeemed_by: userId, redeemed_at: new Date().toISOString() })
       .eq('token', token)
+      .is('redeemed_at', null)
+      .select('*')
       .maybeSingle()
 
-    if (giftError || !gift) return res.status(404).json({ error: 'Gift not found' })
-    if (gift.redeemed_at) return res.status(400).json({ error: 'Gift already redeemed' })
+    if (giftError) return res.status(500).json({ error: 'Redemption failed' })
+    if (!gift) {
+      const { data: existing } = await supabaseAdmin.from('gift_purchases').select('id').eq('token', token).maybeSingle()
+      return existing
+        ? res.status(400).json({ error: 'Gift already redeemed' })
+        : res.status(404).json({ error: 'Gift not found' })
+    }
 
     const accessRows = [
   { user_id: userId, access_type: 'story',  story_type: gift.story_type, variant: gift.story_type },
@@ -1032,13 +1191,13 @@ app.post('/redeem-gift', async (req, res) => {
 
     if (accessError) {
       console.error('Access grant error:', accessError)
+      // Release the claim so they can try again
+      await supabaseAdmin
+        .from('gift_purchases')
+        .update({ redeemed_by: null, redeemed_at: null })
+        .eq('token', token)
       return res.status(500).json({ error: 'Failed to grant access' })
     }
-
-    await supabaseAdmin
-      .from('gift_purchases')
-      .update({ redeemed_by: userId, redeemed_at: new Date().toISOString() })
-      .eq('token', token)
 
       // After successful redemption
 await addToResendContacts(gift.recipient_email, gift.recipient_name)
