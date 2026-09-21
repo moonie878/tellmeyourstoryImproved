@@ -186,6 +186,8 @@
 </section>
 
     <!-- CTA -->
+    <StorytellerPromo who="them" />
+
     <section class="bg-[#1C1917] px-5 py-16 text-center sm:px-8 sm:py-20">
       <p class="text-xs font-medium uppercase tracking-[0.22em] text-[#9C7C5C]">Christmas 2026</p>
       <h2 class="mt-4 font-display text-2xl font-bold text-white sm:text-3xl">Their stories won't wait forever</h2>
@@ -205,6 +207,7 @@
 </template>
 
 <script setup lang="ts">
+import StorytellerPromo from '../components/Marketing/StorytellerPromo.vue'
 import { useSeo } from '../composables/useSeo'
 
 const tiers = [

@@ -172,6 +172,35 @@
       </div>
     </section>
 
+    <!-- Or set it up for them -->
+    <section class="px-5 py-14 sm:px-8 sm:py-16">
+      <div class="mx-auto grid max-w-5xl items-center gap-10 rounded-[2rem] bg-[#F5F0E8] p-8 sm:p-12 md:grid-cols-2">
+        <div>
+          <p class="text-xs font-medium uppercase tracking-[0.22em] text-[#86664A]">Another way to give it</p>
+          <h2 class="mt-3 font-display text-2xl font-bold leading-snug text-stone-900 sm:text-3xl">
+            Set it up for them — and send them a question every week
+          </h2>
+          <p class="mt-4 text-base leading-relaxed text-stone-600">
+            Not everyone wants to create an account. Start their story yourself, and we'll email them one question a week.
+            They tap the link, talk or type their answer, and it goes straight into the book — no app, no account, no password.
+            You get an email each time they answer.
+          </p>
+          <router-link
+            to="/register"
+            class="mt-6 inline-flex min-h-[48px] items-center rounded-full bg-[#7C5C3B] px-7 text-sm font-semibold text-white transition hover:opacity-90"
+          >
+            Start their story — 5 questions free
+          </router-link>
+        </div>
+        <ol class="space-y-5">
+          <li v-for="(step, i) in setUpForThemSteps" :key="step" class="flex items-start gap-4">
+            <span class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-[#7C5C3B] text-sm font-bold text-white">{{ i + 1 }}</span>
+            <p class="pt-1.5 text-base leading-relaxed text-stone-700">{{ step }}</p>
+          </li>
+        </ol>
+      </div>
+    </section>
+
     <!-- Occasions -->
     <section class="px-5 py-14 sm:px-8">
       <div class="mx-auto max-w-4xl text-center">
@@ -283,6 +312,14 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { PRINTED_BOOK_FROM_PRICE } from '../lib/printPricing'
+
+// Steps for the "set it up for them" option
+const setUpForThemSteps = [
+  'Start their story free — choose Mum, Dad, Nan or Grandad.',
+  "Tap 'Send the questions', add their email and pick a day.",
+  'Each week they get one question. They just talk — we type it up and keep their voice.',
+  'When the book is ready, order a printed copy with a QR code by every recorded story.',
+]
 
 const SERVER_URL = import.meta.env.VITE_SERVER_URL || 'https://tellmeyourstoryimproved.onrender.com'
 const printFrom = PRINTED_BOOK_FROM_PRICE.toFixed(2)

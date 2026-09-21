@@ -162,6 +162,8 @@
     </section>
 
     <!-- RELATED -->
+    <StorytellerPromo who="them" />
+
     <section class="px-5 pb-16 sm:px-8">
       <div class="mx-auto max-w-3xl">
         <p class="text-center text-xs font-medium uppercase tracking-[0.2em] text-[#9C7C5C]">
@@ -182,6 +184,7 @@
 </template>
 
 <script setup lang="ts">
+import StorytellerPromo from '../components/Marketing/StorytellerPromo.vue'
 import { computed } from 'vue'
 import { PRINTED_BOOK_FROM_PRICE } from '../lib/printPricing'
 import { useSeo } from '../composables/useSeo'

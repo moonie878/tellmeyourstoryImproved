@@ -634,7 +634,7 @@ const storyOptions = [
 const howSteps = [
   {
     title: 'Choose whose story it is',
-    desc: "Mum, Dad, Nan or Grandad, a partner, or your own. Each story type has questions written for that person's life. Sit down together, or invite family to join in by link.",
+    desc: "Mum, Dad, Nan or Grandad, a partner, or your own. Each story type has questions written for that person's life. Sit down together — or send them their questions: one arrives each week, and they just tap and talk. No app or account needed.",
   },
   {
     title: 'Speak or type — we write it up',
@@ -648,6 +648,10 @@ const howSteps = [
 
 // Shown on the page AND used for the FAQPage schema, so they always match.
 const faqs = [
+  {
+    q: 'Can Mum answer from her own home?',
+    a: "Yes. From your dashboard, tap 'Send Mum the questions' and we'll email her one question a week — or send her the link on WhatsApp. She taps it, talks or types her answer, and it goes straight into your book. She doesn't need an app, an account or a password, and you get an email each time she answers.",
+  },
   {
     q: 'How do the QR codes work?',
     a: 'Every answer recorded by voice gets its own QR code, printed next to that story in the book. Scan it with any phone camera and the recording plays in the browser — no app needed.',
