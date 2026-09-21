@@ -25,6 +25,8 @@ declare module 'vue-router' {
   interface RouteMeta {
     seo?: SeoInput
     requiresAuth?: boolean
+    /** Hide the site header, banner and footer (storyteller page) */
+    bare?: boolean
     /** Set false to exclude a public route from prerender + sitemap. */
     prerender?: boolean
   }
@@ -108,6 +110,7 @@ const NOINDEX_PREFIXES = [
   '/story',
   '/editor',
   '/listen',
+  '/tell',
   '/checkout',
   '/success',
 ]

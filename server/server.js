@@ -1069,6 +1069,335 @@ app.get('/cron/milestone-emails', async (req, res) => {
   }
 })
 
+// ─── Storyteller links ("Send Mum her questions") ────────────────────────────
+// The storyteller answers from /tell/:token with no account. Every read and
+// write for them goes through these endpoints using the secret token, with the
+// service role — the browser never gets direct database access.
+
+const STORYTELLER_FREE_LIMIT = 5
+const SITE_URL = 'https://tellmeyourstory.uk'
+
+async function getStorytellerLink(token) {
+  if (!token || typeof token !== 'string' || token.length < 20) return null
+  const { data } = await supabaseAdmin
+    .from('storyteller_links')
+    .select('*')
+    .eq('token', token)
+    .maybeSingle()
+  return data || null
+}
+
+/** Same rule as the editor: story access for this type (or "all") AND export access. */
+async function ownerHasPaidAccess(userId, storyType) {
+  const { data } = await supabaseAdmin.from('user_access').select('*').eq('user_id', userId)
+  const rows = data || []
+  const all = rows.some((r) => r.access_type === 'story' && r.story_type === 'all')
+  const story = all || rows.some((r) => r.access_type === 'story' && r.story_type === storyType)
+  const exp = rows.some((r) => r.access_type === 'export' && (r.variant === 'text_only' || r.variant === 'with_images'))
+  return story && exp
+}
+
+async function storytellerContext(link) {
+  const [{ data: project }, { data: sections }, { data: answers }] = await Promise.all([
+    supabaseAdmin.from('story_projects').select('id, user_id, title, story_type').eq('id', link.project_id).maybeSingle(),
+    supabaseAdmin.from('story_sections').select('id, chapter, question, order_index').eq('project_id', link.project_id).order('order_index', { ascending: true }),
+    supabaseAdmin.from('story_answers').select('section_id, answer').eq('project_id', link.project_id),
+  ])
+  const answerBySection = {}
+  for (const a of answers || []) if (a.answer && a.answer.trim()) answerBySection[a.section_id] = a.answer
+  const answeredCount = Object.keys(answerBySection).length
+  const paid = project ? await ownerHasPaidAccess(project.user_id, project.story_type) : false
+  return { project, sections: sections || [], answerBySection, answeredCount, paid }
+}
+
+function storytellerLimitReached(ctx, sectionId) {
+  if (ctx.paid) return false
+  if (sectionId && ctx.answerBySection[sectionId]) return false // editing an existing answer is fine
+  return ctx.answeredCount >= STORYTELLER_FREE_LIMIT
+}
+
+// Tell the owner when their storyteller answers — at most once every 3 hours
+async function notifyOwnerOfAnswer(link, ctx, sectionId, answer) {
+  try {
+    const last = link.last_owner_notified_at ? new Date(link.last_owner_notified_at).getTime() : 0
+    if (Date.now() - last < 3 * 60 * 60 * 1000) return
+
+    const { data } = await supabaseAdmin.auth.admin.getUserById(ctx.project.user_id)
+    const owner = data?.user
+    if (!owner?.email) return
+
+    const section = ctx.sections.find((s) => s.id === sectionId)
+    const who = escapeHtml(link.storyteller_name)
+    await resend.emails.send({
+      from: 'Tell Me Your Story <mark-griffiths@tellmeyourstory.uk>',
+      to: owner.email,
+      subject: `${link.storyteller_name} just answered a question`,
+      html: `
+        <div style="font-family: Georgia, serif; max-width: 600px; margin: 0 auto; padding: 40px 20px;">
+          <h1 style="font-size: 22px; color: #1C1917;">${who} just answered a question</h1>
+          <div style="border-left: 3px solid #C4A882; padding: 4px 0 4px 18px; margin: 24px 0;">
+            <p style="font-size: 13px; color: #86664A; margin: 0 0 8px; font-style: italic;">${escapeHtml(section?.question || '')}</p>
+            <p style="font-size: 16px; color: #3C3530; line-height: 1.7; margin: 0;">“${escapeHtml(excerpt(answer, 280))}”</p>
+          </div>
+          <div style="margin: 28px 0; text-align: center;">
+            <a href="${SITE_URL}/story/${ctx.project.id}" style="display: inline-block; background: #7C5C3B; color: white; padding: 12px 32px; border-radius: 100px; font-size: 14px; text-decoration: none; font-weight: 500;">Read it in “${escapeHtml(ctx.project.title || 'your story')}”</a>
+          </div>
+          <p style="font-size: 12px; color: #8C847E;">You're getting this because you invited ${who} to answer questions in your story.</p>
+        </div>`,
+    })
+    await supabaseAdmin.from('storyteller_links').update({ last_owner_notified_at: new Date().toISOString() }).eq('id', link.id)
+  } catch (err) {
+    console.error('Owner notify error:', err.message)
+  }
+}
+
+// Load the storyteller page
+app.get('/storyteller/:token', async (req, res) => {
+  try {
+    const link = await getStorytellerLink(req.params.token)
+    if (!link) return res.status(404).json({ error: 'Link not found' })
+
+    const ctx = await storytellerContext(link)
+    if (!ctx.project) return res.status(404).json({ error: 'Story not found' })
+
+    res.json({
+      storytellerName: link.storyteller_name,
+      fromName: link.from_name,
+      storyTitle: ctx.project.title,
+      paused: link.paused,
+      hasEmail: !!link.storyteller_email,
+      answeredCount: ctx.answeredCount,
+      limitReached: storytellerLimitReached(ctx),
+      freeLimit: ctx.paid ? null : STORYTELLER_FREE_LIMIT,
+      questions: ctx.sections.map((s) => ({
+        id: s.id,
+        chapter: s.chapter,
+        question: s.question,
+        answer: ctx.answerBySection[s.id] || '',
+      })),
+    })
+  } catch (err) {
+    console.error('Storyteller load error:', err.message)
+    res.status(500).json({ error: 'Could not load the questions' })
+  }
+})
+
+// Save a typed (or transcribed) answer
+app.post('/storyteller/:token/answer', async (req, res) => {
+  try {
+    const link = await getStorytellerLink(req.params.token)
+    if (!link) return res.status(404).json({ error: 'Link not found' })
+
+    const { sectionId, answer } = req.body || {}
+    const text = typeof answer === 'string' ? answer.trim().slice(0, 20000) : ''
+    if (!sectionId || !text) return res.status(400).json({ error: 'Please write or record an answer first' })
+
+    const ctx = await storytellerContext(link)
+    if (!ctx.sections.some((s) => s.id === sectionId)) return res.status(400).json({ error: 'Unknown question' })
+    if (storytellerLimitReached(ctx, sectionId)) return res.status(402).json({ error: 'limit', limitReached: true })
+
+    const { error } = await supabaseAdmin
+      .from('story_answers')
+      .upsert({ project_id: link.project_id, section_id: sectionId, answer: text, updated_at: new Date().toISOString() }, { onConflict: 'project_id,section_id' })
+    if (error) throw error
+
+    const wasNew = !ctx.answerBySection[sectionId]
+    const answeredCount = ctx.answeredCount + (wasNew ? 1 : 0)
+    ctx.answerBySection[sectionId] = text
+
+    notifyOwnerOfAnswer(link, ctx, sectionId, text) // don't make the storyteller wait for it
+
+    res.json({
+      ok: true,
+      answeredCount,
+      limitReached: !ctx.paid && answeredCount >= STORYTELLER_FREE_LIMIT,
+    })
+  } catch (err) {
+    console.error('Storyteller answer error:', err.message)
+    res.status(500).json({ error: "Sorry — your answer couldn't be saved. Please try again." })
+  }
+})
+
+// Save a voice recording (the page transcribes via /transcribe first)
+app.post('/storyteller/:token/recording', upload.single('audio'), async (req, res) => {
+  try {
+    const link = await getStorytellerLink(req.params.token)
+    if (!link) return res.status(404).json({ error: 'Link not found' })
+    if (!req.file) return res.status(400).json({ error: 'No recording received' })
+
+    const { sectionId, transcript = '', durationSeconds = '0' } = req.body || {}
+    const ctx = await storytellerContext(link)
+    if (!ctx.sections.some((s) => s.id === sectionId)) return res.status(400).json({ error: 'Unknown question' })
+    if (storytellerLimitReached(ctx, sectionId)) return res.status(402).json({ error: 'limit', limitReached: true })
+
+    const type = req.file.mimetype || 'audio/mp4'
+    const ext = type.includes('webm') ? 'webm' : type.includes('ogg') ? 'ogg' : 'mp4'
+    const path = `${link.project_id}/${sectionId}-${Date.now()}.${ext}`
+
+    const { error: upErr } = await supabaseAdmin.storage
+      .from('voice-recordings')
+      .upload(path, req.file.buffer, { contentType: type, upsert: true })
+    if (upErr) throw upErr
+
+    const { data: { publicUrl } } = supabaseAdmin.storage.from('voice-recordings').getPublicUrl(path)
+
+    const { data: rec, error: dbErr } = await supabaseAdmin
+      .from('voice_recordings')
+      .upsert({
+        section_id: sectionId,
+        project_id: link.project_id,
+        audio_url: publicUrl,
+        transcript: String(transcript).slice(0, 20000),
+        duration_seconds: Math.max(1, parseInt(durationSeconds, 10) || 1),
+      }, { onConflict: 'section_id,project_id' })
+      .select()
+      .single()
+    if (dbErr) throw dbErr
+
+    res.json({ ok: true, recordingId: rec.id })
+  } catch (err) {
+    console.error('Storyteller recording error:', err.message)
+    res.status(500).json({ error: "Sorry — your recording couldn't be saved. Please try again." })
+  }
+})
+
+// Storyteller turns weekly emails off (link in every email)
+app.post('/storyteller/:token/stop-emails', async (req, res) => {
+  const link = await getStorytellerLink(req.params.token)
+  if (!link) return res.status(404).json({ error: 'Link not found' })
+  await supabaseAdmin.from('storyteller_links').update({ paused: true }).eq('id', link.id)
+  res.json({ ok: true })
+})
+
+function storytellerPromptEmail(link, ctx, section, isInvite) {
+  const url = `${SITE_URL}/tell/${link.token}?q=${encodeURIComponent(section.id)}`
+  const stopUrl = `${SITE_URL}/tell/${link.token}?stop=1`
+  const name = escapeHtml(link.storyteller_name)
+  const from = escapeHtml(link.from_name)
+  const intro = isInvite
+    ? `<p style="font-size: 16px; color: #5C534E; line-height: 1.7;">${from} would love to hear your stories, and has set up a little book of questions for you. There's nothing to download and no password — just tap the button, then talk or type your answer.</p>`
+    : `<p style="font-size: 16px; color: #5C534E; line-height: 1.7;">Here's this week's question from ${from}. Take as long as you like — there's no right or wrong answer.</p>`
+
+  return {
+    subject: isInvite ? `${link.from_name} has a question for you` : `This week's question from ${link.from_name}`,
+    html: `
+      <div style="font-family: Georgia, serif; max-width: 600px; margin: 0 auto; padding: 40px 20px;">
+        <p style="font-size: 16px; color: #5C534E; line-height: 1.7;">Hello ${name},</p>
+        ${intro}
+        <div style="background: #F5F0E8; border-radius: 16px; padding: 28px 24px; margin: 28px 0; text-align: center;">
+          <p style="font-size: 13px; color: #86664A; letter-spacing: 0.12em; text-transform: uppercase; margin: 0 0 12px;">${escapeHtml(section.chapter || 'Your story')}</p>
+          <p style="font-size: 22px; color: #1C1917; line-height: 1.4; margin: 0 0 24px;">${escapeHtml(section.question)}</p>
+          <a href="${url}" style="display: inline-block; background: #7C5C3B; color: white; padding: 14px 34px; border-radius: 100px; font-size: 16px; text-decoration: none; font-weight: 600;">Answer this question</a>
+          <p style="font-size: 13px; color: #8C847E; margin: 14px 0 0;">You can speak your answer out loud — we'll type it up.</p>
+        </div>
+        <p style="font-size: 12px; color: #8C847E; line-height: 1.6;">
+          ${from} asked Tell Me Your Story to send you these questions.
+          <a href="${stopUrl}" style="color: #86664A;">Stop these emails</a>
+        </p>
+      </div>`,
+  }
+}
+
+function nextUnanswered(ctx) {
+  return ctx.sections.find((s) => !ctx.answerBySection[s.id]) || null
+}
+
+// Owner sends the invite email now (from the dashboard)
+app.post('/storyteller-links/:id/invite', async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization || ''
+    const accessToken = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null
+    if (!accessToken) return res.status(401).json({ error: 'Please sign in' })
+    const { data: authData } = await supabaseAdmin.auth.getUser(accessToken)
+    const userId = authData?.user?.id
+    if (!userId) return res.status(401).json({ error: 'Please sign in' })
+
+    const { data: link } = await supabaseAdmin.from('storyteller_links').select('*').eq('id', req.params.id).maybeSingle()
+    if (!link) return res.status(404).json({ error: 'Link not found' })
+
+    const ctx = await storytellerContext(link)
+    if (!ctx.project || ctx.project.user_id !== userId) return res.status(403).json({ error: 'Not your story' })
+    if (!link.storyteller_email) return res.status(400).json({ error: 'Add their email address first' })
+
+    // Guard against repeated clicks
+    if (link.last_prompted_at && Date.now() - new Date(link.last_prompted_at).getTime() < 10 * 60 * 1000) {
+      return res.status(429).json({ error: 'We sent it a moment ago — give it a few minutes to arrive.' })
+    }
+
+    const section = nextUnanswered(ctx) || ctx.sections[0]
+    if (!section) return res.status(400).json({ error: 'This story has no questions yet' })
+
+    const message = storytellerPromptEmail(link, ctx, section, true)
+    await resend.emails.send({
+      from: `${link.from_name} via Tell Me Your Story <mark-griffiths@tellmeyourstory.uk>`,
+      to: link.storyteller_email,
+      replyTo: authData.user.email,
+      subject: message.subject,
+      html: message.html,
+    })
+    await supabaseAdmin.from('storyteller_links').update({ last_prompted_at: new Date().toISOString(), paused: false }).eq('id', link.id)
+    res.json({ ok: true })
+  } catch (err) {
+    console.error('Storyteller invite error:', err.message)
+    res.status(500).json({ error: "Couldn't send the email. Please try again." })
+  }
+})
+
+// Weekly question emails. Call daily: GET /cron/storyteller-prompts?key=CRON_SECRET (&dry=1 to preview)
+app.get('/cron/storyteller-prompts', async (req, res) => {
+  if (req.query.key !== process.env.CRON_SECRET) return res.status(401).json({ error: 'Unauthorized' })
+  const dryRun = req.query.dry === '1'
+  const report = []
+
+  try {
+    // Today's weekday in the UK (0 = Sunday)
+    const ukDay = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].indexOf(
+      new Intl.DateTimeFormat('en-GB', { weekday: 'short', timeZone: 'Europe/London' }).format(new Date()),
+    )
+
+    const { data: links, error } = await supabaseAdmin
+      .from('storyteller_links')
+      .select('*')
+      .eq('prompt_day', ukDay)
+      .eq('paused', false)
+      .not('storyteller_email', 'is', null)
+    if (error) throw error
+
+    let sent = 0
+    for (const link of links || []) {
+      if (link.last_prompted_at && Date.now() - new Date(link.last_prompted_at).getTime() < 6 * 24 * 60 * 60 * 1000) continue
+
+      const ctx = await storytellerContext(link)
+      if (!ctx.project) continue
+      if (storytellerLimitReached(ctx)) continue // owner needs to unlock more first
+      const section = nextUnanswered(ctx)
+      if (!section) continue // every question answered
+
+      report.push({ to: link.storyteller_email, story: ctx.project.title, question: section.question })
+      if (dryRun) continue
+
+      try {
+        const message = storytellerPromptEmail(link, ctx, section, false)
+        await resend.emails.send({
+          from: `${link.from_name} via Tell Me Your Story <mark-griffiths@tellmeyourstory.uk>`,
+          to: link.storyteller_email,
+          subject: message.subject,
+          html: message.html,
+        })
+        await supabaseAdmin.from('storyteller_links').update({ last_prompted_at: new Date().toISOString() }).eq('id', link.id)
+        sent++
+      } catch (emailErr) {
+        console.error('Storyteller prompt error:', link.storyteller_email, emailErr.message)
+      }
+    }
+
+    res.json({ sent, checked: (links || []).length, dryRun, ...(dryRun ? { wouldSend: report } : {}) })
+  } catch (err) {
+    console.error('Storyteller cron error:', err.message)
+    res.status(500).json({ error: err.message })
+  }
+})
+
 // ─── Transcribe ───────────────────────────────────────────────────────────────
 app.post('/transcribe', upload.single('audio'), async (req, res) => {
   try {

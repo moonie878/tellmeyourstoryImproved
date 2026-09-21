@@ -3,7 +3,8 @@
     <!-- Keyboard users can jump straight past the navigation -->
     <a href="#main-content" class="skip-link">Skip to main content</a>
 
-    <header class="sticky top-0 z-40 border-b border-stone-200 bg-stone-50/90 backdrop-blur">
+    <!-- Storyteller page (meta.bare) shows no navigation: nothing to get lost in -->
+    <header v-if="!isBare" class="sticky top-0 z-40 border-b border-stone-200 bg-stone-50/90 backdrop-blur">
       <div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6">
         <router-link to="/" class="shrink-0" aria-label="Tell Me Your Story home">
           <img
@@ -128,11 +129,11 @@
       </div>
     </header>
 
-    <ChristmasBanner />
+    <ChristmasBanner v-if="!isBare" />
     <div id="main-content" tabindex="-1" class="outline-none">
       <router-view />
     </div>
-    <SiteFooter />
+    <SiteFooter v-if="!isBare" />
     <CookieBanner />
   </div>
 </template>
@@ -177,6 +178,8 @@ const loggedOutLinks: NavLink[] = [
   { to: '/contact', label: 'Contact' },
   { to: '/login', label: 'Login' },
 ]
+
+const isBare = computed(() => route.meta.bare === true)
 
 const navLinks = computed(() => (user.value ? loggedInLinks : loggedOutLinks))
 

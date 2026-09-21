@@ -41,6 +41,7 @@ const routes: RouteRecordRaw[] = [
 
   // ── Shared / private links (noindex) ──────────────────────────────────────
   { path: '/story/share/:token', name: 'story-share', component: () => import('../views/StoryShareView.vue') },
+  { path: '/tell/:token', name: 'storyteller', component: () => import('../views/StorytellerView.vue'), meta: { bare: true } },
   { path: '/listen/:id', name: 'listen', component: () => import('../views/ListenView.vue') },
   { path: '/gift/redeem/:token', name: 'gift-redeem', component: () => import('../views/GiftRedeemView.vue') },
 

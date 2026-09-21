@@ -165,6 +165,16 @@
                   >
                     {{ story.progress > 0 ? 'Continue' : 'Start writing' }}
                   </button>
+                  <button
+                    type="button"
+                    @click="openStoryteller(story)"
+                    class="inline-flex items-center gap-1.5 rounded-full border border-[#7C5C3B] px-4 py-2 text-sm font-medium text-[#7C5C3B] transition hover:bg-[#FAF7F4]"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4 20-7z"/>
+                    </svg>
+                    Send {{ storytellerLabel(story) }} the questions
+                  </button>
 <p v-if="hasPrintAccess()" class="mt-2 text-xs text-stone-400">
   Printed and shipped from £{{ PRINTED_BOOK_FROM_PRICE.toFixed(2) }}, UK delivery included
 </p>
@@ -418,6 +428,13 @@
     </Transition>
 
   </div>
+  <StorytellerInviteModal
+    :open="!!storytellerStory"
+    :project-id="storytellerStory?.id || ''"
+    :story-title="storytellerStory?.title || ''"
+    :suggested-name="storytellerStory ? storytellerLabel(storytellerStory, true) : ''"
+    @close="storytellerStory = null"
+  />
 </template>
 
 <script setup lang="ts">
@@ -426,6 +443,7 @@ import { useRouter } from 'vue-router'
 import { supabase } from '../lib/supabase'
 import { track } from '../lib/analytics'
 import { STORY_TYPES } from '../data/storyTypes'
+import StorytellerInviteModal from '../components/story/StorytellerInviteModal.vue'
 import { isValidStoryType, takePendingStoryType } from '../lib/pendingStoryTypes'
 import { useStoryTrueBookExport } from '../composables/useTrueBookExport'
 import { generateCoverPDF } from '../lib/generateCoverPDF'
@@ -589,6 +607,21 @@ async function prepareInteriorForPricing(story: any) {
     alert('Could not calculate pricing for this book. Please try again.')
     bindingModalOpen.value = false
   }
+}
+
+// ─── "Send Mum the questions" ───────────────────────────────────────────────
+const storytellerStory = ref<any | null>(null)
+
+const STORYTELLER_NAMES: Record<string, string> = { mum: 'Mum', dad: 'Dad', grandma: 'Nan', grandad: 'Grandad' }
+
+/** "Mum" for a Mum story; "them" otherwise (or '' as a form suggestion). */
+function storytellerLabel(story: any, forForm = false) {
+  return STORYTELLER_NAMES[story?.story_type] || (forForm ? '' : 'them')
+}
+
+function openStoryteller(story: any) {
+  storytellerStory.value = story
+  track('storyteller_modal_opened', { story_type: story?.story_type })
 }
 
 async function generateShareLink(storyId: string) {
