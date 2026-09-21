@@ -1098,11 +1098,19 @@ async function ownerHasPaidAccess(userId, storyType) {
 }
 
 async function storytellerContext(link) {
-  const [{ data: project }, { data: sections }, { data: answers }] = await Promise.all([
+  const [{ data: project }, { data: answers }] = await Promise.all([
     supabaseAdmin.from('story_projects').select('id, user_id, title, story_type').eq('id', link.project_id).maybeSingle(),
-    supabaseAdmin.from('story_sections').select('id, chapter, question, order_index').eq('project_id', link.project_id).order('order_index', { ascending: true }),
     supabaseAdmin.from('story_answers').select('section_id, answer').eq('project_id', link.project_id),
   ])
+
+  // Questions belong to the story TYPE (all "mum" stories share one set), not to a project
+  const { data: sections } = project
+    ? await supabaseAdmin
+        .from('story_sections')
+        .select('id, chapter, question, order_index')
+        .eq('story_type', project.story_type)
+        .order('order_index', { ascending: true })
+    : { data: [] }
   const answerBySection = {}
   for (const a of answers || []) if (a.answer && a.answer.trim()) answerBySection[a.section_id] = a.answer
   const answeredCount = Object.keys(answerBySection).length
