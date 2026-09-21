@@ -1493,10 +1493,23 @@ app.post('/verify-turnstile', async (req, res) => {
 })
 
 // ─── Checkout sessions ────────────────────────────────────────────────────────
+// What each Stripe price unlocks. The webhook grants access from this, so the
+// browser can't pay for the £3.99 plan and claim the £17.99 one.
+// Keep in sync with src/composables/useStoryCheckout.ts.
+const PRICE_PURCHASE_TYPES = {
+  'price_1TJvcYR13CJL70CCXAigFPLP': 'single_text',
+  'price_1TJvd3R13CJL70CCmOGoDDVT': 'single_images',
+  'price_1TJvdJR13CJL70CCrdpt1bg0': 'all_text',
+  'price_1TJvdiR13CJL70CCqAqRBjZq': 'all_images',
+}
+
 app.post('/create-checkout-session', async (req, res) => {
   try {
-    const { priceId, userId, storyType, projectId, purchaseType } = req.body
+    const { priceId, userId, storyType, projectId } = req.body
     if (!priceId || !userId || !projectId) return res.status(400).json({ error: 'Missing required checkout data' })
+
+    const purchaseType = PRICE_PURCHASE_TYPES[priceId]
+    if (!purchaseType) return res.status(400).json({ error: 'Unknown plan' })
 
     const session = await stripe.checkout.sessions.create({
       mode: 'payment',
@@ -1514,17 +1527,43 @@ app.post('/create-checkout-session', async (req, res) => {
   }
 })
 
+// Printed book prices (pence, UK delivery included), by page count.
+// Keep in sync with BINDING_CONFIGS in src/lib/printPricing.ts. Only books
+// listed here can be ordered — the browser can no longer set its own price.
+const PRINT_PRODUCTS = {
+  '0600X0900.FC.STD.PB.060UW444.MXX': {
+    label: 'Softcover',
+    includesPhotoBook: false,
+    brackets: [
+      { maxPages: 80,  amount: 2199 },
+      { maxPages: 180, amount: 3499 },
+      { maxPages: 280, amount: 4399 },
+    ],
+  },
+  // Add hardcover here (and uncomment it in printPricing.ts) to sell it again.
+}
+const PHOTO_BOOK_POD_ID = '0600X0900.FC.PRE.PB.080CW444.MXX'
+
 app.post('/create-print-checkout', async (req, res) => {
   try {
-    const { userId, storyId, storyTitle, quantity = 1, amount, podId, binding, includesPhotoBook, } = req.body
-    console.log('Print checkout received:', { podId, binding, amount })
+    const { userId, storyId, storyTitle, podId, pageCount } = req.body
     if (!userId || !storyId) return res.status(400).json({ error: 'Missing required fields' })
 
-    // amount is in pence from the frontend (binding cost + shipping * 100)
-    // Fall back to softcover price if not provided
-    const bookAmount     = amount || 2998  // £29.98 default (£24.99 + £4.99)
-    const selectedPodId  = podId || '0600X0900.FC.STD.PB.060UW444.MXX'
-    const selectedBinding = binding || 'Softcover'
+    const product = PRINT_PRODUCTS[podId]
+    if (!product) return res.status(400).json({ error: 'That book format is not available' })
+
+    const pages = parseInt(pageCount, 10)
+    const bracket = product.brackets.find((b) => pages > 0 && pages <= b.maxPages)
+    if (!bracket) {
+      return res.status(400).json({ error: 'This book is longer than we can print online — please get in touch and we will sort it out.' })
+    }
+
+    const quantity        = Math.min(Math.max(parseInt(req.body.quantity, 10) || 1, 1), 10)
+    const bookAmount      = bracket.amount
+    const selectedPodId   = podId
+    const selectedBinding = product.label
+    const includesPhotoBook = product.includesPhotoBook
+    console.log('Print checkout:', { podId, pages, bookAmount, quantity })
 
     const session = await stripe.checkout.sessions.create({
       mode: 'payment',
@@ -1553,7 +1592,9 @@ app.post('/create-print-checkout', async (req, res) => {
         podId:        selectedPodId,
         binding:      selectedBinding,
         amount:       String(bookAmount),
-        includesPhotoBook: String(includesPhotoBook || false),  // ← add this
+        pageCount:    String(pages),
+        maxPages:     String(bracket.maxPages),
+        includesPhotoBook: String(includesPhotoBook),
       },
     })
 
@@ -1786,8 +1827,39 @@ app.post('/lulu-shipping-options', async (req, res) => {
 
 app.post('/lulu-print-job', async (req, res) => {
   try {
+    const body  = req.body || {}
+
+    // Every print job must be backed by a paid print checkout that hasn't been
+    // used yet. (Previously anyone could call this and print at our expense.)
+    let session
+    try {
+      session = await stripe.checkout.sessions.retrieve(String(body.external_id || ''))
+    } catch {
+      return res.status(402).json({ error: 'Payment not found' })
+    }
+    const meta = session.metadata || {}
+    // 'no_payment_required' = a 100% promo code (e.g. your own test orders)
+    const settled = session.payment_status === 'paid' || session.payment_status === 'no_payment_required'
+    if (session.status !== 'complete' || !settled || meta.purchaseType !== 'printed_book') {
+      return res.status(402).json({ error: 'Payment not found' })
+    }
+    if (meta.luluJobId) {
+      return res.status(409).json({ error: 'This order has already been sent to print', id: meta.luluJobId })
+    }
+
+    const items = Array.isArray(body.line_items) ? body.line_items : []
+    const paidQty = parseInt(meta.quantity, 10) || 1
+    const maxPages = parseInt(meta.maxPages, 10) || 0
+    const itemsOk =
+      items.length >= 1 &&
+      items.length <= 2 &&
+      items[0].pod_package_id === meta.podId &&
+      (items.length === 1 || (meta.includesPhotoBook === 'true' && items[1].pod_package_id === PHOTO_BOOK_POD_ID)) &&
+      items.every((it) => (parseInt(it.quantity, 10) || 1) <= paidQty) &&
+      (!maxPages || !items[0].page_count || parseInt(items[0].page_count, 10) <= maxPages)
+    if (!itemsOk) return res.status(400).json({ error: "The order doesn't match what was paid for" })
+
     const token = await getLuluAccessToken()
-    const body  = req.body
     const transformedBody = {
       contact_email:    body.contact_email,
       external_id:      body.external_id,
@@ -1813,7 +1885,12 @@ app.post('/lulu-print-job', async (req, res) => {
     const text = await response.text()
     const data = JSON.parse(text)
     if (!response.ok) console.error('Lulu print job rejected:', JSON.stringify(data))
-    else console.log('Lulu print job created:', data.id)
+    else {
+      console.log('Lulu print job created:', data.id)
+      // Mark the payment as used so it can't print a second book
+      await stripe.checkout.sessions.update(session.id, { metadata: { ...meta, luluJobId: String(data.id) } })
+        .catch((e) => console.error('Could not mark session as printed:', e.message))
+    }
     res.status(response.status).json(data)
   } catch (err) {
     console.error('Lulu print job error:', err.message)
@@ -1842,6 +1919,20 @@ app.get('/lulu-print-job-status/:id', async (req, res) => {
 
 app.post('/lulu-print-job-cancel/:id', async (req, res) => {
   try {
+    const authHeader = req.headers.authorization || ''
+    const accessToken = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null
+    const { data: authData } = accessToken ? await supabaseAdmin.auth.getUser(accessToken) : { data: null }
+    const userId = authData?.user?.id
+    if (!userId) return res.status(401).json({ error: 'Please sign in' })
+
+    const { data: order } = await supabaseAdmin
+      .from('print_orders')
+      .select('id')
+      .eq('lulu_print_job_id', req.params.id)
+      .eq('user_id', userId)
+      .maybeSingle()
+    if (!order) return res.status(403).json({ error: 'Not your order' })
+
     const token    = await getLuluAccessToken()
     const response = await fetch(`${LULU_API_URL}/print-jobs/${req.params.id}/`, {
       method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` },

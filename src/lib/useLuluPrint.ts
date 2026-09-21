@@ -203,9 +203,11 @@ if (photoBookUrl) {
   }
 
   async function cancelPrintJob(luluPrintJobId: string): Promise<boolean> {
+    // The server checks this order belongs to the signed-in user
+    const { data: { session } } = await supabase.auth.getSession()
     const response = await fetch(
       `${BACKEND_URL}/lulu-print-job-cancel/${luluPrintJobId}`,
-      { method: 'POST' }
+      { method: 'POST', headers: { Authorization: `Bearer ${session?.access_token ?? ''}` } }
     )
     return response.ok
   }

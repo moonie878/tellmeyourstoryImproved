@@ -374,8 +374,8 @@
         <div class="relative w-full max-w-sm overflow-hidden rounded-2xl bg-white shadow-2xl">
 
           <div class="border-b border-stone-100 px-6 py-5">
-            <h2 class="font-display text-lg font-bold text-stone-900">Choose your book type</h2>
-            <p class="mt-1 text-sm text-stone-500">Price includes UK shipping.</p>
+            <h2 class="font-display text-lg font-bold text-stone-900">Check and order your book</h2>
+            <p class="mt-1 text-sm text-stone-500">Price includes UK delivery.</p>
           </div>
 
           <div class="px-6 py-5">
@@ -384,10 +384,28 @@
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/>
               </svg>
-              <p class="text-xs text-stone-500">Calculating pricing for your book…</p>
+              <p class="text-xs text-stone-500">Laying out your pages and working out the price…</p>
             </div>
 
             <div v-else class="space-y-2">
+              <!-- Look before you pay -->
+              <div class="mb-4 rounded-xl bg-[#F5F0E8] p-4">
+                <p class="text-sm font-semibold text-stone-900">Check every page first</p>
+                <p class="mt-1 text-xs leading-relaxed text-stone-600">
+                  This is exactly what will be printed — {{ bindingModalPageCount }} pages.
+                  Spotted something to change? Close this, edit your story, and come back.
+                </p>
+                <button
+                  type="button"
+                  class="mt-3 inline-flex min-h-[44px] w-full items-center justify-center gap-2 rounded-full border border-[#7C5C3B] bg-white text-sm font-semibold text-[#7C5C3B] transition hover:bg-[#FAF7F4]"
+                  @click="openPrintPreview"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>
+                  </svg>
+                  Preview your book
+                </button>
+              </div>
               <button
                 v-for="b in bindingOptions"
                 :key="b.id"
@@ -405,8 +423,11 @@
                 </div>
                 <p class="mt-0.5 text-xs text-stone-500">{{ b.desc }}</p>
               </button>
-              <p class="pt-1 text-center text-[11px] text-stone-400">
-                {{ bindingModalPageCount }} pages · UK shipping included
+              <p class="pt-1 text-center text-xs text-stone-500">
+                {{ bindingModalPageCount }} pages · UK delivery included · usually arrives in 10–14 days
+              </p>
+              <p v-if="christmasPrintNote" class="text-center text-xs font-medium text-[#86664A]">
+                {{ christmasPrintNote }}
               </p>
             </div>
 
@@ -540,6 +561,7 @@ const bindingModalPageCount    = ref<number | null>(null)
 const bindingModalInteriorBlob = ref<Blob | null>(null)
 
 import { BINDING_CONFIGS, getPrintPrice, type BindingId } from '../lib/printPricing'
+import { christmasPhase, PRINT_CUTOFF_LABEL } from '../lib/christmas'
 
 const bindingOptions = BINDING_CONFIGS
 
@@ -566,6 +588,26 @@ function openBindingModal(story: any) {
   // loss. See printPricing.ts for the bracket pricing this now uses.
   prepareInteriorForPricing(story)
 }
+
+// ─── Print preview ─────────────────────────────────────────────────────────
+// Opens the exact interior PDF that will be sent to the printer, so people can
+// check every page before paying.
+let printPreviewUrl: string | null = null
+
+function openPrintPreview() {
+  if (!bindingModalInteriorBlob.value) return
+  if (printPreviewUrl) URL.revokeObjectURL(printPreviewUrl)
+  printPreviewUrl = URL.createObjectURL(bindingModalInteriorBlob.value)
+  window.open(printPreviewUrl, '_blank', 'noopener')
+  track('print_preview_opened', { pages: bindingModalPageCount.value })
+}
+
+const christmasPrintNote = computed(() => {
+  const phase = christmasPhase()
+  if (phase === 'early' || phase === 'countdown') return `For Christmas, order by ${PRINT_CUTOFF_LABEL}.`
+  if (phase === 'digital') return 'Ordered now, this will arrive after Christmas.'
+  return ''
+})
 
 async function prepareInteriorForPricing(story: any) {
   try {
