@@ -890,6 +890,185 @@ app.get('/cron/trustpilot-ask', async (req, res) => {
   }
 })
 
+// ─── Nurture: milestone emails (cron) ────────────────────────────────────────
+// When a story reaches 10, 25 or 40 answered questions, email the owner once:
+// "you've got enough for a book — preview it". Skips stories that already have
+// a print order, people who opted out at signup, and anyone unsubscribed.
+// Only the highest milestone reached is sent (no catch-up spam).
+// Call daily: GET /cron/milestone-emails?key=CRON_SECRET   (add &dry=1 to preview)
+
+const MILESTONES = [40, 25, 10]           // highest first
+const MILESTONE_PRINT_FROM = '£21.99'     // keep in sync with PRINTED_BOOK_FROM_PRICE
+const CHRISTMAS_PRINT_CUTOFF = new Date('2026-12-03T23:59:59Z') // keep in sync with lib/christmas.ts
+const CHRISTMAS_SEASON_START = new Date('2026-10-01T00:00:00Z')
+
+function milestoneEmail({ firstName, total, milestone, storyTitle, storyUrl, email }) {
+  const title = escapeHtml(storyTitle || 'your story')
+  const hi = `Hi${firstName ? ` ${escapeHtml(firstName)}` : ''},`
+
+  const christmasLine =
+    new Date() >= CHRISTMAS_SEASON_START && new Date() <= CHRISTMAS_PRINT_CUTOFF
+      ? `<p style="font-size: 15px; color: #5C534E; line-height: 1.7;">
+           Thinking of it for Christmas? Order the printed book by <strong>3 December</strong> to be sure it arrives in time.
+         </p>`
+      : ''
+
+  const copy = {
+    10: {
+      subject: `${total} stories written — enough for a first book`,
+      heading: `${total} stories in “${title}”`,
+      body: `That's already enough for a small book. Have a look at how it reads on the page — it's a lovely moment, seeing the answers set out like a real book.`,
+      button: 'Preview your book',
+    },
+    25: {
+      subject: `“${storyTitle || 'Your story'}” is turning into a real book`,
+      heading: `${total} stories — this is a real book now`,
+      body: `With ${total} answers, “${title}” has the shape of a proper keepsake. Preview it, and when you're happy you can order a printed copy from ${MILESTONE_PRINT_FROM}, including UK delivery. Every voice answer gets its own QR code in the book.`,
+      button: 'Preview your book',
+    },
+    40: {
+      subject: `Your book is ready to print`,
+      heading: `${total} stories — ready to hold`,
+      body: `“${title}” now has ${total} answers. That's a book the family will keep. Preview it one more time, then order a printed copy from ${MILESTONE_PRINT_FROM}, including UK delivery — or keep adding stories, there's no deadline.`,
+      button: 'Preview and print',
+    },
+  }[milestone]
+
+  return {
+    subject: copy.subject,
+    html: `
+      <div style="font-family: Georgia, serif; max-width: 600px; margin: 0 auto; padding: 40px 20px;">
+        <p style="font-size: 15px; color: #5C534E; line-height: 1.7;">${hi}</p>
+        <h1 style="font-size: 24px; color: #1C1917; line-height: 1.3;">${copy.heading}</h1>
+        <p style="font-size: 15px; color: #5C534E; line-height: 1.7;">${copy.body}</p>
+        ${christmasLine}
+        <div style="margin: 28px 0; text-align: center;">
+          <a href="${storyUrl}" style="display: inline-block; background: #7C5C3B; color: white; padding: 12px 32px; border-radius: 100px; font-size: 14px; text-decoration: none; font-weight: 500;">${copy.button}</a>
+        </div>
+        <p style="font-size: 15px; color: #5C534E; line-height: 1.7;">
+          If there's anything you'd like the book to do that it doesn't, just reply — I read every message.
+        </p>
+        <p style="font-size: 14px; color: #3C3530; margin-top: 28px;">
+          Mark<br><span style="color: #8C847E; font-size: 13px;">Founder, Tell Me Your Story</span>
+        </p>
+        ${gateEmailFooter(email)}
+      </div>`,
+  }
+}
+
+app.get('/cron/milestone-emails', async (req, res) => {
+  if (req.query.key !== process.env.CRON_SECRET) {
+    return res.status(401).json({ error: 'Unauthorized' })
+  }
+
+  const dryRun = req.query.dry === '1'
+  const report = []
+
+  try {
+    // Count non-empty answers per story (paged — Supabase returns 1,000 rows max)
+    const answersPerProject = {}
+    for (let from = 0; ; from += 1000) {
+      const { data, error } = await supabaseAdmin
+        .from('story_answers')
+        .select('project_id, answer')
+        .not('answer', 'is', null)
+        .range(from, from + 999)
+      if (error) throw error
+      for (const row of data || []) {
+        if (row.answer && row.answer.trim()) {
+          answersPerProject[row.project_id] = (answersPerProject[row.project_id] || 0) + 1
+        }
+      }
+      if (!data || data.length < 1000) break
+    }
+
+    const candidates = Object.entries(answersPerProject).filter(([, n]) => n >= MILESTONES[MILESTONES.length - 1])
+    let sentCount = 0
+    const userCache = {}
+
+    for (const [projectId, total] of candidates) {
+      const milestone = MILESTONES.find((m) => total >= m)
+
+      const { data: project } = await supabaseAdmin
+        .from('story_projects')
+        .select('id, user_id, title')
+        .eq('id', projectId)
+        .maybeSingle()
+      if (!project?.user_id) continue
+
+      // Already had this milestone (or a higher one) for this story?
+      const types = MILESTONES.filter((m) => m >= milestone).map((m) => `milestone_${m}:${projectId}`)
+      const { data: sent } = await supabaseAdmin
+        .from('nurture_emails')
+        .select('email_type')
+        .eq('user_id', project.user_id)
+        .in('email_type', types)
+      if (sent && sent.length) continue
+
+      // Already ordered a printed copy of this story?
+      const { count: printCount } = await supabaseAdmin
+        .from('print_orders')
+        .select('*', { count: 'exact', head: true })
+        .eq('story_id', projectId)
+      if ((printCount || 0) > 0) continue
+
+      if (!userCache[project.user_id]) {
+        const { data } = await supabaseAdmin.auth.admin.getUserById(project.user_id)
+        userCache[project.user_id] = data?.user || null
+      }
+      const user = userCache[project.user_id]
+      if (!user?.email) continue
+      if (user.user_metadata?.email_opt_in === false) continue
+      if (await isUnsubscribed(user.email)) continue
+
+      const firstName = user.user_metadata?.full_name?.split(' ')[0] || user.user_metadata?.name?.split(' ')[0] || ''
+      const message = milestoneEmail({
+        firstName,
+        total,
+        milestone,
+        storyTitle: project.title,
+        storyUrl: `https://tellmeyourstory.uk/story/${projectId}`,
+        email: user.email,
+      })
+
+      report.push({ email: user.email, story: project.title, answers: total, milestone })
+      if (dryRun) continue
+
+      try {
+        await resend.emails.send({
+          from: 'Mark at Tell Me Your Story <mark-griffiths@tellmeyourstory.uk>',
+          to: user.email,
+          subject: message.subject,
+          html: message.html,
+          headers: {
+            'List-Unsubscribe': `<${unsubscribeUrl(user.email)}>`,
+            'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
+          },
+        })
+
+        // Record this milestone and any lower ones, so they're never sent later
+        // One insert per row, so an existing lower milestone can't block the new one
+        for (const m of MILESTONES.filter((x) => x <= milestone)) {
+          const { error: logErr } = await supabaseAdmin
+            .from('nurture_emails')
+            .insert({ user_id: project.user_id, email_type: `milestone_${m}:${projectId}` })
+          if (logErr && m === milestone) console.error('Milestone log error:', logErr.message)
+        }
+
+        console.log(`milestone_${milestone} sent to:`, user.email, '| story:', projectId)
+        sentCount++
+      } catch (emailErr) {
+        console.error('Milestone email error:', user.email, emailErr.message)
+      }
+    }
+
+    res.json({ sent: sentCount, checked: candidates.length, dryRun, ...(dryRun ? { wouldSend: report } : {}) })
+  } catch (err) {
+    console.error('Milestone cron error:', err.message)
+    res.status(500).json({ error: err.message })
+  }
+})
+
 // ─── Transcribe ───────────────────────────────────────────────────────────────
 app.post('/transcribe', upload.single('audio'), async (req, res) => {
   try {
