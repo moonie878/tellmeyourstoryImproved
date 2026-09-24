@@ -1208,10 +1208,10 @@ onMounted(async () => {
     const user = currentUser
     if (!user) return
 
-    // If user has no stories yet, create a default one
+    // Use the story they already have; otherwise create the type they picked
     let targetStoryId = stories.value[0]?.id
 
-    if (!targetStoryId) {
+    if (!targetStoryId && pendingStoryType) {
       const { data: newStory, error: storyErr } = await supabase
         .from('story_projects')
         .insert([{
@@ -1228,6 +1228,12 @@ onMounted(async () => {
       }
       targetStoryId = newStory.id
       track('story_auto_created', { source: 'register_premium', plan: planFromRegister })
+    }
+
+    // Nothing to open (no story and no chosen type) — let them pick first
+    if (!targetStoryId) {
+      planAfterFirstStory.value = planFromRegister
+      return
     }
 
     track('checkout_from_register', { plan: planFromRegister, source: queryPlan ? 'query' : 'stored' })

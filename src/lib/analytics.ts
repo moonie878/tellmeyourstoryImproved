@@ -41,6 +41,8 @@ type AnalyticsEvent =
    | 'plan_selected'
    | 'christmas_banner_dismissed'
    | 'story_type_selected'
+   | 'print_preview_opened'
+   | 'storyteller_modal_opened'
 
 
 type AnalyticsValue =
