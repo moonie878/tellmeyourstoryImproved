@@ -542,12 +542,14 @@ const firstRunTypes = [
   { id: 'life',    short: 'Someone else',  hint: 'A partner, a friend, or your own story' },
 ]
 
+const planAfterFirstStory = ref('')
+
 async function startFirstStory(typeId: string) {
   if (startingType.value) return
   startingType.value = typeId
   firstRunError.value = ''
   try {
-    await createStory(typeId, 'first_run')
+    await createStory(typeId, 'first_run', planAfterFirstStory.value)
   } catch {
     firstRunError.value = "Sorry — that didn't work. Please try again."
   } finally {
@@ -1059,7 +1061,7 @@ function onOrdered(printJobId: string) {
 
 // ─── CRUD ─────────────────────────────────────────────────────────────────────
 
-async function createStory(type: string, source = 'dashboard') {
+async function createStory(type: string, source = 'dashboard', plan = '') {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return
 
@@ -1071,7 +1073,12 @@ async function createStory(type: string, source = 'dashboard') {
 
   if (!error && data) {
     track('story_started', { source, story_type: type })
-    router.push(`/story/${data.id}`)
+    if (plan) {
+      try { localStorage.removeItem('tmys-pending-plan') } catch { /* not essential */ }
+      router.push(`/story/${data.id}?plan=${plan}`)
+    } else {
+      router.push(`/story/${data.id}`)
+    }
   }
 }
 
@@ -1173,12 +1180,10 @@ onMounted(async () => {
 
   // Story type picked on the homepage ("Whose story?") — same rules as the plan.
   const queryType = params.get('type')
-  const storedType = takePendingStoryType()
-  const pendingStoryType = isValidStoryType(queryType)
-    ? queryType
-    : storedType && isNewAccount
-      ? storedType
-      : null
+  // Clear any saved choice, but don't act on it: a leftover value was opening
+  // a Mum story for people who never picked one.
+  takePendingStoryType()
+  const pendingStoryType = isValidStoryType(queryType) ? queryType : null
 
   const queryPlan = params.get('plan')
   const planFromRegister =
@@ -1192,6 +1197,14 @@ onMounted(async () => {
     // Clear the param so refresh doesn't re-trigger
     if (queryPlan || queryType) window.history.replaceState({}, '', '/dashboard')
 
+    // No story type chosen yet? Don't guess. Keep the plan and let them pick
+    // on the first-run screen; checkout happens as soon as they do.
+    if (!pendingStoryType && stories.value.length === 0) {
+      planAfterFirstStory.value = planFromRegister
+      try { localStorage.setItem(PLAN_STORAGE_KEY, planFromRegister) } catch { /* not essential */ }
+      return
+    }
+
     const user = currentUser
     if (!user) return
 
@@ -1203,8 +1216,8 @@ onMounted(async () => {
         .from('story_projects')
         .insert([{
           user_id: user.id,
-          title: getStoryTitle(pendingStoryType || 'mum'),
-          story_type: pendingStoryType || 'mum',
+          title: getStoryTitle(pendingStoryType),
+          story_type: pendingStoryType,
         }])
         .select()
         .single()
