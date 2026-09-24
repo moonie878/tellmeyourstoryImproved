@@ -150,7 +150,7 @@ const videos: HelpVideo[] = [
     title: 'QR codes and exporting your PDF',
     description: 'Every voice recording gets a QR code printed in your book. Family can scan it with their phone and hear you tell the story in your own words. See how to export your finished PDF.',
     duration: '~2 min',
-    youtubeId: '',
+    youtubeId: 'tbDukSyP-ZY',
   },
   {
     id: 'writing-text',
