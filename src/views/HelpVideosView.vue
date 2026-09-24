@@ -141,7 +141,7 @@ const videos: HelpVideo[] = [
     title: 'How to record your voice',
     description: 'Tap the microphone and speak your answer naturally. Your voice is recorded and transcribed into text automatically — no typing needed.',
     duration: '~1 min',
-    youtubeId: '',
+    youtubeId: 'PEUjWCxhXDY',
   },
   {
     id: 'qr-codes',
