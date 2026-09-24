@@ -51,7 +51,55 @@
       </div>
     </header>
 
-    <div class="mx-auto max-w-6xl space-y-10 px-4 py-8 sm:px-6 sm:py-10">
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- FIRST RUN — one question, nothing else to decide            -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <div v-if="isFirstRun" class="mx-auto max-w-3xl px-4 py-10 sm:px-6 sm:py-14">
+      <div class="text-center">
+        <h2 class="font-display text-2xl font-bold text-stone-900 sm:text-3xl">
+          Whose story would you like to keep?
+        </h2>
+        <p class="mx-auto mt-3 max-w-md text-base leading-relaxed text-stone-600">
+          Pick one and we'll open the first question. You can answer it by typing, or just talking.
+        </p>
+      </div>
+
+      <div class="mt-8 grid gap-3 sm:grid-cols-2">
+        <button
+          v-for="type in firstRunTypes"
+          :key="type.id"
+          type="button"
+          :disabled="startingType !== ''"
+          class="flex min-h-[72px] items-center justify-between gap-4 rounded-2xl border border-stone-200 bg-white px-6 text-left transition hover:border-[#7C5C3B] hover:shadow-sm disabled:opacity-50"
+          @click="startFirstStory(type.id)"
+        >
+          <span>
+            <span class="block font-display text-lg font-semibold text-stone-900">{{ type.short }}</span>
+            <span class="mt-0.5 block text-sm text-stone-500">{{ type.hint }}</span>
+          </span>
+          <span class="flex-shrink-0 text-lg text-[#7C5C3B]" aria-hidden="true">
+            {{ startingType === type.id ? '…' : '→' }}
+          </span>
+        </button>
+      </div>
+
+      <p class="mt-6 text-center text-sm text-stone-500">
+        5 questions free · no card needed · you can add more people later
+      </p>
+
+      <p v-if="firstRunError" class="mt-4 text-center text-sm text-red-700" role="alert">{{ firstRunError }}</p>
+
+      <div class="mt-10 rounded-2xl bg-white p-6">
+        <p class="text-sm font-semibold text-stone-900">What happens next</p>
+        <ol class="mt-3 space-y-2 text-sm leading-relaxed text-stone-600">
+          <li>1. You'll see the first question. Type the answer, or tap the microphone and talk.</li>
+          <li>2. We'll show you how it looks as a page in the book.</li>
+          <li>3. Keep going whenever you like — or send the questions to them, and we'll email one a week.</li>
+        </ol>
+      </div>
+    </div>
+
+    <div v-else class="mx-auto max-w-6xl space-y-10 px-4 py-8 sm:px-6 sm:py-10">
 
       <!-- ═══════════════════════════════════════════════════════════ -->
       <!-- UPGRADE BANNER — free users only                            -->
@@ -478,6 +526,34 @@ import { usePhotoBookExport } from '../composables/usePhotoBookExport'
 const stories           = ref<any[]>([])
 const userAccess        = ref<any[]>([])
 const isFirstTimeUser   = ref(false)
+const storiesLoaded     = ref(false)
+const startingType      = ref('')
+const firstRunError     = ref('')
+
+/** Brand-new user with nothing to show: give them one decision, not a dashboard. */
+const isFirstRun = computed(() => storiesLoaded.value && stories.value.length === 0)
+
+/** The four people most families start with, plus a catch-all. */
+const firstRunTypes = [
+  { id: 'mum',     short: 'Mum',           hint: 'Her childhood, family, and the life she has lived' },
+  { id: 'dad',     short: 'Dad',           hint: 'Work, first cars, and the lessons he would pass on' },
+  { id: 'grandma', short: 'Nan',           hint: 'Growing up, family life, and the world she remembers' },
+  { id: 'grandad', short: 'Grandad',       hint: 'His younger years, work, and the stories rarely told' },
+  { id: 'life',    short: 'Someone else',  hint: 'A partner, a friend, or your own story' },
+]
+
+async function startFirstStory(typeId: string) {
+  if (startingType.value) return
+  startingType.value = typeId
+  firstRunError.value = ''
+  try {
+    await createStory(typeId, 'first_run')
+  } catch {
+    firstRunError.value = "Sorry — that didn't work. Please try again."
+  } finally {
+    startingType.value = ''
+  }
+}
 const deletingStoryId   = ref<string | null>(null)
 const generatingPrintId = ref<string | null>(null)
 const printModalOpen    = ref(false)
@@ -1013,6 +1089,7 @@ async function fetchStories() {
     )
     stories.value = storiesWithProgress
     isFirstTimeUser.value = storiesWithProgress.length === 0
+    storiesLoaded.value = true
   }
 }
 

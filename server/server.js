@@ -890,6 +890,140 @@ app.get('/cron/trustpilot-ask', async (req, res) => {
   }
 })
 
+// ─── Nurture: activation email (cron) ────────────────────────────────────────
+// For people who signed up but never answered a question. In the last seven
+// days, 6 of 7 new accounts did this and received nothing at all.
+// Sends once, 1–3 days after signing up.
+// Call daily: GET /cron/activation-email?key=CRON_SECRET   (add &dry=1 to preview)
+
+const ACTIVATION_MIN_HOURS = 20
+const ACTIVATION_MAX_HOURS = 96
+
+app.get('/cron/activation-email', async (req, res) => {
+  if (req.query.key !== process.env.CRON_SECRET) {
+    return res.status(401).json({ error: 'Unauthorized' })
+  }
+
+  const dryRun = req.query.dry === '1'
+  const report = []
+
+  try {
+    const now = Date.now()
+    const users = (await listAllUsers()).filter((u) => {
+      if (!u.email) return false
+      const ageHours = (now - new Date(u.created_at).getTime()) / 3_600_000
+      return ageHours >= ACTIVATION_MIN_HOURS && ageHours <= ACTIVATION_MAX_HOURS
+    })
+
+    let sentCount = 0
+
+    for (const user of users) {
+      if (user.user_metadata?.email_opt_in === false) continue
+
+      const { data: alreadySent } = await supabaseAdmin
+        .from('nurture_emails')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('email_type', 'activation_nudge')
+        .maybeSingle()
+      if (alreadySent) continue
+
+      // Their stories, and whether anything has been answered yet
+      const { data: projects } = await supabaseAdmin
+        .from('story_projects')
+        .select('id, title, story_type, created_at')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: true })
+
+      let answered = 0
+      if (projects?.length) {
+        const { data: answerRows } = await supabaseAdmin
+          .from('story_answers')
+          .select('answer')
+          .in('project_id', projects.map((p) => p.id))
+        answered = (answerRows || []).filter((a) => a.answer && a.answer.trim()).length
+      }
+      if (answered > 0) continue // they've started — the other emails cover them
+
+      if (await isUnsubscribed(user.email)) continue
+
+      // Give them an actual question to answer, not just a link
+      const project = projects?.[0] || null
+      let question = 'What did your childhood home smell like?'
+      if (project) {
+        const { data: sections } = await supabaseAdmin
+          .from('story_sections')
+          .select('question, order_index')
+          .eq('story_type', project.story_type)
+          .order('order_index', { ascending: true })
+          .limit(1)
+        if (sections?.[0]?.question) question = sections[0].question
+      }
+
+      const firstName =
+        user.user_metadata?.full_name?.split(' ')[0] || user.user_metadata?.name?.split(' ')[0] || ''
+      const link = project
+        ? `${SITE_URL}/story/${project.id}`
+        : `${SITE_URL}/dashboard`
+
+      report.push({ email: user.email, hasStory: !!project })
+      if (dryRun) continue
+
+      try {
+        await resend.emails.send({
+          from: 'Mark at Tell Me Your Story <mark-griffiths@tellmeyourstory.uk>',
+          to: user.email,
+          subject: 'One question to start with',
+          html: `
+            <div style="font-family: Georgia, serif; max-width: 600px; margin: 0 auto; padding: 40px 20px;">
+              <p style="font-size: 15px; color: #5C534E; line-height: 1.7;">Hi${firstName ? ` ${escapeHtml(firstName)}` : ''},</p>
+              <p style="font-size: 15px; color: #5C534E; line-height: 1.7;">
+                You signed up to Tell Me Your Story the other day — thank you. Starting is the hard bit,
+                so here's one question to get going:
+              </p>
+              <div style="border-left: 3px solid #C4A882; padding: 8px 0 8px 18px; margin: 24px 0;">
+                <p style="font-size: 20px; color: #1C1917; line-height: 1.5; margin: 0; font-style: italic;">${escapeHtml(question)}</p>
+              </div>
+              <p style="font-size: 15px; color: #5C534E; line-height: 1.7;">
+                You don't have to write it yourself. Tap the microphone and talk — we'll type it up and keep the
+                recording, so the voice is saved too. Two minutes is enough to see how it feels.
+              </p>
+              <div style="margin: 28px 0; text-align: center;">
+                <a href="${link}" style="display: inline-block; background: #7C5C3B; color: white; padding: 12px 32px; border-radius: 100px; font-size: 14px; text-decoration: none; font-weight: 500;">Answer this question</a>
+              </div>
+              <p style="font-size: 15px; color: #5C534E; line-height: 1.7;">
+                Would they rather answer it themselves? From your dashboard you can send them the questions —
+                we'll email them one a week, and they just tap and talk. No app or account needed.
+              </p>
+              <p style="font-size: 15px; color: #5C534E; line-height: 1.7;">
+                If something got in the way, reply and tell me what — it genuinely helps me fix it.
+              </p>
+              <p style="font-size: 14px; color: #3C3530; margin-top: 28px;">
+                Mark<br><span style="color: #8C847E; font-size: 13px;">Founder, Tell Me Your Story</span>
+              </p>
+              ${gateEmailFooter(user.email)}
+            </div>`,
+          headers: {
+            'List-Unsubscribe': `<${unsubscribeUrl(user.email)}>`,
+            'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
+          },
+        })
+
+        await supabaseAdmin.from('nurture_emails').insert({ user_id: user.id, email_type: 'activation_nudge' })
+        console.log('activation_nudge sent to:', user.email)
+        sentCount++
+      } catch (emailErr) {
+        console.error('Activation email error:', user.email, emailErr.message)
+      }
+    }
+
+    res.json({ sent: sentCount, checked: users.length, dryRun, ...(dryRun ? { wouldSend: report } : {}) })
+  } catch (err) {
+    console.error('Activation cron error:', err.message)
+    res.status(500).json({ error: err.message })
+  }
+})
+
 // ─── Nurture: milestone emails (cron) ────────────────────────────────────────
 // When a story reaches 10, 25 or 40 answered questions, email the owner once:
 // "you've got enough for a book — preview it". Skips stories that already have
