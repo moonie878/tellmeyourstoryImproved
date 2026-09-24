@@ -897,7 +897,7 @@ app.get('/cron/trustpilot-ask', async (req, res) => {
 // Call daily: GET /cron/activation-email?key=CRON_SECRET   (add &dry=1 to preview)
 
 const ACTIVATION_MIN_HOURS = 20
-const ACTIVATION_MAX_HOURS = 96
+const ACTIVATION_MAX_HOURS = 240
 
 app.get('/cron/activation-email', async (req, res) => {
   if (req.query.key !== process.env.CRON_SECRET) {
