@@ -897,7 +897,7 @@ app.get('/cron/trustpilot-ask', async (req, res) => {
 // Call daily: GET /cron/activation-email?key=CRON_SECRET   (add &dry=1 to preview)
 
 const ACTIVATION_MIN_HOURS = 20
-const ACTIVATION_MAX_HOURS = 240
+const ACTIVATION_MAX_HOURS = 96
 
 app.get('/cron/activation-email', async (req, res) => {
   if (req.query.key !== process.env.CRON_SECRET) {
@@ -1199,6 +1199,221 @@ app.get('/cron/milestone-emails', async (req, res) => {
     res.json({ sent: sentCount, checked: candidates.length, dryRun, ...(dryRun ? { wouldSend: report } : {}) })
   } catch (err) {
     console.error('Milestone cron error:', err.message)
+    res.status(500).json({ error: err.message })
+  }
+})
+
+
+// ─── Gift buyers: progress + review ask (cron) ───────────────────────────────
+// A gift buyer never creates an account — they pay, get a link, and vanish.
+// No other cron can see them, so after the confirmation email they hear nothing,
+// not even whether the gift was ever used. This one reads redeemed gifts, counts
+// the recipient's answers, and tells the buyer their gift is being used, with a
+// real line from the story.
+//
+// Dedup lives in nurture_emails keyed to the RECIPIENT's user_id (the buyer has
+// none) with the gift's id in email_type, so no schema change is needed.
+// Call daily: GET /cron/gift-progress?key=CRON_SECRET   (add &dry=1 to preview)
+
+const GIFT_MILESTONES = [40, 25, 10]      // highest first
+const GIFT_INCLUDE_EXCERPT = true         // set false to send counts only, no story text
+
+function giftEmailFooter(email) {
+  return `
+    <hr style="border: none; border-top: 1px solid #E8DDD0; margin: 32px 0 16px;">
+    <p style="font-size: 11px; color: #A8A29E; line-height: 1.6;">
+      You're getting this because you bought a gift at tellmeyourstory.uk.
+      <a href="${unsubscribeUrl(email)}" style="color: #9C7C5C;">Unsubscribe</a> ·
+      <a href="https://tellmeyourstory.uk/privacy" style="color: #9C7C5C;">Privacy</a>
+    </p>`
+}
+
+function giftProgressEmail({ email, recipientName, total, milestone, question, answerExcerpt }) {
+  const name = recipientName ? escapeHtml(recipientName) : 'They'
+  const theyHave = recipientName ? `${name} has` : 'They have'
+
+  const copy = {
+    10: {
+      subject: `${recipientName || 'Your gift'} has started`,
+      heading: `${theyHave} answered ${total} questions`,
+      body: `Your gift is being used. ${theyHave} written ${total} answers so far — these are memories that weren't written down anywhere before you gave this.`,
+    },
+    25: {
+      subject: `${recipientName ? `${recipientName}'s` : 'Their'} story is becoming a book`,
+      heading: `${total} stories now`,
+      body: `${theyHave} answered ${total} questions. That's past the point where it stops being a questionnaire and starts being a book — enough for a proper keepsake with real weight to it.`,
+    },
+    40: {
+      subject: `${recipientName ? `${recipientName}'s` : 'Their'} story is ready to print`,
+      heading: `${total} stories — a finished book`,
+      body: `${theyHave} answered ${total} questions. That's a full book: childhood, work, love, the lot. Whenever they're ready, they can order a printed copy from their account — every voice answer gets its own QR code so you can hear them read it.`,
+    },
+  }[milestone]
+
+  const excerptBlock =
+    GIFT_INCLUDE_EXCERPT && answerExcerpt
+      ? `
+      <div style="background: #F5F0E8; border-radius: 16px; padding: 24px; margin: 26px 0;">
+        ${question ? `<p style="font-size: 12px; color: #9C7C5C; margin: 0 0 10px; text-transform: uppercase; letter-spacing: 0.08em;">${escapeHtml(question)}</p>` : ''}
+        <p style="font-size: 15px; color: #3C3530; line-height: 1.75; font-style: italic; margin: 0;">“${escapeHtml(answerExcerpt)}”</p>
+      </div>`
+      : ''
+
+  const reviewBlock =
+    milestone >= 25
+      ? `
+      <p style="font-size: 15px; color: #5C534E; line-height: 1.7;">
+        If this has been worth it, would you share an honest review? I'm building this on my own, and it helps other families decide whether to start before it's too late.
+      </p>
+      <div style="margin: 24px 0; text-align: center;">
+        <a href="https://uk.trustpilot.com/evaluate/tellmeyourstory.uk" style="display: inline-block; background: #7C5C3B; color: white; padding: 12px 32px; border-radius: 100px; font-size: 14px; text-decoration: none; font-weight: 500;">Write a review</a>
+        <p style="font-size: 12px; color: #8C847E; margin-top: 10px;">Takes about a minute</p>
+      </div>`
+      : `
+      <p style="font-size: 14px; color: #8C847E; line-height: 1.7;">
+        If you've got a minute, an honest <a href="https://uk.trustpilot.com/evaluate/tellmeyourstory.uk" style="color: #7C5C3B;">review</a> helps other families more than you'd think.
+      </p>`
+
+  const printOffer =
+    milestone >= 40
+      ? `
+      <p style="font-size: 15px; color: #5C534E; line-height: 1.7;">
+        If you'd like to give the printed book as well, just reply to this email and I'll sort it out with you directly.
+      </p>`
+      : ''
+
+  return {
+    subject: copy.subject,
+    html: `
+      <div style="font-family: Georgia, serif; max-width: 600px; margin: 0 auto; padding: 40px 20px;">
+        <h1 style="font-size: 24px; color: #1C1917; line-height: 1.3;">${copy.heading}</h1>
+        <p style="font-size: 15px; color: #5C534E; line-height: 1.7;">${copy.body}</p>
+        ${excerptBlock}
+        ${printOffer}
+        ${reviewBlock}
+        <p style="font-size: 15px; color: #5C534E; line-height: 1.7;">
+          Anything you'd like changed, just reply — I read every message myself.
+        </p>
+        <p style="font-size: 14px; color: #3C3530; margin-top: 28px;">
+          Mark<br><span style="color: #8C847E; font-size: 13px;">Founder, Tell Me Your Story</span>
+        </p>
+        ${giftEmailFooter(email)}
+      </div>`,
+  }
+}
+
+app.get('/cron/gift-progress', async (req, res) => {
+  if (req.query.key !== process.env.CRON_SECRET) {
+    return res.status(401).json({ error: 'Unauthorized' })
+  }
+
+  const dryRun = req.query.dry === '1'
+  const report = []
+
+  try {
+    const { data: gifts, error: giftsErr } = await supabaseAdmin
+      .from('gift_purchases')
+      .select('*')
+      .not('redeemed_at', 'is', null)
+    if (giftsErr) throw giftsErr
+
+    let sentCount = 0
+
+    for (const gift of gifts || []) {
+      const giftKey = gift.id || gift.token
+      if (!gift.buyer_email || !gift.redeemed_by || !giftKey) continue
+
+      // The recipient's story for the type that was gifted
+      const { data: projects } = await supabaseAdmin
+        .from('story_projects')
+        .select('id')
+        .eq('user_id', gift.redeemed_by)
+        .eq('story_type', gift.story_type)
+      if (!projects?.length) continue
+
+      const { data: answers } = await supabaseAdmin
+        .from('story_answers')
+        .select('project_id, section_id, answer')
+        .in('project_id', projects.map((p) => p.id))
+        .not('answer', 'is', null)
+
+      const answered = (answers || []).filter((a) => a.answer && a.answer.trim())
+      const total = answered.length
+      const milestone = GIFT_MILESTONES.find((m) => total >= m)
+      if (!milestone) continue
+
+      // Already had this milestone, or a higher one, for this gift?
+      const types = GIFT_MILESTONES.filter((m) => m >= milestone).map((m) => `gift_progress_${m}:${giftKey}`)
+      const { data: alreadySent } = await supabaseAdmin
+        .from('nurture_emails')
+        .select('email_type')
+        .eq('user_id', gift.redeemed_by)
+        .in('email_type', types)
+      if (alreadySent && alreadySent.length) continue
+
+      if (await isUnsubscribed(gift.buyer_email)) continue
+
+      // Their longest answer makes the best excerpt
+      let question = ''
+      let answerExcerpt = ''
+      if (GIFT_INCLUDE_EXCERPT) {
+        const best = answered.reduce((a, b) => (b.answer.length > a.answer.length ? b : a))
+        answerExcerpt = excerpt(best.answer)
+        const { data: section } = await supabaseAdmin
+          .from('story_sections')
+          .select('question')
+          .eq('id', best.section_id)
+          .maybeSingle()
+        question = section?.question || ''
+      }
+
+      report.push({
+        buyer: gift.buyer_email,
+        recipient: gift.recipient_name,
+        answers: total,
+        milestone,
+      })
+      if (dryRun) continue
+
+      const message = giftProgressEmail({
+        email: gift.buyer_email,
+        recipientName: gift.recipient_name,
+        total,
+        milestone,
+        question,
+        answerExcerpt,
+      })
+
+      try {
+        await resend.emails.send({
+          from: 'Mark at Tell Me Your Story <mark-griffiths@tellmeyourstory.uk>',
+          to: gift.buyer_email,
+          subject: message.subject,
+          html: message.html,
+          headers: {
+            'List-Unsubscribe': `<${unsubscribeUrl(gift.buyer_email)}>`,
+            'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
+          },
+        })
+
+        // Record this milestone and any lower ones, so they're never sent later
+        for (const m of GIFT_MILESTONES.filter((x) => x <= milestone)) {
+          const { error: logErr } = await supabaseAdmin
+            .from('nurture_emails')
+            .insert({ user_id: gift.redeemed_by, email_type: `gift_progress_${m}:${giftKey}` })
+          if (logErr && m === milestone) console.error('Gift progress log error:', logErr.message)
+        }
+
+        console.log(`gift_progress_${milestone} sent to buyer:`, gift.buyer_email)
+        sentCount++
+      } catch (emailErr) {
+        console.error('Gift progress email error:', gift.buyer_email, emailErr.message)
+      }
+    }
+
+    res.json({ sent: sentCount, checked: (gifts || []).length, dryRun, ...(dryRun ? { wouldSend: report } : {}) })
+  } catch (err) {
+    console.error('Gift progress cron error:', err.message)
     res.status(500).json({ error: err.message })
   }
 })
