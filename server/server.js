@@ -1892,7 +1892,18 @@ const PRINT_PRODUCTS = {
       { maxPages: 280, amount: 4399 },
     ],
   },
-  // Add hardcover here (and uncomment it in printPricing.ts) to sell it again.
+  '0600X0900.FC.PRE.CW.080CW444.GXX': {
+    label: 'Hardcover',
+    includesPhotoBook: false,
+    // Keep in sync with BINDING_CONFIGS in src/lib/printPricing.ts.
+    brackets: [
+      { maxPages: 80,  amount: 2999 },
+      { maxPages: 180, amount: 4299 },
+      { maxPages: 280, amount: 5299 },
+    ],
+  },
+  // Dust jacket (…PRE.LW…) and the photo-book bundle stay out until a cover
+  // for them has been checked against Lulu — see printPricing.ts.
 }
 const PHOTO_BOOK_POD_ID = '0600X0900.FC.PRE.PB.080CW444.MXX'
 
