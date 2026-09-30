@@ -71,7 +71,11 @@
 
     <div v-if="result" class="mt-3 rounded-xl bg-white/70 p-3 text-[11px] leading-relaxed text-stone-700">
       <p><strong>Sheet</strong> {{ result.width.toFixed(2) }} × {{ result.height.toFixed(2) }} mm</p>
-      <p><strong>Spine</strong> {{ result.spine.toFixed(2) }} mm</p>
+      <p>
+        <strong>Spine</strong> {{ result.spine.toFixed(2) }} mm
+        <span class="text-stone-400">({{ result.spineSource === 'lulu' ? 'from Lulu' : `derived from ${result.spineSource}` }})</span>
+      </p>
+      <p><strong>Panel</strong> {{ panelW.toFixed(2) }} mm <span :class="panelOk ? 'text-green-700' : 'text-red-600'">{{ panelOk ? 'ok' : 'should be ~152.40' }}</span></p>
       <p class="mt-2 text-stone-500">Check it with:</p>
       <code class="mt-1 block break-all rounded bg-stone-100 p-1.5 text-[10px]">
         node scripts/check-cover.mjs {{ fileName }} {{ binding }} {{ result.spine.toFixed(2) }}
@@ -83,7 +87,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useRoute } from 'vue-router'
-import { generateCoverPDF, type BindingType } from '../../lib/generateCoverPDF'
+import { generateCoverPDF, resolveSpineMm, type BindingType } from '../../lib/generateCoverPDF'
 
 const POD_IDS: Record<BindingType, string> = {
   softcover:  '0600X0900.FC.STD.PB.060UW444.MXX',
@@ -104,11 +108,24 @@ const coverImageUrl = ref('')
 
 const busy   = ref(false)
 const error  = ref('')
-const result = ref<{ width: number; height: number; spine: number } | null>(null)
+const result = ref<{ width: number; height: number; spine: number; spineSource: string } | null>(null)
 
 const fileName = computed(
   () => `cover-${binding.value}-${pageCount.value}p.pdf`,
 )
+
+const EDGE: Record<BindingType, number> = {
+  softcover: 3.175, hardcover: 22.225, dustjacket: 3.175,
+}
+
+/** Visible panel width implied by the sheet and spine — should land on 152.40mm. */
+const panelW = computed(() => {
+  if (!result.value) return 0
+  const flap = binding.value === 'dustjacket' ? 76.2 : 0
+  const { width, spine } = result.value
+  return (width - EDGE[binding.value] - flap) - ((width + spine) / 2)
+})
+const panelOk = computed(() => Math.abs(panelW.value - 152.4) < 1.5)
 
 /** Same loader the print flow uses — reads an image URL into a data URL. */
 async function loadImageAsBase64(url: string): Promise<string> {
@@ -147,9 +164,17 @@ async function run() {
     const dims = JSON.parse(text)
     const width  = parseFloat(dims.width  ?? dims.width_mm)
     const height = parseFloat(dims.height ?? dims.height_mm)
-    const spine  = parseFloat(dims.spine ?? dims.spine_mm ?? dims.spine_width ?? '0')
-
     if (!width || !height) throw new Error(`Unexpected dimensions response: ${text.slice(0, 160)}`)
+
+    // Lulu does not reliably return a spine field, so resolve it exactly the
+    // way generateCoverPDF does — otherwise this panel reports a number the
+    // PDF was never drawn with (it showed 0.00 while the cover used 15.87).
+    const { spine, source: spineSource } = resolveSpineMm({
+      totalW: width,
+      luluSpine: parseFloat(dims.spine ?? dims.spine_mm ?? dims.spine_width ?? dims.spine_width_mm ?? '0'),
+      pageCount: pageCount.value,
+      bindingType: binding.value,
+    })
 
     const blob = await generateCoverPDF({
       title:    title.value,
@@ -163,7 +188,7 @@ async function run() {
       bindingType: binding.value,
     })
 
-    result.value = { width, height, spine }
+    result.value = { width, height, spine, spineSource }
 
     const url = URL.createObjectURL(blob)
     const a   = document.createElement('a')

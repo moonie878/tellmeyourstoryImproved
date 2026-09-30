@@ -181,6 +181,34 @@ function buildGeometry(
   }
 }
 
+/**
+ * Works out the spine width to lay the cover out with.
+ *
+ * Lulu's /cover-dimensions response does not reliably carry a spine field, and
+ * when it is missing the sheet itself gives an exact answer: the spine is
+ * whatever is left once the two 6in panels and the edge allowance are taken off.
+ * Page-count maths is the last resort — it is a generic paper-thickness guess.
+ *
+ * Exported so CoverTestPanel reports the same number the PDF is drawn with.
+ */
+export function resolveSpineMm(opts: {
+  totalW: number
+  luluSpine?: number
+  pageCount?: number
+  bindingType?: BindingType
+}): { spine: number; source: 'lulu' | 'sheet' | 'pages' } {
+  const { totalW, luluSpine, pageCount, bindingType = 'softcover' } = opts
+
+  if (luluSpine && luluSpine > 0) return { spine: luluSpine, source: 'lulu' }
+
+  const edge = EDGE_ALLOWANCE[bindingType] ?? EDGE_ALLOWANCE.softcover
+  const flap = bindingType === 'dustjacket' ? FLAP_W : 0
+  const bySheet = totalW - edge * 2 - flap * 2 - TRIM_W * 2
+
+  if (bySheet > 1 && bySheet < totalW / 3) return { spine: bySheet, source: 'sheet' }
+  return { spine: getSpineWidthMm(pageCount || 28), source: 'pages' }
+}
+
 // ─── Main cover generator ─────────────────────────────────────────────────────
 
 export async function generateCoverPDF(options: CoverOptions): Promise<Blob> {
@@ -218,18 +246,14 @@ export async function generateCoverPDF(options: CoverOptions): Promise<Blob> {
   // Lulu returns the spine in the same response as width/height. Use it.
   // Falling back to page-count maths is a last resort: it was the old default
   // and it is what let a wrong constant shift the whole front panel sideways.
-  let spine = luluSpine && luluSpine > 0 ? luluSpine : 0
+  const { spine, source: spineSource } = resolveSpineMm({
+    totalW, luluSpine, pageCount, bindingType,
+  })
 
-  if (!spine) {
-    const byPages = getSpineWidthMm(pageCount || 28)
-    const bySheet = totalW - edge * 2 - (isDustJacket ? FLAP_W * 2 : 0) - TRIM_W * 2
-    // Prefer the sheet-derived figure when it is plausible; it reflects the
-    // real book rather than a generic paper-thickness constant.
-    spine = bySheet > 1 && bySheet < totalW / 3 ? bySheet : byPages
+  if (spineSource !== 'lulu') {
     console.warn(
-      `[generateCoverPDF] No luluSpine provided — using ${spine.toFixed(2)}mm ` +
-      `(sheet-derived: ${bySheet.toFixed(2)}, page-derived: ${byPages.toFixed(2)}). ` +
-      `Pass spine from /lulu-cover-dimensions for an exact layout.`,
+      `[generateCoverPDF] Lulu returned no spine — using ${spine.toFixed(2)}mm ` +
+      `derived from the ${spineSource === 'sheet' ? 'sheet width' : 'page count'}.`,
     )
   }
 
@@ -386,18 +410,34 @@ export async function generateCoverPDF(options: CoverOptions): Promise<Blob> {
       doc.setFontSize(spineFont)
       setTxt(doc, C_PRIMARY)
 
-      // jsPDF anchors rotated text on its baseline, so the glyph body sits to
-      // one side of the anchor. Shift by roughly a third of the cap height to
-      // centre it on the spine. Derived from the font size rather than a fixed
-      // constant, which is what previously threw the title onto the front cover.
-      const capHeightMm  = spineFont * 0.3527 * 0.7
-      const baselineFix  = capHeightMm * 0.5
+      // NEVER pass align:'center' together with angle:90. jsPDF applies the
+      // centring offset along X instead of along the rotated baseline, so the
+      // title slides sideways by HALF ITS OWN LENGTH — a long title ends up on
+      // the back cover, a short one stays put. That is what put "Dorothy's
+      // Story" 10.7mm off the spine, and what the old 10mm nudge was chasing.
+      //
+      // Positioned by hand instead:
+      //   x — rotated glyphs sit 0.1369mm per point left of the anchor
+      //       (measured across 6/7/8/9/12pt; the relationship is exactly linear)
+      //   y — rotated text runs upward from the anchor, so start half its
+      //       length below the middle to centre it on the spine
+      const SPINE_BASELINE_MM_PER_PT = 0.1369
 
-      doc.text(title, g.spineCX + baselineFix, g.totalH / 2, {
-        align:    'center',
-        angle:    90,
-        maxWidth: g.totalH - g.edge * 2 - 20,
-      })
+      const maxTitleLen = g.totalH - g.edge * 2 - 20
+      let spineTitle = title
+      while (spineTitle.length > 4 && doc.getTextWidth(spineTitle) > maxTitleLen) {
+        spineTitle = spineTitle.slice(0, -1)
+      }
+      if (spineTitle !== title) spineTitle = `${spineTitle.trimEnd()}…`
+
+      const titleLen = doc.getTextWidth(spineTitle)
+
+      doc.text(
+        spineTitle,
+        g.spineCX + spineFont * SPINE_BASELINE_MM_PER_PT,
+        g.totalH / 2 + titleLen / 2,
+        { angle: 90 },
+      )
     }
   }
 
