@@ -175,23 +175,33 @@ app.post(
       const kind =
         session.metadata?.product === 'tribute-video' ? 'tribute_video' : purchaseType
 
-      await trackServerEvent({
-        event: 'purchase_completed',
-        distinctId: userId || buyerEmailForTracking,
-        uuid: uuidFrom(`stripe:${session.id}`),
-        timestamp: new Date(event.created * 1000).toISOString(),
-        properties: {
-          purchase_type:    kind,
-          story_type:       storyType,
-          amount_gbp:       (session.amount_total || 0) / 100,
-          discount_gbp:     (session.total_details?.amount_discount || 0) / 100,
-          currency:         session.currency,
-          promo_used:       (session.total_details?.amount_discount || 0) > 0,
-          gift_product:     session.metadata?.productKey || undefined,
-          stripe_session_id: session.id,
-          logged_in:        Boolean(userId),
-        },
-      })
+      // A fully-discounted order is a test, not a sale. It still processes
+      // normally below — access is granted, the book prints — but it must not
+      // land in PostHog, or every conversion rate is inflated by our own
+      // testing. Two of September's six "purchases" were 100%-off test books.
+      const amountPaid = session.amount_total || 0
+
+      if (amountPaid === 0) {
+        console.log('Zero-value order — not tracked as a purchase:', session.id)
+      } else {
+        await trackServerEvent({
+          event: 'purchase_completed',
+          distinctId: userId || buyerEmailForTracking,
+          uuid: uuidFrom(`stripe:${session.id}`),
+          timestamp: new Date(event.created * 1000).toISOString(),
+          properties: {
+            purchase_type:     kind,
+            story_type:        storyType,
+            amount_gbp:        amountPaid / 100,
+            discount_gbp:      (session.total_details?.amount_discount || 0) / 100,
+            currency:          session.currency,
+            promo_used:        (session.total_details?.amount_discount || 0) > 0,
+            gift_product:      session.metadata?.productKey || undefined,
+            stripe_session_id: session.id,
+            logged_in:         Boolean(userId),
+          },
+        })
+      }
 
       // ── Gift purchase ──────────────────────────────────────────────────────
       if (purchaseType === 'gift') {
