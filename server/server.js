@@ -1421,6 +1421,300 @@ app.get('/cron/gift-progress', async (req, res) => {
   }
 })
 
+
+// ─── Dormant stories: re-engage, then clear out (cron) ───────────────────────
+// 71% of stories ever created have never had a single answer. Those rows cost
+// almost nothing (no answers means no recordings and no photos), so this is not
+// really about disk — it is about the 170 people who signed up, chose whose
+// story to capture, and then stopped.
+//
+// Lifecycle, for a story with ZERO answers whose owner has never paid:
+//    30 days  → nudge email with their first question, and notice of the clear-out
+//    83 days  → final warning, seven days left
+//    90 days  → deleted
+//
+// Safety rules, deliberately conservative:
+//  · A story with even one answer is NEVER touched, at any age.
+//  · An owner with any user_access row (i.e. who has paid) is NEVER touched.
+//  · Nothing is deleted unless BOTH emails actually sent. No notice, no delete.
+//  · Answers are re-counted immediately before deleting, so a story answered
+//    after the warning survives.
+//  · Sends are capped per run — 170 cold emails in one burst from a young
+//    domain is a deliverability problem, so it drips instead.
+//
+// Progress is tracked in nurture_emails (email_type carries the project id), so
+// there is no schema change and nothing new to migrate.
+//
+// Call daily: GET /cron/dormant-stories?key=CRON_SECRET   (add &dry=1 to preview)
+// Tune the batch with &max=40.
+
+const DORMANT_NUDGE_DAYS  = 30   // story age before the first email
+const DORMANT_FINAL_DAYS  = 83   // story age before the final warning
+const DORMANT_DELETE_DAYS = 90   // story age before deletion
+const DORMANT_MAX_PER_RUN = 40   // emails per run, to protect deliverability
+
+// Gaps measured from when the emails actually SENT, not from the story's age.
+// Without these, a story that is already 200 days old when this first runs
+// would be nudged on Monday, warned on Tuesday and deleted on Wednesday —
+// which is exactly the backlog this was built to work through.
+const DORMANT_MIN_DAYS_AFTER_NUDGE = 30
+const DORMANT_MIN_DAYS_AFTER_FINAL = 7
+
+function dormantNudgeEmail({ firstName, storyTitle, question, storyUrl, email, daysLeft }) {
+  const hi = `Hi${firstName ? ` ${escapeHtml(firstName)}` : ''},`
+  const title = escapeHtml(storyTitle || 'your story')
+
+  return {
+    subject: `One question to start “${storyTitle || 'your story'}”`,
+    html: `
+      <div style="font-family: Georgia, serif; max-width: 600px; margin: 0 auto; padding: 40px 20px;">
+        <p style="font-size: 15px; color: #5C534E; line-height: 1.7;">${hi}</p>
+        <h1 style="font-size: 24px; color: #1C1917; line-height: 1.3;">You started “${title}” but haven't answered anything yet</h1>
+        <p style="font-size: 15px; color: #5C534E; line-height: 1.7;">
+          That's the hardest part done — deciding to do it at all. Here's the first question, and it takes about two minutes to answer. You can speak it instead of typing if that's easier.
+        </p>
+        <div style="background: #F5F0E8; border-radius: 16px; padding: 24px; margin: 26px 0;">
+          <p style="font-size: 17px; color: #3C3530; line-height: 1.6; margin: 0; font-style: italic;">“${escapeHtml(question)}”</p>
+        </div>
+        <div style="margin: 28px 0; text-align: center;">
+          <a href="${storyUrl}" style="display: inline-block; background: #7C5C3B; color: white; padding: 12px 32px; border-radius: 100px; font-size: 14px; text-decoration: none; font-weight: 500;">Answer this question</a>
+        </div>
+        <p style="font-size: 14px; color: #8C847E; line-height: 1.7;">
+          If you've changed your mind that's completely fine — empty stories are cleared from our system after ${daysLeft} more days. Answer anything at all and it stays for good.
+        </p>
+        <p style="font-size: 15px; color: #5C534E; line-height: 1.7;">
+          If something got in the way, reply and tell me — I read every message myself.
+        </p>
+        <p style="font-size: 14px; color: #3C3530; margin-top: 28px;">
+          Mark<br><span style="color: #8C847E; font-size: 13px;">Founder, Tell Me Your Story</span>
+        </p>
+        ${gateEmailFooter(email)}
+      </div>`,
+  }
+}
+
+function dormantFinalEmail({ firstName, storyTitle, question, storyUrl, email }) {
+  const hi = `Hi${firstName ? ` ${escapeHtml(firstName)}` : ''},`
+  const title = escapeHtml(storyTitle || 'your story')
+
+  return {
+    subject: `“${storyTitle || 'Your story'}” will be cleared in 7 days`,
+    html: `
+      <div style="font-family: Georgia, serif; max-width: 600px; margin: 0 auto; padding: 40px 20px;">
+        <p style="font-size: 15px; color: #5C534E; line-height: 1.7;">${hi}</p>
+        <h1 style="font-size: 24px; color: #1C1917; line-height: 1.3;">Last chance to keep “${title}”</h1>
+        <p style="font-size: 15px; color: #5C534E; line-height: 1.7;">
+          It's still completely empty, so in seven days it'll be cleared from our system. Nothing is lost by that — there's nothing in it yet — but I didn't want it to happen without telling you.
+        </p>
+        <p style="font-size: 15px; color: #5C534E; line-height: 1.7;">
+          Answering a single question keeps it, permanently:
+        </p>
+        <div style="background: #F5F0E8; border-radius: 16px; padding: 24px; margin: 26px 0;">
+          <p style="font-size: 17px; color: #3C3530; line-height: 1.6; margin: 0; font-style: italic;">“${escapeHtml(question)}”</p>
+        </div>
+        <div style="margin: 28px 0; text-align: center;">
+          <a href="${storyUrl}" style="display: inline-block; background: #7C5C3B; color: white; padding: 12px 32px; border-radius: 100px; font-size: 14px; text-decoration: none; font-weight: 500;">Keep my story</a>
+        </div>
+        <p style="font-size: 14px; color: #3C3530; margin-top: 28px;">
+          Mark<br><span style="color: #8C847E; font-size: 13px;">Founder, Tell Me Your Story</span>
+        </p>
+        ${gateEmailFooter(email)}
+      </div>`,
+  }
+}
+
+app.get('/cron/dormant-stories', async (req, res) => {
+  if (req.query.key !== process.env.CRON_SECRET) {
+    return res.status(401).json({ error: 'Unauthorized' })
+  }
+
+  const dryRun = req.query.dry === '1'
+  const maxPerRun = Math.min(Math.max(parseInt(req.query.max, 10) || DORMANT_MAX_PER_RUN, 1), 200)
+  const report = { nudged: [], warned: [], deleted: [], skipped: {} }
+  const skip = (why) => { report.skipped[why] = (report.skipped[why] || 0) + 1 }
+
+  try {
+    // Answer counts per project (paged — Supabase returns 1,000 rows max)
+    const answersPerProject = {}
+    for (let from = 0; ; from += 1000) {
+      const { data, error } = await supabaseAdmin
+        .from('story_answers')
+        .select('project_id, answer')
+        .not('answer', 'is', null)
+        .range(from, from + 999)
+      if (error) throw error
+      for (const row of data || []) {
+        if (row.answer && row.answer.trim()) {
+          answersPerProject[row.project_id] = (answersPerProject[row.project_id] || 0) + 1
+        }
+      }
+      if (!data || data.length < 1000) break
+    }
+
+    const { data: projects, error: projErr } = await supabaseAdmin
+      .from('story_projects')
+      .select('id, user_id, title, story_type, created_at')
+      .order('created_at', { ascending: true })
+    if (projErr) throw projErr
+
+    const empty = (projects || []).filter((p) => !answersPerProject[p.id])
+
+    const userCache = {}
+    const paidCache = {}
+    const questionCache = {}
+    let sent = 0
+
+    for (const project of empty) {
+      const ageDays = (Date.now() - new Date(project.created_at).getTime()) / 86_400_000
+      if (ageDays < DORMANT_NUDGE_DAYS) { skip('too new'); continue }
+      if (!project.user_id) { skip('no owner'); continue }
+
+      // Never touch a paying customer's work.
+      if (paidCache[project.user_id] === undefined) {
+        const { count } = await supabaseAdmin
+          .from('user_access')
+          .select('*', { count: 'exact', head: true })
+          .eq('user_id', project.user_id)
+        paidCache[project.user_id] = (count || 0) > 0
+      }
+      if (paidCache[project.user_id]) { skip('owner has paid'); continue }
+
+      const nudgeType = `dormant_nudge:${project.id}`
+      const finalType = `dormant_final:${project.id}`
+      const { data: logged } = await supabaseAdmin
+        .from('nurture_emails')
+        .select('email_type, created_at')
+        .eq('user_id', project.user_id)
+        .in('email_type', [nudgeType, finalType])
+      const sentAt = {}
+      for (const r of logged || []) sentAt[r.email_type] = r.created_at
+      const done = new Set(Object.keys(sentAt))
+
+      // Days since each email went out. Null when we cannot tell, which is
+      // treated as "not long enough" so nothing is deleted on a missing date.
+      const daysSince = (type) => {
+        const t = sentAt[type] ? new Date(sentAt[type]).getTime() : NaN
+        return Number.isFinite(t) ? (Date.now() - t) / 86_400_000 : null
+      }
+
+      // ── Delete: warned, still empty, past the deadline ────────────────────
+      const sinceFinal = daysSince(finalType)
+      if (
+        ageDays >= DORMANT_DELETE_DAYS &&
+        done.has(nudgeType) && done.has(finalType) &&
+        sinceFinal !== null && sinceFinal >= DORMANT_MIN_DAYS_AFTER_FINAL
+      ) {
+        // Re-count this one project right now — it may have been answered since.
+        const { count: liveAnswers } = await supabaseAdmin
+          .from('story_answers')
+          .select('*', { count: 'exact', head: true })
+          .eq('project_id', project.id)
+          .not('answer', 'is', null)
+        if ((liveAnswers || 0) > 0) { skip('answered after warning'); continue }
+
+        report.deleted.push({ id: project.id, title: project.title, ageDays: Math.round(ageDays) })
+        if (dryRun) continue
+
+        try {
+          await supabaseAdmin.from('storyteller_links').delete().eq('project_id', project.id)
+          await supabaseAdmin.from('story_answers').delete().eq('project_id', project.id)
+          const { error: delErr } = await supabaseAdmin.from('story_projects').delete().eq('id', project.id)
+          if (delErr) throw delErr
+          console.log('Dormant story deleted:', project.id, project.title)
+        } catch (delErr) {
+          console.error('Dormant delete error:', project.id, delErr.message)
+        }
+        continue
+      }
+
+      // Everything below sends an email, so respect the per-run cap.
+      if (sent >= maxPerRun) { skip('over batch limit'); continue }
+
+      const sinceNudge = daysSince(nudgeType)
+      const stage =
+        !done.has(nudgeType) ? 'nudge'
+        : (!done.has(finalType)
+           && ageDays >= DORMANT_FINAL_DAYS
+           && sinceNudge !== null
+           && sinceNudge >= DORMANT_MIN_DAYS_AFTER_NUDGE) ? 'final'
+        : null
+      if (!stage) { skip('waiting'); continue }
+
+      if (!userCache[project.user_id]) {
+        const { data } = await supabaseAdmin.auth.admin.getUserById(project.user_id)
+        userCache[project.user_id] = data?.user || null
+      }
+      const user = userCache[project.user_id]
+      if (!user?.email) { skip('no email address'); continue }
+      if (user.user_metadata?.email_opt_in === false) { skip('opted out'); continue }
+      if (await isUnsubscribed(user.email)) { skip('unsubscribed'); continue }
+
+      // First question for this story type — something concrete to answer.
+      const type = project.story_type || 'life'
+      if (!questionCache[type]) {
+        const { data: sections } = await supabaseAdmin
+          .from('story_sections')
+          .select('question')
+          .eq('story_type', type)
+          .order('order_index', { ascending: true })
+          .limit(1)
+        questionCache[type] = sections?.[0]?.question || 'What did your childhood home smell like?'
+      }
+
+      const firstName = user.user_metadata?.full_name?.split(' ')[0]
+        || user.user_metadata?.name?.split(' ')[0] || ''
+      const details = {
+        firstName,
+        storyTitle: project.title,
+        question: questionCache[type],
+        storyUrl: `${SITE_URL}/story/${project.id}`,
+        email: user.email,
+        daysLeft: Math.max(1, Math.round(DORMANT_DELETE_DAYS - ageDays)),
+      }
+
+      report[stage === 'nudge' ? 'nudged' : 'warned'].push({
+        email: user.email, title: project.title, ageDays: Math.round(ageDays),
+      })
+      if (dryRun) { sent++; continue }
+
+      const message = stage === 'nudge' ? dormantNudgeEmail(details) : dormantFinalEmail(details)
+
+      try {
+        await resend.emails.send({
+          from: 'Mark at Tell Me Your Story <mark-griffiths@tellmeyourstory.uk>',
+          to: user.email,
+          subject: message.subject,
+          html: message.html,
+          headers: {
+            'List-Unsubscribe': `<${unsubscribeUrl(user.email)}>`,
+            'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
+          },
+        })
+        await supabaseAdmin
+          .from('nurture_emails')
+          .insert({ user_id: project.user_id, email_type: stage === 'nudge' ? nudgeType : finalType })
+        console.log(`dormant_${stage} sent to:`, user.email, '| story:', project.id)
+        sent++
+      } catch (emailErr) {
+        console.error('Dormant email error:', user.email, emailErr.message)
+      }
+    }
+
+    res.json({
+      dryRun,
+      emptyStories: empty.length,
+      nudged: report.nudged.length,
+      warned: report.warned.length,
+      deleted: report.deleted.length,
+      skipped: report.skipped,
+      ...(dryRun ? { detail: report } : {}),
+    })
+  } catch (err) {
+    console.error('Dormant stories cron error:', err.message)
+    res.status(500).json({ error: err.message })
+  }
+})
+
 // ─── Storyteller links ("Send Mum her questions") ────────────────────────────
 // The storyteller answers from /tell/:token with no account. Every read and
 // write for them goes through these endpoints using the secret token, with the
