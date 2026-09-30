@@ -51,55 +51,7 @@
       </div>
     </header>
 
-    <!-- ═══════════════════════════════════════════════════════════ -->
-    <!-- FIRST RUN — one question, nothing else to decide            -->
-    <!-- ═══════════════════════════════════════════════════════════ -->
-    <div v-if="isFirstRun" class="mx-auto max-w-3xl px-4 py-10 sm:px-6 sm:py-14">
-      <div class="text-center">
-        <h2 class="font-display text-2xl font-bold text-stone-900 sm:text-3xl">
-          Whose story would you like to keep?
-        </h2>
-        <p class="mx-auto mt-3 max-w-md text-base leading-relaxed text-stone-600">
-          Pick one and we'll open the first question. You can answer it by typing, or just talking.
-        </p>
-      </div>
-
-      <div class="mt-8 grid gap-3 sm:grid-cols-2">
-        <button
-          v-for="type in firstRunTypes"
-          :key="type.id"
-          type="button"
-          :disabled="startingType !== ''"
-          class="flex min-h-[72px] items-center justify-between gap-4 rounded-2xl border border-stone-200 bg-white px-6 text-left transition hover:border-[#7C5C3B] hover:shadow-sm disabled:opacity-50"
-          @click="startFirstStory(type.id)"
-        >
-          <span>
-            <span class="block font-display text-lg font-semibold text-stone-900">{{ type.short }}</span>
-            <span class="mt-0.5 block text-sm text-stone-500">{{ type.hint }}</span>
-          </span>
-          <span class="flex-shrink-0 text-lg text-[#7C5C3B]" aria-hidden="true">
-            {{ startingType === type.id ? '…' : '→' }}
-          </span>
-        </button>
-      </div>
-
-      <p class="mt-6 text-center text-sm text-stone-500">
-        5 questions free · no card needed · you can add more people later
-      </p>
-
-      <p v-if="firstRunError" class="mt-4 text-center text-sm text-red-700" role="alert">{{ firstRunError }}</p>
-
-      <div class="mt-10 rounded-2xl bg-white p-6">
-        <p class="text-sm font-semibold text-stone-900">What happens next</p>
-        <ol class="mt-3 space-y-2 text-sm leading-relaxed text-stone-600">
-          <li>1. You'll see the first question. Type the answer, or tap the microphone and talk.</li>
-          <li>2. We'll show you how it looks as a page in the book.</li>
-          <li>3. Keep going whenever you like — or send the questions to them, and we'll email one a week.</li>
-        </ol>
-      </div>
-    </div>
-
-    <div v-else class="mx-auto max-w-6xl space-y-10 px-4 py-8 sm:px-6 sm:py-10">
+    <div class="mx-auto max-w-6xl space-y-10 px-4 py-8 sm:px-6 sm:py-10">
 
       <!-- ═══════════════════════════════════════════════════════════ -->
       <!-- UPGRADE BANNER — free users only                            -->
@@ -212,16 +164,6 @@
                     class="rounded-full bg-[#7C5C3B] px-5 py-2 text-sm font-semibold text-white transition hover:opacity-90"
                   >
                     {{ story.progress > 0 ? 'Continue' : 'Start writing' }}
-                  </button>
-                  <button
-                    type="button"
-                    @click="openStoryteller(story)"
-                    class="inline-flex items-center gap-1.5 rounded-full border border-[#7C5C3B] px-4 py-2 text-sm font-medium text-[#7C5C3B] transition hover:bg-[#FAF7F4]"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                      <path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4 20-7z"/>
-                    </svg>
-                    Send {{ storytellerLabel(story) }} the questions
                   </button>
 <p v-if="hasPrintAccess()" class="mt-2 text-xs text-stone-400">
   Printed and shipped from £{{ PRINTED_BOOK_FROM_PRICE.toFixed(2) }}, UK delivery included
@@ -422,8 +364,8 @@
         <div class="relative w-full max-w-sm overflow-hidden rounded-2xl bg-white shadow-2xl">
 
           <div class="border-b border-stone-100 px-6 py-5">
-            <h2 class="font-display text-lg font-bold text-stone-900">Check and order your book</h2>
-            <p class="mt-1 text-sm text-stone-500">Price includes UK delivery.</p>
+            <h2 class="font-display text-lg font-bold text-stone-900">Choose your book type</h2>
+            <p class="mt-1 text-sm text-stone-500">Price includes UK shipping.</p>
           </div>
 
           <div class="px-6 py-5">
@@ -432,28 +374,10 @@
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/>
               </svg>
-              <p class="text-xs text-stone-500">Laying out your pages and working out the price…</p>
+              <p class="text-xs text-stone-500">Calculating pricing for your book…</p>
             </div>
 
             <div v-else class="space-y-2">
-              <!-- Look before you pay -->
-              <div class="mb-4 rounded-xl bg-[#F5F0E8] p-4">
-                <p class="text-sm font-semibold text-stone-900">Check every page first</p>
-                <p class="mt-1 text-xs leading-relaxed text-stone-600">
-                  This is exactly what will be printed — {{ bindingModalPageCount }} pages.
-                  Spotted something to change? Close this, edit your story, and come back.
-                </p>
-                <button
-                  type="button"
-                  class="mt-3 inline-flex min-h-[44px] w-full items-center justify-center gap-2 rounded-full border border-[#7C5C3B] bg-white text-sm font-semibold text-[#7C5C3B] transition hover:bg-[#FAF7F4]"
-                  @click="openPrintPreview"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>
-                  </svg>
-                  Preview your book
-                </button>
-              </div>
               <button
                 v-for="b in bindingOptions"
                 :key="b.id"
@@ -471,11 +395,8 @@
                 </div>
                 <p class="mt-0.5 text-xs text-stone-500">{{ b.desc }}</p>
               </button>
-              <p class="pt-1 text-center text-xs text-stone-500">
-                {{ bindingModalPageCount }} pages · UK delivery included · usually arrives in 10–14 days
-              </p>
-              <p v-if="christmasPrintNote" class="text-center text-xs font-medium text-[#86664A]">
-                {{ christmasPrintNote }}
+              <p class="pt-1 text-center text-[11px] text-stone-400">
+                {{ bindingModalPageCount }} pages · UK shipping included
               </p>
             </div>
 
@@ -497,13 +418,6 @@
     </Transition>
 
   </div>
-  <StorytellerInviteModal
-    :open="!!storytellerStory"
-    :project-id="storytellerStory?.id || ''"
-    :story-title="storytellerStory?.title || ''"
-    :suggested-name="storytellerStory ? storytellerLabel(storytellerStory, true) : ''"
-    @close="storytellerStory = null"
-  />
 </template>
 
 <script setup lang="ts">
@@ -512,7 +426,6 @@ import { useRouter } from 'vue-router'
 import { supabase } from '../lib/supabase'
 import { track } from '../lib/analytics'
 import { STORY_TYPES } from '../data/storyTypes'
-import StorytellerInviteModal from '../components/story/StorytellerInviteModal.vue'
 import { isValidStoryType, takePendingStoryType } from '../lib/pendingStoryTypes'
 import { useStoryTrueBookExport } from '../composables/useTrueBookExport'
 import { generateCoverPDF } from '../lib/generateCoverPDF'
@@ -526,36 +439,6 @@ import { usePhotoBookExport } from '../composables/usePhotoBookExport'
 const stories           = ref<any[]>([])
 const userAccess        = ref<any[]>([])
 const isFirstTimeUser   = ref(false)
-const storiesLoaded     = ref(false)
-const startingType      = ref('')
-const firstRunError     = ref('')
-
-/** Brand-new user with nothing to show: give them one decision, not a dashboard. */
-const isFirstRun = computed(() => storiesLoaded.value && stories.value.length === 0)
-
-/** The four people most families start with, plus a catch-all. */
-const firstRunTypes = [
-  { id: 'mum',     short: 'Mum',           hint: 'Her childhood, family, and the life she has lived' },
-  { id: 'dad',     short: 'Dad',           hint: 'Work, first cars, and the lessons he would pass on' },
-  { id: 'grandma', short: 'Nan',           hint: 'Growing up, family life, and the world she remembers' },
-  { id: 'grandad', short: 'Grandad',       hint: 'His younger years, work, and the stories rarely told' },
-  { id: 'life',    short: 'Someone else',  hint: 'A partner, a friend, or your own story' },
-]
-
-const planAfterFirstStory = ref('')
-
-async function startFirstStory(typeId: string) {
-  if (startingType.value) return
-  startingType.value = typeId
-  firstRunError.value = ''
-  try {
-    await createStory(typeId, 'first_run', planAfterFirstStory.value)
-  } catch {
-    firstRunError.value = "Sorry — that didn't work. Please try again."
-  } finally {
-    startingType.value = ''
-  }
-}
 const deletingStoryId   = ref<string | null>(null)
 const generatingPrintId = ref<string | null>(null)
 const printModalOpen    = ref(false)
@@ -639,7 +522,6 @@ const bindingModalPageCount    = ref<number | null>(null)
 const bindingModalInteriorBlob = ref<Blob | null>(null)
 
 import { BINDING_CONFIGS, getPrintPrice, type BindingId } from '../lib/printPricing'
-import { christmasPhase, PRINT_CUTOFF_LABEL } from '../lib/christmas'
 
 const bindingOptions = BINDING_CONFIGS
 
@@ -666,26 +548,6 @@ function openBindingModal(story: any) {
   // loss. See printPricing.ts for the bracket pricing this now uses.
   prepareInteriorForPricing(story)
 }
-
-// ─── Print preview ─────────────────────────────────────────────────────────
-// Opens the exact interior PDF that will be sent to the printer, so people can
-// check every page before paying.
-let printPreviewUrl: string | null = null
-
-function openPrintPreview() {
-  if (!bindingModalInteriorBlob.value) return
-  if (printPreviewUrl) URL.revokeObjectURL(printPreviewUrl)
-  printPreviewUrl = URL.createObjectURL(bindingModalInteriorBlob.value)
-  window.open(printPreviewUrl, '_blank', 'noopener')
-  track('print_preview_opened', { pages: bindingModalPageCount.value })
-}
-
-const christmasPrintNote = computed(() => {
-  const phase = christmasPhase()
-  if (phase === 'early' || phase === 'countdown') return `For Christmas, order by ${PRINT_CUTOFF_LABEL}.`
-  if (phase === 'digital') return 'Ordered now, this will arrive after Christmas.'
-  return ''
-})
 
 async function prepareInteriorForPricing(story: any) {
   try {
@@ -727,21 +589,6 @@ async function prepareInteriorForPricing(story: any) {
     alert('Could not calculate pricing for this book. Please try again.')
     bindingModalOpen.value = false
   }
-}
-
-// ─── "Send Mum the questions" ───────────────────────────────────────────────
-const storytellerStory = ref<any | null>(null)
-
-const STORYTELLER_NAMES: Record<string, string> = { mum: 'Mum', dad: 'Dad', grandma: 'Nan', grandad: 'Grandad' }
-
-/** "Mum" for a Mum story; "them" otherwise (or '' as a form suggestion). */
-function storytellerLabel(story: any, forForm = false) {
-  return STORYTELLER_NAMES[story?.story_type] || (forForm ? '' : 'them')
-}
-
-function openStoryteller(story: any) {
-  storytellerStory.value = story
-  track('storyteller_modal_opened', { story_type: story?.story_type })
 }
 
 async function generateShareLink(storyId: string) {
@@ -974,6 +821,7 @@ const photoBookBlob = includesPhotoBook
 // Lulu's accepted tolerance).
 let luluWidth: number
 let luluHeight: number
+let luluSpine: number
 
 const dimsResponse = await fetch(`${API_BASE}/lulu-cover-dimensions`, {
   method: 'POST',
@@ -995,7 +843,10 @@ const dims = await dimsResponse.json()
 console.log('Raw dims response:', JSON.stringify(dims))
 luluWidth  = parseFloat(dims.width)
 luluHeight = parseFloat(dims.height)
-console.log('Cover dims from Lulu for', podId, ':', luluWidth, luluHeight)
+// Lulu returns the spine in the same response. Pass it through — deriving it
+// from a hardcoded wrap constant is what shifted the hardcover front panel.
+luluSpine  = parseFloat(dims.spine ?? dims.spine_mm ?? dims.spine_width ?? '0')
+console.log('Cover dims from Lulu for', podId, ':', luluWidth, luluHeight, 'spine:', luluSpine)
 
 console.log('Converted dims mm:', luluWidth, luluHeight)
 
@@ -1008,6 +859,7 @@ console.log('Converted dims mm:', luluWidth, luluHeight)
       loadImageAsBase64,
       luluWidth:     luluWidth,
       luluHeight:    luluHeight,
+      luluSpine:     luluSpine,
       bindingType: podId === '0600X0900.FC.PRE.LW.080CW444.GNG' ? 'dustjacket' 
              : podId === '0600X0900.FC.PRE.CW.080CW444.GXX' ? 'hardcover' 
              : 'softcover',
@@ -1061,7 +913,7 @@ function onOrdered(printJobId: string) {
 
 // ─── CRUD ─────────────────────────────────────────────────────────────────────
 
-async function createStory(type: string, source = 'dashboard', plan = '') {
+async function createStory(type: string, source = 'dashboard') {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return
 
@@ -1073,12 +925,7 @@ async function createStory(type: string, source = 'dashboard', plan = '') {
 
   if (!error && data) {
     track('story_started', { source, story_type: type })
-    if (plan) {
-      try { localStorage.removeItem('tmys-pending-plan') } catch { /* not essential */ }
-      router.push(`/story/${data.id}?plan=${plan}`)
-    } else {
-      router.push(`/story/${data.id}`)
-    }
+    router.push(`/story/${data.id}`)
   }
 }
 
@@ -1096,7 +943,6 @@ async function fetchStories() {
     )
     stories.value = storiesWithProgress
     isFirstTimeUser.value = storiesWithProgress.length === 0
-    storiesLoaded.value = true
   }
 }
 
@@ -1180,10 +1026,12 @@ onMounted(async () => {
 
   // Story type picked on the homepage ("Whose story?") — same rules as the plan.
   const queryType = params.get('type')
-  // Clear any saved choice, but don't act on it: a leftover value was opening
-  // a Mum story for people who never picked one.
-  takePendingStoryType()
-  const pendingStoryType = isValidStoryType(queryType) ? queryType : null
+  const storedType = takePendingStoryType()
+  const pendingStoryType = isValidStoryType(queryType)
+    ? queryType
+    : storedType && isNewAccount
+      ? storedType
+      : null
 
   const queryPlan = params.get('plan')
   const planFromRegister =
@@ -1197,27 +1045,19 @@ onMounted(async () => {
     // Clear the param so refresh doesn't re-trigger
     if (queryPlan || queryType) window.history.replaceState({}, '', '/dashboard')
 
-    // No story type chosen yet? Don't guess. Keep the plan and let them pick
-    // on the first-run screen; checkout happens as soon as they do.
-    if (!pendingStoryType && stories.value.length === 0) {
-      planAfterFirstStory.value = planFromRegister
-      try { localStorage.setItem(PLAN_STORAGE_KEY, planFromRegister) } catch { /* not essential */ }
-      return
-    }
-
     const user = currentUser
     if (!user) return
 
-    // Use the story they already have; otherwise create the type they picked
+    // If user has no stories yet, create a default one
     let targetStoryId = stories.value[0]?.id
 
-    if (!targetStoryId && pendingStoryType) {
+    if (!targetStoryId) {
       const { data: newStory, error: storyErr } = await supabase
         .from('story_projects')
         .insert([{
           user_id: user.id,
-          title: getStoryTitle(pendingStoryType),
-          story_type: pendingStoryType,
+          title: getStoryTitle(pendingStoryType || 'mum'),
+          story_type: pendingStoryType || 'mum',
         }])
         .select()
         .single()
@@ -1228,12 +1068,6 @@ onMounted(async () => {
       }
       targetStoryId = newStory.id
       track('story_auto_created', { source: 'register_premium', plan: planFromRegister })
-    }
-
-    // Nothing to open (no story and no chosen type) — let them pick first
-    if (!targetStoryId) {
-      planAfterFirstStory.value = planFromRegister
-      return
     }
 
     track('checkout_from_register', { plan: planFromRegister, source: queryPlan ? 'query' : 'stored' })

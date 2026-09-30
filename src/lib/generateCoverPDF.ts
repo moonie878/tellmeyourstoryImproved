@@ -6,43 +6,46 @@ import { EBGaramondBoldItalic } from '../fonts/EBGaramond-BoldItalic'
 
 // ─── Lulu cover spec ──────────────────────────────────────────────────────────
 //
-// Dimensions come from Lulu's /cover-dimensions/ endpoint — always use those.
-// Default fallback values are for a 28-page 6x9 softcover book.
+// Dimensions come from Lulu's /cover-dimensions/ endpoint — always pass those
+// in as luluWidth/luluHeight/luluSpine.
 //
-// Softcover/Hardcover layout (left to right):
-//   [bleed] [back cover: 152.4mm] [spine] [front cover: 152.4mm] [bleed]
+// THE RULE THIS FILE NOW FOLLOWS:
+//   Nothing is positioned from TRIM_W or BLEED. Every panel edge is derived
+//   from the sheet Lulu gave us and the spine Lulu gave us. The only binding-
+//   specific constant is EDGE_ALLOWANCE — how much of each side disappears
+//   when the cover is finished.
 //
-// Dust jacket layout (left to right):
-//   [bleed] [front flap] [back cover: 152.4mm] [spine] [front cover: 152.4mm] [back flap] [bleed]
-//
-// Bleed is 3.175mm (0.125 inches) on all sides.
+// Why that matters (the June–Sept 2026 hardcover bug):
+//   Softcover loses 3.175mm of bleed per side. A hardcover case wrap folds
+//   22.225mm around the board on every side. The old code laid everything out
+//   as though only the bleed was lost, so on hardcover the front footer printed
+//   13mm outside the finished cover (gone), the content block centred 9mm too
+//   high (dead space along the bottom), and two hand-tuned "nudge" constants
+//   pushed the front panel a further 3mm sideways. Deriving the safe area from
+//   EDGE_ALLOWANCE removes all three at once and needs no magic numbers.
 
-const BLEED       = 3.175   // mm — fixed for all Lulu 6x9 books
-const TRIM_W       = 152.4   // mm — 6 inches per side
-const TRIM_H       = 228.6   // mm — 9 inches
-const FLAP_W       = 76.2    // mm — standard 3 inch dust jacket flap
-const HC_WRAP      = 19.045 // mm — hardcover case wrap margin per side.
-// Derived from Lulu's stated requirement for 0600X0900.FC.PRE.CW.080CW444.GXX:
-// width 365.12mm, spine 15.88mm (per Lulu's own product spec panel).
-// margin_per_side = (365.12 - 152.4*2 - 15.88) / 2 = 22.22mm total,
-// of which BLEED (3.175mm) is the flat bleed — so HC_WRAP is the
-// remainder: 22.22 - 3.175 = 19.045mm. The previous value (6.35mm) was
-// a guess that undershot the real figure by more than half, causing
-// the spine to calculate far too wide and throwing off the entire
-// front cover layout (June 2026 — see hardcover front cover bug).
+const TRIM_W = 152.4   // mm — 6in. Fallback sizing only; never used for layout.
+const TRIM_H = 228.6   // mm — 9in. Fallback sizing only; never used for layout.
+const FLAP_W = 76.2    // mm — standard 3in dust jacket flap
 
-// Small cosmetic nudge — shifts front/back cover text/image content
-// slightly OUTWARD (away from the spine) to better centre it within
-// Lulu's safe area, per visual check against Lulu's own preview tool.
-// Positive value shifts front cover right and back cover left.
-// Adjust in small (1-2mm) increments and re-check against Lulu's preview.
-const COVER_CONTENT_NUDGE = 3 // mm
+/**
+ * Distance from the PDF edge to the visible edge of the finished cover.
+ *
+ *  softcover / dustjacket — 3.175mm (0.125in) bleed, trimmed off.
+ *  hardcover case wrap    — 22.225mm (0.875in) folded around the board.
+ *
+ * The hardcover figure is confirmed against Lulu's own published spec for
+ * 0600X0900.FC.PRE.CW.080CW444.GXX: a 365.12mm sheet with a 15.88mm spine
+ * leaves (365.12 - 152.4*2 - 15.88) / 2 = 22.225mm per side.
+ */
+const EDGE_ALLOWANCE: Record<string, number> = {
+  softcover:  3.175,
+  hardcover:  22.225,
+  dustjacket: 3.175,
+}
 
-// Small cosmetic nudge for spine text specifically — jsPDF's rotated
-// text (angle: 90) doesn't always centre on its true anchor point the
-// same way unrotated text does, so the spine title can render slightly
-// off-centre within the spine strip even when spineCX itself is correct.
-const SPINE_TEXT_NUDGE = 10 // mm — positive shifts spine text right
+/** Keep text and rules at least this far inside the visible edge. */
+const SAFE_MARGIN = 8 // mm
 
 const IMG_QUALITY = 0.85
 
@@ -54,6 +57,7 @@ const C_MUTED     = [140, 132, 126] as const
 const C_ACCENT    = [148, 116, 74]  as const
 const C_DIVIDER   = [221, 214, 206] as const
 const C_DARK      = [28, 25, 23]    as const
+const C_SPINE_BG  = [240, 235, 228] as const
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -90,15 +94,91 @@ async function compressImage(imgData: string, targetW: number, targetH: number):
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
+export type BindingType = 'softcover' | 'hardcover' | 'dustjacket'
+
 export interface CoverOptions {
   title: string
   subtitle: string
   pageCount: number
   coverImageUrl?: string
   loadImageAsBase64?: (url: string) => Promise<string>
+  /** Sheet width in mm, from Lulu /cover-dimensions. */
   luluWidth?: number
+  /** Sheet height in mm, from Lulu /cover-dimensions. */
   luluHeight?: number
-  bindingType?: 'softcover' | 'hardcover' | 'dustjacket'
+  /** Spine width in mm, from Lulu /cover-dimensions. Strongly preferred. */
+  luluSpine?: number
+  bindingType?: BindingType
+}
+
+/** Everything the drawing code needs, all derived from Lulu's sheet. */
+interface CoverGeometry {
+  totalW: number
+  totalH: number
+  edge: number
+  spine: number
+  spineLeft: number
+  spineRight: number
+  spineCX: number
+  backLeft: number
+  backRight: number
+  backCX: number
+  frontLeft: number
+  frontRight: number
+  frontCX: number
+  panelW: number
+  contentTop: number
+  contentBot: number
+}
+
+/**
+ * Derives every panel edge from the finished sheet.
+ *
+ * The cover is always symmetrical about the spine, so the spine sits dead
+ * centre and each panel runs from the spine out to the edge allowance. No
+ * panel width is assumed — it falls out of the arithmetic, which is what
+ * keeps hardcover and softcover correct with the same code.
+ */
+function buildGeometry(
+  totalW: number,
+  totalH: number,
+  spineIn: number,
+  bindingType: BindingType,
+): CoverGeometry {
+  const edge = EDGE_ALLOWANCE[bindingType] ?? EDGE_ALLOWANCE.softcover
+  const isDustJacket = bindingType === 'dustjacket'
+  const flap = isDustJacket ? FLAP_W : 0
+
+  // Never let a bad spine collapse the layout.
+  const maxSpine = totalW - 2 * edge - 2 * flap - 40
+  const spine = Math.max(0, Math.min(spineIn, maxSpine))
+
+  const spineLeft  = (totalW - spine) / 2
+  const spineRight = spineLeft + spine
+
+  const backLeft   = edge + flap
+  const backRight  = spineLeft
+  const frontLeft  = spineRight
+  const frontRight = totalW - edge - flap
+
+  return {
+    totalW,
+    totalH,
+    edge,
+    spine,
+    spineLeft,
+    spineRight,
+    spineCX:  totalW / 2,
+    backLeft,
+    backRight,
+    backCX:   (backLeft + backRight) / 2,
+    frontLeft,
+    frontRight,
+    frontCX:  (frontLeft + frontRight) / 2,
+    panelW:   frontRight - frontLeft,
+    contentTop: edge + SAFE_MARGIN,
+    contentBot: totalH - edge - SAFE_MARGIN,
+  }
 }
 
 // ─── Main cover generator ─────────────────────────────────────────────────────
@@ -112,85 +192,62 @@ export async function generateCoverPDF(options: CoverOptions): Promise<Blob> {
     loadImageAsBase64,
     luluWidth,
     luluHeight,
+    luluSpine,
     bindingType = 'softcover',
   } = options
 
   const isDustJacket = bindingType === 'dustjacket'
-  const isHardcover  = bindingType === 'hardcover'
+  const edge = EDGE_ALLOWANCE[bindingType] ?? EDGE_ALLOWANCE.softcover
 
-  // Use Lulu's exact dimensions if provided — ALWAYS prefer these.
-  // Fallbacks below are last-resort estimates only and may not pass Lulu's
-  // validation, especially for hardcover/case wrap which adds a wrap
-  // allowance Lulu calculates per page-count via /cover-dimensions/.
+  // ── Sheet size ─────────────────────────────────────────────────────────────
   let totalW = luluWidth
   let totalH = luluHeight
 
   if (!totalW || !totalH) {
     console.warn(
-      `[generateCoverPDF] No luluWidth/luluHeight provided for bindingType="${bindingType}". ` +
-      `Falling back to an estimated size — this MAY be rejected by Lulu. ` +
-      `Fetch real dimensions from /lulu-cover-dimensions before calling generateCoverPDF.`
+      `[generateCoverPDF] No luluWidth/luluHeight for bindingType="${bindingType}". ` +
+      `Falling back to an estimate — Lulu may reject this. Fetch real dimensions ` +
+      `from /lulu-cover-dimensions first.`,
     )
-
-    if (isDustJacket) {
-      totalW = totalW || 508.00
-      totalH = totalH || 247.65
-    } else if (isHardcover) {
-      // Hardcover case wrap: standard bleed+trim+spine, PLUS wrap allowance
-      // on each side (Lulu adds ~0.25" wrap on top of the flat bleed used
-      // for softcover — this was previously missing entirely).
-      const estSpine = getSpineWidthMm(pageCount || 28)
-      totalW = totalW || (TRIM_W * 2 + estSpine + (BLEED + HC_WRAP) * 2)
-      totalH = totalH || (TRIM_H + (BLEED + HC_WRAP) * 2)
-    } else {
-      totalW = totalW || 314.280
-      totalH = totalH || 234.950
-    }
+    const estSpine = getSpineWidthMm(pageCount || 28)
+    totalW = totalW || TRIM_W * 2 + estSpine + edge * 2 + (isDustJacket ? FLAP_W * 2 : 0)
+    totalH = totalH || TRIM_H + edge * 2
   }
 
-  // ── Layout calculations ────────────────────────────────────────────────────
+  // ── Spine ──────────────────────────────────────────────────────────────────
+  // Lulu returns the spine in the same response as width/height. Use it.
+  // Falling back to page-count maths is a last resort: it was the old default
+  // and it is what let a wrong constant shift the whole front panel sideways.
+  let spine = luluSpine && luluSpine > 0 ? luluSpine : 0
 
-  let backLeft:  number
-  let spineLeft: number
-  let frontLeft: number
-  let spine:     number
-
-  if (isDustJacket) {
-    // Dust jacket: [bleed][front flap][back][spine][front][back flap][bleed]
-    // Total = bleed*2 + flap*2 + trim*2 + spine
-    spine     = totalW - BLEED * 2 - FLAP_W * 2 - TRIM_W * 2
-    backLeft  = BLEED + FLAP_W
-    spineLeft = backLeft + TRIM_W
-    frontLeft = spineLeft + spine
-  } else {
-    // Softcover/Hardcover: [bleed][back][spine][front][bleed]
-    // Hardcover case wrap needs the extra wrap margin (HC_WRAP) subtracted
-    // on top of bleed on both sides — without this, spine calculates far
-    // too wide (e.g. 53.97mm instead of Lulu's correct 15.88mm for a
-    // 142-page hardcover), which throws off the whole layout including
-    // where the front cover panel starts (June 2026 bug).
-    const sideMargin = isHardcover ? BLEED + HC_WRAP : BLEED
-    spine     = totalW - TRIM_W * 2 - sideMargin * 2
-    backLeft  = sideMargin
-    spineLeft = backLeft + TRIM_W
-    frontLeft = spineLeft + spine
+  if (!spine) {
+    const byPages = getSpineWidthMm(pageCount || 28)
+    const bySheet = totalW - edge * 2 - (isDustJacket ? FLAP_W * 2 : 0) - TRIM_W * 2
+    // Prefer the sheet-derived figure when it is plausible; it reflects the
+    // real book rather than a generic paper-thickness constant.
+    spine = bySheet > 1 && bySheet < totalW / 3 ? bySheet : byPages
+    console.warn(
+      `[generateCoverPDF] No luluSpine provided — using ${spine.toFixed(2)}mm ` +
+      `(sheet-derived: ${bySheet.toFixed(2)}, page-derived: ${byPages.toFixed(2)}). ` +
+      `Pass spine from /lulu-cover-dimensions for an exact layout.`,
+    )
   }
 
-  const contentBot = totalH - BLEED - 18
-  const backCX     = backLeft  + TRIM_W / 2 - COVER_CONTENT_NUDGE
-  const frontCX    = frontLeft + TRIM_W / 2 + COVER_CONTENT_NUDGE
-  const spineCX    = spineLeft + spine / 2
+  const g = buildGeometry(totalW, totalH, spine, bindingType)
 
-  console.log(`Cover PDF (${bindingType}): ${totalW.toFixed(3)}×${totalH.toFixed(3)}mm, spine: ${spine.toFixed(3)}mm`)
+  console.log(
+    `Cover PDF (${bindingType}): ${g.totalW.toFixed(2)}×${g.totalH.toFixed(2)}mm · ` +
+    `spine ${g.spine.toFixed(2)}mm · panel ${g.panelW.toFixed(2)}mm · ` +
+    `edge allowance ${g.edge.toFixed(2)}mm · safe band ${g.contentTop.toFixed(1)}–${g.contentBot.toFixed(1)}mm`,
+  )
 
-  // Create doc
+  // ── Document ───────────────────────────────────────────────────────────────
   const doc = new jsPDF({
     unit:        'mm',
-    format:      [totalW, totalH],
-    orientation: totalW > totalH ? 'landscape' : 'portrait',
+    format:      [g.totalW, g.totalH],
+    orientation: g.totalW > g.totalH ? 'landscape' : 'portrait',
   })
 
-  // Register fonts
   doc.addFileToVFS('EBGaramond-Regular.ttf',    EBGaramondRegular)
   doc.addFont('EBGaramond-Regular.ttf',    'EBGaramond', 'normal')
   doc.addFileToVFS('EBGaramond-Italic.ttf',     EBGaramondItalic)
@@ -200,50 +257,41 @@ export async function generateCoverPDF(options: CoverOptions): Promise<Blob> {
   doc.addFileToVFS('EBGaramond-BoldItalic.ttf', EBGaramondBoldItalic)
   doc.addFont('EBGaramond-BoldItalic.ttf', 'EBGaramond', 'bolditalic')
 
-  // ── Full background ────────────────────────────────────────────────────────
+  // Background runs to the sheet edge so the wrap folds in the same colour.
   setFill(doc, C_PAGE_BG)
-  doc.rect(0, 0, totalW, totalH, 'F')
+  doc.rect(0, 0, g.totalW, g.totalH, 'F')
 
-  // ── DUST JACKET FLAPS ──────────────────────────────────────────────────────
+  // ── Dust jacket flaps ──────────────────────────────────────────────────────
   if (isDustJacket) {
-    // Front flap (left side) — subtle tint
     setFill(doc, [242, 237, 230])
-    doc.rect(BLEED, BLEED, FLAP_W, totalH - BLEED * 2, 'F')
+    doc.rect(g.edge, g.edge, FLAP_W, g.totalH - g.edge * 2, 'F')
+    doc.rect(g.frontRight, g.edge, FLAP_W, g.totalH - g.edge * 2, 'F')
 
-    // Back flap (right side)
-    setFill(doc, [242, 237, 230])
-    doc.rect(frontLeft + TRIM_W, BLEED, FLAP_W, totalH - BLEED * 2, 'F')
-
-    // Fold lines
     setDraw(doc, C_DIVIDER)
     doc.setLineWidth(0.3)
-    doc.line(BLEED + FLAP_W,           BLEED, BLEED + FLAP_W,           totalH - BLEED)
-    doc.line(frontLeft + TRIM_W,       BLEED, frontLeft + TRIM_W,       totalH - BLEED)
+    doc.line(g.backLeft,   g.edge, g.backLeft,   g.totalH - g.edge)
+    doc.line(g.frontRight, g.edge, g.frontRight, g.totalH - g.edge)
 
-    // Front flap text — "Tell Me Your Story"
     doc.setFont('EBGaramond', 'italic')
     doc.setFontSize(9)
     setTxt(doc, C_MUTED)
-    doc.text(
-      'Tell Me Your Story',
-      BLEED + FLAP_W / 2,
-      totalH / 2,
-      { align: 'center', maxWidth: FLAP_W - 12 }
-    )
+    doc.text('Tell Me Your Story', g.edge + FLAP_W / 2, g.totalH / 2, {
+      align: 'center', maxWidth: FLAP_W - 12,
+    })
 
-    // Back flap — website
     doc.setFont('EBGaramond', 'normal')
     doc.setFontSize(8)
     setTxt(doc, C_MUTED)
-    doc.text(
-      'tellmeyourstory.uk',
-      frontLeft + TRIM_W + FLAP_W / 2,
-      totalH / 2,
-      { align: 'center' }
-    )
+    doc.text('tellmeyourstory.uk', g.frontRight + FLAP_W / 2, g.totalH / 2, {
+      align: 'center', maxWidth: FLAP_W - 12,
+    })
   }
 
-  // ── FRONT COVER ───────────────────────────────────────────────────────────
+  // ── Front cover ────────────────────────────────────────────────────────────
+
+  const maxIW = g.panelW - 24
+  const maxIH = (g.contentBot - g.contentTop) * 0.46
+  let renderedFront = false
 
   if (coverImageUrl && loadImageAsBase64) {
     try {
@@ -255,33 +303,25 @@ export async function generateCoverPDF(options: CoverOptions): Promise<Blob> {
         img.onerror = reject
       })
 
-      // img.width/height are pixels — convert to mm at 96dpi (1px = 0.2646mm)
-      // before comparing against maxIW/maxIH, which are already in mm.
-      // Without this conversion the ratio comes out as mm-per-pixel (tiny),
-      // rendering the image far smaller than intended (see: hardcover
-      // front cover photo printing tiny with an odd border, June 2026).
+      // img.width/height are pixels — convert to mm at 96dpi before comparing
+      // with maxIW/maxIH, which are in mm.
       const PX_TO_MM = 0.2646
-      const naturalW = img.width * PX_TO_MM
+      const naturalW = img.width  * PX_TO_MM
       const naturalH = img.height * PX_TO_MM
 
-      const maxIW  = TRIM_W - 24
-      const maxIH  = TRIM_H * 0.42
-      const ratio  = Math.min(maxIW / naturalW, maxIH / naturalH, 1)
-      const iw     = naturalW * ratio
-      const ih     = naturalH * ratio
-      const ix     = frontLeft + (TRIM_W - iw) / 2 + COVER_CONTENT_NUDGE
+      const ratio = Math.min(maxIW / naturalW, maxIH / naturalH, 1)
+      const iw    = naturalW * ratio
+      const ih    = naturalH * ratio
+      const ix    = g.frontCX - iw / 2
 
-      // Total height of the image + ornament + title + ornament + subtitle
-      // block, used to centre the whole thing vertically within the
-      // available front cover space. The block's true height matches the
-      // last element's offset from iy (subtitle sits at iy + ih + 48) plus
-      // a little buffer for the subtitle's own line height — NOT ih plus
-      // every individual gap added together, which overestimates the
-      // block and barely shifts the centred position (first attempt at
-      // this fix made this mistake).
-      const blockH = ih + 48 + 10
-      const availableH = contentBot - BLEED
-      const iy = BLEED + Math.max(20, (availableH - blockH) / 2)
+      // Block = image, ornament, title, ornament, subtitle. Centred in the
+      // VISIBLE area (contentTop..contentBot), not the whole sheet — this is
+      // what stops the design riding up and leaving dead space at the foot.
+      const GAP_TITLE    = 26
+      const GAP_SUBTITLE = 48
+      const blockH = ih + GAP_SUBTITLE + 10
+      const availableH = g.contentBot - g.contentTop - 14 // leave room for the footer
+      const iy = g.contentTop + Math.max(0, (availableH - blockH) / 2)
 
       const compressed = await compressImage(rawImg, iw, ih)
 
@@ -290,156 +330,180 @@ export async function generateCoverPDF(options: CoverOptions): Promise<Blob> {
       doc.roundedRect(ix - 1.5, iy - 1.5, iw + 3, ih + 3, 2, 2)
       doc.addImage(compressed, 'JPEG', ix, iy, iw, ih)
 
-      ornament(doc, frontCX, iy + ih + 12)
+      ornament(doc, g.frontCX, iy + ih + 12)
 
       doc.setFont('EBGaramond', 'bold')
       doc.setFontSize(22)
       setTxt(doc, C_PRIMARY)
-      doc.text(title, frontCX, iy + ih + 26, { align: 'center', maxWidth: TRIM_W - 24 })
+      doc.text(title, g.frontCX, iy + ih + GAP_TITLE, {
+        align: 'center', maxWidth: g.panelW - 24,
+      })
 
-      ornament(doc, frontCX, iy + ih + 36)
+      ornament(doc, g.frontCX, iy + ih + 36)
 
       doc.setFont('EBGaramond', 'italic')
       doc.setFontSize(10)
       setTxt(doc, C_SECONDARY)
-      doc.text(subtitle, frontCX, iy + ih + 48, { align: 'center', maxWidth: TRIM_W - 24 })
+      doc.text(subtitle, g.frontCX, iy + ih + GAP_SUBTITLE, {
+        align: 'center', maxWidth: g.panelW - 24,
+      })
 
+      renderedFront = true
     } catch {
-      renderFrontTextOnly(doc, title, subtitle, frontCX, BLEED, TRIM_H)
+      renderedFront = false
     }
-  } else {
-    renderFrontTextOnly(doc, title, subtitle, frontCX, BLEED, TRIM_H)
   }
 
-  // Front footer
+  if (!renderedFront) {
+    renderFrontTextOnly(doc, title, subtitle, g)
+  }
+
+  // Front footer — anchored to the visible bottom edge, inside the fold.
+  const footerY = g.contentBot
   setDraw(doc, C_DIVIDER)
   doc.setLineWidth(0.2)
-  doc.line(frontLeft + 12, contentBot + 6, frontLeft + TRIM_W - 12, contentBot + 6)
+  doc.line(g.frontLeft + 12, footerY - 6, g.frontRight - 12, footerY - 6)
   doc.setFont('EBGaramond', 'normal')
   doc.setFontSize(7.5)
   setTxt(doc, C_MUTED)
-  doc.text('Tell Me Your Story · tellmeyourstory.uk', frontCX, contentBot + 12, { align: 'center' })
+  doc.text('Tell Me Your Story · tellmeyourstory.uk', g.frontCX, footerY, { align: 'center' })
 
-  // ── SPINE ─────────────────────────────────────────────────────────────────
+  // ── Spine ──────────────────────────────────────────────────────────────────
 
-  setFill(doc, [240, 235, 228])
-  doc.rect(spineLeft, 0, spine, totalH, 'F')
+  if (g.spine > 0) {
+    setFill(doc, C_SPINE_BG)
+    doc.rect(g.spineLeft, 0, g.spine, g.totalH, 'F')
 
-  setDraw(doc, C_DIVIDER)
-  doc.setLineWidth(0.3)
-  doc.line(spineLeft,        BLEED, spineLeft,        totalH - BLEED)
-  doc.line(spineLeft + spine, BLEED, spineLeft + spine, totalH - BLEED)
+    setDraw(doc, C_DIVIDER)
+    doc.setLineWidth(0.3)
+    doc.line(g.spineLeft,    g.edge, g.spineLeft,    g.totalH - g.edge)
+    doc.line(g.spineRight,   g.edge, g.spineRight,   g.totalH - g.edge)
 
-  if (spine >= 6) {
-    doc.setFont('EBGaramond', 'bold')
-    doc.setFontSize(Math.min(8, spine * 2.5))
-    setTxt(doc, C_PRIMARY)
-    doc.text(title, spineCX + SPINE_TEXT_NUDGE, totalH / 2, {
-      align:    'center',
-      angle:    90,
-      maxWidth: totalH - 40,
-    })
+    // Only letter a spine wide enough to carry type legibly.
+    if (g.spine >= 6) {
+      const spineFont = Math.min(9, Math.max(6, g.spine * 1.6))
+      doc.setFont('EBGaramond', 'bold')
+      doc.setFontSize(spineFont)
+      setTxt(doc, C_PRIMARY)
+
+      // jsPDF anchors rotated text on its baseline, so the glyph body sits to
+      // one side of the anchor. Shift by roughly a third of the cap height to
+      // centre it on the spine. Derived from the font size rather than a fixed
+      // constant, which is what previously threw the title onto the front cover.
+      const capHeightMm  = spineFont * 0.3527 * 0.7
+      const baselineFix  = capHeightMm * 0.5
+
+      doc.text(title, g.spineCX + baselineFix, g.totalH / 2, {
+        align:    'center',
+        angle:    90,
+        maxWidth: g.totalH - g.edge * 2 - 20,
+      })
+    }
   }
 
-  // ── BACK COVER ────────────────────────────────────────────────────────────
+  // ── Back cover ─────────────────────────────────────────────────────────────
 
-  const backHeaderH = totalH * 0.12
+  // Header bleeds off the top and outer edge, so the block still reaches the
+  // board edge after the wrap folds under.
+  const headerVisibleH = (g.totalH - g.edge * 2) * 0.12
+  const headerH = g.edge + headerVisibleH
 
   setFill(doc, C_DARK)
-  doc.rect(backLeft, 0, TRIM_W, backHeaderH, 'F')
+  doc.rect(0, 0, g.backRight, headerH, 'F')
 
   doc.setFont('EBGaramond', 'normal')
   doc.setFontSize(8)
   setTxt(doc, [198, 168, 130])
-  doc.text('TELL ME YOUR STORY', backCX, BLEED + totalH * 0.06, { align: 'center' })
+  doc.text('TELL ME YOUR STORY', g.backCX, g.edge + headerVisibleH * 0.62, { align: 'center' })
 
-  ornament(doc, backCX, backHeaderH + 16)
+  ornament(doc, g.backCX, headerH + 16)
 
   doc.setFont('EBGaramond', 'italic')
   doc.setFontSize(11)
   setTxt(doc, C_SECONDARY)
-  doc.text(`"${title}"`, backCX, backHeaderH + 30, { align: 'center', maxWidth: TRIM_W - 24 })
+  doc.text(`"${title}"`, g.backCX, headerH + 30, { align: 'center', maxWidth: g.panelW - 24 })
 
   doc.setFont('EBGaramond', 'normal')
   doc.setFontSize(9)
   setTxt(doc, C_SECONDARY)
   const desc  = 'A life told through memories, moments, and love. Created with Tell Me Your Story — capturing the stories that matter most, before they are lost.'
-  const lines = doc.splitTextToSize(desc, TRIM_W - 32)
+  const lines = doc.splitTextToSize(desc, g.panelW - 32)
   lines.forEach((ln: string, i: number) => {
-    doc.text(ln, backCX, backHeaderH + 46 + i * 6, { align: 'center' })
+    doc.text(ln, g.backCX, headerH + 46 + i * 6, { align: 'center' })
   })
 
-  // Track where the description block actually ends, so the next ornament
-  // and website line flow naturally from real content height rather than
-  // jumping to a fixed totalH/2 position (which created a large dead gap
-  // once cover height grew with the corrected hardcover dimensions).
-  const descEndY = backHeaderH + 46 + lines.length * 6
+  // Flow the closing mark from where the description actually ends, and centre
+  // it in the space left above the footer.
+  const descEndY  = headerH + 46 + lines.length * 6
+  const midOfRest = descEndY + (g.contentBot - 14 - descEndY) / 2
 
-  // Centre the remaining elements in whatever space is left between the
-  // description and the footer, rather than anchoring to totalH/2.
-  const remainingSpace = contentBot - descEndY
-  const midOfRemaining = descEndY + remainingSpace / 2
-
-  ornament(doc, backCX, midOfRemaining - 6)
+  ornament(doc, g.backCX, midOfRest - 6)
   doc.setFont('EBGaramond', 'normal')
   doc.setFontSize(8)
   setTxt(doc, C_MUTED)
-  doc.text('tellmeyourstory.uk', backCX, midOfRemaining + 6, { align: 'center' })
+  doc.text('tellmeyourstory.uk', g.backCX, midOfRest + 6, { align: 'center' })
 
   // Back footer
   setDraw(doc, C_DIVIDER)
   doc.setLineWidth(0.2)
-  doc.line(backLeft + 12, contentBot + 6, backLeft + TRIM_W - 12, contentBot + 6)
+  doc.line(g.backLeft + 12, footerY - 6, g.backRight - 12, footerY - 6)
   doc.setFont('EBGaramond', 'normal')
   doc.setFontSize(7)
   setTxt(doc, C_MUTED)
-  doc.text('Printed by Lulu Press · tellmeyourstory.uk', backCX, contentBot + 12, { align: 'center' })
+  doc.text('Printed by Lulu Press · tellmeyourstory.uk', g.backCX, footerY, { align: 'center' })
 
   return doc.output('blob')
 }
 
 // ─── Fallback: front cover text only ─────────────────────────────────────────
 
-function renderFrontTextOnly(
-  doc: jsPDF, title: string, subtitle: string,
-  frontCX: number, bleed: number, trimH: number
-) {
-  const midY = bleed + trimH / 2
+function renderFrontTextOnly(doc: jsPDF, title: string, subtitle: string, g: CoverGeometry) {
+  const midY = (g.contentTop + g.contentBot) / 2
+  const maxW = g.panelW - 28
 
   doc.setFont('EBGaramond', 'normal')
   doc.setFontSize(9)
   setTxt(doc, C_MUTED)
-  doc.text('A MEMORY WORTH KEEPING', frontCX, midY - 40, { align: 'center' })
+  doc.text('A MEMORY WORTH KEEPING', g.frontCX, midY - 40, { align: 'center', maxWidth: maxW })
 
-  ornament(doc, frontCX, midY - 30)
+  ornament(doc, g.frontCX, midY - 30)
 
   doc.setFont('EBGaramond', 'bold')
   doc.setFontSize(26)
   setTxt(doc, C_PRIMARY)
-  doc.text(title, frontCX, midY - 12, { align: 'center', maxWidth: 130 })
+  doc.text(title, g.frontCX, midY - 12, { align: 'center', maxWidth: maxW })
 
-  ornament(doc, frontCX, midY + 6)
+  ornament(doc, g.frontCX, midY + 6)
 
   doc.setFont('EBGaramond', 'italic')
   doc.setFontSize(10)
   setTxt(doc, C_SECONDARY)
-  doc.text(subtitle, frontCX, midY + 20, { align: 'center', maxWidth: 120 })
+  doc.text(subtitle, g.frontCX, midY + 20, { align: 'center', maxWidth: maxW })
 }
 
 // ─── Utilities ────────────────────────────────────────────────────────────────
 
+/** Rough spine width from page count. Fallback only — prefer Lulu's figure. */
 export function getSpineWidthMm(pageCount: number): number {
   return pageCount * 0.002252 * 25.4
 }
 
-export function getCoverDimensions(pageCount: number, bindingType: 'softcover' | 'hardcover' | 'dustjacket' = 'softcover') {
+/**
+ * Estimated sheet size, for previews and sanity checks only.
+ * Real print jobs must use /lulu-cover-dimensions.
+ */
+export function getCoverDimensions(
+  pageCount: number,
+  bindingType: BindingType = 'softcover',
+) {
   const spine = getSpineWidthMm(pageCount)
-  const wrap  = bindingType === 'hardcover' ? HC_WRAP : 0
+  const edge  = EDGE_ALLOWANCE[bindingType] ?? EDGE_ALLOWANCE.softcover
+  const flap  = bindingType === 'dustjacket' ? FLAP_W : 0
 
   return {
-    width_mm:  TRIM_W * 2 + spine + (BLEED + wrap) * 2,
-    height_mm: TRIM_H + (BLEED + wrap) * 2,
+    width_mm:  TRIM_W * 2 + spine + edge * 2 + flap * 2,
+    height_mm: TRIM_H + edge * 2,
     spine_mm:  spine,
-    bleed_mm:  BLEED,
+    edge_mm:   edge,
   }
 }
