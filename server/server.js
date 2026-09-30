@@ -13,7 +13,10 @@ const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 25 
 
 const PORT         = process.env.PORT || 3000
 const FRONTEND_URL = process.env.FRONTEND_URL
-const LULU_API_URL = 'https://api.lulu.com'
+// Point LULU_API_URL at https://api.sandbox.lulu.com to run the whole print
+// flow against Lulu's sandbox (free, never fulfilled). Sandbox needs its own
+// account and its own LULU_CLIENT_KEY/SECRET from developers.sandbox.lulu.com.
+const LULU_API_URL = process.env.LULU_API_URL || 'https://api.lulu.com'
 
 // ─── Env checks ───────────────────────────────────────────────────────────────
 if (!process.env.STRIPE_SECRET_KEY)        throw new Error('Missing STRIPE_SECRET_KEY')
@@ -2386,7 +2389,7 @@ async function verifyTurnstileToken(token, remoteIp) {
 }
 
 async function getLuluAccessToken() {
-  const response = await fetch('https://api.lulu.com/auth/realms/glasstree/protocol/openid-connect/token', {
+  const response = await fetch(`${LULU_API_URL}/auth/realms/glasstree/protocol/openid-connect/token`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: new URLSearchParams({

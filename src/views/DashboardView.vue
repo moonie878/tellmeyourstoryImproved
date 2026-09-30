@@ -418,6 +418,9 @@
     </Transition>
 
   </div>
+
+    <!-- Dev only: ?covertest=1 to generate a cover PDF without buying a book -->
+    <CoverTestPanel />
 </template>
 
 <script setup lang="ts">
@@ -429,6 +432,7 @@ import { STORY_TYPES } from '../data/storyTypes'
 import { isValidStoryType, takePendingStoryType } from '../lib/pendingStoryTypes'
 import { useStoryTrueBookExport } from '../composables/useTrueBookExport'
 import { generateCoverPDF } from '../lib/generateCoverPDF'
+import CoverTestPanel from '../components/dev/CoverTestPanel.vue'
 import PrintOrderModal from '../components/print/PrintOrderModal.vue'
 import { useShare } from '../composables/useShare'
 import { PRINTED_BOOK_FROM_PRICE } from '../lib/printPricing'
