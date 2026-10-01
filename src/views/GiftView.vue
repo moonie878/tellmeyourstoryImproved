@@ -23,6 +23,25 @@
 
   <div v-else class="min-h-screen bg-[#F5F0E8]">
 
+    <!--
+      Campaign confirmation. Someone arriving on ?campaign=christmas previously
+      saw full price in the hero and only found the discount if they scrolled as
+      far as the product cards — so the people the link was sent to were the
+      least likely to see it. This says so straight away, and carries the print
+      deadline, which motivates harder than the money does.
+    -->
+    <div
+      v-if="campaignDiscountRef > 0"
+      class="bg-[#7C5C3B] px-5 py-3 text-center text-white"
+    >
+      <p class="text-sm font-medium">
+        Your {{ campaignDiscountRef }}% {{ campaignLabel }} discount is applied
+      </p>
+      <p v-if="showPrintDeadline" class="mt-0.5 text-xs text-[#E8DDD0]">
+        Order printed books by {{ printCutoffLabel }} to arrive in time
+      </p>
+    </div>
+
     <!-- Hero -->
     <section class="relative overflow-hidden bg-[#1C1917] px-5 py-16 sm:px-8 sm:py-24">
       <div class="relative mx-auto max-w-4xl">
@@ -81,7 +100,7 @@
         </h2>
         <p class="mx-auto mt-3 max-w-lg text-sm leading-6 text-stone-500">
           Every gift includes 100+ guided questions and voice recording, with a QR code beside each recorded story
-          if they order a printed book (from £{{ printFrom }} including UK delivery).
+          if they order a printed book (from £{{ printFrom }} plus UK shipping).
         </p>
       </div>
 
@@ -169,35 +188,6 @@
             </p>
           </div>
         </div>
-      </div>
-    </section>
-
-    <!-- Or set it up for them -->
-    <section class="px-5 py-14 sm:px-8 sm:py-16">
-      <div class="mx-auto grid max-w-5xl items-center gap-10 rounded-[2rem] bg-[#F5F0E8] p-8 sm:p-12 md:grid-cols-2">
-        <div>
-          <p class="text-xs font-medium uppercase tracking-[0.22em] text-[#86664A]">Another way to give it</p>
-          <h2 class="mt-3 font-display text-2xl font-bold leading-snug text-stone-900 sm:text-3xl">
-            Set it up for them — and send them a question every week
-          </h2>
-          <p class="mt-4 text-base leading-relaxed text-stone-600">
-            Not everyone wants to create an account. Start their story yourself, and we'll email them one question a week.
-            They tap the link, talk or type their answer, and it goes straight into the book — no app, no account, no password.
-            You get an email each time they answer.
-          </p>
-          <router-link
-            to="/register"
-            class="mt-6 inline-flex min-h-[48px] items-center rounded-full bg-[#7C5C3B] px-7 text-sm font-semibold text-white transition hover:opacity-90"
-          >
-            Start their story — 5 questions free
-          </router-link>
-        </div>
-        <ol class="space-y-5">
-          <li v-for="(step, i) in setUpForThemSteps" :key="step" class="flex items-start gap-4">
-            <span class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-[#7C5C3B] text-sm font-bold text-white">{{ i + 1 }}</span>
-            <p class="pt-1.5 text-base leading-relaxed text-stone-700">{{ step }}</p>
-          </li>
-        </ol>
       </div>
     </section>
 
@@ -312,14 +302,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { PRINTED_BOOK_FROM_PRICE } from '../lib/printPricing'
-
-// Steps for the "set it up for them" option
-const setUpForThemSteps = [
-  'Start their story free — choose Mum, Dad, Nan or Grandad.',
-  "Tap 'Send the questions', add their email and pick a day.",
-  'Each week they get one question. They just talk — we type it up and keep their voice.',
-  'When the book is ready, order a printed copy with a QR code by every recorded story.',
-]
+import { PRINT_CUTOFF_LABEL, isChristmasSeason, canStillOrderPrint } from '../lib/christmas'
 
 const SERVER_URL = import.meta.env.VITE_SERVER_URL || 'https://tellmeyourstoryimproved.onrender.com'
 const printFrom = PRINTED_BOOK_FROM_PRICE.toFixed(2)
@@ -331,6 +314,22 @@ const route = useRoute()
 // what the discount is, to display it.
 const campaignKey = typeof route.query.campaign === 'string' ? route.query.campaign : undefined
 const campaignDiscountRef = ref(0)
+
+/** "Christmas", "Mother's Day" … for the confirmation banner. */
+const CAMPAIGN_LABELS: Record<string, string> = {
+  christmas: 'Christmas',
+  'mothers-day': "Mother's Day",
+  'fathers-day': "Father's Day",
+}
+const campaignLabel = computed(() => (campaignKey && CAMPAIGN_LABELS[campaignKey]) || 'seasonal')
+
+// The print deadline only belongs on the banner during the Christmas season and
+// while books can still arrive. Both read from lib/christmas.ts, so the date
+// never has to be updated in two places.
+const printCutoffLabel = PRINT_CUTOFF_LABEL
+const showPrintDeadline = computed(
+  () => campaignKey === 'christmas' && isChristmasSeason() && canStillOrderPrint(),
+)
 
 onMounted(async () => {
   if (!campaignKey) return
@@ -432,7 +431,7 @@ const products = computed<GiftProduct[]>(() => {
       'All story types and photos',
       'Premium layouts and cover design',
       'Tribute video creator',
-      'Print-ready premium layouts',
+      'Print-ready layouts for hardback',
     ],
     featured: false,
     discountPercent: campaignDiscount,
