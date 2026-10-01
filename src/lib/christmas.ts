@@ -17,6 +17,17 @@ const PRINT_CUTOFF_DAY = 3
 /** Month the banner starts showing (1 = Jan … 10 = Oct) */
 const SEASON_START_MONTH = 10
 
+/**
+ * When the discount stops being a quiet reward for arriving on a campaign link
+ * and starts being advertised on the banner.
+ *
+ * Black Friday through to Christmas Day. Discounts are expected that week, so
+ * shouting about it then costs no credibility — whereas a banner running "20%
+ * off" from October would just be the price with a sticker on it.
+ */
+const DISCOUNT_START_MONTH = 11
+const DISCOUNT_START_DAY = 27
+
 const pad = (n: number) => String(n).padStart(2, '0')
 
 /** Last safe order date for printed books (end of that day, UK time on the visitor's clock) */
@@ -33,6 +44,26 @@ export const SEASON_START = new Date(`${CHRISTMAS_YEAR}-${pad(SEASON_START_MONTH
 
 /** Digital gifts keep selling right up to the day */
 export const CHRISTMAS_DAY = new Date(`${CHRISTMAS_YEAR}-12-25T23:59:59`)
+
+/** Start of the fortnight where the discount is advertised publicly */
+export const DISCOUNT_START = new Date(
+  `${CHRISTMAS_YEAR}-${pad(DISCOUNT_START_MONTH)}-${pad(DISCOUNT_START_DAY)}T00:00:00`,
+)
+
+/** e.g. "27 November" */
+export const DISCOUNT_START_LABEL = `${DISCOUNT_START_DAY} November`
+
+/**
+ * True while the banner should advertise the discount.
+ *
+ * Only says WHEN it is appropriate to shout — never whether a discount exists.
+ * The live percentage comes from the server (GIFT_CAMPAIGNS in server.js), so
+ * the banner can't promise something checkout won't honour.
+ */
+export function isDiscountWindow(): boolean {
+  const now = new Date()
+  return now >= DISCOUNT_START && now <= CHRISTMAS_DAY
+}
 
 /** True from SEASON_START to Christmas Day */
 export function isChristmasSeason(): boolean {

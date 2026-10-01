@@ -23,16 +23,26 @@
           <!-- Final fortnight -->
           <template v-else-if="phase === 'countdown'">
             <span class="mr-1" aria-hidden="true">⏳</span>
-            <strong class="font-semibold">
-              {{ printDays }} {{ printDays === 1 ? 'day' : 'days' }} left
-            </strong>
-            to order printed books for Christmas
+            <template v-if="showDiscount">
+              <strong class="font-semibold">{{ discountPercent }}% off Christmas gifts</strong>
+              <span class="sm:hidden"> · print by {{ PRINT_CUTOFF_SHORT_LABEL }}</span>
+              <span class="hidden sm:inline">
+                — {{ printDays }} {{ printDays === 1 ? 'day' : 'days' }} left to order printed books
+              </span>
+            </template>
+            <template v-else>
+              <strong class="font-semibold">
+                {{ printDays }} {{ printDays === 1 ? 'day' : 'days' }} left
+              </strong>
+              to order printed books for Christmas
+            </template>
           </template>
 
           <!-- Print cutoff passed -->
           <template v-else>
             <span class="mr-1" aria-hidden="true">✨</span>
-            <strong class="font-semibold">Missed the print date?</strong>
+            <strong v-if="showDiscount" class="font-semibold">{{ discountPercent }}% off digital gifts —</strong>
+            <strong v-else class="font-semibold">Missed the print date?</strong>
             <span class="sm:hidden"> Give it digitally.</span>
             <span class="hidden sm:inline"> Give it digitally — they get their personal link instantly, and you can print it together in the new year.</span>
           </template>
@@ -72,6 +82,7 @@ import {
   PRINT_CUTOFF_SHORT_LABEL,
   christmasPhase,
   daysUntilPrintCutoff,
+  isDiscountWindow,
   type ChristmasPhase,
 } from '../../lib/christmas'
 import { track } from '../../lib/analytics'
@@ -87,6 +98,20 @@ const phase = ref<ChristmasPhase>('off')
 const printDays = ref(0)
 const dismissed = ref(true) // hidden until storage is checked — avoids a flash
 
+/**
+ * The discount is a quiet reward for arriving on a campaign link for most of
+ * the season — the banner sells the DEADLINE, which motivates harder and costs
+ * nothing. From 27 November it is worth saying out loud, so the banner shouts
+ * it for the last fortnight and links straight to the discounted gift page.
+ *
+ * The percentage is read from the server, never hardcoded, so the banner can
+ * only ever advertise a discount that checkout will actually apply. If the
+ * request fails the banner simply falls back to the deadline message.
+ */
+const SERVER_URL = import.meta.env.VITE_SERVER_URL || 'https://tellmeyourstoryimproved.onrender.com'
+const discountPercent = ref(0)
+const showDiscount = computed(() => discountPercent.value > 0 && phase.value !== 'off')
+
 const visible = computed(() => phase.value !== 'off' && !dismissed.value)
 
 const variantClasses = computed(() =>
@@ -99,10 +124,17 @@ const ctaClasses = computed(() =>
     : 'bg-[#7C5C3B] text-white hover:opacity-90',
 )
 
-const ctaLabel = computed(() => (phase.value === 'digital' ? 'Buy a digital gift' : 'Christmas gifts'))
+const ctaLabel = computed(() => {
+  if (showDiscount.value) return `Get ${discountPercent.value}% off`
+  return phase.value === 'digital' ? 'Buy a digital gift' : 'Christmas gifts'
+})
 
+// While the discount is being advertised, send people straight to the gift page
+// with the campaign on it — the offer in the banner has to be the offer they land on.
 const ctaTarget = computed(() =>
-  phase.value === 'digital' ? '/gift?campaign=christmas' : '/christmas-gifts-for-grandparents',
+  showDiscount.value || phase.value === 'digital'
+    ? '/gift?campaign=christmas'
+    : '/christmas-gifts-for-grandparents',
 )
 
 function dismiss() {
@@ -119,7 +151,7 @@ function trackClick() {
   track('christmas_banner_clicked', { phase: phase.value })
 }
 
-onMounted(() => {
+onMounted(async () => {
   // Never bake the banner into prerendered HTML — a countdown frozen at
   // build time ("12 days left") would be wrong for visitors and for Google.
   if ((window as unknown as { __TMYS_PRERENDER__?: boolean }).__TMYS_PRERENDER__) return
@@ -131,6 +163,15 @@ onMounted(() => {
     dismissed.value = localStorage.getItem(dismissKey(phase.value)) === '1'
   } catch {
     dismissed.value = false
+  }
+
+  // Only ask about the discount inside the window it would be shown in.
+  if (!isDiscountWindow()) return
+  try {
+    const r = await fetch(`${SERVER_URL}/gift-campaign/christmas`)
+    if (r.ok) discountPercent.value = Number((await r.json()).percent) || 0
+  } catch {
+    // Unreachable — the banner keeps its deadline message and promises nothing
   }
 })
 </script>
