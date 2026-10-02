@@ -937,17 +937,40 @@ async function verifyAndGenerate(sessionId: string) {
 .builder-inner { max-width: 680px; margin: 0 auto; }
 
 /* Steps */
-.steps-bar { display: flex; align-items: center; margin-bottom: 28px; background: white; border: 1px solid #E8DDD0; border-radius: 100px; padding: 6px; }
-.step-item { flex: 1; display: flex; align-items: center; gap: 6px; justify-content: center; padding: 8px 12px; border-radius: 100px; cursor: default; transition: all 0.2s; }
+/*
+  Each step used to be flex: 1, so all four took a quarter of the bar. On a
+  phone only the active step shows a label, which left it 82px for a label
+  needing ~127px — "Music & style" wrapped to two lines, the pill grew taller
+  than the dots, and the rounded bar looked broken. Meanwhile the three plain
+  dots sat on space they weren't using.
+
+  Now items size to their content and spread across the bar, so the one step
+  with text gets the room it needs. min-height keeps every pill the same height
+  whether it holds a label or not.
+*/
+.steps-bar { display: flex; align-items: center; justify-content: space-between; gap: 4px; margin-bottom: 28px; background: white; border: 1px solid #E8DDD0; border-radius: 100px; padding: 6px; }
+.step-item { flex: 0 0 auto; display: flex; align-items: center; gap: 6px; justify-content: center; min-height: 38px; box-sizing: border-box; padding: 8px 12px; border-radius: 100px; cursor: default; transition: all 0.2s; }
 .step-active { background: #1C1917; }
 .step-done { cursor: pointer; opacity: 0.7; }
 .step-dot { width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; flex-shrink: 0; }
 .step-active .step-dot { background: #9C7C5C; color: white; }
 .step-done .step-dot { background: #7C5C3B; color: white; }
 .step-idle .step-dot { background: #F0EBE3; color: #A8A29E; }
-.step-label { font-size: 12px; font-weight: 500; color: #1C1917; display: none; }
+.step-label { font-size: 12px; font-weight: 500; color: #1C1917; display: none; white-space: nowrap; }
 .step-active .step-label { display: block; color: white; }
-@media (min-width: 500px) { .step-label { display: block; } .step-idle .step-label { color: #A8A29E; } .step-done .step-label { color: #7C5C3B; } }
+
+/*
+  All four labels only once there is genuinely room. The old 500px breakpoint
+  was too early: "Details", "Photos", "Music & style" and "Preview & export"
+  need about 455px between them, which overflows a 500px screen once page
+  padding is taken off.
+*/
+@media (min-width: 640px) {
+  .step-item { flex: 1 1 auto; }
+  .step-label { display: block; }
+  .step-idle .step-label { color: #A8A29E; }
+  .step-done .step-label { color: #7C5C3B; }
+}
 
 /* Card */
 .builder-card { background: white; border: 1px solid #E8DDD0; border-radius: 28px; padding: 32px; }
