@@ -15,6 +15,24 @@
       </div>
     </section>
 
+    <!-- Answer first — the 30-second version -->
+    <section class="border-b border-stone-200 px-5 py-12 sm:px-8 sm:py-14">
+      <div class="mx-auto max-w-3xl">
+        <p class="text-xs font-medium uppercase tracking-[0.22em] text-[#9C7C5C]">The 30-second answer</p>
+        <div class="mt-5 space-y-4 text-sm leading-7 text-stone-600">
+          <p>
+            <strong class="text-stone-900">The short version:</strong> StoryKeeper is a one-off £79 with a hardcover and free UK delivery included, and the storyteller can write, dictate or record audio and video at their own pace. Storyworth is £49 a year, built around a question emailed every week, with written answers on the entry plan and a hardcover included — but books ship from the US and Europe, with delivery charged at checkout.
+          </p>
+          <p>
+            <strong class="text-stone-900">So, broadly:</strong> choose StoryKeeper if you want to pay once, have no deadline and want voice or video recorded throughout. Choose Storyworth if a gentle weekly email is more likely to actually get answered, and the familiar name matters. Neither lets you try before paying, which is the gap <router-link to="/register" class="text-[#7C5C3B] underline hover:no-underline">Tell Me Your Story</router-link> fills — 5 questions free, no card, then one payment from £3.99.
+          </p>
+        </div>
+        <p class="mt-5 text-xs text-stone-500">
+          Full detail below, with every price and feature checked {{ CHECKED_ON }}.
+        </p>
+      </div>
+    </section>
+
     <!-- Quick summary -->
     <section class="px-5 py-16 sm:px-8 sm:py-20">
       <div class="mx-auto max-w-3xl">
@@ -161,14 +179,14 @@
       <p class="mt-4 text-xs text-[#9C7C5C]">5 questions free · One-time payment · Printed book from {{ printFrom }} including UK delivery</p>
     </section>
 
-  </main>
-
     <!-- Related comparisons — links every comparison page to the others -->
     <ComparisonLinks />
+
+  </main>
 </template>
 
 <script setup lang="ts">
-import { useSeo } from '../composables/useSeo'
+import { useSeo, SITE_URL } from '../composables/useSeo'
 import { PRINTED_BOOK_FROM_PRICE } from '../lib/printPricing'
 import ComparisonLinks from '../components/seo/ComparisonLinks.vue'
 
@@ -192,8 +210,8 @@ const comparisonRows = [
   { feature: 'How they answer',          sk: 'Write, dictate, audio, video', sw: 'Write; phone on upgraded plans', tm: 'Type or voice' },
   { feature: 'Phone-call recording',     sk: 'Plus plan (£99)',         sw: 'Upgraded plans',              tm: '✗' },
   { feature: 'Voice in printed book',    sk: 'QR code per chapter',     sw: 'One QR code, last page',      tm: 'QR code per recorded story' },
-  { feature: 'Printed book',             sk: '✓ Hardcover included',    sw: '✓ Hardcover included',        tm: `From ${printFrom} + shipping` },
-  { feature: 'Delivery to the UK',       sk: 'Free',                    sw: 'Charged at checkout',         tm: 'UK shipping extra' },
+  { feature: 'Printed book',             sk: '✓ Hardcover included',    sw: '✓ Hardcover included',        tm: `Optional, from ${printFrom}` },
+  { feature: 'Delivery to the UK',       sk: 'Free',                    sw: 'Charged at checkout',         tm: 'Included in the price' },
   { feature: 'Family contributors',      sk: 'Plus plan: unlimited',    sw: 'Sharing, Family Calls',       tm: 'Invite by link' },
   { feature: 'Tribute video export',     sk: '✗',                       sw: '✗',                           tm: '✓' },
 ]
@@ -281,16 +299,29 @@ const faqs = [
 ]
 
 useSeo({
-  title: 'StoryKeeper vs Storyworth (2026) — Honest UK Comparison',
-  description: 'StoryKeeper vs Storyworth compared for UK families: one-time vs annual pricing, voice and video recording, QR codes, hardcovers and delivery — plus a free way to start.',
+  title: 'StoryKeeper vs Storyworth UK: £79 Once vs £49 a Year (2026)',
+  description: 'StoryKeeper vs Storyworth for UK families: £79 one-time vs £49 a year, voice and video, QR codes, hardcovers and who pays delivery. Checked September 2026.',
   schema: {
     '@context': 'https://schema.org',
-    '@type': 'FAQPage',
-    mainEntity: faqs.map((f) => ({
-      '@type': 'Question',
-      name: f.q,
-      acceptedAnswer: { '@type': 'Answer', text: f.a },
-    })),
+    '@graph': [
+      {
+        '@type': 'FAQPage',
+        '@id': `${SITE_URL}/storykeeper-vs-storyworth#faq`,
+        mainEntity: faqs.map((f) => ({
+          '@type': 'Question',
+          name: f.q,
+          acceptedAnswer: { '@type': 'Answer', text: f.a },
+        })),
+      },
+      {
+        '@type': 'BreadcrumbList',
+        '@id': `${SITE_URL}/storykeeper-vs-storyworth#breadcrumb`,
+        itemListElement: [
+          { '@type': 'ListItem', position: 1, name: 'Home', item: `${SITE_URL}/` },
+          { '@type': 'ListItem', position: 2, name: 'StoryKeeper vs Storyworth', item: `${SITE_URL}/storykeeper-vs-storyworth` },
+        ],
+      },
+    ],
   },
 })
 </script>
