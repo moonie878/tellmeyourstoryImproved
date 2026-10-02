@@ -2274,6 +2274,61 @@ app.post('/create-print-checkout', async (req, res) => {
 
 
 
+// ─── Tribute video checkout ───────────────────────────────────────────────────
+// TributePaymentModal.vue has always POSTed here, but the route was never
+// implemented — so every attempt to buy a tribute video 404'd and the modal
+// showed "Failed to create checkout session". Nobody has ever been able to pay
+// for one.
+//
+// Returned URLs are built here from FRONTEND_URL rather than taken from the
+// request body. The modal sends successUrl/cancelUrl, but trusting a
+// client-supplied redirect target is an open-redirect waiting to happen, and
+// every other checkout in this file builds its own.
+//
+// session_id is appended because /tribute reads it on return and passes it to
+// /verify-tribute-payment before it will generate the video.
+
+const TRIBUTE_PRICE = 1999 // £19.99 — keep in sync with TributePaymentModal.vue
+
+app.post('/create-tribute-checkout', async (req, res) => {
+  try {
+    const rawName = typeof req.body?.name === 'string' ? req.body.name.trim().slice(0, 120) : ''
+    const subjectName = rawName || 'your tribute'
+
+    const session = await stripe.checkout.sessions.create({
+      mode: 'payment',
+      payment_method_types: ['card'],
+      allow_promotion_codes: true,
+      line_items: [
+        {
+          price_data: {
+            currency: 'gbp',
+            unit_amount: TRIBUTE_PRICE,
+            product_data: {
+              name: `Tribute video — ${subjectName}`,
+              description: 'Full HD 1920×1080 MP4 · no watermark · yours to keep',
+            },
+          },
+          quantity: 1,
+        },
+      ],
+      success_url: `${FRONTEND_URL}/tribute?payment=success&session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url:  `${FRONTEND_URL}/tribute?payment=cancelled`,
+      metadata: {
+        product:      'tribute-video',   // /verify-tribute-payment checks this exact value
+        subject_name: subjectName,
+        purchaseType: 'tribute_video',
+        amount:       String(TRIBUTE_PRICE),
+      },
+    })
+
+    res.json({ url: session.url })
+  } catch (error) {
+    console.error('Tribute checkout error:', error.message)
+    res.status(500).json({ error: 'Failed to create checkout session' })
+  }
+})
+
 app.post('/verify-tribute-payment', async (req, res) => {
   try {
     const { sessionId } = req.body
