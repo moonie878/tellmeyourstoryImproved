@@ -221,11 +221,15 @@
     </section>
 
   </main>
+
+    <!-- Related comparisons — links every comparison page to the others -->
+    <ComparisonLinks />
 </template>
 
 <script setup lang="ts">
 import { useSeo } from '../composables/useSeo'
 import { PRINTED_BOOK_FROM_PRICE } from '../lib/printPricing'
+import ComparisonLinks from '../components/seo/ComparisonLinks.vue'
 
 /** Update this whenever the Storyworth facts below are re-checked. */
 const CHECKED_ON = 'September 2026'
@@ -251,7 +255,7 @@ const comparison = [
   { feature: 'How questions arrive',    them: 'By email or text — weekly by default, can be changed',  us: 'In the app — answer as many as you like, any time', usPositive: false },
   { feature: 'Voice recording',         them: 'By phone call, on upgraded plans',                      us: 'Tap the microphone — on every plan, including free', usPositive: true },
   { feature: 'Hearing it in the book',  them: 'One QR code on the last page, linking to the stories online', us: 'A QR code beside every voice-recorded story',   usPositive: true },
-  { feature: 'Printed book',            them: 'Hardcover included in the plan',                        us: `Softcover from ${printFrom} including UK delivery`, usPositive: false },
+  { feature: 'Printed book',            them: 'Hardcover included in the plan',                        us: `Softcover from ${printFrom} including UK delivery; hardcover available`, usPositive: false },
   { feature: 'Extra copies',            them: '£29 black and white, £59 colour',                       us: 'Same price as the first copy',                      usPositive: false },
   { feature: 'Where books come from',   them: 'Printed in the US and Europe; import fees possible',    us: 'Printed to order and delivered to UK addresses',    usPositive: false },
   { feature: 'Digital copy',            them: 'Free e-book download',                                  us: 'PDF download on paid plans',                        usPositive: false },
@@ -260,7 +264,7 @@ const comparison = [
 const features = [
   { icon: '📖', title: '100+ guided questions',  desc: 'Every chapter of life — childhood, family, work, love and the lessons learned. Answer in any order, at your own pace.' },
   { icon: '🎙️', title: 'Voice recordings',       desc: 'Tap the microphone and talk. The words are typed up for you and the recording is kept, with a QR code beside that story in the printed book.' },
-  { icon: '📚', title: 'Printed keepsake books', desc: `Printed to order and delivered to UK addresses. Softcover from ${printFrom} including UK delivery.` },
+  { icon: '📚', title: 'Printed keepsake books', desc: `Printed to order and delivered to UK addresses. Softcover from ${printFrom} including UK delivery, with hardcover options.` },
   { icon: '💷', title: 'One-time payment',        desc: 'Pay once for the plan you choose. No renewal date and nothing to cancel.' },
   { icon: '✨', title: 'Writing help',            desc: 'Gentle prompts help expand short answers — the words always stay theirs.' },
   { icon: '🤍', title: 'Family can read along',  desc: 'Share a link so the whole family can read the story as it grows, at no extra cost.' },

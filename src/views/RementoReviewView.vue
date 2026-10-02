@@ -166,11 +166,15 @@
     </section>
 
   </main>
+
+    <!-- Related comparisons — links every comparison page to the others -->
+    <ComparisonLinks />
 </template>
 
 <script setup lang="ts">
 import { useSeo } from '../composables/useSeo'
 import { PRINTED_BOOK_FROM_PRICE } from '../lib/printPricing'
+import ComparisonLinks from '../components/seo/ComparisonLinks.vue'
 
 /** Update whenever the Remento facts below are re-checked. */
 const CHECKED_ON = 'September 2026'

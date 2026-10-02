@@ -162,11 +162,15 @@
     </section>
 
   </main>
+
+    <!-- Related comparisons — links every comparison page to the others -->
+    <ComparisonLinks />
 </template>
 
 <script setup lang="ts">
 import { useSeo } from '../composables/useSeo'
 import { PRINTED_BOOK_FROM_PRICE } from '../lib/printPricing'
+import ComparisonLinks from '../components/seo/ComparisonLinks.vue'
 
 /** Update whenever the StoryKeeper / Storyworth facts below are re-checked. */
 const CHECKED_ON = 'September 2026'
@@ -188,8 +192,8 @@ const comparisonRows = [
   { feature: 'How they answer',          sk: 'Write, dictate, audio, video', sw: 'Write; phone on upgraded plans', tm: 'Type or voice' },
   { feature: 'Phone-call recording',     sk: 'Plus plan (£99)',         sw: 'Upgraded plans',              tm: '✗' },
   { feature: 'Voice in printed book',    sk: 'QR code per chapter',     sw: 'One QR code, last page',      tm: 'QR code per recorded story' },
-  { feature: 'Printed book',             sk: '✓ Hardcover included',    sw: '✓ Hardcover included',        tm: `From ${printFrom} inc. UK delivery` },
-  { feature: 'Delivery to the UK',       sk: 'Free',                    sw: 'Charged at checkout',         tm: 'UK delivery included' },
+  { feature: 'Printed book',             sk: '✓ Hardcover included',    sw: '✓ Hardcover included',        tm: `From ${printFrom} + shipping` },
+  { feature: 'Delivery to the UK',       sk: 'Free',                    sw: 'Charged at checkout',         tm: 'UK shipping extra' },
   { feature: 'Family contributors',      sk: 'Plus plan: unlimited',    sw: 'Sharing, Family Calls',       tm: 'Invite by link' },
   { feature: 'Tribute video export',     sk: '✗',                       sw: '✗',                           tm: '✓' },
 ]
@@ -219,7 +223,7 @@ const deepDive = [
     paras: [
       'Tell Me Your Story is built in Southampton. The main difference from both is how you start: answer 5 questions free, with no card, before paying anything. After that you pay once — from £3.99 for a digital keepsake — and only pay for printing if and when you want a book.',
       'Storytellers type or speak each answer. Every voice-recorded story gets its own QR code beside it in the printed book, so family can scan it and hear that exact story in their voice.',
-      `A printed softcover starts at ${printFrom} including UK delivery. If a hardcover included in one price matters most, StoryKeeper or Storyworth may suit you better; if you want to try first and keep costs low, we're the cheaper place to begin.`,
+      `A printed softcover starts at ${printFrom} including UK delivery, with hardcover options. If a hardcover included in one price matters most, StoryKeeper or Storyworth may suit you better; if you want to try first and keep costs low, we're the cheaper place to begin.`,
     ],
   },
 ]

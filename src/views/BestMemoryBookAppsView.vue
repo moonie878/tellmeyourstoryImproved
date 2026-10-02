@@ -175,11 +175,15 @@
     </section>
 
   </main>
+
+    <!-- Related comparisons — links every comparison page to the others -->
+    <ComparisonLinks />
 </template>
 
 <script setup lang="ts">
 import { useSeo } from '../composables/useSeo'
 import { PRINTED_BOOK_FROM_PRICE } from '../lib/printPricing'
+import ComparisonLinks from '../components/seo/ComparisonLinks.vue'
 
 /** Update whenever the competitor facts below are re-checked. */
 const CHECKED_ON = 'September 2026'
@@ -206,7 +210,7 @@ const apps: App[] = [
     name: 'Tell Me Your Story',
     short: 'Tell Me Your Story',
     bestFor: 'Best free way to start',
-    price: '5 questions free · one-time from £3.99 · print from ' + printFrom + ' including UK delivery',
+    price: '5 questions free · one-time from £3.99 · print from ' + printFrom + ' + shipping',
     ours: true,
     summary:
       'Built in Southampton. The storyteller answers guided questions by typing or tapping the microphone, at their own pace. Every voice-recorded story gets its own QR code beside it in the printed book. You can try 5 questions free, pay once when you are ready, and only pay for printing if you want a book.',
@@ -218,11 +222,11 @@ const apps: App[] = [
       'Tribute video option',
     ],
     cons: [
-      'Printing is extra, and softcover only for now',
+      'Printing is extra — a hardcover is not included in the price',
       'No phone-call or video recording',
       'A younger, smaller company than the others',
     ],
-    table: { based: 'UK', pay: 'One-time', start: 'Free, then £3.99+', answer: 'Type or voice', voice: 'QR per recorded story', book: `Extra, from ${printFrom}`, delivery: 'UK delivery included' },
+    table: { based: 'UK', pay: 'One-time', start: 'Free, then £3.99+', answer: 'Type or voice', voice: 'QR per recorded story', book: `Extra, from ${printFrom}`, delivery: 'UK shipping extra' },
   },
   {
     id: 'storykeeper',

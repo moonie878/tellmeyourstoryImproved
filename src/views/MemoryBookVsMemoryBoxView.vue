@@ -171,11 +171,15 @@
     </section>
 
   </main>
+
+    <!-- Related comparisons — links every comparison page to the others -->
+    <ComparisonLinks />
 </template>
 
 <script setup lang="ts">
 import { useSeo } from '../composables/useSeo'
 import { PRINTED_BOOK_FROM_PRICE } from '../lib/printPricing'
+import ComparisonLinks from '../components/seo/ComparisonLinks.vue'
 
 const tips = [
   { icon: '🖼️', title: 'Use large, clear photos', desc: 'Bigger photos with good contrast are easier to recognise, especially as eyesight and visual processing can both be affected by dementia.' },

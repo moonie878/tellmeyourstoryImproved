@@ -159,11 +159,15 @@
     </section>
 
   </main>
+
+    <!-- Related comparisons — links every comparison page to the others -->
+    <ComparisonLinks />
 </template>
 
 <script setup lang="ts">
 import { useSeo } from '../composables/useSeo'
 import { PRINTED_BOOK_FROM_PRICE } from '../lib/printPricing'
+import ComparisonLinks from '../components/seo/ComparisonLinks.vue'
 
 /** Update whenever the Remento facts below are re-checked. */
 const CHECKED_ON = 'September 2026'
@@ -182,7 +186,7 @@ const comparisonRows = [
   { feature: 'How they answer',             re: 'Voice or video',             tm: 'Type or voice' },
   { feature: 'Words in the book',           re: 'Transcript or AI narrative', tm: 'Their own words' },
   { feature: 'QR codes in printed book',    re: '✓ Each story',               tm: '✓ Each recorded story' },
-  { feature: 'Printed book',                re: '✓ Hardcover included',       tm: `From ${printFrom} inc. UK delivery` },
+  { feature: 'Printed book',                re: '✓ Hardcover included',       tm: `From ${printFrom} + shipping` },
   { feature: 'Extra copies',                re: '$69 each',                   tm: 'Same as first copy' },
   { feature: 'Digital copy',                re: 'Text/PDF export; e-book $49.99', tm: 'PDF on paid plans' },
   { feature: 'Family contributors',         re: '✓ Unlimited',                tm: '✓ Invite by link' },
@@ -210,7 +214,7 @@ const deepDive = [
       'Tell Me Your Story gives the storyteller the choice: type an answer, record it by voice, or both. Some questions feel natural to talk through; others are easier to sit and write properly.',
       'Like Remento, every voice-recorded story gets a QR code printed beside it in the book, so anyone holding it can scan and hear the voice behind the words. The printed text is their own words — writing help is there if they want it, but nothing is rewritten for them.',
       `There's no yearly plan. You start free with 5 questions, go at your own pace, and pay once in pounds — digital plans from £3.99, printed softcovers from ${printFrom} including UK delivery.`,
-      'Printed books are made to order and delivered to UK addresses, typically within 10–14 days.',
+      'Printed books are made to order and delivered to UK addresses, typically within 10–14 days, with hardcover and dust-jacket options.',
     ],
   },
 ]
@@ -249,7 +253,7 @@ const verdicts = [
 // Shown on the page AND used for the FAQPage schema, so they always match.
 const faqs = [
   { q: 'What is the main difference between Remento and Tell Me Your Story?', a: 'Remento is a yearly plan in US dollars where the storyteller records every answer by voice or video, and AI turns recordings into text. Tell Me Your Story is a one-time payment in pounds where the storyteller can type or speak each answer, and every recorded story gets a QR code in the printed book.' },
-  { q: 'Is Tell Me Your Story cheaper than Remento?', a: `For one printed book, usually. Remento is $99 for the first year with a colour hardcover included, and UK shipping is extra; extra copies are $69. Tell Me Your Story is free to start, with one-time plans from £3.99 and printed softcovers from ${printFrom} including UK delivery.` },
+  { q: 'Is Tell Me Your Story cheaper than Remento?', a: `For one printed book, usually. Remento is $99 for the first year with a colour hardcover included, plus UK shipping; extra copies are $69. Tell Me Your Story is free to start, with one-time plans from £3.99 and printed softcovers from ${printFrom} including UK delivery.` },
   { q: 'Can the storyteller type answers on Remento?', a: 'Remento is built around recording each answer by voice or video; the written text is created from the recording and can be edited afterwards. Tell Me Your Story lets the storyteller type or record any answer.' },
   { q: 'What happens to my Remento stories if I do not renew?', a: 'According to Remento, you can still read your stories, listen to recordings, download everything and order more copies — you just cannot record new stories until you renew.' },
   { q: 'Is there a UK alternative to Remento?', a: 'Yes — Tell Me Your Story is built and run in the UK, priced in pounds, with printed books delivered to UK addresses, voice recording with a QR code beside every recorded story, and no yearly plan.' },

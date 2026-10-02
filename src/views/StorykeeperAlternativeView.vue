@@ -220,11 +220,15 @@
     </section>
 
   </main>
+
+    <!-- Related comparisons — links every comparison page to the others -->
+    <ComparisonLinks />
 </template>
 
 <script setup lang="ts">
 import { useSeo } from '../composables/useSeo'
 import { PRINTED_BOOK_FROM_PRICE } from '../lib/printPricing'
+import ComparisonLinks from '../components/seo/ComparisonLinks.vue'
 
 /** Update this whenever the StoryKeeper facts below are re-checked. */
 const CHECKED_ON = 'September 2026'
@@ -251,7 +255,7 @@ const comparison = [
   { feature: 'How they answer',         them: 'Write, dictate, or record audio or video',   us: 'Type or tap the microphone',                         usPositive: false },
   { feature: 'Phone-call recording',    them: 'On StoryKeeper Plus (£99)',                  us: 'Not available',                                      usPositive: false },
   { feature: 'Hearing it in the book',  them: 'QR code per chapter',                        us: 'QR code beside each voice-recorded story',           usPositive: false },
-  { feature: 'Printed book',            them: 'A5 hardcover included; free UK delivery',    us: `Softcover from ${printFrom} including UK delivery`, usPositive: false },
+  { feature: 'Printed book',            them: 'A5 hardcover included; free UK delivery',    us: `Softcover from ${printFrom} including UK delivery; hardcover available`, usPositive: false },
   { feature: 'Family contributors',     them: 'Unlimited on Plus; one storyteller on Classic', us: 'Invite family by link',                          usPositive: false },
   { feature: 'Tribute video',           them: 'Not offered',                                us: 'Available',                                          usPositive: true },
 ]
@@ -259,7 +263,7 @@ const comparison = [
 const features = [
   { icon: '📖', title: '100+ guided questions',  desc: 'Every chapter of life — childhood, family, work, love and the lessons learned. Answer in any order, at your own pace.' },
   { icon: '🎙️', title: 'Type or speak',          desc: 'Tap the microphone and talk, or type — whichever suits each question. Recordings get a QR code beside that story in the printed book.' },
-  { icon: '📚', title: 'Print only if you want', desc: `Keep it digital, or order a printed copy: softcover from ${printFrom} including UK delivery.` },
+  { icon: '📚', title: 'Print only if you want', desc: `Keep it digital, or order a printed copy: softcover from ${printFrom} including UK delivery, with hardcover options.` },
   { icon: '💷', title: 'Free to start',           desc: 'Answer 5 questions free, then pay once from £3.99. No renewal date and nothing to cancel.' },
   { icon: '🎬', title: 'Tribute video',           desc: 'Turn photos, music and a message into a video keepsake — for a celebration of life or family far away.' },
   { icon: '🤍', title: 'Family can read along',  desc: 'Share a link so the whole family can read the story as it grows, at no extra cost.' },

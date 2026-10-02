@@ -159,11 +159,15 @@
     </section>
 
   </main>
+
+    <!-- Related comparisons — links every comparison page to the others -->
+    <ComparisonLinks />
 </template>
 
 <script setup lang="ts">
 import { useSeo } from '../composables/useSeo'
 import { PRINTED_BOOK_FROM_PRICE } from '../lib/printPricing'
+import ComparisonLinks from '../components/seo/ComparisonLinks.vue'
 
 /** Update whenever the Storyworth facts below are re-checked. */
 const CHECKED_ON = 'September 2026'
@@ -182,8 +186,8 @@ const comparisonRows = [
   { feature: 'Question format',          sw: 'Weekly email or text (adjustable)', tm: 'Guided app, your own pace' },
   { feature: 'Voice recording',          sw: 'By phone, upgraded plans',        tm: '✓ Every plan' },
   { feature: 'Voice in printed book',    sw: 'One QR code, last page',          tm: 'QR code beside each story' },
-  { feature: 'Printed book',             sw: '✓ Included in plan',              tm: `From ${printFrom} inc. UK delivery` },
-  { feature: 'Hardcover option',         sw: '✓',                               tm: 'Softcover for now' },
+  { feature: 'Printed book',             sw: '✓ Included in plan',              tm: `From ${printFrom} + shipping` },
+  { feature: 'Hardcover option',         sw: '✓',                               tm: '✓' },
   { feature: 'Delivery to the UK',       sw: 'Printed US/Europe, shipping extra', tm: 'Delivered to UK addresses' },
   { feature: 'Photo support',            sw: '✓',                               tm: '✓' },
   { feature: 'AI help',                  sw: 'Guided interviews, proofreader',  tm: 'Writing assist' },
@@ -210,7 +214,7 @@ const deepDive = [
     paras: [
       'Tell Me Your Story was built around the idea that voice matters as much as the written word. Tap the microphone and talk; the words are typed up and the recording is kept. In the printed book, a QR code sits beside every voice-recorded story, so anyone holding the book can scan it and hear that exact story in their own voice.',
       `There's no annual plan. You start with 5 questions free, no card required, and go at your own pace. When you're ready, you pay once: digital plans start from £3.99 and a printed softcover starts from ${printFrom} including UK delivery.`,
-      'Printed books are made to order and delivered to UK addresses, typically within 10–14 days.',
+      'Printed books are made to order and delivered to UK addresses, typically within 10–14 days. Hardcover and dust-jacket options are available.',
       'Tell Me Your Story also offers a tribute video — turning photos, music and a message into a video keepsake, which many families use at a celebration of life or to share with relatives abroad.',
     ],
   },
