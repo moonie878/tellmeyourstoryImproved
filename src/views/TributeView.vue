@@ -402,7 +402,7 @@
         <div class="upsell-card">
           <p class="upsell-eyebrow">Want more than a tribute video?</p>
           <h3 class="upsell-title">Capture their full life story with Tell Me Your Story</h3>
-          <p class="upsell-desc">100+ guided questions across 10 chapters. Every answer turns into a beautifully designed keepsake book — a complete record of their life, in their own words.</p>
+          <p class="upsell-desc">100 guided questions across 10 chapters. Every answer turns into a beautifully designed keepsake book — a complete record of their life, in their own words.</p>
           <router-link to="/register" class="upsell-btn">Start capturing their story — it's free →</router-link>
         </div>
       </div>
@@ -1083,14 +1083,49 @@ async function verifyAndGenerate(sessionId: string) {
 .trust-row { display: flex; flex-wrap: wrap; gap: 6px 10px; justify-content: center; font-size: 11px; color: #A8A29E; margin-bottom: 16px; }
 
 /* Shared buttons */
-.btn-primary { display: inline-block; background: #7C5C3B; color: white; font-size: 14px; font-weight: 500; padding: 13px 26px; border-radius: 100px; border: none; cursor: pointer; transition: opacity 0.2s; width: 100%; text-align: center; }
+/*
+  Both buttons share a box model so they always match height. They were
+  inline-block with different vertical padding (13px vs 12px) and only the
+  secondary had a border, so they never quite lined up. min-height also gives
+  a 48px touch target, which is the smallest that's comfortable on a phone.
+*/
+.btn-primary,
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  min-height: 48px;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: 100px;
+  cursor: pointer;
+  text-align: center;
+}
+.btn-primary { background: #7C5C3B; color: white; padding: 13px 26px; border: none; transition: opacity 0.2s; width: 100%; }
 .btn-primary:hover { opacity: 0.88; }
 .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
-.btn-secondary { display: inline-block; background: white; color: #1C1917; font-size: 14px; font-weight: 500; padding: 12px 22px; border-radius: 100px; border: 1.5px solid #E7E5E4; cursor: pointer; transition: all 0.15s; }
+.btn-secondary { background: white; color: #1C1917; padding: 13px 22px; border: 1.5px solid #E7E5E4; transition: all 0.15s; }
 .btn-secondary:hover { border-color: #A8A29E; }
-.btn-row { display: flex; gap: 10px; margin-top: 24px; }
+
+.btn-row { display: flex; gap: 10px; margin-top: 24px; align-items: stretch; }
 .btn-row .btn-primary { flex: 2; }
 .btn-row .btn-secondary { flex: 1; }
+
+/*
+  On a phone the 2:1 split left about 210px for the primary button, and
+  "Continue — choose music →" needs nearer 230px. It wrapped to two lines, the
+  primary grew taller, and the stretched "← Back" became a tall empty pill
+  beside it. Stacking avoids the squeeze entirely.
+
+  column-reverse puts the primary action on top — it's the one people want,
+  and it sits closest to the thumb.
+*/
+@media (max-width: 480px) {
+  .btn-row { flex-direction: column-reverse; gap: 12px; }
+  .btn-row .btn-primary,
+  .btn-row .btn-secondary { flex: 0 0 auto; width: 100%; }
+}
 .btn-back-link { background: none; border: none; font-size: 13px; color: #A8A29E; cursor: pointer; padding: 0; }
 .btn-back-link:hover { color: #5C534E; }
 .error-text { font-size: 13px; color: #DC2626; background: #FEF2F2; border: 1px solid #FECACA; border-radius: 12px; padding: 10px 14px; margin-bottom: 16px; }
