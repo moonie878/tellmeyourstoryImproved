@@ -256,7 +256,7 @@ const faqs = [
 ]
 
 useSeo({
-  title: 'How to Write a Legacy Letter to Your Children — Guide & Examples | Tell Me Your Story',
+  title: 'How to Write a Legacy Letter to Your Children — Guide & Examples',
   description: 'A legacy letter passes on the things a will can\'t — your values, your wisdom, your love, and your hopes. A complete guide to writing one, with prompts, examples, and step-by-step advice.',
   canonical: 'https://tellmeyourstory.uk/legacy-letter-to-children',
   schema: {

@@ -225,7 +225,7 @@ const giftFor = [
 ]
 
 useSeo({
-  title: 'Christmas Gift Ideas 2026 — Give the Gift of Their Story | Tell Me Your Story',
+  title: 'Christmas Gift Ideas 2026 — Give the Gift of Their Story',
   description: 'The most meaningful Christmas gift — help a loved one capture their life story in their own words. Voice recordings and a printed keepsake book. Tell Me Your Story.',
   canonical: 'https://tellmeyourstory.uk/christmas',
 })

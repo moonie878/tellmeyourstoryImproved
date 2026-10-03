@@ -170,7 +170,7 @@ const tips = [
 ]
 
 useSeo({
-  title: 'How to Capture Your Parents\' Life Story Before It\'s Too Late | Tell Me Your Story',
+  title: 'How to Capture Your Parents\' Life Story Before It\'s Too Late',
   description: 'A practical guide to recording your parents\' life story — the questions to ask, the tools to use, and how to turn their answers into a keepsake book. Free to start.',
   canonical: 'https://tellmeyourstory.uk/how-to-capture-parents-life-story',
 })

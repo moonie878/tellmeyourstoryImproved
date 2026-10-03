@@ -184,7 +184,7 @@ const methods = [
 ]
 
 useSeo({
-  title: 'What Is a Life Story Book? A Complete Guide | Tell Me Your Story',
+  title: 'What Is a Life Story Book? A Complete Guide',
   description: 'What is a life story book? Everything you need to know — what goes inside, who they\'re for, how to create one, and why families are making them before it\'s too late.',
   canonical: 'https://tellmeyourstory.uk/what-is-a-life-story-book',
 })

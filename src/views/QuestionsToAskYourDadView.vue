@@ -241,7 +241,7 @@ const tips = [
 ]
 
 useSeo({
-  title: 'Questions to Ask Your Dad — 100 Questions Before It\'s Too Late | Tell Me Your Story',
+  title: 'Questions to Ask Your Dad — 100 Questions Before It\'s Too Late',
   description: 'The best questions to ask your dad about his life, childhood, and memories. 100 questions designed to draw out the stories he\'s never thought to tell — and capture them forever.',
   canonical: 'https://tellmeyourstory.uk/questions-to-ask-your-dad',
 })

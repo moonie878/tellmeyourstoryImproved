@@ -145,7 +145,7 @@ const tiers = [
 ]
 
 useSeo({
-  title: "Father's Day Gift Ideas 2026 — Give Dad the Gift of His Story | Tell Me Your Story",
+  title: "Father's Day Gift Ideas 2026 — Give Dad the Gift of His Story",
   description: "The most meaningful Father's Day gift — help Dad capture his life story in his own words. Voice recordings, keepsake book, QR codes. 50% off this Father's Day.",
   canonical: 'https://tellmeyourstory.uk/fathers-day',
 })

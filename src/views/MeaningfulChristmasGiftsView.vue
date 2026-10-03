@@ -194,7 +194,7 @@ import { PRINT_CUTOFF_LABEL, canStillOrderPrint } from '../lib/christmas'
 const showDeadline = computed(() => canStillOrderPrint())
 
 useSeo({
-  title: 'Meaningful Christmas Gifts — 8 Ideas That Get Kept | Tell Me Your Story',
+  title: 'Meaningful Christmas Gifts — 8 Ideas That Get Kept',
   description:
     'Eight meaningful Christmas gift ideas that get kept rather than recycled — from restored family photos to recording a life story in their own voice. Several cost nothing.',
   canonical: 'https://tellmeyourstory.uk/meaningful-christmas-gifts',

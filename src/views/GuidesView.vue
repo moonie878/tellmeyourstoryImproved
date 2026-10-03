@@ -175,7 +175,7 @@ const groups = [
 ]
 
 useSeo({
-  title: 'Life Story Guides — Questions, How-Tos and Gift Ideas | Tell Me Your Story',
+  title: 'Life Story Guides — Questions, How-Tos and Gift Ideas',
   description: 'Every guide in one place: questions to ask your parents and grandparents, how to record their stories, gift ideas, honest comparisons, and guides for later life and remembrance.',
   schema: {
     '@context': 'https://schema.org',

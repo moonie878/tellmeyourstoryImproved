@@ -337,7 +337,7 @@ const faqs = [
 ]
 
 useSeo({
-  title: 'Questions to Ask a Dying Parent — Gentle Guide to Final Conversations | Tell Me Your Story',
+  title: 'Questions to Ask a Dying Parent — Gentle Guide to Final Conversations',
  description: 'End of life questions for parents — a gentle guide to the conversations worth having before it\'s too late. What to ask, how to approach it, and how to capture what they share.',
   canonical: 'https://tellmeyourstory.uk/questions-to-ask-dying-parent',
   schema: {

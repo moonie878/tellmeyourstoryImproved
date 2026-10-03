@@ -169,7 +169,7 @@ const features = [
 ]
 
 useSeo({
-  title: 'Family History Book UK — Capture the Stories Behind Your Family Tree | Tell Me Your Story',
+  title: 'Family History Book UK — Capture the Stories Behind Your Family Tree',
   description: 'Create a family history book that goes beyond names and dates. Guided questions, voice recordings, and a beautifully printed book — the living memory of your family, preserved forever.',
   canonical: 'https://tellmeyourstory.uk/family-history-book',
 })

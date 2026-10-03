@@ -186,7 +186,7 @@ const contents = [
 ]
 
 useSeo({
-  title: 'Memorial Book UK — Preserve a Loved One\'s Life Story | Tell Me Your Story',
+  title: 'Memorial Book UK — Preserve a Loved One\'s Life Story',
   description: 'Create a memorial book that captures a loved one\'s life, memories, and voice. Guided questions, voice recordings, and a beautifully printed book delivered to your door.',
   canonical: 'https://tellmeyourstory.uk/memorial-book',
 })

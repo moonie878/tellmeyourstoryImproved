@@ -258,7 +258,7 @@ const faqs = [
 ]
 
 useSeo({
-  title: 'How to Record Your Grandparent\'s Life Story — A Complete Guide | Tell Me Your Story',
+  title: 'How to Record Your Grandparent\'s Life Story — A Complete Guide',
   description: 'A practical guide to recording your grandparent\'s life story — what equipment to use, questions to ask, how to get them talking, and how to turn what you capture into something permanent.',
   canonical: 'https://tellmeyourstory.uk/how-to-record-grandparents-story',
   schema: {

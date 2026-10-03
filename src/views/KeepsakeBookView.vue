@@ -225,7 +225,7 @@ const faqs = [
 ]
 
 useSeo({
-  title: 'Life Story Keepsake Book UK — In Their Own Words | Tell Me Your Story',
+  title: 'Life Story Keepsake Book UK — In Their Own Words',
   description: 'Create a life story keepsake book for a parent or grandparent — 100+ guided questions, voice recordings, photos, and a professionally printed book delivered to your door. Free to start.',
   canonical: 'https://tellmeyourstory.uk/keepsake-book',
   schema: {

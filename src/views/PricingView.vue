@@ -660,7 +660,7 @@ const faqs = [
 const toPrice = (label: string) => label.replace(/[^0-9.]/g, '') || '0'
 
 useSeo({
-  title: 'Pricing — Memory Book With Voice Recordings | Tell Me Your Story',
+  title: 'Pricing — Memory Book With Voice Recordings',
   description: 'Start free with 5 questions, no time limit. Unlock a beautifully designed keepsake book or video when you\'re ready. One-time payment — no subscription, no renewal.',
   schema: {
     '@context': 'https://schema.org',

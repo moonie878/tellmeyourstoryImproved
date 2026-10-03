@@ -277,7 +277,7 @@ const faqs = [
 ]
 
 useSeo({
-  title: 'How to Write a Life Story — Complete Step-by-Step Guide (2026) | Tell Me Your Story',
+  title: 'How to Write a Life Story — Complete Step-by-Step Guide (2026)',
   description: 'A complete guide to capturing a loved one\'s life story — what questions to ask, how to create the right environment, common mistakes to avoid, and how to turn it into a keepsake. Free to start.',
   canonical: 'https://tellmeyourstory.uk/how-to-write-a-life-story',
   schema: {

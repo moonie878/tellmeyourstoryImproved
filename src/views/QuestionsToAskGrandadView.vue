@@ -239,7 +239,7 @@ const tips = [
 ]
 
 useSeo({
-  title: '100 Questions to Ask Your Grandad Before It\'s Too Late | Tell Me Your Story',
+  title: '100 Questions to Ask Your Grandad Before It\'s Too Late',
   description: 'Questions to ask your grandad about his life — childhood, work, adventures, family, and the wisdom he\'s gathered over a lifetime. 100 questions across 7 chapters.',
   canonical: 'https://tellmeyourstory.uk/questions-to-ask-your-grandad',
 })

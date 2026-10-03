@@ -48,12 +48,12 @@ const PAGE_SEO: Record<string, SeoInput> = {
     description: DEFAULTS.description,
   },
   '/pricing': {
-    title: 'Pricing — Memory Book With Voice Recordings | Tell Me Your Story',
+    title: 'Pricing — Memory Book With Voice Recordings',
     description:
       'Start free with 5 questions. One-time payment, no subscription. Printed keepsake books with QR codes that play their voice.',
   },
   '/example': {
-    title: 'Example Memory Book — Read and Hear a Real Story | Tell Me Your Story',
+    title: 'Example Memory Book — Read and Hear a Real Story',
     description:
       'See a finished Tell Me Your Story keepsake: guided questions, answers, photos, and QR codes that play the storyteller’s voice.',
   },
@@ -63,7 +63,7 @@ const PAGE_SEO: Record<string, SeoInput> = {
       'Gift a parent or grandparent the chance to tell their story. They get a personal link, answer by speaking or typing, and you get a book with their voice inside.',
   },
   '/tribute': {
-    title: 'Tribute Video Maker — Memorial Video With Music | Tell Me Your Story',
+    title: 'Tribute Video Maker — Memorial Video With Music',
     description:
       'Create a memorial tribute video from up to 30 photos with music and a personal message. Preview free, download in full HD. No account needed.',
   },
@@ -82,12 +82,12 @@ const PAGE_SEO: Record<string, SeoInput> = {
       'How to record answers, add photos, invite family, export your PDF and order a printed memory book.',
   },
   '/christmas-gifts-for-grandparents': {
-    title: 'Christmas Gifts for Grandparents: A Book With Their Voice | Tell Me Your Story',
+    title: 'Christmas Gifts for Grandparents: A Book With Their Voice',
     description:
       'A Christmas gift grandparents will treasure: their life story in a printed book, with QR codes that play their voice. Order printed books by 3 December.',
   },
   '/blog/questions-to-ask-your-parents': {
-    title: '100 Questions to Ask Your Parents Before It’s Too Late | Tell Me Your Story',
+    title: '100 Questions to Ask Your Parents Before It’s Too Late',
     description:
       'The questions to ask your mum and dad about childhood, love, work and life lessons — plus how to record their answers in their own voice.',
     type: 'article',

@@ -295,7 +295,7 @@ const faqs = [
 ]
 
 useSeo({
-  title: 'Christmas Gifts for Parents Who Have Everything | Tell Me Your Story',
+  title: 'Christmas Gifts for Parents Who Have Everything',
   description:
     "Stuck for a Christmas gift for parents who say don't get me anything? Capture their life story in their own words and voice — a keepsake that takes up no space. From £3.99.",
   canonical: 'https://tellmeyourstory.uk/christmas-gift-for-parents-who-have-everything',

@@ -327,7 +327,7 @@ const faqs = [
 ]
 
 useSeo({
-  title: '100 Oral History Questions — Capture a Life in Their Own Words | Tell Me Your Story',
+  title: '100 Oral History Questions — Capture a Life in Their Own Words',
   description: '100 oral history questions across every chapter of life — from childhood memories to legacy and wisdom. With advice on how to conduct an oral history interview and preserve what you capture.',
   canonical: 'https://tellmeyourstory.uk/oral-history-questions',
   schema: {

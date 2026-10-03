@@ -241,7 +241,7 @@ const tips = [
 ]
 
 useSeo({
-  title: 'Questions to Ask Your Mum — 100 Questions Before It\'s Too Late | Tell Me Your Story',
+  title: 'Questions to Ask Your Mum — 100 Questions Before It\'s Too Late',
   description: 'The best questions to ask your mum about her life, childhood, and memories. 100 questions across 10 chapters — and a way to capture her answers forever.',
   canonical: 'https://tellmeyourstory.uk/questions-to-ask-your-mum',
 })

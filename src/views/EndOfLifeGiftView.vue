@@ -149,7 +149,7 @@ const tips = [
 ]
 
 useSeo({
-  title: 'End of Life Gift UK — Capture Their Life Story | Tell Me Your Story',
+  title: 'End of Life Gift UK — Capture Their Life Story',
   description: 'A meaningful end of life gift — help someone capture their memories, voice, and stories in a beautiful keepsake book. Guided questions, voice recordings, printed keepsake book.',
   canonical: 'https://tellmeyourstory.uk/end-of-life-gift',
 })

@@ -164,7 +164,7 @@
 import { useSeo } from '../composables/useSeo'
 
 useSeo({
-  title: '100 Questions to Ask Your Parents Before It\'s Too Late | Tell Me Your Story',
+  title: '100 Questions to Ask Your Parents Before It\'s Too Late',
   description: 'The questions most families never think to ask — until it\'s too late. 100 meaningful questions to ask your parents or grandparents, across 10 chapters of their life. Free to start capturing their story today.',
   canonical: 'https://tellmeyourstory.uk/blog/questions-to-ask-your-parents',
   schema: {

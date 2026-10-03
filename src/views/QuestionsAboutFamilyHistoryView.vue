@@ -266,7 +266,7 @@ const faqs = [
 ]
 
 useSeo({
-  title: 'Questions to Ask About Family History — Discover Your Roots | Tell Me Your Story',
+  title: 'Questions to Ask About Family History — Discover Your Roots',
   description: '100 questions to ask relatives about family history — where your family came from, what they lived through, and the stories behind the names. With advice on how to research and preserve what you find.',
   canonical: 'https://tellmeyourstory.uk/questions-about-family-history',
   schema: {

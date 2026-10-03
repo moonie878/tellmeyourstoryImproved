@@ -174,7 +174,7 @@ import EmailCaptureForm from '../components/Marketing/EmailCaptureForm.vue'
 import { useSeo } from '../composables/useSeo'
 
 useSeo({
-  title: 'Questions to Ask Your Grandparents Before It\'s Too Late | Tell Me Your Story',
+  title: 'Questions to Ask Your Grandparents Before It\'s Too Late',
   description: '80 meaningful questions to ask your grandparents about their childhood, history, family traditions, values, and legacy. Preserve their stories before they\'re lost.',
   canonical: 'https://tellmeyourstory.uk/questions-to-ask-your-grandparents',
   schema: {
