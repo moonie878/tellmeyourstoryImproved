@@ -1,5 +1,6 @@
 import { onUnmounted } from 'vue'
 import { useRoute } from 'vue-router'
+import { PRINT_CUTOFF_LABEL } from '../lib/christmas'
 import type { Router, RouteLocationNormalized } from 'vue-router'
 
 // All SEO for the site lives in this one file:
@@ -84,7 +85,7 @@ const PAGE_SEO: Record<string, SeoInput> = {
   '/christmas-gifts-for-grandparents': {
     title: 'Christmas Gifts for Grandparents: A Book With Their Voice',
     description:
-      'A Christmas gift grandparents will treasure: their life story in a printed book, with QR codes that play their voice. Order printed books by 3 December.',
+      'A Christmas gift grandparents will treasure: their life story in a printed book, with QR codes that play their voice. Order printed books by ${PRINT_CUTOFF_LABEL}.',
   },
   '/blog/questions-to-ask-your-parents': {
     title: '100 Questions to Ask Your Parents Before It’s Too Late',
