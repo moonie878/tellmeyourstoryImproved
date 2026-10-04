@@ -6,7 +6,7 @@
       <div class="mx-auto max-w-3xl text-center">
         <p class="text-xs font-medium uppercase tracking-[0.22em] text-[#9C7C5C]">Questions to Ask Your Grandad</p>
         <h1 class="mt-4 font-display text-3xl font-bold leading-tight text-white sm:text-4xl md:text-5xl">
-          100 questions to ask your grandad<br>
+          {{ totalQuestions }} questions to ask your grandad<br>
           <em class="text-[#C4A882] italic">before it's too late</em>
         </h1>
         <p class="mx-auto mt-5 max-w-xl text-sm leading-7 text-[#A8A29E]">
@@ -46,7 +46,7 @@
     <section class="bg-[#F5F0E8] px-5 py-16 sm:px-8 sm:py-20">
       <div class="mx-auto max-w-4xl">
         <div class="text-center mb-12">
-          <p class="text-xs font-medium uppercase tracking-[0.22em] text-[#9C7C5C]">100 questions</p>
+          <p class="text-xs font-medium uppercase tracking-[0.22em] text-[#9C7C5C]">{{ totalQuestions }} questions</p>
           <h2 class="mt-3 font-display text-2xl font-bold text-stone-900 sm:text-3xl">Questions to ask your grandad about his life</h2>
         </div>
         <div v-for="chapter in chapters" :key="chapter.title" class="mb-10">
@@ -148,15 +148,19 @@
       <router-link to="/register" class="mt-8 inline-block rounded-full bg-[#C4A882] px-8 py-3 text-sm font-semibold text-[#1C1917] transition hover:opacity-90">
         Start free today →
       </router-link>
-      <p class="mt-4 text-xs text-[#9C7C5C]">Free to start · One-time payment · Printed book from £21.99</p>
+      <p class="mt-4 text-xs text-[#9C7C5C]">Free to start · One-time payment · Printed book from {{ printFrom }} including UK delivery</p>
     </section>
 
   </main>
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
 import EmailCaptureForm from '../components/Marketing/EmailCaptureForm.vue'
-import { useSeo } from '../composables/useSeo'
+import { useSeo, SITE_URL } from '../composables/useSeo'
+import { PRINTED_BOOK_FROM_PRICE } from '../lib/printPricing'
+
+const printFrom = `£${PRINTED_BOOK_FROM_PRICE.toFixed(2)}`
 
 const chapters = [
   {
@@ -229,7 +233,57 @@ const chapters = [
       'Is there anything you want to say to the people you love?', 'What story do you most want to make sure is never forgotten?',
     ],
   },
+  {
+    icon: '🏘️', title: 'His world growing up',
+    questions: [
+      'What was the street you grew up on like?',
+      'Did everyone know each other?',
+      'What did a day out look like when you were a boy?',
+      'What did people do before television?',
+      'What was your town or village known for?',
+      'Who was the character everyone talked about?',
+      'What has changed most about where you grew up?',
+      'What did you do when it rained?',
+      'How did you get about before you had a car?',
+      'What do you miss about how people lived then?',
+    ],
+  },
+  {
+    icon: '🏠', title: 'Home, money and making it work',
+    questions: [
+      'What was the first place you lived in on your own?',
+      'How did you afford your first home?',
+      'What was money like when the children were small?',
+      'What did you go without so the family did not have to?',
+      'What was the most you ever worried about money?',
+      'What did you always mean to fix and never did?',
+      'What job around the house were you proudest of doing yourself?',
+      'What did a pint cost when you were young?',
+      'What would you tell a young couple about money?',
+      'What do you think we take for granted?',
+    ],
+  },
+  {
+    icon: '😄', title: 'The lighter side',
+    questions: [
+      'What is the funniest thing that ever happened to you?',
+      'What is the daftest thing you ever spent money on?',
+      'What were you absolutely hopeless at?',
+      'What is the story the family always tells about you?',
+      'What is your party trick?',
+      'Did you ever have a lucky escape?',
+      'What did you wear that you now regret?',
+      'Who makes you laugh most?',
+      'What is the best joke you know?',
+      'What would surprise people about you?',
+    ],
+  },
 ]
+
+/** Single source of truth — the headline can never drift from the list again. */
+const totalQuestions = computed(() =>
+  chapters.reduce((sum, chapter) => sum + chapter.questions.length, 0),
+)
 
 const tips = [
   { icon: '🎣', title: 'Ask during an activity', desc: 'Grandads often open up more easily when they\'re doing something — fishing, gardening, watching the match. Side-by-side conversation is less confronting than face-to-face.' },
@@ -239,9 +293,23 @@ const tips = [
 ]
 
 useSeo({
-  title: '100 Questions to Ask Your Grandad Before It\'s Too Late',
-  description: 'Questions to ask your grandad about his life — childhood, work, adventures, family, and the wisdom he\'s gathered over a lifetime. 100 questions across 7 chapters.',
+  title: `${totalQuestions.value} Questions to Ask Your Grandad About His Life`,
+  description: `${totalQuestions.value} questions to ask your grandad — childhood, work, hobbies, adventures, hard times and the wisdom of a lifetime. Free to read and print.`,
   canonical: 'https://tellmeyourstory.uk/questions-to-ask-your-grandad',
+  type: 'article',
+  schema: {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'BreadcrumbList',
+        '@id': `${SITE_URL}/questions-to-ask-your-grandad#breadcrumb`,
+        itemListElement: [
+          { '@type': 'ListItem', position: 1, name: 'Home', item: `${SITE_URL}/` },
+          { '@type': 'ListItem', position: 2, name: 'Questions to Ask Your Grandad', item: `${SITE_URL}/questions-to-ask-your-grandad` },
+        ],
+      },
+    ],
+  },
 })
 </script>
 

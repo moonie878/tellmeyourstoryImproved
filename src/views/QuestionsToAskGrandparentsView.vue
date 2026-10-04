@@ -2,13 +2,6 @@
   <main class="bg-white">
 
     <!-- Hero -->
-    <!-- Free printable: for readers not ready to start yet -->
-    <section class="px-5 py-14 sm:px-8 sm:py-16">
-      <div class="mx-auto max-w-5xl">
-        <EmailCaptureForm source="Questions-grandparents" />
-      </div>
-    </section>
-
     <section class="bg-[#F5F0E8] px-5 py-16 sm:px-8 sm:py-20">
       <div class="mx-auto max-w-3xl text-center">
         <p class="eyebrow">Tell Me Your Story · Guide</p>
@@ -134,6 +127,17 @@
           </div>
         </div>
 
+        <!-- FAQ — rendered on the page so the FAQPage schema matches what visitors see -->
+        <div class="mt-14">
+          <h2 class="article-h2">Common questions</h2>
+          <div class="mt-6 space-y-4">
+            <div v-for="faq in faqs" :key="faq.q" class="tip-card">
+              <p class="tip-title">{{ faq.q }}</p>
+              <p class="tip-desc">{{ faq.a }}</p>
+            </div>
+          </div>
+        </div>
+
         <!-- CTA -->
         <div class="mt-12 rounded-3xl bg-[#1C1917] px-6 py-10 sm:px-8 sm:py-12 text-center">
           <p class="text-[11px] font-medium uppercase tracking-[0.22em] text-[#9C7C5C]">Tell Me Your Story</p>
@@ -166,10 +170,19 @@
 
       </div>
     </article>
+
+    <!-- Free printable: for readers not ready to start yet -->
+    <section class="px-5 py-14 sm:px-8 sm:py-16">
+      <div class="mx-auto max-w-5xl">
+        <EmailCaptureForm source="Questions-grandparents" />
+      </div>
+    </section>
+
   </main>
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
 import EmailCaptureForm from '../components/Marketing/EmailCaptureForm.vue'
 import { useSeo } from '../composables/useSeo'
 
@@ -198,44 +211,39 @@ useSeo({
       },
       {
         '@type': 'FAQPage',
-        mainEntity: [
-          {
-            '@type': 'Question',
-            name: 'What are good questions to ask your grandparents?',
-            acceptedAnswer: {
-              '@type': 'Answer',
-              text: 'Good questions to ask your grandparents include asking about their childhood home, what the world was like when they were young, how they met, what they lived through historically, family traditions they want passed down, and what they most want their grandchildren to know about them.',
-            },
-          },
-          {
-            '@type': 'Question',
-            name: 'What questions should I ask my grandparents about their life?',
-            acceptedAnswer: {
-              '@type': 'Answer',
-              text: 'The most meaningful questions to ask your grandparents are: What was your childhood like? What world events do you remember most vividly? How did you meet each other? What was the hardest thing you ever went through? What family stories do you most want passed down? What do you want your grandchildren to remember about you?',
-            },
-          },
-          {
-            '@type': 'Question',
-            name: 'How do I get my grandparents to share their stories?',
-            acceptedAnswer: {
-              '@type': 'Answer',
-              text: 'Use old photos as conversation starters, ask specific sensory questions like "what did your home smell like?", and ask them separately so each gets to tell their own version. Spread questions across multiple visits rather than one session, and record what they say — even just on your phone.',
-            },
-          },
-          {
-            '@type': 'Question',
-            name: 'Why is it important to ask your grandparents about their life?',
-            acceptedAnswer: {
-              '@type': 'Answer',
-              text: 'Your grandparents carry family history, lived experience of historical events, and personal stories that exist nowhere else. When they are gone, that knowledge is gone too unless someone asks. Recording their stories preserves family identity across generations and gives grandchildren a sense of where they came from.',
-            },
-          },
-        ],
+        mainEntity: faqs.map((f) => ({
+          '@type': 'Question',
+          name: f.q,
+          acceptedAnswer: { '@type': 'Answer', text: f.a },
+        })),
       },
     ],
   },
 })
+
+/** Single source of truth — the description can never drift from the list again. */
+const totalQuestions = computed(() =>
+  chapters.reduce((sum, chapter) => sum + chapter.questions.length, 0),
+)
+
+const faqs = [
+  {
+    q: 'What are good questions to ask your grandparents?',
+    a: 'Good questions to ask your grandparents include asking about their childhood home, what the world was like when they were young, how they met, what they lived through historically, family traditions they want passed down, and what they most want their grandchildren to know about them.',
+  },
+  {
+    q: 'What questions should I ask my grandparents about their life?',
+    a: 'The most meaningful questions are: What was your childhood like? What world events do you remember most vividly? How did you meet each other? What was the hardest thing you ever went through? What family stories do you most want passed down? What do you want your grandchildren to remember about you?',
+  },
+  {
+    q: 'How do I get my grandparents to share their stories?',
+    a: 'Use old photos as conversation starters, ask specific sensory questions like "what did your home smell like?", and ask them separately so each gets to tell their own version. Spread questions across multiple visits rather than one session, and record what they say — even just on your phone.',
+  },
+  {
+    q: 'Why is it important to ask your grandparents about their life?',
+    a: 'Your grandparents carry family history, lived experience of historical events, and personal stories that exist nowhere else. When they are gone, that knowledge is gone too unless someone asks. Recording their stories preserves family identity across generations.',
+  },
+]
 
 const chapters = [
   {

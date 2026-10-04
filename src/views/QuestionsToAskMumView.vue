@@ -35,7 +35,7 @@
             These questions are a way to meet her — not just as your mum, but as a person. Most mums, when someone finally asks, are overwhelmed that anyone thought to.
           </p>
           <p class="founder-text mt-4 font-medium text-[#1C1917]">
-            Here are 80 of the most meaningful questions you can ask your mum — across every chapter of her life.
+            Here are {{ totalQuestions }} of the most meaningful questions you can ask your mum — across every chapter of her life.
           </p>
         </div>
 
@@ -118,6 +118,22 @@
           </div>
         </div>
 
+        <!-- FAQ — rendered on the page so the FAQPage schema matches what visitors see -->
+        <div class="mt-14">
+          <h2 class="article-h2">Common questions</h2>
+          <div class="mt-6 space-y-4">
+            <div v-for="faq in faqs" :key="faq.q" class="tip-card">
+              <p class="tip-title">{{ faq.q }}</p>
+              <p class="tip-desc">{{ faq.a }}</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Free printable: for readers not ready to start yet -->
+        <div class="mt-12">
+          <EmailCaptureForm source="Questions-mum" />
+        </div>
+
         <!-- CTA -->
         <div class="mt-12 rounded-3xl bg-[#1C1917] px-6 py-10 sm:px-8 sm:py-12 text-center">
           <p class="text-[11px] font-medium uppercase tracking-[0.22em] text-[#9C7C5C]">Tell Me Your Story</p>
@@ -154,6 +170,8 @@
 </template>
 
 <script setup lang="ts">
+import EmailCaptureForm from '../components/Marketing/EmailCaptureForm.vue'
+import { computed } from 'vue'
 import { useSeo } from '../composables/useSeo'
 
 useSeo({
@@ -181,36 +199,35 @@ useSeo({
       },
       {
         '@type': 'FAQPage',
-        mainEntity: [
-          {
-            '@type': 'Question',
-            name: 'What are good questions to ask your mum about her life?',
-            acceptedAnswer: {
-              '@type': 'Answer',
-              text: 'Good questions to ask your mum include asking about her childhood home, her happiest memories growing up, what she dreamed of becoming, how she felt when she became a mother, what she sacrificed for the family, and what she most wants you to remember about her.',
-            },
-          },
-          {
-            '@type': 'Question',
-            name: 'What questions should I ask my mum before it\'s too late?',
-            acceptedAnswer: {
-              '@type': 'Answer',
-              text: 'The most important questions to ask your mum are: What was your childhood like? What was the hardest thing you ever went through? How did you feel when you first held me? What do you most want to be remembered for? What advice would you give your younger self?',
-            },
-          },
-          {
-            '@type': 'Question',
-            name: 'How do I get my mum to open up about her past?',
-            acceptedAnswer: {
-              '@type': 'Answer',
-              text: 'Start with one gentle question during a relaxed moment — over a cup of tea, on a walk, or during a car journey. Avoid making it feel like a formal interview. Ask about happy memories first, like her favourite childhood memories or how she met your dad. Once she starts talking, follow the thread naturally.',
-            },
-          },
-        ],
+        mainEntity: faqs.map((f) => ({
+          '@type': 'Question',
+          name: f.q,
+          acceptedAnswer: { '@type': 'Answer', text: f.a },
+        })),
       },
     ],
   },
 })
+
+/** Single source of truth — the intro can never drift from the list again. */
+const totalQuestions = computed(() =>
+  chapters.reduce((sum, chapter) => sum + chapter.questions.length, 0),
+)
+
+const faqs = [
+  {
+    q: 'What are good questions to ask your mum about her life?',
+    a: 'Good questions to ask your mum include asking about her childhood home, her happiest memories growing up, what she dreamed of becoming, how she felt when she became a mother, what she sacrificed for the family, and what she most wants you to remember about her.',
+  },
+  {
+    q: "What questions should I ask my mum before it's too late?",
+    a: 'The most important questions to ask your mum are: What was your childhood like? What was the hardest thing you ever went through? How did you feel when you first held me? What do you most want to be remembered for? What advice would you give your younger self?',
+  },
+  {
+    q: 'How do I get my mum to open up about her past?',
+    a: 'Start with one gentle question during a relaxed moment — over a cup of tea, on a walk, or during a car journey. Avoid making it feel like a formal interview. Ask about happy memories first, like her favourite childhood memories or how she met your dad. Once she starts talking, follow the thread naturally.',
+  },
+]
 
 const chapters = [
   {
@@ -354,6 +371,7 @@ const chapters = [
       'What do you want to be remembered for?',
       'What is the one thing you most want us to know about your life?',
       'Is there anything you want to say that you have never found the right moment for?',
+      'What do you hope I understand about you that I might not yet?',
     ],
   },
 ]
