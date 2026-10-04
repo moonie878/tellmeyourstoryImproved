@@ -111,7 +111,7 @@
             <p class="text-sm font-semibold text-stone-900 group-hover:text-[#7C5C3B]">Gifts for Parents Who Have Everything</p>
             <p class="mt-1 text-xs text-stone-500">Specifically for mums, dads and grandparents</p>
           </router-link>
-          <router-link to="/70th-birthday-gift-ideas" class="rounded-2xl border border-stone-200 p-4 hover:border-[#7C5C3B] transition group">
+          <router-link to="/milestone-birthday-gift-ideas" class="rounded-2xl border border-stone-200 p-4 hover:border-[#7C5C3B] transition group">
             <p class="text-sm font-semibold text-stone-900 group-hover:text-[#7C5C3B]">70th Birthday Gift Ideas</p>
             <p class="mt-1 text-xs text-stone-500">The most meaningful milestone birthday gift</p>
           </router-link>

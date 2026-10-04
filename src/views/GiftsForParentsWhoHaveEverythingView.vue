@@ -137,7 +137,7 @@
       <div class="mx-auto max-w-3xl">
         <p class="text-xs font-medium uppercase tracking-[0.22em] text-[#9C7C5C] mb-6">Related reading</p>
         <div class="grid gap-4 sm:grid-cols-3">
-          <router-link to="/70th-birthday-gift-ideas" class="rounded-2xl border border-stone-200 p-4 hover:border-[#7C5C3B] transition group">
+          <router-link to="/milestone-birthday-gift-ideas" class="rounded-2xl border border-stone-200 p-4 hover:border-[#7C5C3B] transition group">
             <p class="text-sm font-semibold text-stone-900 group-hover:text-[#7C5C3B]">70th Birthday Gift Ideas</p>
             <p class="mt-1 text-xs text-stone-500">The most meaningful milestone birthday gift</p>
           </router-link>

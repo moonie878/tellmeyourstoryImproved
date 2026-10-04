@@ -271,7 +271,7 @@ const relatedLinks = [
   { to: '/christmas-gifts-for-grandparents', label: 'Gifts for grandparents' },
   { to: '/christmas-gift-for-parents-who-have-everything', label: 'For parents who have everything' },
   { to: '/memory-book-vs-memory-box', label: 'Memory book vs memory box' },
-  { to: '/gift', label: 'All gift options' },
+  { to: '/gift?campaign=christmas', label: 'All gift options' },
 ]
 </script>
 

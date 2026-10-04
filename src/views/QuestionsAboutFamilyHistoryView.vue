@@ -31,12 +31,27 @@
           <p>Research consistently shows that children who know their family history — who have a sense of where they came from and what their family has been through — have stronger self-esteem, greater resilience, and a clearer sense of identity. The stories aren't just interesting. They're formative.</p>
           <p>But family history disappears with the people who carry it. Every generation that passes takes its stories with it unless someone thought to ask. The questions below are designed to draw those stories out — from living relatives who still remember, before the window closes.</p>
         </div>
-        <div class="mt-6 flex flex-wrap justify-center gap-3">
-          <router-link to="/oral-history-questions" class="text-xs text-[#7C5C3B] underline hover:no-underline">100 oral history questions →</router-link>
-          <span class="text-xs text-stone-300">·</span>
-          <router-link to="/questions-to-ask-elderly-parents" class="text-xs text-[#7C5C3B] underline hover:no-underline">Questions for elderly parents →</router-link>
-          <span class="text-xs text-stone-300">·</span>
-          <router-link to="/how-to-record-grandparents-story" class="text-xs text-[#7C5C3B] underline hover:no-underline">How to record a grandparent's story →</router-link>
+      </div>
+    </section>
+
+    <!-- Which list do you want? Disambiguates the question sets for readers and for Google. -->
+    <section class="border-y border-stone-200 bg-[#FAF7F4] px-5 py-12 sm:px-8">
+      <div class="mx-auto max-w-4xl">
+        <p class="text-center text-xs font-medium uppercase tracking-[0.22em] text-[#9C7C5C]">Not the list you wanted?</p>
+        <h2 class="mt-3 text-center font-display text-xl font-bold text-stone-900">We keep four separate sets of questions</h2>
+        <p class="mx-auto mt-3 max-w-xl text-center text-sm leading-7 text-stone-600">
+          This page is the genealogy set — about ancestors, origins and the stories behind the family tree, rather than one person's own life.
+        </p>
+        <div class="mt-8 grid gap-4 sm:grid-cols-3">
+          <router-link
+            v-for="alt in otherLists"
+            :key="alt.to"
+            :to="alt.to"
+            class="group rounded-2xl border border-stone-200 bg-white p-4 transition hover:border-[#7C5C3B]"
+          >
+            <p class="text-sm font-semibold text-stone-900 group-hover:text-[#7C5C3B]">{{ alt.title }}</p>
+            <p class="mt-1 text-xs leading-5 text-stone-500">{{ alt.pickIf }}</p>
+          </router-link>
         </div>
       </div>
     </section>
@@ -92,7 +107,7 @@
           <router-link to="/register" class="rounded-full bg-[#C4A882] px-7 py-3 text-sm font-semibold text-[#1C1917] transition hover:opacity-90">Start capturing family history free →</router-link>
           <router-link to="/example" class="rounded-full border border-white/20 px-7 py-3 text-sm font-medium text-white transition hover:bg-white/10">See an example</router-link>
         </div>
-        <p class="mt-5 text-xs text-[#9C7C5C]">Free to start · No subscription · Printed book from £21.99</p>
+        <p class="mt-5 text-xs text-[#9C7C5C]">Free to start · No subscription · Printed book from {{ printFrom }} including UK delivery</p>
       </div>
     </section>
 
@@ -145,7 +160,7 @@
       <h2 class="font-display text-2xl font-bold text-white sm:text-3xl">Your family history is waiting to be told</h2>
       <p class="mx-auto mt-4 max-w-lg text-sm leading-7 text-[#A8A29E]">Start capturing it today — free, in their own words, preserved forever.</p>
       <router-link to="/register" class="mt-8 inline-block rounded-full bg-[#C4A882] px-8 py-3 text-sm font-semibold text-[#1C1917] transition hover:opacity-90">Start capturing family history free →</router-link>
-      <p class="mt-4 text-xs text-[#9C7C5C]">Free to start · One-time payment · Printed book from £21.99</p>
+      <p class="mt-4 text-xs text-[#9C7C5C]">Free to start · One-time payment · Printed book from {{ printFrom }} including UK delivery</p>
     </section>
 
   </main>
@@ -153,7 +168,17 @@
 
 <script setup lang="ts">
 import EmailCaptureForm from '../components/Marketing/EmailCaptureForm.vue'
-import { useSeo } from '../composables/useSeo'
+import { useSeo, SITE_URL } from '../composables/useSeo'
+import { PRINTED_BOOK_FROM_PRICE } from '../lib/printPricing'
+
+const printFrom = `£${PRINTED_BOOK_FROM_PRICE.toFixed(2)}`
+
+/** The other three question sets, so this page is never mistaken for them. */
+const otherLists = [
+  { to: '/life-story-questions',           title: '150 Life Story Questions', pickIf: "For one person's own life — childhood, love, work, legacy. The place most families start." },
+  { to: '/oral-history-questions',          title: 'Oral History Questions',  pickIf: 'For recording someone as a witness to their time, with the world they lived through.' },
+  { to: '/life-story-interview-questions',  title: 'Interview Questions',     pickIf: 'For one longer sit-down conversation you intend to record end to end.' },
+]
 
 const chapters = [
   {
@@ -267,21 +292,33 @@ const faqs = [
 
 useSeo({
   title: 'Questions to Ask About Family History — Discover Your Roots',
-  description: '100 questions to ask relatives about family history — where your family came from, what they lived through, and the stories behind the names. With advice on how to research and preserve what you find.',
+  description: '60 questions to ask relatives about family history — where the family came from, what they lived through, and the stories behind the names. Plus how to research it.',
   canonical: 'https://tellmeyourstory.uk/questions-about-family-history',
+  type: 'article',
   schema: {
     '@context': 'https://schema.org',
     '@graph': [
       {
+        // Generated from the faqs array above, so the markup can never drift
+        // from what the page actually shows.
         '@type': 'FAQPage',
-        mainEntity: [
-          { '@type': 'Question', name: 'What questions should I ask about family history?', acceptedAnswer: { '@type': 'Answer', text: 'Start with where the family came from, what your grandparents did for work, what major historical events they lived through, and the family characters. The most specific questions produce the best stories.' } },
-          { '@type': 'Question', name: 'How do I research my family history?', acceptedAnswer: { '@type': 'Answer', text: 'Start with conversations with living relatives. Then use Ancestry and FindMyPast for UK genealogical records. County archives and the Imperial War Museum hold records not available digitally.' } },
-          { '@type': 'Question', name: 'What is the difference between genealogy and family history?', acceptedAnswer: { '@type': 'Answer', text: 'Genealogy builds a family tree from records. Family history captures the stories, experiences, and personalities behind the names and dates.' } },
-        ]
-      }
-    ]
-  }
+        '@id': `${SITE_URL}/questions-about-family-history#faq`,
+        mainEntity: faqs.map((f) => ({
+          '@type': 'Question',
+          name: f.q,
+          acceptedAnswer: { '@type': 'Answer', text: f.a },
+        })),
+      },
+      {
+        '@type': 'BreadcrumbList',
+        '@id': `${SITE_URL}/questions-about-family-history#breadcrumb`,
+        itemListElement: [
+          { '@type': 'ListItem', position: 1, name: 'Home', item: `${SITE_URL}/` },
+          { '@type': 'ListItem', position: 2, name: 'Questions About Family History', item: `${SITE_URL}/questions-about-family-history` },
+        ],
+      },
+    ],
+  },
 })
 </script>
 

@@ -32,12 +32,27 @@
           <p>The British Library, the Imperial War Museum, and countless universities and community archives have dedicated oral history programmes — recognising that the stories of ordinary people are as historically significant as the stories of the famous.</p>
           <p>But you don't need an archive or a professional interviewer to do oral history. You need a person with stories to tell, someone willing to listen, and the right questions to get them started. The questions below are designed to do exactly that.</p>
         </div>
-        <div class="mt-6 flex flex-wrap justify-center gap-3">
-          <router-link to="/life-story-interview-questions" class="text-xs text-[#7C5C3B] underline hover:no-underline">Life story interview questions →</router-link>
-          <span class="text-xs text-stone-300">·</span>
-          <router-link to="/how-to-record-grandparents-story" class="text-xs text-[#7C5C3B] underline hover:no-underline">How to record a grandparent's story →</router-link>
-          <span class="text-xs text-stone-300">·</span>
-          <router-link to="/questions-about-family-history" class="text-xs text-[#7C5C3B] underline hover:no-underline">Family history questions →</router-link>
+      </div>
+    </section>
+
+    <!-- Which list do you want? Disambiguates the question sets for readers and for Google. -->
+    <section class="border-y border-stone-200 bg-[#FAF7F4] px-5 py-12 sm:px-8">
+      <div class="mx-auto max-w-4xl">
+        <p class="text-center text-xs font-medium uppercase tracking-[0.22em] text-[#9C7C5C]">Not the list you wanted?</p>
+        <h2 class="mt-3 text-center font-display text-xl font-bold text-stone-900">We keep four separate sets of questions</h2>
+        <p class="mx-auto mt-3 max-w-xl text-center text-sm leading-7 text-stone-600">
+          This page is the oral history set — for recording someone as a witness to their own time, with the world they lived through as much as the life they led.
+        </p>
+        <div class="mt-8 grid gap-4 sm:grid-cols-3">
+          <router-link
+            v-for="alt in otherLists"
+            :key="alt.to"
+            :to="alt.to"
+            class="group rounded-2xl border border-stone-200 bg-white p-4 transition hover:border-[#7C5C3B]"
+          >
+            <p class="text-sm font-semibold text-stone-900 group-hover:text-[#7C5C3B]">{{ alt.title }}</p>
+            <p class="mt-1 text-xs leading-5 text-stone-500">{{ alt.pickIf }}</p>
+          </router-link>
         </div>
       </div>
     </section>
@@ -93,7 +108,7 @@
           <router-link to="/register" class="rounded-full bg-[#C4A882] px-7 py-3 text-sm font-semibold text-[#1C1917] transition hover:opacity-90">Start capturing their story free →</router-link>
           <router-link to="/example" class="rounded-full border border-white/20 px-7 py-3 text-sm font-medium text-white transition hover:bg-white/10">See an example</router-link>
         </div>
-        <p class="mt-5 text-xs text-[#9C7C5C]">Free to start · No subscription · Printed book from £21.99</p>
+        <p class="mt-5 text-xs text-[#9C7C5C]">Free to start · No subscription · Printed book from {{ printFrom }} including UK delivery</p>
       </div>
     </section>
 
@@ -146,7 +161,7 @@
       <h2 class="font-display text-2xl font-bold text-white sm:text-3xl">Their stories won't tell themselves</h2>
       <p class="mx-auto mt-4 max-w-lg text-sm leading-7 text-[#A8A29E]">Start capturing their oral history today — free, in their own words, preserved forever.</p>
       <router-link to="/register" class="mt-8 inline-block rounded-full bg-[#C4A882] px-8 py-3 text-sm font-semibold text-[#1C1917] transition hover:opacity-90">Start capturing their story free →</router-link>
-      <p class="mt-4 text-xs text-[#9C7C5C]">Free to start · One-time payment · Printed book from £21.99</p>
+      <p class="mt-4 text-xs text-[#9C7C5C]">Free to start · One-time payment · Printed book from {{ printFrom }} including UK delivery</p>
     </section>
 
   </main>
@@ -154,7 +169,17 @@
 
 <script setup lang="ts">
 import EmailCaptureForm from '../components/Marketing/EmailCaptureForm.vue'
-import { useSeo } from '../composables/useSeo'
+import { useSeo, SITE_URL } from '../composables/useSeo'
+import { PRINTED_BOOK_FROM_PRICE } from '../lib/printPricing'
+
+const printFrom = `£${PRINTED_BOOK_FROM_PRICE.toFixed(2)}`
+
+/** The other three question sets, so this page is never mistaken for them. */
+const otherLists = [
+  { to: '/life-story-questions',           title: '150 Life Story Questions',  pickIf: 'For a personal life story — childhood, love, work, legacy. The place most families start.' },
+  { to: '/questions-about-family-history', title: 'Family History Questions',  pickIf: 'For genealogy — where the family came from, what they lived through, the stories behind the tree.' },
+  { to: '/life-story-interview-questions', title: 'Interview Questions',       pickIf: 'For one longer sit-down conversation you intend to record end to end.' },
+]
 
 const chapters = [
   {
@@ -327,22 +352,34 @@ const faqs = [
 ]
 
 useSeo({
-  title: '100 Oral History Questions — Capture a Life in Their Own Words',
-  description: '100 oral history questions across every chapter of life — from childhood memories to legacy and wisdom. With advice on how to conduct an oral history interview and preserve what you capture.',
+  title: '100 Oral History Questions + How to Run the Interview',
+  description: '100 oral history questions across every chapter of a life, plus how to conduct the interview, what to record it on, and how to preserve what you capture.',
   canonical: 'https://tellmeyourstory.uk/oral-history-questions',
+  type: 'article',
   schema: {
     '@context': 'https://schema.org',
     '@graph': [
       {
+        // Generated from the faqs array above, so the markup can never drift
+        // from what the page actually shows.
         '@type': 'FAQPage',
-        mainEntity: [
-          { '@type': 'Question', name: 'What is oral history?', acceptedAnswer: { '@type': 'Answer', text: 'Oral history is the collection and recording of personal memories and first-hand accounts — capturing the stories and perspectives of individuals whose lives might not otherwise be recorded.' } },
-          { '@type': 'Question', name: 'What questions should I ask in an oral history interview?', acceptedAnswer: { '@type': 'Answer', text: 'The best oral history questions are open-ended and specific. Start with the world they were born into, move through childhood, work, relationships, and hard times, and end with legacy and wisdom.' } },
-          { '@type': 'Question', name: 'How do I preserve an oral history?', acceptedAnswer: { '@type': 'Answer', text: 'Record it, transcribe it, and create a permanent physical copy. Digital files get lost over time. A printed book is the most durable format.' } },
-        ]
-      }
-    ]
-  }
+        '@id': `${SITE_URL}/oral-history-questions#faq`,
+        mainEntity: faqs.map((f) => ({
+          '@type': 'Question',
+          name: f.q,
+          acceptedAnswer: { '@type': 'Answer', text: f.a },
+        })),
+      },
+      {
+        '@type': 'BreadcrumbList',
+        '@id': `${SITE_URL}/oral-history-questions#breadcrumb`,
+        itemListElement: [
+          { '@type': 'ListItem', position: 1, name: 'Home', item: `${SITE_URL}/` },
+          { '@type': 'ListItem', position: 2, name: 'Oral History Questions', item: `${SITE_URL}/oral-history-questions` },
+        ],
+      },
+    ],
+  },
 })
 </script>
 

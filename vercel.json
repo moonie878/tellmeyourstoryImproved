@@ -10,7 +10,12 @@
     { "source": "/plan", "destination": "/pricing", "permanent": true },
     { "source": "/plans", "destination": "/pricing", "permanent": true },
     { "source": "/subscriptions", "destination": "/pricing", "permanent": true },
-    { "source": "/billing", "destination": "/pricing", "permanent": true }
+    { "source": "/billing", "destination": "/pricing", "permanent": true },
+    { "source": "/60th-birthday-gift-ideas", "destination": "/milestone-birthday-gift-ideas", "permanent": true },
+    { "source": "/70th-birthday-gift-ideas", "destination": "/milestone-birthday-gift-ideas", "permanent": true },
+    { "source": "/80th-birthday-gift-ideas", "destination": "/milestone-birthday-gift-ideas", "permanent": true },
+    { "source": "/90th-birthday-gift-ideas", "destination": "/milestone-birthday-gift-ideas", "permanent": true }
+
   ],
   "rewrites": [
     { "source": "/(.*)", "destination": "/spa-shell.html" },

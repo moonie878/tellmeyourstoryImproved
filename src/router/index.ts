@@ -138,10 +138,11 @@ const routes: RouteRecordRaw[] = [
   { path: '/mothers-day-gift-ideas', name: 'mothers-day-gift-ideas', component: () => import('../views/MothersDayGiftView.vue') },
   { path: '/fathers-day-gift-for-grandad', name: 'fathers-day-gift-for-grandad', component: () => import('../views/FathersDayGiftGrandadView.vue') },
   { path: '/anniversary-gift-ideas', name: 'anniversary-gift-ideas', component: () => import('../views/AnniversaryGiftView.vue') },
-  { path: '/60th-birthday-gift-ideas', name: '60th-birthday-gift', component: () => import('../views/SixtyBirthdayGiftView.vue') },
-  { path: '/70th-birthday-gift-ideas', name: '70th-birthday-gift', component: () => import('../views/SeventyBirthdayGiftView.vue') },
-  { path: '/80th-birthday-gift-ideas', name: '80th-birthday-gift', component: () => import('../views/EightyBirthdayGiftView.vue') },
-  { path: '/90th-birthday-gift-ideas', name: '90th-birthday-gift', component: () => import('../views/NinetyBirthdayGiftView.vue') },
+  {
+      path: '/milestone-birthday-gift-ideas',
+      component: () => import('../views/MilestoneBirthdayGiftView.vue'),
+    },
+
 
   // ── Redirects (also add as real 301s in vercel.json) ──────────────────────
   // Same view was served at two URLs — duplicate content. Keep one.
