@@ -108,7 +108,7 @@ const columns = [
       { to: '/christmas-gifts-for-grandparents', label: 'Christmas gifts for grandparents' },
       { to: '/meaningful-christmas-gifts', label: 'Meaningful Christmas gifts' },
       { to: '/mothers-day-gift-ideas', label: "Mother's Day gifts" },
-      { to: '/70th-birthday-gift-ideas', label: '70th birthday gifts' },
+      { to: '/milestone-birthday-gift-ideas', label: '70th birthday gifts' },
       { to: '/gifts-for-parents-who-have-everything', label: 'For parents who have everything' },
       { to: '/bereavement-gift-ideas', label: 'Bereavement gifts' },
     ],
