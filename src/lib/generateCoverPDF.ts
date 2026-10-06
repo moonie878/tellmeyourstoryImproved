@@ -437,8 +437,11 @@ export async function generateCoverPDF(options: CoverOptions): Promise<Blob> {
     renderFrontTextOnly(doc, title, subtitle, g)
   }
 
-  // Front footer — anchored to the visible bottom edge, inside the fold.
-  const footerY = g.contentBot
+  // Front footer — anchored near the visible bottom edge, inside the fold.
+  // Sat exactly on contentBot until Oct 2026, which put the baseline on the
+  // safe line and let descenders hang below it. 3mm up keeps whole glyphs in.
+  const FOOTER_LIFT = 3
+  const footerY = g.contentBot - FOOTER_LIFT
   setDraw(doc, C_DIVIDER)
   doc.setLineWidth(0.2)
   doc.line(g.frontLeft + 12, footerY - 6, g.frontRight - 12, footerY - 6)
@@ -527,16 +530,41 @@ export async function generateCoverPDF(options: CoverOptions): Promise<Blob> {
     doc.text(ln, g.backCX, headerH + 46 + i * 6, { align: 'center' })
   })
 
-  // Flow the closing mark from where the description actually ends, and centre
-  // it in the space left above the footer.
-  const descEndY  = headerH + 46 + lines.length * 6
-  const midOfRest = descEndY + (g.contentBot - 14 - descEndY) / 2
+  const descEndY = headerH + 46 + lines.length * 6
 
-  ornament(doc, g.backCX, midOfRest - 6)
+  // ── How the book works ─────────────────────────────────────────────────────
+  // The back cover used to leave ~77mm of nothing between the description and
+  // the footer, with the URL marooned in the middle of it. That space now
+  // explains the QR codes, which is the one thing a recipient holding this for
+  // the first time will not work out on their own.
+  const howY = descEndY + 20
+
+  doc.setFont('EBGaramond', 'bold')
+  doc.setFontSize(8)
+  setTxt(doc, C_ACCENT)
+  doc.text('HEAR THEM TELL IT', g.backCX, howY, { align: 'center' })
+
+  doc.setFont('EBGaramond', 'normal')
+  doc.setFontSize(9)
+  setTxt(doc, C_SECONDARY)
+  const how = 'Wherever a story was recorded aloud, a code sits beside it on the page. Scan that code with any phone camera and you will hear it told in their own voice.'
+  const howLines = doc.splitTextToSize(how, g.panelW - 36)
+  howLines.forEach((ln: string, i: number) => {
+    doc.text(ln, g.backCX, howY + 11 + i * 6, { align: 'center' })
+  })
+
+  // ── Closing mark ───────────────────────────────────────────────────────────
+  // Sits just above the footer so the two read as one foot group. Keeping it
+  // mid-panel left air both above AND below it, and a gap between two content
+  // groups reads as a mistake where a gap above an anchored foot does not.
+  const howEndY  = howY + 11 + howLines.length * 6
+  const closeY   = Math.max(howEndY + 16, footerY - 22)
+
+  ornament(doc, g.backCX, closeY)
   doc.setFont('EBGaramond', 'normal')
   doc.setFontSize(8)
   setTxt(doc, C_MUTED)
-  doc.text('tellmeyourstory.uk', g.backCX, midOfRest + 6, { align: 'center' })
+  doc.text('tellmeyourstory.uk', g.backCX, closeY + 10, { align: 'center' })
 
   // Back footer
   setDraw(doc, C_DIVIDER)
