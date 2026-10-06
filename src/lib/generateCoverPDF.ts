@@ -9,32 +9,38 @@ import { EBGaramondBoldItalic } from '../fonts/EBGaramond-BoldItalic'
 // Dimensions come from Lulu's /cover-dimensions/ endpoint — always pass those
 // in as luluWidth/luluHeight/luluSpine.
 //
-// THE RULE THIS FILE NOW FOLLOWS:
+// THE RULE THIS FILE FOLLOWS:
 //   Nothing is positioned from TRIM_W or BLEED. Every panel edge is derived
-//   from the sheet Lulu gave us and the spine Lulu gave us. The only binding-
-//   specific constant is EDGE_ALLOWANCE — how much of each side disappears
-//   when the cover is finished.
+//   from the sheet Lulu gave us and the spine Lulu gave us. There are two
+//   binding-specific constants and they are NOT interchangeable:
 //
-// Why that matters (the June–Sept 2026 hardcover bug):
-//   Softcover loses 3.175mm of bleed per side. A hardcover case wrap folds
-//   22.225mm around the board on every side. The old code laid everything out
-//   as though only the bleed was lost, so on hardcover the front footer printed
-//   13mm outside the finished cover (gone), the content block centred 9mm too
-//   high (dead space along the bottom), and two hand-tuned "nudge" constants
-//   pushed the front panel a further 3mm sideways. Deriving the safe area from
-//   EDGE_ALLOWANCE removes all three at once and needs no magic numbers.
+//     EDGE_ALLOWANCE — how much wider the SHEET is per side. Sheet maths only.
+//     LOST_EDGE      — how much of that actually disappears. Layout only.
+//
+//   On softcover they are the same number. On a hardcover case wrap they are
+//   not, because the board is cut larger than the page.
+//
+// Why that matters (the 2026 hardcover bugs, in order):
+//   June–Sept: the code laid out as though only the 3.175mm bleed was lost, so
+//   the front footer printed 13mm outside the finished cover, the content block
+//   centred 9mm too high, and two hand-tuned "nudge" constants pushed the front
+//   panel a further 3mm sideways.
+//   October: fixing that with a single 22.225mm constant over-corrected. The
+//   board overhangs the page by 3.175mm on the fore-edge, so only 19.05mm is
+//   truly lost — treating all of it as lost pulled both panels 1.5875mm toward
+//   the spine. Front cover printed left, back cover printed right, spine and
+//   vertical placement correct (the overhang is symmetric at head and tail).
 
 const TRIM_W = 152.4   // mm — 6in. Fallback sizing only; never used for layout.
 const TRIM_H = 228.6   // mm — 9in. Fallback sizing only; never used for layout.
 const FLAP_W = 76.2    // mm — standard 3in dust jacket flap
 
 /**
- * Distance from the PDF edge to the visible edge of the finished cover.
+ * SHEET arithmetic only — how much wider the PDF is than two trimmed pages
+ * plus the spine, per side. Use this to derive or estimate the sheet size,
+ * never to position anything.
  *
- *  softcover / dustjacket — 3.175mm (0.125in) bleed, trimmed off.
- *  hardcover case wrap    — 22.225mm (0.875in) folded around the board.
- *
- * The hardcover figure is confirmed against Lulu's own published spec for
+ * Confirmed against Lulu's published spec for
  * 0600X0900.FC.PRE.CW.080CW444.GXX: a 365.12mm sheet with a 15.88mm spine
  * leaves (365.12 - 152.4*2 - 15.88) / 2 = 22.225mm per side.
  */
@@ -42,6 +48,41 @@ const EDGE_ALLOWANCE: Record<string, number> = {
   softcover:  3.175,
   hardcover:  22.225,
   dustjacket: 3.175,
+}
+
+/**
+ * LAYOUT — how much of each outer edge is genuinely gone once the cover is
+ * finished, i.e. where the visible cover actually begins.
+ *
+ *  softcover / dustjacket — 3.175mm (0.125in) bleed, trimmed off.
+ *  hardcover case wrap    — 19.05mm (0.75in) folded under the board.
+ *
+ * This is NOT the same as EDGE_ALLOWANCE, and conflating the two is what
+ * caused the October 2026 hardcover bug. On a case wrap the board is cut
+ * 3.175mm LARGER than the trimmed page, so of the 22.225mm allowance only
+ * 19.05mm disappears — the remaining 3.175mm is board you can see and hold.
+ *
+ * Treating all 22.225mm as lost pulled both panel centres 1.5875mm toward
+ * the spine (half the overhang each), which printed as a front cover shifted
+ * left and a back cover shifted right. Vertically it cancelled out, because
+ * the overhang is symmetric at head and tail — which is why the spine and the
+ * vertical placement looked correct while the panels did not.
+ */
+const LOST_EDGE: Record<string, number> = {
+  softcover:  3.175,
+  hardcover:  19.05,
+  dustjacket: 3.175,
+}
+
+/**
+ * How much larger the board is than the trimmed page, on the fore-edge, head
+ * and tail — never on the spine edge, where the hinge is. Kept for the
+ * geometry log so the numbers can be checked against a finished book.
+ */
+const BOARD_OVERHANG: Record<string, number> = {
+  softcover:  0,
+  hardcover:  3.175,
+  dustjacket: 0,
 }
 
 /** Keep text and rules at least this far inside the visible edge. */
@@ -145,17 +186,23 @@ function buildGeometry(
   spineIn: number,
   bindingType: BindingType,
 ): CoverGeometry {
-  const edge = EDGE_ALLOWANCE[bindingType] ?? EDGE_ALLOWANCE.softcover
+  // `edge` is the VISIBLE boundary — everything drawn is positioned from it.
+  // The sheet allowance (EDGE_ALLOWANCE) is deliberately not used here; it is
+  // larger than this on a case wrap and using it shifts both panels inward.
+  const edge = LOST_EDGE[bindingType] ?? LOST_EDGE.softcover
+  const sheetEdge = EDGE_ALLOWANCE[bindingType] ?? EDGE_ALLOWANCE.softcover
   const isDustJacket = bindingType === 'dustjacket'
   const flap = isDustJacket ? FLAP_W : 0
 
   // Never let a bad spine collapse the layout.
-  const maxSpine = totalW - 2 * edge - 2 * flap - 40
+  const maxSpine = totalW - 2 * sheetEdge - 2 * flap - 40
   const spine = Math.max(0, Math.min(spineIn, maxSpine))
 
   const spineLeft  = (totalW - spine) / 2
   const spineRight = spineLeft + spine
 
+  // Panels run from the spine out to the visible edge — on a hardcover that is
+  // the board edge, which sits 3.175mm proud of the trimmed page.
   const backLeft   = edge + flap
   const backRight  = spineLeft
   const frontLeft  = spineRight
@@ -201,9 +248,12 @@ export function resolveSpineMm(opts: {
 
   if (luluSpine && luluSpine > 0) return { spine: luluSpine, source: 'lulu' }
 
-  const edge = EDGE_ALLOWANCE[bindingType] ?? EDGE_ALLOWANCE.softcover
+  // Sheet arithmetic: the spine is what is left of the sheet once the two
+  // trimmed pages and the full per-side allowance are taken off. LOST_EDGE
+  // would give the wrong answer here — this one is about the PDF, not the book.
+  const sheetEdge = EDGE_ALLOWANCE[bindingType] ?? EDGE_ALLOWANCE.softcover
   const flap = bindingType === 'dustjacket' ? FLAP_W : 0
-  const bySheet = totalW - edge * 2 - flap * 2 - TRIM_W * 2
+  const bySheet = totalW - sheetEdge * 2 - flap * 2 - TRIM_W * 2
 
   if (bySheet > 1 && bySheet < totalW / 3) return { spine: bySheet, source: 'sheet' }
   return { spine: getSpineWidthMm(pageCount || 28), source: 'pages' }
@@ -225,7 +275,8 @@ export async function generateCoverPDF(options: CoverOptions): Promise<Blob> {
   } = options
 
   const isDustJacket = bindingType === 'dustjacket'
-  const edge = EDGE_ALLOWANCE[bindingType] ?? EDGE_ALLOWANCE.softcover
+  // Sheet arithmetic only — the layout uses the visible edge, from buildGeometry.
+  const sheetEdge = EDGE_ALLOWANCE[bindingType] ?? EDGE_ALLOWANCE.softcover
 
   // ── Sheet size ─────────────────────────────────────────────────────────────
   let totalW = luluWidth
@@ -238,8 +289,8 @@ export async function generateCoverPDF(options: CoverOptions): Promise<Blob> {
       `from /lulu-cover-dimensions first.`,
     )
     const estSpine = getSpineWidthMm(pageCount || 28)
-    totalW = totalW || TRIM_W * 2 + estSpine + edge * 2 + (isDustJacket ? FLAP_W * 2 : 0)
-    totalH = totalH || TRIM_H + edge * 2
+    totalW = totalW || TRIM_W * 2 + estSpine + sheetEdge * 2 + (isDustJacket ? FLAP_W * 2 : 0)
+    totalH = totalH || TRIM_H + sheetEdge * 2
   }
 
   // ── Spine ──────────────────────────────────────────────────────────────────
@@ -259,10 +310,14 @@ export async function generateCoverPDF(options: CoverOptions): Promise<Blob> {
 
   const g = buildGeometry(totalW, totalH, spine, bindingType)
 
+  // Panel centres are logged so a finished book can be checked against them:
+  // measure the printed block's two side margins — they should match.
   console.log(
     `Cover PDF (${bindingType}): ${g.totalW.toFixed(2)}×${g.totalH.toFixed(2)}mm · ` +
-    `spine ${g.spine.toFixed(2)}mm · panel ${g.panelW.toFixed(2)}mm · ` +
-    `edge allowance ${g.edge.toFixed(2)}mm · safe band ${g.contentTop.toFixed(1)}–${g.contentBot.toFixed(1)}mm`,
+    `spine ${g.spine.toFixed(2)}mm · visible panel ${g.panelW.toFixed(2)}mm ` +
+    `(page ${TRIM_W} + ${(BOARD_OVERHANG[bindingType] ?? 0).toFixed(3)}mm board) · ` +
+    `visible edge ${g.edge.toFixed(3)}mm · safe band ${g.contentTop.toFixed(1)}–${g.contentBot.toFixed(1)}mm · ` +
+    `centres back ${g.backCX.toFixed(3)} front ${g.frontCX.toFixed(3)}`,
   )
 
   // ── Document ───────────────────────────────────────────────────────────────
@@ -536,14 +591,18 @@ export function getCoverDimensions(
   pageCount: number,
   bindingType: BindingType = 'softcover',
 ) {
-  const spine = getSpineWidthMm(pageCount)
-  const edge  = EDGE_ALLOWANCE[bindingType] ?? EDGE_ALLOWANCE.softcover
-  const flap  = bindingType === 'dustjacket' ? FLAP_W : 0
+  const spine     = getSpineWidthMm(pageCount)
+  const sheetEdge = EDGE_ALLOWANCE[bindingType] ?? EDGE_ALLOWANCE.softcover
+  const lostEdge  = LOST_EDGE[bindingType] ?? LOST_EDGE.softcover
+  const flap      = bindingType === 'dustjacket' ? FLAP_W : 0
 
   return {
-    width_mm:  TRIM_W * 2 + spine + edge * 2 + flap * 2,
-    height_mm: TRIM_H + edge * 2,
+    width_mm:  TRIM_W * 2 + spine + sheetEdge * 2 + flap * 2,
+    height_mm: TRIM_H + sheetEdge * 2,
     spine_mm:  spine,
-    edge_mm:   edge,
+    /** Per-side sheet allowance — for sizing the PDF. */
+    edge_mm:   sheetEdge,
+    /** Per-side loss — where the visible cover starts. For layout. */
+    visible_edge_mm: lostEdge,
   }
 }
