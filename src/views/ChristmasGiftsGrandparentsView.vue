@@ -76,7 +76,7 @@
     </section>
 
     <!-- ══════════════════════════════════════════════════════════ -->
-    <!-- THE VOICE ANGLE — the differentiator                       -->
+    <!-- THE VOICE ANGLE                                            -->
     <!-- ══════════════════════════════════════════════════════════ -->
     <section class="px-5 py-16 sm:px-8 sm:py-20">
       <div class="mx-auto max-w-4xl">
@@ -86,13 +86,20 @@
               What makes it different
             </p>
             <h2 class="mt-4 font-display text-2xl font-bold leading-tight text-white sm:text-3xl">
-              Your grandchildren will hear your voice long after you're gone
+              Their voice, long after they're gone
             </h2>
             <p class="mt-5 text-[15px] leading-[1.8] text-stone-400">
               They can answer each question out loud instead of writing. Their voice is saved, and a QR code is printed beside that memory in the book. Anyone can scan it with a phone and hear them tell the story themselves — in twenty years, in fifty.
             </p>
             <p class="mt-5 text-[15px] leading-[1.8] text-stone-400">
-              No other memory book does this. It's the reason families tell us this is the gift that made someone cry on Christmas morning.
+              The words on the page are theirs. So is the voice behind the code. A grandchild who never got the chance to meet them can still hear exactly how they told it.
+            </p>
+            <p class="mt-7 text-[13px] leading-[1.7] text-stone-500">
+              Weighing up the options? See how we compare with
+              <router-link to="/storyworth-review" class="underline decoration-stone-600 underline-offset-2 hover:text-stone-300">Storyworth</router-link>,
+              <router-link to="/storykeeper-review" class="underline decoration-stone-600 underline-offset-2 hover:text-stone-300">StoryKeeper</router-link>
+              and
+              <router-link to="/remento-review" class="underline decoration-stone-600 underline-offset-2 hover:text-stone-300">Remento</router-link>.
             </p>
           </div>
         </div>
@@ -306,8 +313,6 @@ const steps = [
   },
 ]
 
-
-
 const faqs = [
   {
     q: 'What if my grandparents are not good with technology?',
@@ -329,12 +334,14 @@ const faqs = [
     q: 'What if they never get round to it?',
     a: 'Their answers are saved forever, so nothing is wasted if they stop and come back months later. In practice the hardest part is the first question, which is why we suggest doing that one together.',
   },
-  {
-    q: 'Is it a subscription?',
-    a: 'No. It is a one-time payment with nothing to cancel and no renewal. Printed books are ordered separately if and when you want one.',
-  },
 ]
 
+/**
+ * TODO — this is built but never injected into the page.
+ * The FAQs above are visible on the page, so the schema is legitimate.
+ * Wire it up the same way MilestoneBirthdayGiftView.vue does, or send
+ * useSeo.ts over and it can be added here properly.
+ */
 const faqSchema = {
   '@context': 'https://schema.org',
   '@type': 'FAQPage',
@@ -361,10 +368,4 @@ const relatedLinks = [
 details > summary::-webkit-details-marker {
   display: none;
 }
-</style>
-
-
-
-<style scoped>
-.font-display { font-family: 'Playfair Display', Georgia, serif; }
 </style>
