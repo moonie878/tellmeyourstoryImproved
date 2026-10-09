@@ -27,7 +27,15 @@
     "headers": [
       { "key": "Cache-Control", "value": "public, max-age=604800, stale-while-revalidate=86400" }
     ]
-  }
+    
+  },
+  {
+      "source": "/tribute",
+      "headers": [
+        { "key": "Cross-Origin-Opener-Policy",   "value": "same-origin" },
+        { "key": "Cross-Origin-Embedder-Policy", "value": "credentialless" }
+      ]
+    }
 ]
   
 }

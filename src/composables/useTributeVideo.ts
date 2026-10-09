@@ -1,31 +1,35 @@
 import { ref } from 'vue'
 
 /*
- * ─── Why this file was rewritten (October 2026) ───────────────────────────────
+ * ─── History ─────────────────────────────────────────────────────────────────
  *
- * The old version wrote one full-size PNG per FRAME into ffmpeg.wasm's virtual
- * filesystem. A 5-second slide at 25fps is 125 identical 1920x1080 PNGs. Thirty
- * photos came to roughly 4,900 files and about 3.7 GB — past the WebAssembly
- * address-space ceiling — so generation reliably died at the assembly step,
- * after every slide had rendered. That is why people got all the way through
- * and then nothing happened.
+ * Oct 2026 (1): the original wrote one full-size PNG per FRAME into ffmpeg's
+ *   virtual filesystem — 125 identical 1920x1080 PNGs for a 5-second slide.
+ *   Thirty photos came to ~4,900 files and ~3.7 GB, past the WebAssembly
+ *   ceiling, so generation died at the assembly step after every slide had
+ *   rendered. Each slide is now written once and ffmpeg holds it.
  *
- * Now each slide is written ONCE and ffmpeg is told how long to hold it, with
- * crossfades done by the xfade filter rather than by blending frames in canvas.
- * Thirty photos is about 35 files and 26 MB.
+ * Oct 2026 (2), after Mark's test pass:
+ *   - progress could read -216004650%. ffmpeg.wasm reports nonsense progress
+ *     for looped-image inputs; it is now clamped and only nudges within the
+ *     band owned by the chunk being encoded.
+ *   - video clips lost their sound. Clip audio is now mixed in at the right
+ *     offset and the music ducks underneath it.
+ *   - the cover photo was cropped to fill the title slide. Backdrops are now
+ *     blurred, so nothing reads as cut off.
+ *   - a corrupt image rendered as a white box and still charged the customer.
+ *     Images are validated and skipped; if none survive, the render fails
+ *     before payment.
  *
- * Two further things measured while fixing it:
- *
- *  - A single xfade chain across 33 slides peaks around 1.8 GB of working
- *    memory, which would still fail in wasm. Encoding in chunks of 8 brings
- *    that to under 700 MB. Chunk boundaries are placed half way through a
- *    slide's static hold, so the two sides of the join are the same still
- *    frame and the cut is invisible (measured: 0.04/255 mean pixel difference).
- *
- *  - User video clips were being rasterised to PNG frames too — 750 files for
- *    a 30-second clip. They are now handed to ffmpeg as files. That also
- *    removes a hang: the old frame extractor waited on a `seeked` event that
- *    never fires when you seek to the time the video is already at.
+ * Measured while tuning (native ffmpeg 6.1.1, 8-slide chunk, 33s of video):
+ *   one static 1080p image, encode only ......... 11.5s   <- the floor
+ *   full xfade chain ............................ 19.6s
+ *   holds encoded separately, xfade only on the
+ *     transitions ............................... 18.7s   (1.05x — not worth it)
+ *   720p instead of 1080p ....................... 8.4s    (1.37x)
+ *   preset ultrafast ............................ 8.1s    (1.42x, 2.7x filesize)
+ * So filter tricks are a dead end: x264 at 1080p is the floor. The only lever
+ * that moves it materially is threading — see USE_MULTITHREAD below.
  */
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -35,14 +39,14 @@ export type TributeSlideDuration = 3 | 5 | 8
 
 export interface TributeMediaItem {
   type: 'photo' | 'video'
-  src?: string        // base64 data URL for photos
-  file?: File         // File object for videos
-  previewUrl?: string // object URL for video preview thumbnail
+  src?: string
+  file?: File
+  previewUrl?: string
 }
 
 export interface TributeOptions {
   media: TributeMediaItem[]
-  photos: string[]             // kept for backwards compatibility
+  photos: string[]
   name: string
   birthYear?: string
   deathYear?: string
@@ -60,12 +64,8 @@ export interface TributeResult {
 }
 
 export type TributeMusicTrack =
-  | 'gentle-piano'
-  | 'warm-strings'
-  | 'soft-acoustic'
-  | 'peaceful-melody'
-  | 'silent'
-  | 'custom'
+  | 'gentle-piano' | 'warm-strings' | 'soft-acoustic'
+  | 'peaceful-melody' | 'silent' | 'custom'
 
 export const MUSIC_TRACKS: Record<TributeMusicTrack, { label: string; description: string; emoji: string }> = {
   'gentle-piano':    { label: 'Gentle Piano',    description: 'Soft and peaceful',    emoji: '🎹' },
@@ -76,42 +76,48 @@ export const MUSIC_TRACKS: Record<TributeMusicTrack, { label: string; descriptio
   'custom':          { label: 'Upload your own', description: 'Your chosen music',    emoji: '📁' },
 }
 
-// ─── Canvas / encode constants ────────────────────────────────────────────────
+// ─── Constants ────────────────────────────────────────────────────────────────
 
 const W = 1920
 const H = 1080
 const FPS = 25
 
-/** Slides per encoded chunk. Keeps the xfade chain short enough to fit in wasm. */
+/** Shared with the builder UI so the cap is enforced in one place. */
+export const MAX_PHOTOS = 30
+export const MAX_VIDEOS = 5
+
+/** Slides per encoded chunk. Keeps the xfade chain inside wasm's memory ceiling. */
 const CHUNK_SIZE = 8
 
-/** Hard ceiling on a user video clip, in seconds. */
 const MAX_CLIP_SECONDS = 30
+
+/** How far the music drops while a video clip's own sound is playing. */
+const MUSIC_DUCK = 0.22
 
 const CREAM  = '#F8F4EF'
 const DARK   = '#1C1917'
 const ACCENT = '#947449'
 const MUTED  = '#8C847E'
 
-/** Largest a photo may be drawn. Height-led, so portraits get the room they need. */
-const PHOTO_MAX_W = Math.round(W * 0.62)   // 1190
-const PHOTO_MAX_H = Math.round(H * 0.80)   // 864
+const PHOTO_MAX_W = Math.round(W * 0.62)
+const PHOTO_MAX_H = Math.round(H * 0.80)
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
+
+/** True only for an image that actually decoded to something with pixels. */
+function isUsable(img: HTMLImageElement | null): img is HTMLImageElement {
+  return !!img && img.naturalWidth > 0 && img.naturalHeight > 0
+}
 
 function loadImageFromUrl(url: string): Promise<HTMLImageElement | null> {
   return new Promise((resolve) => {
     const img = new Image()
-    img.onload  = () => resolve(img)
+    img.onload  = () => resolve(isUsable(img) ? img : null)
     img.onerror = () => resolve(null)
     img.src = url
   })
 }
 
-/**
- * Reads a video's duration without decoding any frames.
- * Resolves to null rather than hanging if the file can't be read.
- */
 function probeVideoDuration(file: File): Promise<number | null> {
   return new Promise((resolve) => {
     const video = document.createElement('video')
@@ -123,32 +129,43 @@ function probeVideoDuration(file: File): Promise<number | null> {
       URL.revokeObjectURL(url)
       resolve(v)
     }
-    // Never let a bad file stall the whole render.
     const timer = setTimeout(() => done(null), 15000)
     video.preload = 'metadata'
     video.muted = true
     video.onloadedmetadata = () => {
       clearTimeout(timer)
       const d = Number.isFinite(video.duration) ? video.duration : null
-      done(d ? Math.min(d, MAX_CLIP_SECONDS) : null)
+      done(d && d > 0 ? Math.min(d, MAX_CLIP_SECONDS) : null)
     }
     video.onerror = () => { clearTimeout(timer); done(null) }
     video.src = url
   })
 }
 
-function drawCoverImage(
+/**
+ * Background photo for the title, quote and closing slides.
+ *
+ * This used to be a plain cover fit, which crops to 16:9 — on a portrait photo
+ * that lops off the top of someone's head, and it was obvious even at low
+ * opacity. Blurring it means the crop can't be read as a crop: it becomes
+ * colour and tone behind the text, which is all it was ever meant to be.
+ */
+function drawBlurredBackdrop(
   ctx: CanvasRenderingContext2D,
   img: HTMLImageElement,
-  x: number, y: number, w: number, h: number,
-  opacity = 1,
+  opacity: number,
 ) {
-  const scale = Math.max(w / img.width, h / img.height)
+  // Slight overscan so the blur doesn't pull transparent edges inward.
+  const over = 1.12
+  const scale = Math.max(W / img.width, H / img.height) * over
   const dw = img.width * scale
   const dh = img.height * scale
   ctx.save()
   ctx.globalAlpha = opacity
-  ctx.drawImage(img, x + (w - dw) / 2, y + (h - dh) / 2, dw, dh)
+  // Not every engine supports canvas filters; without it we simply get the
+  // old un-blurred backdrop rather than a broken slide.
+  try { ctx.filter = 'blur(36px)' } catch { /* no filter support */ }
+  ctx.drawImage(img, (W - dw) / 2, (H - dh) / 2, dw, dh)
   ctx.restore()
 }
 
@@ -159,8 +176,7 @@ function wrapText(ctx: CanvasRenderingContext2D, text: string, maxW: number): st
   for (const word of words) {
     const test = current ? `${current} ${word}` : word
     if (ctx.measureText(test).width > maxW && current) {
-      lines.push(current)
-      current = word
+      lines.push(current); current = word
     } else {
       current = test
     }
@@ -206,7 +222,7 @@ function drawTitleSlide(
   const cx = W / 2
   ctx.fillStyle = DARK
   ctx.fillRect(0, 0, W, H)
-  if (photoImg) drawCoverImage(ctx, photoImg, 0, 0, W, H, 0.35)
+  if (isUsable(photoImg)) drawBlurredBackdrop(ctx, photoImg, 0.45)
   const grad = ctx.createLinearGradient(0, 0, 0, H)
   grad.addColorStop(0, 'rgba(28,25,23,0.7)')
   grad.addColorStop(0.5, 'rgba(28,25,23,0.4)')
@@ -229,15 +245,7 @@ function drawTitleSlide(
   if (options.watermark) drawWatermark(ctx)
 }
 
-/**
- * The photo card now takes the SHAPE OF THE PHOTO.
- *
- * It used to be a fixed 1190x778 landscape box with a contain fit, so a portrait
- * phone photo — which is most photos of people — was drawn at 582px wide inside
- * it, filling 49% of the frame width with flat beige either side. A 9:16 photo
- * managed 37%. Now the white mount is sized to the scaled image, so a portrait
- * gets a portrait mount and reads as a deliberately presented print.
- */
+/** The white mount takes the shape of the photo, so portraits aren't stranded in beige. */
 function drawPhotoSlide(
   ctx: CanvasRenderingContext2D,
   img: HTMLImageElement,
@@ -248,14 +256,12 @@ function drawPhotoSlide(
   ctx.fillStyle = CREAM
   ctx.fillRect(0, 0, W, H)
 
-  const scale = Math.min(PHOTO_MAX_W / img.width, PHOTO_MAX_H / img.height)
-  const dw = Math.round(img.width * scale)
-  const dh = Math.round(img.height * scale)
+  const scale = Math.min(PHOTO_MAX_W / img.naturalWidth, PHOTO_MAX_H / img.naturalHeight)
+  const dw = Math.round(img.naturalWidth * scale)
+  const dh = Math.round(img.naturalHeight * scale)
   const dx = Math.round((W - dw) / 2)
-  // Nudged up slightly to leave room for the caption line beneath.
   const dy = Math.round((H - dh) / 2 - 16)
 
-  // White mount with a soft drop shadow, hugging the photo
   ctx.save()
   ctx.shadowColor = 'rgba(0,0,0,0.15)'
   ctx.shadowBlur = 40
@@ -270,7 +276,6 @@ function drawPhotoSlide(
   ctx.lineWidth = 1.5
   ctx.strokeRect(dx, dy, dw, dh)
 
-  // Caption aligned to the mount, not to a fixed box
   ctx.font = 'italic 18px Georgia, serif'
   ctx.fillStyle = MUTED
   ctx.textAlign = 'left'
@@ -282,10 +287,7 @@ function drawPhotoSlide(
 
   ctx.strokeStyle = '#E8DDD0'
   ctx.lineWidth = 0.5
-  ctx.beginPath()
-  ctx.moveTo(60, 36)
-  ctx.lineTo(W - 60, 36)
-  ctx.stroke()
+  ctx.beginPath(); ctx.moveTo(60, 36); ctx.lineTo(W - 60, 36); ctx.stroke()
 
   if (options.watermark) drawWatermark(ctx)
 }
@@ -298,7 +300,7 @@ function drawTributeTextSlide(
   const cx = W / 2
   ctx.fillStyle = DARK
   ctx.fillRect(0, 0, W, H)
-  if (photoImg) drawCoverImage(ctx, photoImg, 0, 0, W, H, 0.2)
+  if (isUsable(photoImg)) drawBlurredBackdrop(ctx, photoImg, 0.28)
   ctx.fillStyle = 'rgba(28,25,23,0.75)'
   ctx.fillRect(0, 0, W, H)
   drawOrnament(ctx, cx, H * 0.28)
@@ -324,7 +326,7 @@ function drawClosingSlide(
   const cx = W / 2
   ctx.fillStyle = DARK
   ctx.fillRect(0, 0, W, H)
-  if (photoImg) drawCoverImage(ctx, photoImg, 0, 0, W, H, 0.25)
+  if (isUsable(photoImg)) drawBlurredBackdrop(ctx, photoImg, 0.32)
   ctx.fillStyle = 'rgba(28,25,23,0.8)'
   ctx.fillRect(0, 0, W, H)
   ctx.textAlign = 'center'
@@ -347,58 +349,81 @@ function drawClosingSlide(
   if (options.watermark) drawWatermark(ctx)
 }
 
-// ─── Segment planning ─────────────────────────────────────────────────────────
+// ─── Timeline planning ────────────────────────────────────────────────────────
 
 interface Segment {
   kind: 'image' | 'video'
-  file: string      // filename inside the ffmpeg virtual filesystem
-  duration: number  // seconds
+  file: string
+  duration: number
+  /** Clip only: where its own audio sits in the finished video. Filled by planTimeline. */
+  startsAt?: number
+}
+
+interface Plan {
+  chunks: Segment[][]
+  total: number
+  clips: { file: string; start: number; duration: number }[]
+}
+
+/** The crossfade actually used between two segments, which xfade caps. */
+function effectiveT(wanted: number, nextDuration: number, accSoFar: number): number {
+  return Math.min(wanted, nextDuration / 2, accSoFar / 2)
 }
 
 /**
- * Splits segments into chunks that each encode independently.
+ * Splits segments into chunks and works out the real timeline.
  *
- * A boundary is placed half way through a slide's static hold, and the boundary
- * slide appears at the end of one chunk and the start of the next. Both sides
- * are the same still frame, so concatenating the chunks produces no visible cut.
- * Video segments are never split.
+ * The timeline is SIMULATED rather than assumed, because xfade clamps the
+ * crossfade when a segment is short — which happens at every chunk boundary,
+ * where a slide is halved. Assuming a uniform transition length made the music
+ * duration and the clip offsets drift on slow-fade.
  */
-function planChunks(segments: Segment[], size: number): Segment[][] {
-  if (segments.length <= size) return [segments]
+function planTimeline(segments: Segment[], transitionSecs: number, size: number): Plan {
   const chunks: Segment[][] = []
   let i = 0
   while (i < segments.length) {
     const end = Math.min(i + size, segments.length)
     const chunk = segments.slice(i, end).map((s) => ({ ...s }))
-
     const boundary = chunk[chunk.length - 1]
-    if (end < segments.length && boundary.kind === 'image') {
-      boundary.duration = boundary.duration / 2
-    }
+    if (end < segments.length && boundary.kind === 'image') boundary.duration /= 2
     if (i > 0) {
       const prev = segments[i - 1]
-      if (prev.kind === 'image') {
-        chunk.unshift({ ...prev, duration: prev.duration / 2 })
-      }
+      if (prev.kind === 'image') chunk.unshift({ ...prev, duration: prev.duration / 2 })
     }
     chunks.push(chunk)
     i = end
+    if (size >= segments.length) break
   }
-  return chunks
+
+  const clips: Plan['clips'] = []
+  let globalStart = 0
+  for (const chunk of chunks) {
+    let acc = chunk[0].duration
+    if (chunk[0].kind === 'video') {
+      clips.push({ file: chunk[0].file, start: globalStart, duration: chunk[0].duration })
+    }
+    for (let k = 1; k < chunk.length; k++) {
+      const t = transitionSecs > 0 ? effectiveT(transitionSecs, chunk[k].duration, acc) : 0
+      const startWithin = acc - t
+      if (chunk[k].kind === 'video') {
+        clips.push({ file: chunk[k].file, start: globalStart + startWithin, duration: chunk[k].duration })
+      }
+      acc = acc + chunk[k].duration - t
+    }
+    globalStart += acc
+  }
+
+  return { chunks, total: globalStart, clips }
 }
 
-/** Builds the ffmpeg argument list for one chunk. */
-function chunkArgs(chunk: Segment[], transitionSecs: number, outName: string): string[] {
+function chunkArgs(chunk: Segment[], transitionSecs: number, threads: number, outName: string): string[] {
   const args: string[] = []
-
   for (const s of chunk) {
     if (s.kind === 'image') args.push('-loop', '1', '-t', String(s.duration), '-i', s.file)
     else args.push('-t', String(s.duration), '-i', s.file)
   }
 
   const chains: string[] = []
-  // Normalise every input so xfade can join them: same size, pixel aspect and rate.
-  // Video clips are scaled to fit and padded rather than cropped.
   for (let i = 0; i < chunk.length; i++) {
     chains.push(
       `[${i}:v]scale=${W}:${H}:force_original_aspect_ratio=decrease,` +
@@ -411,34 +436,25 @@ function chunkArgs(chunk: Segment[], transitionSecs: number, outName: string): s
     let acc = chunk[0].duration
     let cur = 'v0'
     for (let i = 1; i < chunk.length; i++) {
-      // xfade can only overlap as far as the shorter side allows
-      const t = Math.min(transitionSecs, chunk[i].duration / 2, acc / 2)
+      const t = effectiveT(transitionSecs, chunk[i].duration, acc)
       const offset = Math.max(0, Number((acc - t).toFixed(3)))
-      const out = `x${i}`
-      chains.push(`[${cur}][v${i}]xfade=transition=fade:duration=${t}:offset=${offset}[${out}]`)
+      chains.push(`[${cur}][v${i}]xfade=transition=fade:duration=${t}:offset=${offset}[x${i}]`)
       acc = acc + chunk[i].duration - t
-      cur = out
+      cur = `x${i}`
     }
     vout = cur
   } else if (chunk.length > 1) {
-    chains.push(
-      chunk.map((_, i) => `[v${i}]`).join('') + `concat=n=${chunk.length}:v=1:a=0[vcat]`,
-    )
+    chains.push(chunk.map((_, i) => `[v${i}]`).join('') + `concat=n=${chunk.length}:v=1:a=0[vcat]`)
     vout = 'vcat'
   } else {
     vout = 'v0'
   }
 
   args.push('-filter_complex', chains.join(';'), '-map', `[${vout}]`)
+  if (threads > 1) args.push('-threads', String(threads))
   args.push(
-    '-c:v', 'libx264',
-    '-preset', 'veryfast',
-    '-crf', '20',
-    '-pix_fmt', 'yuv420p',
-    '-r', String(FPS),
-    '-g', String(FPS),   // keyframe every second, so chunk joins line up cleanly
-    '-an',
-    outName,
+    '-c:v', 'libx264', '-preset', 'veryfast', '-crf', '20',
+    '-pix_fmt', 'yuv420p', '-r', String(FPS), '-g', String(FPS), '-an', outName,
   )
   return args
 }
@@ -451,15 +467,6 @@ export function useTributeVideo() {
   const progressLabel = ref('')
   const error         = ref('')
 
-  /**
-   * Renders the tribute and returns the finished file.
-   *
-   * It no longer downloads the video itself — the caller decides what to do with
-   * it. That is what lets the purchase flow render BEFORE taking payment, so
-   * nobody is charged for a video that failed to build.
-   *
-   * Returns null if anything went wrong; `error` holds the message.
-   */
   async function generateTribute(options: TributeOptions): Promise<TributeResult | null> {
     isGenerating.value  = true
     progress.value      = 0
@@ -475,12 +482,29 @@ export function useTributeVideo() {
 
       ffmpeg = new FFmpeg()
 
+      /*
+       * Multi-threaded core when the page is cross-origin isolated, which needs
+       * COOP/COEP headers on this route (see vercel.json). x264 scales well
+       * across cores, and threading is the only change that materially moves
+       * render time — filter and preset tweaks were measured and don't.
+       * Falls back silently to the single-threaded core everywhere else,
+       * including Safari, which has no COEP: credentialless.
+       */
+      const isolated = typeof crossOriginIsolated !== 'undefined' && crossOriginIsolated === true
+      const cores = typeof navigator !== 'undefined' ? (navigator.hardwareConcurrency || 2) : 2
+      const threads = isolated ? Math.max(1, Math.min(8, cores - 1)) : 1
+
       progressLabel.value = 'Loading video engine…'
-      const baseURL = 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/esm'
-      await ffmpeg.load({
+      const pkg = isolated ? '@ffmpeg/core-mt' : '@ffmpeg/core'
+      const baseURL = `https://unpkg.com/${pkg}@0.12.6/dist/esm`
+      const loadCfg: Record<string, string> = {
         coreURL: await toBlobURL(`${baseURL}/ffmpeg-core.js`, 'text/javascript'),
         wasmURL: await toBlobURL(`${baseURL}/ffmpeg-core.wasm`, 'application/wasm'),
-      })
+      }
+      if (isolated) {
+        loadCfg.workerURL = await toBlobURL(`${baseURL}/ffmpeg-core.worker.js`, 'text/javascript')
+      }
+      await ffmpeg.load(loadCfg)
 
       const canvas = document.createElement('canvas')
       canvas.width = W
@@ -491,32 +515,42 @@ export function useTributeVideo() {
         await ffmpeg.writeFile(name, data)
         written.push(name)
       }
-
       const canvasToFile = async (name: string) => {
         const blob: Blob = await new Promise((r) => canvas.toBlob((b) => r(b!), 'image/png'))
         await write(name, new Uint8Array(await blob.arrayBuffer()))
       }
 
-      // ── Gather media ────────────────────────────────────────────────────────
+      // ── Gather and validate media ───────────────────────────────────────────
       const mediaItems: TributeMediaItem[] = options.media?.length
         ? options.media
         : options.photos.map((src) => ({ type: 'photo' as const, src }))
 
-      const photoItems = mediaItems.filter((m) => m.type === 'photo' && m.src)
-      if (photoItems.length === 0) throw new Error('Add at least one photo before creating your tribute.')
-
       progressLabel.value = 'Loading photos…'
       progress.value = 4
 
-      const imageCache = new Map<string, HTMLImageElement | null>()
-      for (const item of photoItems) {
-        if (item.src && !imageCache.has(item.src)) {
-          imageCache.set(item.src, await loadImageFromUrl(item.src))
-        }
+      const imageCache = new Map<string, HTMLImageElement>()
+      let skipped = 0
+      for (const item of mediaItems) {
+        if (item.type !== 'photo' || !item.src || imageCache.has(item.src)) continue
+        const img = await loadImageFromUrl(item.src)
+        if (isUsable(img)) imageCache.set(item.src, img)
+        else skipped++
       }
-      const firstPhotoImg = photoItems[0]?.src ? imageCache.get(photoItems[0].src!) ?? null : null
 
-      // ── Render each slide ONCE ──────────────────────────────────────────────
+      // A photo that won't decode used to render as a blank white card — and
+      // because the render "succeeded", the customer was still charged for it.
+      if (imageCache.size === 0) {
+        throw new Error(
+          skipped > 0
+            ? "None of those photos could be read. Please remove them and upload different ones."
+            : 'Add at least one photo before creating your tribute.',
+        )
+      }
+
+      const usablePhotos = mediaItems.filter((m) => m.type === 'photo' && m.src && imageCache.has(m.src))
+      const firstPhotoImg = usablePhotos[0]?.src ? imageCache.get(usablePhotos[0].src!) ?? null : null
+
+      // ── Render each slide once ──────────────────────────────────────────────
       progressLabel.value = 'Rendering slides…'
 
       const segments: Segment[] = []
@@ -536,7 +570,7 @@ export function useTributeVideo() {
       let photoNo = 0
       for (let i = 0; i < mediaItems.length; i++) {
         const item = mediaItems[i]
-        progress.value = 4 + Math.round((i / mediaItems.length) * 26)
+        progress.value = 4 + Math.round((i / Math.max(1, mediaItems.length)) * 24)
         progressLabel.value = `Rendering slide ${i + 1} of ${mediaItems.length}…`
 
         if (item.type === 'photo' && item.src) {
@@ -544,10 +578,7 @@ export function useTributeVideo() {
           if (img) {
             photoNo++
             const n = photoNo
-            await pushImage(
-              () => drawPhotoSlide(ctx, img, options, n, photoItems.length),
-              slideSecs,
-            )
+            await pushImage(() => drawPhotoSlide(ctx, img, options, n, usablePhotos.length), slideSecs)
           }
         } else if (item.type === 'video' && item.file) {
           const duration = await probeVideoDuration(item.file)
@@ -555,8 +586,9 @@ export function useTributeVideo() {
             const name = `c${String(fileNo++).padStart(3, '0')}.mp4`
             await write(name, await fetchFile(item.file))
             segments.push({ kind: 'video', file: name, duration })
+          } else {
+            skipped++
           }
-          // A clip we can't read is skipped rather than stalling the render.
         }
 
         if (i === halfway - 1 && options.tribute.trim()) {
@@ -566,73 +598,107 @@ export function useTributeVideo() {
 
       await pushImage(() => drawClosingSlide(ctx, options, firstPhotoImg), slideSecs)
 
-      // ── Encode in chunks ────────────────────────────────────────────────────
+      // ── Plan and encode ─────────────────────────────────────────────────────
       const transitionSecs = options.transition === 'cut' ? 0
-        : options.transition === 'fade' ? 1
-        : 2
+        : options.transition === 'fade' ? 1 : 2
 
-      const chunks = planChunks(segments, CHUNK_SIZE)
+      const plan = planTimeline(segments, transitionSecs, CHUNK_SIZE)
       const chunkFiles: string[] = []
 
+      /*
+       * ffmpeg.wasm reports garbage progress for looped-image inputs — it has
+       * no real duration to measure against, and Mark saw -216004650%. Chunk
+       * completion is the trustworthy signal; ffmpeg's number only moves
+       * within the band owned by the chunk currently encoding, and only when
+       * it's a sane fraction.
+       */
+      const ENCODE_FROM = 30
+      const ENCODE_TO   = 90
       ffmpeg.on('progress', ({ progress: p }: { progress: number }) => {
-        // ffmpeg reports 0..1 per invocation; map it inside the current chunk's band.
-        const band = 60 / chunks.length
-        const base = 30 + band * chunkFiles.length
-        progress.value = Math.min(92, Math.round(base + p * band))
+        const band = (ENCODE_TO - ENCODE_FROM) / plan.chunks.length
+        const base = ENCODE_FROM + band * chunkFiles.length
+        const frac = Number.isFinite(p) && p >= 0 && p <= 1 ? p : 0
+        const next = Math.round(base + frac * band)
+        progress.value = Math.max(progress.value, Math.min(ENCODE_TO, next))
       })
 
-      for (let c = 0; c < chunks.length; c++) {
-        progressLabel.value = chunks.length > 1
-          ? `Encoding part ${c + 1} of ${chunks.length}…`
+      for (let c = 0; c < plan.chunks.length; c++) {
+        progressLabel.value = plan.chunks.length > 1
+          ? `Encoding part ${c + 1} of ${plan.chunks.length}…`
           : 'Encoding your tribute…'
+        progress.value = Math.max(progress.value, Math.round(ENCODE_FROM + ((ENCODE_TO - ENCODE_FROM) / plan.chunks.length) * c))
         const out = `part${c}.mp4`
-        await ffmpeg.exec(chunkArgs(chunks[c], transitionSecs, out))
+        await ffmpeg.exec(chunkArgs(plan.chunks[c], transitionSecs, threads, out))
         written.push(out)
         chunkFiles.push(out)
       }
 
-      // ── Join, and add music ─────────────────────────────────────────────────
-      progress.value = 92
+      // ── Join, mix the audio ─────────────────────────────────────────────────
+      progress.value = 91
       progressLabel.value = 'Adding music…'
-
-      const totalDuration = segments.reduce((t, s) => t + s.duration, 0)
-        - (transitionSecs > 0 ? Math.max(0, segments.length - 1) * transitionSecs : 0)
 
       let musicFile: File | null = options.musicFile
       if (options.musicTrack !== 'custom' && options.musicTrack !== 'silent' && !musicFile) {
         try {
           const res = await fetch(`/audio/${options.musicTrack}.mp3`)
-          if (res.ok) {
-            musicFile = new File([await res.blob()], 'music.mp3', { type: 'audio/mp3' })
-          }
-        } catch {
-          // Music is a nice-to-have; a missing track must not fail the render.
-        }
+          if (res.ok) musicFile = new File([await res.blob()], 'music.mp3', { type: 'audio/mp3' })
+        } catch { /* music is optional — never fail the render over it */ }
       }
       const hasMusic = musicFile !== null && options.musicTrack !== 'silent'
+      const total = plan.total
 
-      const listName = 'parts.txt'
-      await write(listName, new TextEncoder().encode(
+      await write('parts.txt', new TextEncoder().encode(
         chunkFiles.map((f) => `file '${f}'`).join('\n') + '\n',
       ))
 
-      const finalArgs = ['-f', 'concat', '-safe', '0', '-i', listName]
+      const args = ['-f', 'concat', '-safe', '0', '-i', 'parts.txt']
+      const chains: string[] = []
+      const mixInputs: string[] = []
+      let inputNo = 1
+
       if (hasMusic && musicFile) {
         await write('music.mp3', await fetchFile(musicFile))
-        finalArgs.push('-stream_loop', '-1', '-i', 'music.mp3')
-        finalArgs.push(
-          '-filter_complex',
-          `[1:a]atrim=duration=${totalDuration.toFixed(3)},` +
-          `afade=t=out:st=${Math.max(0, totalDuration - 3).toFixed(3)}:d=3[aout]`,
+        args.push('-stream_loop', '-1', '-i', 'music.mp3')
+        const musicIdx = inputNo++
+        // Duck the music under each clip so the clip's own sound carries.
+        const duckCond = plan.clips.length
+          ? plan.clips.map((c) => `between(t,${c.start.toFixed(2)},${(c.start + c.duration).toFixed(2)})`).join('+')
+          : ''
+        const vol = duckCond ? `volume='if(${duckCond},${MUSIC_DUCK},1)':eval=frame,` : ''
+        chains.push(
+          `[${musicIdx}:a]atrim=duration=${total.toFixed(3)},${vol}` +
+          `afade=t=out:st=${Math.max(0, total - 3).toFixed(3)}:d=3[mus]`,
         )
-        finalArgs.push('-map', '0:v', '-map', '[aout]', '-c:a', 'aac', '-b:a', '160k')
-      } else {
-        finalArgs.push('-map', '0:v')
+        mixInputs.push('[mus]')
       }
-      // The chunks are already encoded correctly — copy rather than re-encode.
-      finalArgs.push('-c:v', 'copy', '-movflags', '+faststart', 'output.mp4')
 
-      await ffmpeg.exec(finalArgs)
+      // Each clip's own audio, placed where the clip sits in the finished video.
+      plan.clips.forEach((clip, n) => {
+        args.push('-i', clip.file)
+        const idx = inputNo++
+        const ms = Math.round(clip.start * 1000)
+        chains.push(
+          `[${idx}:a]atrim=duration=${clip.duration.toFixed(3)},` +
+          `adelay=${ms}|${ms},apad=whole_dur=${total.toFixed(3)}[cl${n}]`,
+        )
+        mixInputs.push(`[cl${n}]`)
+      })
+
+      if (mixInputs.length === 1) {
+        chains.push(`${mixInputs[0]}anull[aout]`)
+      } else if (mixInputs.length > 1) {
+        chains.push(`${mixInputs.join('')}amix=inputs=${mixInputs.length}:normalize=0:duration=first[aout]`)
+      }
+
+      if (mixInputs.length) {
+        args.push('-filter_complex', chains.join(';'), '-map', '0:v', '-map', '[aout]',
+                  '-c:a', 'aac', '-b:a', '160k')
+      } else {
+        args.push('-map', '0:v')
+      }
+      args.push('-c:v', 'copy', '-movflags', '+faststart', 'output.mp4')
+
+      await ffmpeg.exec(args)
       written.push('output.mp4')
 
       // ── Read it back ────────────────────────────────────────────────────────
@@ -644,7 +710,6 @@ export function useTributeVideo() {
       const copy = new Uint8Array(bytes.byteLength)
       copy.set(bytes)
       const blob = new Blob([copy], { type: 'video/mp4' })
-
       if (blob.size < 1024) throw new Error('The video came out empty. Please try again with fewer photos.')
 
       const safeName = options.name.trim().replace(/\s+/g, '-').replace(/[^a-zA-Z0-9-]/g, '') || 'tribute'
@@ -653,7 +718,9 @@ export function useTributeVideo() {
         : `${safeName}-tribute.mp4`
 
       progress.value = 100
-      progressLabel.value = 'Your tribute is ready.'
+      progressLabel.value = skipped > 0
+        ? `Your tribute is ready. ${skipped} file${skipped > 1 ? 's' : ''} couldn't be read and ${skipped > 1 ? 'were' : 'was'} left out.`
+        : 'Your tribute is ready.'
 
       return { blob, filename }
 
@@ -665,20 +732,16 @@ export function useTributeVideo() {
       return null
 
     } finally {
-      // Always clear the virtual filesystem, success or failure.
       if (ffmpeg) {
-        for (const name of written) {
-          await ffmpeg.deleteFile(name).catch(() => null)
-        }
+        for (const name of written) await ffmpeg.deleteFile(name).catch(() => null)
       }
       isGenerating.value = false
       setTimeout(() => {
         if (!isGenerating.value) { progress.value = 0; progressLabel.value = '' }
-      }, 4000)
+      }, 6000)
     }
   }
 
-  /** Saves a finished tribute to the user's device. */
   function downloadTribute(result: TributeResult) {
     const url = URL.createObjectURL(result.blob)
     const a = document.createElement('a')
@@ -690,7 +753,6 @@ export function useTributeVideo() {
     setTimeout(() => URL.revokeObjectURL(url), 10000)
   }
 
-  /** Rough finished length, used for the estimate shown in the builder. */
   function estimateSeconds(
     mediaCount: number,
     slideDuration: number,
@@ -710,6 +772,8 @@ export function useTributeVideo() {
     generateTribute,
     downloadTribute,
     estimateSeconds,
+    MAX_PHOTOS,
+    MAX_VIDEOS,
     MUSIC_TRACKS,
   }
 }

@@ -102,14 +102,15 @@
       <p class="upload-text">Drop photos or videos here</p>
       <p class="upload-hint">or choose what to add:</p>
       <div class="upload-btn-row">
-        <label class="upload-type-btn">
-          📷 Add photos
+        <label class="upload-type-btn" :class="photoCount >= MAX_PHOTOS ? 'upload-type-btn-disabled' : ''">
+          📷 Add photos {{ photoCount > 0 ? `(${photoCount}/${MAX_PHOTOS})` : '' }}
           <input
             ref="fileInputRef"
             type="file"
             accept="image/*"
             multiple
             class="hidden"
+            :disabled="photoCount >= MAX_PHOTOS"
             @change="onFileSelect"
           />
         </label>
@@ -591,8 +592,9 @@ async function handleFreeDownload() {
 }
 
 // ── Form ──────────────────────────────────────────────────────────────────────
+const MAX_PHOTOS = 30
 const MAX_VIDEOS = 5
-const MAX_MEDIA  = 35 // 30 photos + 5 videos
+const MAX_MEDIA  = MAX_PHOTOS + MAX_VIDEOS
 
 const form = ref({
   name:          '',
@@ -751,52 +753,75 @@ function onStorageChange(event: StorageEvent) {
 // ── Photos ────────────────────────────────────────────────────────────────────
 
 
+/*
+  Reads one image, checks it actually decodes, and adds it.
+
+  The old version fired off FileReader callbacks in a loop and tried to guard
+  the cap inside each callback, which is why 32 photos could get in past a
+  limit of 30 — the reads finished out of order. Awaiting each one makes the
+  count exact.
+
+  It also validates the image. A file that doesn't decode used to sail through
+  and render as a blank white card in the finished video, and because the
+  render "succeeded" the customer was still charged.
+*/
+function readPhoto(file: File): Promise<string | null> {
+  return new Promise((resolve) => {
+    const reader = new FileReader()
+    reader.onerror = () => resolve(null)
+    reader.onload = (e) => {
+      const src = e.target?.result as string
+      if (!src) return resolve(null)
+      const img = new Image()
+      img.onload  = () => resolve(img.naturalWidth > 0 && img.naturalHeight > 0 ? src : null)
+      img.onerror = () => resolve(null)
+      img.src = src
+    }
+    reader.readAsDataURL(file)
+  })
+}
+
+async function addPhotoFiles(files: File[]) {
+  let rejected = 0
+  let hitCap = false
+
+  for (const file of files) {
+    if (photoCount.value >= MAX_PHOTOS || form.value.media.length >= MAX_MEDIA) { hitCap = true; break }
+    const src = await readPhoto(file)
+    if (!src) { rejected++; continue }
+    form.value.media.push({ type: 'photo', src })
+    form.value.photos.push(src)
+  }
+
+  if (hitCap)   alert(`You can add up to ${MAX_PHOTOS} photos and ${MAX_VIDEOS} video clips.`)
+  if (rejected) alert(`${rejected} file${rejected > 1 ? "s couldn't be read and were" : " couldn't be read and was"} skipped.`)
+}
+
 async function onFileSelect(event: Event) {
   const input = event.target as HTMLInputElement
   if (!input.files) return
   const files = Array.from(input.files)
-  
-  for (const file of files) {
-    // Check BEFORE queuing the read
-    if (form.value.media.length >= MAX_MEDIA) {
-      alert(`Maximum ${MAX_MEDIA} photos and videos allowed`)
-      break
-    }
-    
-    const reader = new FileReader()
-    reader.onload = (e) => {
-      // Double check inside callback in case multiple reads complete
-      if (form.value.media.length >= MAX_MEDIA) return
-      const src = e.target?.result as string
-      form.value.media.push({ type: 'photo', src })
-      form.value.photos.push(src)
-    }
-    reader.readAsDataURL(file)
-  }
   input.value = ''
+  await addPhotoFiles(files)
 }
 
 
 
-function onDrop(event: DragEvent) {
+async function onDrop(event: DragEvent) {
   isDragging.value = false
   const files = Array.from(event.dataTransfer?.files || [])
-  for (const file of files) {
-    if (form.value.media.length >= MAX_MEDIA) break  // ← check before queuing
-    if (file.type.startsWith('image/')) {
-      const reader = new FileReader()
-      reader.onload = (e) => {
-        if (form.value.media.length >= MAX_MEDIA) return  // ← double check
-        const src = e.target?.result as string
-        form.value.media.push({ type: 'photo', src })
-        form.value.photos.push(src)
-      }
-      reader.readAsDataURL(file)
-    } else if (file.type.startsWith('video/') && videoCount.value < MAX_VIDEOS) {
-      if (form.value.media.length >= MAX_MEDIA) break
-      form.value.media.push({ type: 'video', file, previewUrl: URL.createObjectURL(file) })
+
+  const videos = files.filter((f) => f.type.startsWith('video/'))
+  for (const file of videos) {
+    if (videoCount.value >= MAX_VIDEOS || form.value.media.length >= MAX_MEDIA) break
+    if (file.size > 200 * 1024 * 1024) {
+      alert(`${file.name} is too large — maximum 200MB per video clip`)
+      continue
     }
+    form.value.media.push({ type: 'video', file, previewUrl: URL.createObjectURL(file) })
   }
+
+  await addPhotoFiles(files.filter((f) => f.type.startsWith('image/')))
 }
 
 function onVideoSelect(event: Event) {
