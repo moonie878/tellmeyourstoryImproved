@@ -43,7 +43,11 @@ type AnalyticsEvent =
    | 'story_type_selected'
    | 'print_preview_opened'
    | 'storyteller_modal_opened'
-
+   | 'tribute_preview_succeeded'
+   | 'tribute_preview_failed'
+   | 'tribute_render_failed_before_payment'
+   | 'tribute_render_succeeded_before_payment'
+   | 'tribute_payment_cancelled'
 
 type AnalyticsValue =
   | string

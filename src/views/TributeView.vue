@@ -305,7 +305,11 @@
               <span class="progress-label">{{ progressLabel }}</span>
               <span class="progress-pct">{{ progress }}%</span>
             </div>
-            <p class="progress-note">This takes a few minutes — please keep this window open 💛</p>
+            <p class="progress-note">
+              {{ isBuildingForPurchase
+                ? 'Making your video first — you only pay once it\'s ready. Please keep this window open 💛'
+                : 'This takes a few minutes — please keep this window open 💛' }}
+            </p>
           </div>
 
           <p v-if="error" class="error-text">{{ error }}</p>
@@ -334,7 +338,7 @@
   </button>
 
   <button
-    @click="showingPaymentPending = false"
+    @click="cancelPayment"
     class="btn-back-link"
     style="margin-top: 12px; display: block;"
   >
@@ -364,7 +368,7 @@
     <p class="btn-sub-label">
       {{ isTier4 ? 'Included in your Full Collection plan ✦'
         : hasPaid ? 'Already purchased — re-generate free ✦'
-        : 'No watermark · Full HD · Keep forever' }}
+        : 'We make it first — you only pay once it\'s ready' }}
     </p>
   </div>
 </button>
@@ -423,7 +427,7 @@
 import { ref, computed, watch, nextTick, onMounted, onUnmounted } from 'vue'
 import { useTributeVideo, MUSIC_TRACKS } from '../composables/useTributeVideo'
 import TributePaymentModal from '../components/tribute/TributePaymentModal.vue'
-import type { TributeMusicTrack, TributeTransition, TributeSlideDuration, TributeOptions, TributeMediaItem } from '../composables/useTributeVideo'
+import type { TributeMusicTrack, TributeTransition, TributeSlideDuration, TributeOptions, TributeMediaItem, TributeResult } from '../composables/useTributeVideo'
 import { supabase } from '../lib/supabase'
 import { track } from '../lib/analytics'
 import { useSeo } from '../composables/useSeo'
@@ -520,6 +524,15 @@ const isTier4               = ref(false)
 const isVerifying = ref(false)
 const hasPaid = ref(false)
 
+/*
+  The clean video is now rendered BEFORE payment is taken and held here until
+  the payment clears. Previously Stripe was charged first and generation ran
+  afterwards, so a failed render meant somebody had paid £19.99 and received
+  nothing. No object URL is created for it until payment is confirmed.
+*/
+const pendingVideo = ref<TributeResult | null>(null)
+const isBuildingForPurchase = ref(false)
+
 
 // ── Audio preview ─────────────────────────────────────────────────────────────
 const playingTrack = ref<TributeMusicTrack | null>(null)
@@ -573,7 +586,8 @@ async function handleFreeDownload() {
   track('tribute_tier4_download', {
     photoCount: form.value.photos.length,
   })
-  await generateTribute(buildOptions(false))
+  const result = await generateTribute(buildOptions(false))
+  if (result) downloadTribute(result)
 }
 
 // ── Form ──────────────────────────────────────────────────────────────────────
@@ -617,7 +631,10 @@ const transitions = [
 ]
 
 // ── Composable ────────────────────────────────────────────────────────────────
-const { isGenerating, progress, progressLabel, error, generateTribute } = useTributeVideo()
+const {
+  isGenerating, progress, progressLabel, error,
+  generateTribute, downloadTribute, estimateSeconds,
+} = useTributeVideo()
 
 // ── Computed ─────────────────────────────────────────────────────────────────
 const wordCount = computed(() => {
@@ -625,10 +642,19 @@ const wordCount = computed(() => {
   return Math.min(words.length, 200)
 })
 
+/*
+  Counts media, not photos. The old version used form.photos, which excludes
+  video clips, so the estimate was wrong for anyone who added one. Transitions
+  also SHORTEN the video (slides overlap) rather than lengthening it — the old
+  maths added them on.
+*/
 const estimatedLength = computed(() => {
-  const slides = form.value.photos.length + 2 + (form.value.tribute.trim() ? 1 : 0)
-  const transitionSecs = form.value.transition === 'cut' ? 0 : form.value.transition === 'fade' ? 1 : 2
-  const totalSecs = slides * form.value.slideDuration + (slides - 1) * transitionSecs
+  const totalSecs = Math.round(estimateSeconds(
+    form.value.media.length,
+    form.value.slideDuration,
+    form.value.transition,
+    form.value.tribute.trim().length > 0,
+  ))
   const mins = Math.floor(totalSecs / 60)
   const secs = totalSecs % 60
   return mins > 0 ? `${mins}m ${secs}s` : `${secs}s`
@@ -856,14 +882,44 @@ async function handlePreview() {
     transition: form.value.transition,
     slideDuration: form.value.slideDuration,
   })
-  await generateTribute(buildOptions(true))
+  const result = await generateTribute(buildOptions(true))
+  track(result ? 'tribute_preview_succeeded' : 'tribute_preview_failed', {
+    photoCount: form.value.photos.length,
+    videoCount: videoCount.value,
+  })
+  if (result) downloadTribute(result)
 }
 
-function handlePurchase() {
+/*
+  Render first, charge second.
+
+  The video is built before the payment modal opens. If it fails, the person
+  sees the error and is never asked for money. If it succeeds we hold it in
+  memory and hand it over the moment Stripe confirms.
+*/
+async function handlePurchase() {
   if (!turnstileToken.value) { turnstileError.value = true; return }
-   track('tribute_purchase_clicked', {
+  track('tribute_purchase_clicked', {
     photoCount: form.value.photos.length,
     musicTrack: form.value.musicTrack,
+  })
+
+  isBuildingForPurchase.value = true
+  const result = await generateTribute(buildOptions(false))
+  isBuildingForPurchase.value = false
+
+  if (!result) {
+    track('tribute_render_failed_before_payment', {
+      photoCount: form.value.photos.length,
+      videoCount: videoCount.value,
+    })
+    return // generateTribute has already set `error`
+  }
+
+  pendingVideo.value = result
+  track('tribute_render_succeeded_before_payment', {
+    photoCount: form.value.photos.length,
+    videoCount: videoCount.value,
   })
   showPaymentModal.value = true
 }
@@ -878,6 +934,13 @@ function onPaymentOpened(url: string) {
 
 function reopenPayment() {
   if (lastPaymentUrl.value) window.open(lastPaymentUrl.value, '_blank')
+}
+
+/** Abandoning the purchase discards the unpaid clean video rather than leaving it in memory. */
+function cancelPayment() {
+  showingPaymentPending.value = false
+  pendingVideo.value = null
+  track('tribute_payment_cancelled')
 }
 
 async function verifyAndGenerate(sessionId: string) {
@@ -905,10 +968,20 @@ async function verifyAndGenerate(sessionId: string) {
       transition: form.value.transition,
     })
 
-     hasPaid.value = true
+    hasPaid.value = true
     isVerifying.value = false
     showingPaymentPending.value = false
-    await generateTribute(buildOptions(false))
+
+    // Normal path: the video was built before payment and is waiting.
+    if (pendingVideo.value) {
+      downloadTribute(pendingVideo.value)
+      pendingVideo.value = null
+      return
+    }
+
+    // Fallback, e.g. the page was reloaded between paying and returning.
+    const result = await generateTribute(buildOptions(false))
+    if (result) downloadTribute(result)
 
   } catch {
     error.value = 'Could not verify payment. Please try again.'

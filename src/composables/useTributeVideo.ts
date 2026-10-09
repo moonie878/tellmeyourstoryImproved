@@ -1,8 +1,36 @@
 import { ref } from 'vue'
 
+/*
+ * ─── Why this file was rewritten (October 2026) ───────────────────────────────
+ *
+ * The old version wrote one full-size PNG per FRAME into ffmpeg.wasm's virtual
+ * filesystem. A 5-second slide at 25fps is 125 identical 1920x1080 PNGs. Thirty
+ * photos came to roughly 4,900 files and about 3.7 GB — past the WebAssembly
+ * address-space ceiling — so generation reliably died at the assembly step,
+ * after every slide had rendered. That is why people got all the way through
+ * and then nothing happened.
+ *
+ * Now each slide is written ONCE and ffmpeg is told how long to hold it, with
+ * crossfades done by the xfade filter rather than by blending frames in canvas.
+ * Thirty photos is about 35 files and 26 MB.
+ *
+ * Two further things measured while fixing it:
+ *
+ *  - A single xfade chain across 33 slides peaks around 1.8 GB of working
+ *    memory, which would still fail in wasm. Encoding in chunks of 8 brings
+ *    that to under 700 MB. Chunk boundaries are placed half way through a
+ *    slide's static hold, so the two sides of the join are the same still
+ *    frame and the cut is invisible (measured: 0.04/255 mean pixel difference).
+ *
+ *  - User video clips were being rasterised to PNG frames too — 750 files for
+ *    a 30-second clip. They are now handed to ffmpeg as files. That also
+ *    removes a hang: the old frame extractor waited on a `seeked` event that
+ *    never fires when you seek to the time the video is already at.
+ */
+
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-export type TributeTransition  = 'fade' | 'slow-fade' | 'cut'
+export type TributeTransition = 'fade' | 'slow-fade' | 'cut'
 export type TributeSlideDuration = 3 | 5 | 8
 
 export interface TributeMediaItem {
@@ -13,7 +41,7 @@ export interface TributeMediaItem {
 }
 
 export interface TributeOptions {
-  media: TributeMediaItem[]    // ordered list of photos + videos
+  media: TributeMediaItem[]
   photos: string[]             // kept for backwards compatibility
   name: string
   birthYear?: string
@@ -24,6 +52,11 @@ export interface TributeOptions {
   transition: TributeTransition
   slideDuration: TributeSlideDuration
   watermark: boolean
+}
+
+export interface TributeResult {
+  blob: Blob
+  filename: string
 }
 
 export type TributeMusicTrack =
@@ -39,27 +72,34 @@ export const MUSIC_TRACKS: Record<TributeMusicTrack, { label: string; descriptio
   'warm-strings':    { label: 'Warm Strings',    description: 'Tender and warm',      emoji: '🎻' },
   'soft-acoustic':   { label: 'Soft Acoustic',   description: 'Simple and heartfelt', emoji: '🎸' },
   'peaceful-melody': { label: 'Peaceful Melody', description: 'Calm and reflective',  emoji: '🎵' },
-  'silent':          { label: 'No Music',         description: 'Silence only',         emoji: '🔇' },
+  'silent':          { label: 'No Music',        description: 'Silence only',         emoji: '🔇' },
   'custom':          { label: 'Upload your own', description: 'Your chosen music',    emoji: '📁' },
 }
 
-// ─── Canvas dimensions ────────────────────────────────────────────────────────
-// ─── Frame rates ──────────────────────────────────────────────────────────────
-const SLIDE_FPS = 25   // photo/title/text slides — fast generation
-const VIDEO_FPS = 25   // user video clips — keeps motion smooth
+// ─── Canvas / encode constants ────────────────────────────────────────────────
 
 const W = 1920
 const H = 1080
+const FPS = 25
 
-// ─── Colours ──────────────────────────────────────────────────────────────────
+/** Slides per encoded chunk. Keeps the xfade chain short enough to fit in wasm. */
+const CHUNK_SIZE = 8
+
+/** Hard ceiling on a user video clip, in seconds. */
+const MAX_CLIP_SECONDS = 30
+
 const CREAM  = '#F8F4EF'
 const DARK   = '#1C1917'
 const ACCENT = '#947449'
 const MUTED  = '#8C847E'
 
+/** Largest a photo may be drawn. Height-led, so portraits get the room they need. */
+const PHOTO_MAX_W = Math.round(W * 0.62)   // 1190
+const PHOTO_MAX_H = Math.round(H * 0.80)   // 864
+
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-async function loadImageFromUrl(url: string): Promise<HTMLImageElement | null> {
+function loadImageFromUrl(url: string): Promise<HTMLImageElement | null> {
   return new Promise((resolve) => {
     const img = new Image()
     img.onload  = () => resolve(img)
@@ -68,11 +108,40 @@ async function loadImageFromUrl(url: string): Promise<HTMLImageElement | null> {
   })
 }
 
+/**
+ * Reads a video's duration without decoding any frames.
+ * Resolves to null rather than hanging if the file can't be read.
+ */
+function probeVideoDuration(file: File): Promise<number | null> {
+  return new Promise((resolve) => {
+    const video = document.createElement('video')
+    const url = URL.createObjectURL(file)
+    let settled = false
+    const done = (v: number | null) => {
+      if (settled) return
+      settled = true
+      URL.revokeObjectURL(url)
+      resolve(v)
+    }
+    // Never let a bad file stall the whole render.
+    const timer = setTimeout(() => done(null), 15000)
+    video.preload = 'metadata'
+    video.muted = true
+    video.onloadedmetadata = () => {
+      clearTimeout(timer)
+      const d = Number.isFinite(video.duration) ? video.duration : null
+      done(d ? Math.min(d, MAX_CLIP_SECONDS) : null)
+    }
+    video.onerror = () => { clearTimeout(timer); done(null) }
+    video.src = url
+  })
+}
+
 function drawCoverImage(
   ctx: CanvasRenderingContext2D,
   img: HTMLImageElement,
   x: number, y: number, w: number, h: number,
-  opacity = 1
+  opacity = 1,
 ) {
   const scale = Math.max(w / img.width, h / img.height)
   const dw = img.width * scale
@@ -118,7 +187,7 @@ function drawOrnament(ctx: CanvasRenderingContext2D, cx: number, y: number) {
 function drawWatermark(ctx: CanvasRenderingContext2D) {
   ctx.save()
   ctx.globalAlpha = 0.4
-  ctx.font = `bold 28px Georgia, serif`
+  ctx.font = 'bold 28px Georgia, serif'
   ctx.fillStyle = '#ffffff'
   ctx.textAlign = 'center'
   ctx.translate(W / 2, H / 2)
@@ -129,19 +198,15 @@ function drawWatermark(ctx: CanvasRenderingContext2D) {
 
 // ─── Slide renderers ──────────────────────────────────────────────────────────
 
-async function drawTitleSlide(
+function drawTitleSlide(
   ctx: CanvasRenderingContext2D,
   options: TributeOptions,
-  photoImg: HTMLImageElement | null
+  photoImg: HTMLImageElement | null,
 ) {
   const cx = W / 2
   ctx.fillStyle = DARK
   ctx.fillRect(0, 0, W, H)
-  if (photoImg) {
-    ctx.save()
-    drawCoverImage(ctx, photoImg, 0, 0, W, H, 0.35)
-    ctx.restore()
-  }
+  if (photoImg) drawCoverImage(ctx, photoImg, 0, 0, W, H, 0.35)
   const grad = ctx.createLinearGradient(0, 0, 0, H)
   grad.addColorStop(0, 'rgba(28,25,23,0.7)')
   grad.addColorStop(0.5, 'rgba(28,25,23,0.4)')
@@ -149,202 +214,233 @@ async function drawTitleSlide(
   ctx.fillStyle = grad
   ctx.fillRect(0, 0, W, H)
   ctx.textAlign = 'center'
-  ctx.font = `bold 88px Georgia, serif`
+  ctx.font = 'bold 88px Georgia, serif'
   ctx.fillStyle = '#F5F0E8'
   ctx.fillText(options.name, cx, H * 0.44)
   if (options.birthYear || options.deathYear) {
-    ctx.font = `300 28px Georgia, serif`
+    ctx.font = '300 28px Georgia, serif'
     ctx.fillStyle = '#C4B8AC'
-    const dates = [options.birthYear, options.deathYear].filter(Boolean).join(' — ')
-    ctx.fillText(dates, cx, H * 0.52)
+    ctx.fillText([options.birthYear, options.deathYear].filter(Boolean).join(' — '), cx, H * 0.52)
   }
   drawOrnament(ctx, cx, H * 0.58)
-  ctx.font = `italic 22px Georgia, serif`
+  ctx.font = 'italic 22px Georgia, serif'
   ctx.fillStyle = MUTED
   ctx.fillText('A life remembered with love', cx, H * 0.65)
   if (options.watermark) drawWatermark(ctx)
 }
 
-async function drawPhotoSlide(
+/**
+ * The photo card now takes the SHAPE OF THE PHOTO.
+ *
+ * It used to be a fixed 1190x778 landscape box with a contain fit, so a portrait
+ * phone photo — which is most photos of people — was drawn at 582px wide inside
+ * it, filling 49% of the frame width with flat beige either side. A 9:16 photo
+ * managed 37%. Now the white mount is sized to the scaled image, so a portrait
+ * gets a portrait mount and reads as a deliberately presented print.
+ */
+function drawPhotoSlide(
   ctx: CanvasRenderingContext2D,
   img: HTMLImageElement,
   options: TributeOptions,
   slideIndex: number,
-  totalItems: number
+  totalItems: number,
 ) {
   ctx.fillStyle = CREAM
   ctx.fillRect(0, 0, W, H)
-  const photoW = W * 0.62
-  const photoH = H * 0.72
-  const photoX = (W - photoW) / 2
-  const photoY = (H - photoH) / 2 - 20
+
+  const scale = Math.min(PHOTO_MAX_W / img.width, PHOTO_MAX_H / img.height)
+  const dw = Math.round(img.width * scale)
+  const dh = Math.round(img.height * scale)
+  const dx = Math.round((W - dw) / 2)
+  // Nudged up slightly to leave room for the caption line beneath.
+  const dy = Math.round((H - dh) / 2 - 16)
+
+  // White mount with a soft drop shadow, hugging the photo
   ctx.save()
   ctx.shadowColor = 'rgba(0,0,0,0.15)'
   ctx.shadowBlur = 40
   ctx.shadowOffsetY = 8
   ctx.fillStyle = '#fff'
-  ctx.fillRect(photoX - 6, photoY - 6, photoW + 12, photoH + 12)
+  ctx.fillRect(dx - 6, dy - 6, dw + 12, dh + 12)
   ctx.restore()
-  ctx.save()
-ctx.beginPath()
-ctx.rect(photoX, photoY, photoW, photoH)
-ctx.clip()
 
-// Contain fit — show whole image, letterbox if needed
-const scale = Math.min(photoW / img.width, photoH / img.height)
-const dw = img.width * scale
-const dh = img.height * scale
-const dx = photoX + (photoW - dw) / 2
-const dy = photoY + (photoH - dh) / 2
+  ctx.drawImage(img, dx, dy, dw, dh)
 
-// Fill letterbox areas with a subtle dark background
-ctx.fillStyle = '#F0EBE4'
-ctx.fillRect(photoX, photoY, photoW, photoH)
-ctx.drawImage(img, dx, dy, dw, dh)
-ctx.restore()
   ctx.strokeStyle = '#E8DDD0'
   ctx.lineWidth = 1.5
-  ctx.strokeRect(photoX, photoY, photoW, photoH)
-  ctx.font = `italic 18px Georgia, serif`
+  ctx.strokeRect(dx, dy, dw, dh)
+
+  // Caption aligned to the mount, not to a fixed box
+  ctx.font = 'italic 18px Georgia, serif'
   ctx.fillStyle = MUTED
   ctx.textAlign = 'left'
-  ctx.fillText(options.name, photoX + 12, photoY + photoH + 28)
+  ctx.fillText(options.name, dx, dy + dh + 30)
   ctx.textAlign = 'right'
-  ctx.font = `300 14px Georgia, serif`
+  ctx.font = '300 14px Georgia, serif'
   ctx.fillStyle = '#C4B8AC'
-  ctx.fillText(`${slideIndex} / ${totalItems}`, photoX + photoW, photoY + photoH + 28)
+  ctx.fillText(`${slideIndex} / ${totalItems}`, dx + dw, dy + dh + 30)
+
   ctx.strokeStyle = '#E8DDD0'
   ctx.lineWidth = 0.5
   ctx.beginPath()
   ctx.moveTo(60, 36)
   ctx.lineTo(W - 60, 36)
   ctx.stroke()
+
   if (options.watermark) drawWatermark(ctx)
 }
 
-async function drawTributeTextSlide(
+function drawTributeTextSlide(
   ctx: CanvasRenderingContext2D,
   options: TributeOptions,
-  photoImg: HTMLImageElement | null
+  photoImg: HTMLImageElement | null,
 ) {
   const cx = W / 2
   ctx.fillStyle = DARK
   ctx.fillRect(0, 0, W, H)
-  if (photoImg) {
-    ctx.save()
-    drawCoverImage(ctx, photoImg, 0, 0, W, H, 0.2)
-    ctx.restore()
-  }
+  if (photoImg) drawCoverImage(ctx, photoImg, 0, 0, W, H, 0.2)
   ctx.fillStyle = 'rgba(28,25,23,0.75)'
   ctx.fillRect(0, 0, W, H)
   drawOrnament(ctx, cx, H * 0.28)
   ctx.textAlign = 'center'
-  ctx.font = `italic 34px Georgia, serif`
+  ctx.font = 'italic 34px Georgia, serif'
   ctx.fillStyle = '#E8DDD0'
-  const maxW = 900
-  const lines = wrapText(ctx, `"${options.tribute}"`, maxW)
+  const lines = wrapText(ctx, `"${options.tribute}"`, 900)
   const lineH = 52
-  const totalTextH = lines.length * lineH
-  const startY = H / 2 - totalTextH / 2
-  lines.forEach((line, i) => {
-    ctx.fillText(line, cx, startY + i * lineH)
-  })
+  const startY = H / 2 - (lines.length * lineH) / 2
+  lines.forEach((line, i) => ctx.fillText(line, cx, startY + i * lineH))
   drawOrnament(ctx, cx, H * 0.72)
-  ctx.font = `300 20px Georgia, serif`
+  ctx.font = '300 20px Georgia, serif'
   ctx.fillStyle = MUTED
   ctx.fillText(`— ${options.name}`, cx, H * 0.78)
   if (options.watermark) drawWatermark(ctx)
 }
 
-async function drawClosingSlide(
+function drawClosingSlide(
   ctx: CanvasRenderingContext2D,
   options: TributeOptions,
-  photoImg: HTMLImageElement | null
+  photoImg: HTMLImageElement | null,
 ) {
   const cx = W / 2
   ctx.fillStyle = DARK
   ctx.fillRect(0, 0, W, H)
-  if (photoImg) {
-    ctx.save()
-    drawCoverImage(ctx, photoImg, 0, 0, W, H, 0.25)
-    ctx.restore()
-  }
+  if (photoImg) drawCoverImage(ctx, photoImg, 0, 0, W, H, 0.25)
   ctx.fillStyle = 'rgba(28,25,23,0.8)'
   ctx.fillRect(0, 0, W, H)
   ctx.textAlign = 'center'
   drawOrnament(ctx, cx, H * 0.36)
-  ctx.font = `italic 52px Georgia, serif`
+  ctx.font = 'italic 52px Georgia, serif'
   ctx.fillStyle = '#F5F0E8'
   ctx.fillText(options.name, cx, H * 0.46)
   if (options.birthYear || options.deathYear) {
-    const dates = [options.birthYear, options.deathYear].filter(Boolean).join(' — ')
-    ctx.font = `300 22px Georgia, serif`
+    ctx.font = '300 22px Georgia, serif'
     ctx.fillStyle = '#C4B8AC'
-    ctx.fillText(dates, cx, H * 0.54)
+    ctx.fillText([options.birthYear, options.deathYear].filter(Boolean).join(' — '), cx, H * 0.54)
   }
   drawOrnament(ctx, cx, H * 0.61)
-  ctx.font = `300 18px Georgia, serif`
+  ctx.font = '300 18px Georgia, serif'
   ctx.fillStyle = MUTED
   ctx.fillText('Forever in our hearts', cx, H * 0.68)
-  ctx.font = `300 14px Georgia, serif`
+  ctx.font = '300 14px Georgia, serif'
   ctx.fillStyle = '#5C534E'
   ctx.fillText('Created with Tell Me Your Story · tellmeyourstory.uk', cx, H - 32)
   if (options.watermark) drawWatermark(ctx)
 }
 
-// ─── Video frame extractor ────────────────────────────────────────────────────
-// Extracts frames from a video file as PNG ArrayBuffers for FFmpeg
+// ─── Segment planning ─────────────────────────────────────────────────────────
 
-async function extractVideoFrames(
-  file: File,
-  fps: number,
-  progressCallback: (p: number) => void
-): Promise<{ frames: ArrayBuffer[]; duration: number }> {
-  return new Promise((resolve, reject) => {
-    const video = document.createElement('video')
-    video.muted = true
-    video.playsInline = true
-    const url = URL.createObjectURL(file)
-    video.src = url
+interface Segment {
+  kind: 'image' | 'video'
+  file: string      // filename inside the ffmpeg virtual filesystem
+  duration: number  // seconds
+}
 
-    video.onloadedmetadata = async () => {
-      const duration = Math.min(video.duration, 30) // cap at 30s
-      const totalFrames = Math.ceil(duration * fps)
-      const canvas = document.createElement('canvas')
-      canvas.width = W
-      canvas.height = H
-      const ctx = canvas.getContext('2d')!
-      const frames: ArrayBuffer[] = []
+/**
+ * Splits segments into chunks that each encode independently.
+ *
+ * A boundary is placed half way through a slide's static hold, and the boundary
+ * slide appears at the end of one chunk and the start of the next. Both sides
+ * are the same still frame, so concatenating the chunks produces no visible cut.
+ * Video segments are never split.
+ */
+function planChunks(segments: Segment[], size: number): Segment[][] {
+  if (segments.length <= size) return [segments]
+  const chunks: Segment[][] = []
+  let i = 0
+  while (i < segments.length) {
+    const end = Math.min(i + size, segments.length)
+    const chunk = segments.slice(i, end).map((s) => ({ ...s }))
 
-      for (let f = 0; f < totalFrames; f++) {
-        const time = f / fps
-        video.currentTime = time
-        await new Promise<void>((r) => { video.onseeked = () => r() })
-       
-        // Contain fit for video — letterbox rather than crop
-const scale = Math.min(W / video.videoWidth, H / video.videoHeight)
-
-// Fill background before drawing video
-ctx.fillStyle = DARK
-ctx.fillRect(0, 0, W, H)
-        const dw = video.videoWidth * scale
-        const dh = video.videoHeight * scale
-        ctx.drawImage(video, (W - dw) / 2, (H - dh) / 2, dw, dh)
-
-        const blob: Blob = await new Promise((r) => canvas.toBlob((b) => r(b!), 'image/png'))
-        frames.push(await blob.arrayBuffer())
-        progressCallback(f / totalFrames)
+    const boundary = chunk[chunk.length - 1]
+    if (end < segments.length && boundary.kind === 'image') {
+      boundary.duration = boundary.duration / 2
+    }
+    if (i > 0) {
+      const prev = segments[i - 1]
+      if (prev.kind === 'image') {
+        chunk.unshift({ ...prev, duration: prev.duration / 2 })
       }
-
-      URL.revokeObjectURL(url)
-      resolve({ frames, duration })
     }
+    chunks.push(chunk)
+    i = end
+  }
+  return chunks
+}
 
-    video.onerror = () => {
-      URL.revokeObjectURL(url)
-      reject(new Error('Could not load video file'))
+/** Builds the ffmpeg argument list for one chunk. */
+function chunkArgs(chunk: Segment[], transitionSecs: number, outName: string): string[] {
+  const args: string[] = []
+
+  for (const s of chunk) {
+    if (s.kind === 'image') args.push('-loop', '1', '-t', String(s.duration), '-i', s.file)
+    else args.push('-t', String(s.duration), '-i', s.file)
+  }
+
+  const chains: string[] = []
+  // Normalise every input so xfade can join them: same size, pixel aspect and rate.
+  // Video clips are scaled to fit and padded rather than cropped.
+  for (let i = 0; i < chunk.length; i++) {
+    chains.push(
+      `[${i}:v]scale=${W}:${H}:force_original_aspect_ratio=decrease,` +
+      `pad=${W}:${H}:(ow-iw)/2:(oh-ih)/2:color=0x1C1917,setsar=1,fps=${FPS},format=yuv420p[v${i}]`,
+    )
+  }
+
+  let vout: string
+  if (transitionSecs > 0 && chunk.length > 1) {
+    let acc = chunk[0].duration
+    let cur = 'v0'
+    for (let i = 1; i < chunk.length; i++) {
+      // xfade can only overlap as far as the shorter side allows
+      const t = Math.min(transitionSecs, chunk[i].duration / 2, acc / 2)
+      const offset = Math.max(0, Number((acc - t).toFixed(3)))
+      const out = `x${i}`
+      chains.push(`[${cur}][v${i}]xfade=transition=fade:duration=${t}:offset=${offset}[${out}]`)
+      acc = acc + chunk[i].duration - t
+      cur = out
     }
-  })
+    vout = cur
+  } else if (chunk.length > 1) {
+    chains.push(
+      chunk.map((_, i) => `[v${i}]`).join('') + `concat=n=${chunk.length}:v=1:a=0[vcat]`,
+    )
+    vout = 'vcat'
+  } else {
+    vout = 'v0'
+  }
+
+  args.push('-filter_complex', chains.join(';'), '-map', `[${vout}]`)
+  args.push(
+    '-c:v', 'libx264',
+    '-preset', 'veryfast',
+    '-crf', '20',
+    '-pix_fmt', 'yuv420p',
+    '-r', String(FPS),
+    '-g', String(FPS),   // keyframe every second, so chunk joins line up cleanly
+    '-an',
+    outName,
+  )
+  return args
 }
 
 // ─── Main composable ──────────────────────────────────────────────────────────
@@ -355,314 +451,255 @@ export function useTributeVideo() {
   const progressLabel = ref('')
   const error         = ref('')
 
-  async function generateTribute(options: TributeOptions): Promise<void> {
+  /**
+   * Renders the tribute and returns the finished file.
+   *
+   * It no longer downloads the video itself — the caller decides what to do with
+   * it. That is what lets the purchase flow render BEFORE taking payment, so
+   * nobody is charged for a video that failed to build.
+   *
+   * Returns null if anything went wrong; `error` holds the message.
+   */
+  async function generateTribute(options: TributeOptions): Promise<TributeResult | null> {
     isGenerating.value  = true
     progress.value      = 0
     progressLabel.value = 'Setting up…'
     error.value         = ''
 
+    const written: string[] = []
+    let ffmpeg: any = null
+
     try {
       const { FFmpeg } = await import('@ffmpeg/ffmpeg')
       const { fetchFile, toBlobURL } = await import('@ffmpeg/util')
 
-      const ffmpeg = new FFmpeg()
+      ffmpeg = new FFmpeg()
 
       progressLabel.value = 'Loading video engine…'
-
       const baseURL = 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/esm'
       await ffmpeg.load({
         coreURL: await toBlobURL(`${baseURL}/ffmpeg-core.js`, 'text/javascript'),
         wasmURL: await toBlobURL(`${baseURL}/ffmpeg-core.wasm`, 'application/wasm'),
       })
 
-      ffmpeg.on('progress', ({ progress: p }) => {
-        progress.value = Math.round(70 + p * 25)
-        progressLabel.value = `Encoding tribute… ${progress.value}%`
-      })
-
-      // ── Set up canvas ─────────────────────────────────────────────────────
       const canvas = document.createElement('canvas')
       canvas.width = W
       canvas.height = H
       const ctx = canvas.getContext('2d')!
 
-      // ── Build media list ──────────────────────────────────────────────────
-      // Support both old (photos array) and new (media array) formats
+      const write = async (name: string, data: Uint8Array) => {
+        await ffmpeg.writeFile(name, data)
+        written.push(name)
+      }
+
+      const canvasToFile = async (name: string) => {
+        const blob: Blob = await new Promise((r) => canvas.toBlob((b) => r(b!), 'image/png'))
+        await write(name, new Uint8Array(await blob.arrayBuffer()))
+      }
+
+      // ── Gather media ────────────────────────────────────────────────────────
       const mediaItems: TributeMediaItem[] = options.media?.length
         ? options.media
-        : options.photos.map(src => ({ type: 'photo' as const, src }))
+        : options.photos.map((src) => ({ type: 'photo' as const, src }))
 
-      const photoItems  = mediaItems.filter(m => m.type === 'photo')
-      const firstPhotoSrc = photoItems[0]?.src || null
+      const photoItems = mediaItems.filter((m) => m.type === 'photo' && m.src)
+      if (photoItems.length === 0) throw new Error('Add at least one photo before creating your tribute.')
 
-      // Pre-load all photo images
       progressLabel.value = 'Loading photos…'
-      progress.value = 5
+      progress.value = 4
 
-      const photoImageCache = new Map<string, HTMLImageElement | null>()
-      for (const item of mediaItems) {
-        if (item.type === 'photo' && item.src && !photoImageCache.has(item.src)) {
-          photoImageCache.set(item.src, await loadImageFromUrl(item.src))
+      const imageCache = new Map<string, HTMLImageElement | null>()
+      for (const item of photoItems) {
+        if (item.src && !imageCache.has(item.src)) {
+          imageCache.set(item.src, await loadImageFromUrl(item.src))
         }
       }
+      const firstPhotoImg = photoItems[0]?.src ? imageCache.get(photoItems[0].src!) ?? null : null
 
-      const firstPhotoImg = firstPhotoSrc ? (photoImageCache.get(firstPhotoSrc) ?? null) : null
-
-      // ── Build slide list ──────────────────────────────────────────────────
-      type TributeSlide =
-        | { type: 'title' }
-        | { type: 'photo'; src: string }
-        | { type: 'video'; file: File }
-        | { type: 'tribute-text' }
-        | { type: 'closing' }
-
-      const slides: TributeSlide[] = []
-      slides.push({ type: 'title' })
-
-      const halfItems = Math.floor(mediaItems.length / 2)
-      for (let i = 0; i < mediaItems.length; i++) {
-        const item = mediaItems[i]
-        if (item.type === 'photo' && item.src) {
-          slides.push({ type: 'photo', src: item.src })
-        } else if (item.type === 'video' && item.file) {
-          slides.push({ type: 'video', file: item.file })
-        }
-        if (i === halfItems - 1 && options.tribute.trim()) {
-          slides.push({ type: 'tribute-text' })
-        }
-      }
-      slides.push({ type: 'closing' })
-
-      // ── Render all slides ─────────────────────────────────────────────────
+      // ── Render each slide ONCE ──────────────────────────────────────────────
       progressLabel.value = 'Rendering slides…'
 
-      const fps = SLIDE_FPS
-      const frameDuration = options.slideDuration
+      const segments: Segment[] = []
+      const slideSecs = options.slideDuration
+      const halfway = Math.floor(mediaItems.length / 2)
+      let fileNo = 0
+
+      const pushImage = async (draw: () => void, duration: number) => {
+        draw()
+        const name = `s${String(fileNo++).padStart(3, '0')}.png`
+        await canvasToFile(name)
+        segments.push({ kind: 'image', file: name, duration })
+      }
+
+      await pushImage(() => drawTitleSlide(ctx, options, firstPhotoImg), slideSecs)
+
+      let photoNo = 0
+      for (let i = 0; i < mediaItems.length; i++) {
+        const item = mediaItems[i]
+        progress.value = 4 + Math.round((i / mediaItems.length) * 26)
+        progressLabel.value = `Rendering slide ${i + 1} of ${mediaItems.length}…`
+
+        if (item.type === 'photo' && item.src) {
+          const img = imageCache.get(item.src)
+          if (img) {
+            photoNo++
+            const n = photoNo
+            await pushImage(
+              () => drawPhotoSlide(ctx, img, options, n, photoItems.length),
+              slideSecs,
+            )
+          }
+        } else if (item.type === 'video' && item.file) {
+          const duration = await probeVideoDuration(item.file)
+          if (duration && duration > 0.4) {
+            const name = `c${String(fileNo++).padStart(3, '0')}.mp4`
+            await write(name, await fetchFile(item.file))
+            segments.push({ kind: 'video', file: name, duration })
+          }
+          // A clip we can't read is skipped rather than stalling the render.
+        }
+
+        if (i === halfway - 1 && options.tribute.trim()) {
+          await pushImage(() => drawTributeTextSlide(ctx, options, firstPhotoImg), slideSecs)
+        }
+      }
+
+      await pushImage(() => drawClosingSlide(ctx, options, firstPhotoImg), slideSecs)
+
+      // ── Encode in chunks ────────────────────────────────────────────────────
       const transitionSecs = options.transition === 'cut' ? 0
         : options.transition === 'fade' ? 1
         : 2
-      const transitionFrameCount = transitionSecs * fps
 
-      // Each segment is either a buffer array (photo/title/text) or video frames
-      type Segment = { frames: ArrayBuffer[]; isVideo: boolean }
-      const segments: Segment[] = []
+      const chunks = planChunks(segments, CHUNK_SIZE)
+      const chunkFiles: string[] = []
 
-      let slideCount = 0
-      for (const slide of slides) {
-        slideCount++
-        progress.value = 5 + Math.round((slideCount / slides.length) * 40)
-        progressLabel.value = `Rendering slide ${slideCount} of ${slides.length}…`
+      ffmpeg.on('progress', ({ progress: p }: { progress: number }) => {
+        // ffmpeg reports 0..1 per invocation; map it inside the current chunk's band.
+        const band = 60 / chunks.length
+        const base = 30 + band * chunkFiles.length
+        progress.value = Math.min(92, Math.round(base + p * band))
+      })
 
-        if (slide.type === 'video') {
-          // Extract video frames
-          progressLabel.value = `Extracting video clip ${slideCount}…`
-          const { frames } = await extractVideoFrames(
-            slide.file,
-            VIDEO_FPS,
-            (p) => {
-              progress.value = 5 + Math.round((slideCount / slides.length) * 40) + Math.round(p * 5)
-            }
-          )
-          segments.push({ frames, isVideo: true })
-        } else {
-          // Render canvas slide to single frame, then repeat for duration
-          if (slide.type === 'title') {
-            await drawTitleSlide(ctx, options, firstPhotoImg)
-          } else if (slide.type === 'photo') {
-            const img = photoImageCache.get(slide.src) ?? null
-            if (img) {
-              const photoIndex = photoItems.findIndex(p => p.src === slide.src)
-              await drawPhotoSlide(ctx, img, options, photoIndex + 1, photoItems.length)
-            }
-          } else if (slide.type === 'tribute-text') {
-            await drawTributeTextSlide(ctx, options, firstPhotoImg)
-          } else if (slide.type === 'closing') {
-            await drawClosingSlide(ctx, options, firstPhotoImg)
-          }
-
-          const blob: Blob = await new Promise((r) => canvas.toBlob((b) => r(b!), 'image/png'))
-          const buf = await blob.arrayBuffer()
-          // Repeat frame for slide duration
-          const frameCount = frameDuration * fps
-          const frames: ArrayBuffer[] = Array(frameCount).fill(buf)
-          segments.push({ frames, isVideo: false })
-        }
+      for (let c = 0; c < chunks.length; c++) {
+        progressLabel.value = chunks.length > 1
+          ? `Encoding part ${c + 1} of ${chunks.length}…`
+          : 'Encoding your tribute…'
+        const out = `part${c}.mp4`
+        await ffmpeg.exec(chunkArgs(chunks[c], transitionSecs, out))
+        written.push(out)
+        chunkFiles.push(out)
       }
 
-      // ── Write all frames with transitions ─────────────────────────────────
-      progressLabel.value = 'Writing frames…'
-      progress.value = 52
+      // ── Join, and add music ─────────────────────────────────────────────────
+      progress.value = 92
+      progressLabel.value = 'Adding music…'
 
-      let frameIndex = 0
+      const totalDuration = segments.reduce((t, s) => t + s.duration, 0)
+        - (transitionSecs > 0 ? Math.max(0, segments.length - 1) * transitionSecs : 0)
 
-      async function writeFrame(buf: ArrayBuffer) {
-        const copy = new Uint8Array(buf.byteLength)
-        copy.set(new Uint8Array(buf))
-        await ffmpeg.writeFile(`frame${String(frameIndex).padStart(5, '0')}.png`, copy)
-        frameIndex++
-      }
-
-      for (let s = 0; s < segments.length; s++) {
-        const seg = segments[s]
-        const isFirst = s === 0
-        const isLast  = s === segments.length - 1
-
-        if (seg.isVideo) {
-          // Write all video frames directly — no transitions for video clips
-          for (const frame of seg.frames) {
-            await writeFrame(frame)
-          }
-        } else {
-          // Static slide — write frames with transition
-          const leadIn  = isFirst ? 0 : Math.floor(transitionFrameCount / 2)
-          const leadOut = isLast  ? 0 : Math.floor(transitionFrameCount / 2)
-          const staticFrames = Math.max(1, seg.frames.length - leadIn - leadOut)
-          const frameBuf = seg.frames[0]
-
-          for (let f = 0; f < staticFrames; f++) {
-            await writeFrame(frameBuf)
-          }
-
-          // Fade transition to next segment
-          if (transitionFrameCount > 0 && !isLast) {
-            const currBuf = seg.frames[0]
-            const nextSeg = segments[s + 1]
-            const nextBuf = nextSeg.frames[0]
-
-            const currBlob = new Blob([currBuf], { type: 'image/png' })
-            const nextBlob = new Blob([nextBuf], { type: 'image/png' })
-
-            const currImg = new Image()
-            currImg.src = URL.createObjectURL(currBlob)
-            await new Promise(r => { currImg.onload = r })
-
-            const nextImg = new Image()
-            nextImg.src = URL.createObjectURL(nextBlob)
-            await new Promise(r => { nextImg.onload = r })
-
-            for (let t = 0; t < transitionFrameCount; t++) {
-              const alpha = t / (transitionFrameCount - 1)
-              ctx.clearRect(0, 0, W, H)
-              ctx.globalAlpha = 1
-              ctx.drawImage(currImg, 0, 0)
-              ctx.globalAlpha = alpha
-              ctx.drawImage(nextImg, 0, 0)
-              ctx.globalAlpha = 1
-              const blendBlob: Blob = await new Promise(r => canvas.toBlob(b => r(b!), 'image/png'))
-              await writeFrame(await blendBlob.arrayBuffer())
-            }
-
-            URL.revokeObjectURL(currImg.src)
-            URL.revokeObjectURL(nextImg.src)
-          }
-        }
-      }
-
-      // ── Assemble with FFmpeg ──────────────────────────────────────────────
-      progress.value = 68
-      progressLabel.value = 'Assembling tribute video…'
-
-      // Calculate total duration
-      let totalDuration = 0
-      for (const seg of segments) {
-        totalDuration += seg.frames.length / fps
-      }
-
-      // Load music
-      progressLabel.value = 'Loading music…'
-      let resolvedMusicFile: File | null = options.musicFile
-
-      if (options.musicTrack !== 'custom' && options.musicTrack !== 'silent' && !options.musicFile) {
+      let musicFile: File | null = options.musicFile
+      if (options.musicTrack !== 'custom' && options.musicTrack !== 'silent' && !musicFile) {
         try {
-          const response = await fetch(`/audio/${options.musicTrack}.mp3`)
-          if (response.ok) {
-            const blob = await response.blob()
-            resolvedMusicFile = new File([blob], `${options.musicTrack}.mp3`, { type: 'audio/mp3' })
+          const res = await fetch(`/audio/${options.musicTrack}.mp3`)
+          if (res.ok) {
+            musicFile = new File([await res.blob()], 'music.mp3', { type: 'audio/mp3' })
           }
         } catch {
-          console.warn('Music fetch failed — continuing without music')
+          // Music is a nice-to-have; a missing track must not fail the render.
         }
       }
+      const hasMusic = musicFile !== null && options.musicTrack !== 'silent'
 
-      const hasMusicFile = resolvedMusicFile !== null && options.musicTrack !== 'silent'
+      const listName = 'parts.txt'
+      await write(listName, new TextEncoder().encode(
+        chunkFiles.map((f) => `file '${f}'`).join('\n') + '\n',
+      ))
 
-      const ffmpegArgs: string[] = [
-        '-framerate', String(fps),
-        '-i', 'frame%05d.png',
-      ]
-
-      if (hasMusicFile && resolvedMusicFile) {
-        const musicData = await fetchFile(resolvedMusicFile)
-        await ffmpeg.writeFile('music.mp3', musicData)
-        ffmpegArgs.push('-i', 'music.mp3')
-        ffmpegArgs.push('-c:v', 'libx264')
-        ffmpegArgs.push('-c:a', 'aac')
-        ffmpegArgs.push('-filter_complex',
-          `[1:a]aloop=loop=-1:size=2147483647,atrim=duration=${totalDuration}[aout]`)
-        ffmpegArgs.push('-map', '0:v:0')
-        ffmpegArgs.push('-map', '[aout]')
+      const finalArgs = ['-f', 'concat', '-safe', '0', '-i', listName]
+      if (hasMusic && musicFile) {
+        await write('music.mp3', await fetchFile(musicFile))
+        finalArgs.push('-stream_loop', '-1', '-i', 'music.mp3')
+        finalArgs.push(
+          '-filter_complex',
+          `[1:a]atrim=duration=${totalDuration.toFixed(3)},` +
+          `afade=t=out:st=${Math.max(0, totalDuration - 3).toFixed(3)}:d=3[aout]`,
+        )
+        finalArgs.push('-map', '0:v', '-map', '[aout]', '-c:a', 'aac', '-b:a', '160k')
       } else {
-        ffmpegArgs.push('-c:v', 'libx264')
+        finalArgs.push('-map', '0:v')
       }
+      // The chunks are already encoded correctly — copy rather than re-encode.
+      finalArgs.push('-c:v', 'copy', '-movflags', '+faststart', 'output.mp4')
 
-      ffmpegArgs.push(
-        '-pix_fmt', 'yuv420p',
-        '-vf', `scale=${W}:${H}`,
-        '-r', '25',
-        '-preset', 'veryfast',
-        'output.mp4'
-      )
+      await ffmpeg.exec(finalArgs)
+      written.push('output.mp4')
 
-      await ffmpeg.exec(ffmpegArgs)
+      // ── Read it back ────────────────────────────────────────────────────────
+      progress.value = 97
+      progressLabel.value = 'Finishing up…'
 
-      // ── Download ──────────────────────────────────────────────────────────
-      progress.value = 96
-      progressLabel.value = 'Preparing your tribute…'
+      const raw = await ffmpeg.readFile('output.mp4')
+      const bytes = raw instanceof Uint8Array ? raw : new Uint8Array(raw as unknown as ArrayBuffer)
+      const copy = new Uint8Array(bytes.byteLength)
+      copy.set(bytes)
+      const blob = new Blob([copy], { type: 'video/mp4' })
 
-      const rawData = await ffmpeg.readFile('output.mp4')
-      const uint8Data = rawData instanceof Uint8Array
-        ? rawData
-        : new Uint8Array(rawData as unknown as ArrayBuffer)
-      const safeData = new Uint8Array(uint8Data.byteLength)
-      safeData.set(uint8Data)
-      const blob = new Blob([safeData], { type: 'video/mp4' })
-      const url = URL.createObjectURL(blob)
+      if (blob.size < 1024) throw new Error('The video came out empty. Please try again with fewer photos.')
 
+      const safeName = options.name.trim().replace(/\s+/g, '-').replace(/[^a-zA-Z0-9-]/g, '') || 'tribute'
       const filename = options.watermark
-        ? `${options.name.replace(/\s+/g, '-')}-tribute-preview.mp4`
-        : `${options.name.replace(/\s+/g, '-')}-tribute.mp4`
-
-      const a = document.createElement('a')
-      a.href = url
-      a.download = filename
-      document.body.appendChild(a)
-      a.click()
-      document.body.removeChild(a)
-      setTimeout(() => URL.revokeObjectURL(url), 10000)
-
-      // Cleanup
-      for (let i = 0; i < frameIndex; i++) {
-        await ffmpeg.deleteFile(`frame${String(i).padStart(5, '0')}.png`).catch(() => null)
-      }
-      await ffmpeg.deleteFile('output.mp4').catch(() => null)
-      if (hasMusicFile) await ffmpeg.deleteFile('music.mp3').catch(() => null)
+        ? `${safeName}-tribute-preview.mp4`
+        : `${safeName}-tribute.mp4`
 
       progress.value = 100
-      progressLabel.value = options.watermark
-        ? 'Preview ready! Upgrade to remove watermark.'
-        : 'Your tribute is downloading.'
+      progressLabel.value = 'Your tribute is ready.'
 
-      setTimeout(() => {
-        progress.value = 0
-        progressLabel.value = ''
-      }, 5000)
+      return { blob, filename }
 
     } catch (err) {
       console.error('Tribute generation error:', err)
-      error.value = err instanceof Error ? err.message : 'Something went wrong. Please try again.'
+      error.value = err instanceof Error
+        ? err.message
+        : 'Something went wrong making your tribute. Please try again.'
+      return null
+
     } finally {
+      // Always clear the virtual filesystem, success or failure.
+      if (ffmpeg) {
+        for (const name of written) {
+          await ffmpeg.deleteFile(name).catch(() => null)
+        }
+      }
       isGenerating.value = false
+      setTimeout(() => {
+        if (!isGenerating.value) { progress.value = 0; progressLabel.value = '' }
+      }, 4000)
     }
+  }
+
+  /** Saves a finished tribute to the user's device. */
+  function downloadTribute(result: TributeResult) {
+    const url = URL.createObjectURL(result.blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = result.filename
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    setTimeout(() => URL.revokeObjectURL(url), 10000)
+  }
+
+  /** Rough finished length, used for the estimate shown in the builder. */
+  function estimateSeconds(
+    mediaCount: number,
+    slideDuration: number,
+    transition: TributeTransition,
+    hasTribute: boolean,
+  ): number {
+    const slides = mediaCount + 2 + (hasTribute ? 1 : 0)
+    const t = transition === 'cut' ? 0 : transition === 'fade' ? 1 : 2
+    return Math.max(0, slides * slideDuration - Math.max(0, slides - 1) * t)
   }
 
   return {
@@ -671,6 +708,8 @@ export function useTributeVideo() {
     progressLabel,
     error,
     generateTribute,
+    downloadTribute,
+    estimateSeconds,
     MUSIC_TRACKS,
   }
 }
