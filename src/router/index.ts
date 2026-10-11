@@ -153,6 +153,10 @@ const routes: RouteRecordRaw[] = [
   { path: '/plans', redirect: '/pricing' },
   { path: '/subscriptions', redirect: '/pricing' },
   { path: '/billing', redirect: '/pricing' },
+  {
+  path: '/admin/purchases',
+  component: () => import('../views/AdminPurchasesView.vue'),
+},
 
   // ── 404 (must be last) ────────────────────────────────────────────────────
   { path: '/:pathMatch(.*)*', name: 'not-found', component: () => import('../views/NotFoundView.vue') },
