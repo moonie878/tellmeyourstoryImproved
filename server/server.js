@@ -2,6 +2,7 @@ const express = require('express')
 const Stripe = require('stripe')
 const cors = require('cors')
 const { createClient } = require('@supabase/supabase-js')
+const { recordPurchase, mountPurchaseAdmin } = require('./purchases')
 const Groq = require('groq-sdk')
 const crypto = require('crypto')
 const multer = require('multer')
@@ -166,6 +167,8 @@ app.post(
 
       console.log('Payment completed, purchaseType:', purchaseType, 'userId:', userId)
 
+       await recordPurchase({ session, event, supabaseAdmin })
+
       // ── Analytics: one purchase_completed event for every kind of payment ──
       // distinct_id = Supabase user id, the same id the site passes to
       // posthog.identify(), so this lands on the same person as their funnel.
@@ -322,6 +325,8 @@ app.post(
 
 // ─── JSON middleware (after webhook raw handler) ───────────────────────────────
 app.use(express.json())
+
+mountPurchaseAdmin(app, { supabaseAdmin })
 
 app.post('/register-contact', async (req, res) => {
   try {
