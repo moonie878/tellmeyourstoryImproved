@@ -131,7 +131,7 @@ function money(minor) {
 }
 
 function mountPurchaseAdmin(app, { supabaseAdmin }) {
-  app.get('/admin/purchases', async (req, res) => {
+  app.get('/purchases', async (req, res) => {
     const admin = await requireAdmin(req, res, supabaseAdmin)
     if (!admin) return
 
