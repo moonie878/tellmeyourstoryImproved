@@ -154,7 +154,7 @@ const routes: RouteRecordRaw[] = [
   { path: '/subscriptions', redirect: '/pricing' },
   { path: '/billing', redirect: '/pricing' },
   {
-  path: '/purchases',
+  path: '/admin/purchases',
   component: () => import('../views/AdminPurchasesView.vue'),
 },
 
