@@ -25,6 +25,15 @@ const supabaseAdmin = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY,
 )
 
+/** Orders from these addresses are ours, not sales. */
+const TEST_EMAILS = (process.env.TEST_EMAILS || 'mark.b.griffiths@hotmail.com')
+  .split(',').map((s) => s.trim().toLowerCase()).filter(Boolean)
+
+function isTestOrder(session, amount) {
+  const email = (session.customer_details?.email || session.metadata?.buyerEmail || '').toLowerCase()
+  return amount === 0 || TEST_EMAILS.includes(email)
+}
+
 function classifyProduct(session) {
   const m = session.metadata || {}
   if (m.product === 'tribute-video') return 'tribute_video'
@@ -65,7 +74,7 @@ async function main() {
       amount_minor:   amount,
       discount_minor: session.total_details?.amount_discount || 0,
       currency:       session.currency || 'gbp',
-      is_test:        amount === 0,
+      is_test:        isTestOrder(session, amount),
       status:         'paid',
       raw:            m,
     })

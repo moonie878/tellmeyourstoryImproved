@@ -36,6 +36,14 @@ function classifyProduct(session) {
   return 'other'
 }
 
+/** Orders from these addresses are ours, not sales. */
+const TEST_EMAILS = (process.env.TEST_EMAILS || 'mark.b.griffiths@hotmail.com')
+  .split(',').map((s) => s.trim().toLowerCase()).filter(Boolean)
+
+function isTestOrder(session, amount) {
+  const email = (session.customer_details?.email || session.metadata?.buyerEmail || '').toLowerCase()
+  return amount === 0 || TEST_EMAILS.includes(email)
+}
 /**
  * Writes one row per completed checkout.
  *
@@ -72,7 +80,7 @@ async function recordPurchase({ session, event, supabaseAdmin }) {
       currency:       session.currency || 'gbp',
 
       // £0 means we were testing, not selling.
-      is_test: amount === 0,
+      is_test: isTestOrder(session, amount),
 
       status: 'paid',
       raw: m,
