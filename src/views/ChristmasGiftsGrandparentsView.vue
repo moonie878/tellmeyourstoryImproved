@@ -263,10 +263,44 @@ import { useSeo } from '../composables/useSeo'
 // Print cutoff date lives in lib/christmas.ts — change it there.
 import { PRINT_CUTOFF_LABEL, canStillOrderPrint } from '../lib/christmas'
 
+const faqs = [
+  {
+    q: 'What if my grandparents are not good with technology?',
+    a: 'They do not need to be. They can answer by speaking instead of typing — they tap one button and talk, and we turn it into text automatically. Plenty of families do it together, with a grandchild holding the phone while the grandparent talks.',
+  },
+  {
+    q: 'How long does it take them to finish?',
+    a: 'There is no requirement to finish. Some people answer everything in a fortnight, others do one question a week for a year. The book can be printed at any point, with however many answers exist at the time.',
+  },
+  {
+    q: 'When do I need to order by for Christmas?',
+    a: `Printed books take roughly 10 to 14 days including UK delivery, so order by ${PRINT_CUTOFF_LABEL} to be safe. Digital keepsakes have no deadline at all — you can buy one on Christmas Eve and it works immediately.`,
+  },
+  {
+    q: 'Can several of us chip in?',
+    a: 'Yes. One person buys and shares the gift link, and the rest of the family can be invited into the story afterwards to read along, listen to the recordings, and add their own comments.',
+  },
+  {
+    q: 'What if they never get round to it?',
+    a: 'Their answers are saved forever, so nothing is wasted if they stop and come back months later. In practice the hardest part is the first question, which is why we suggest doing that one together.',
+  },
+]
+
+const faqSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: faqs.map((f) => ({
+    '@type': 'Question',
+    name: f.q,
+    acceptedAnswer: { '@type': 'Answer', text: f.a },
+  })),
+}
+
 // No canonical needed: it defaults to this page's own URL.
 useSeo({
   title: 'Christmas Gifts for Grandparents 2026 | Tell Me Your Story',
   description: 'The best Christmas gift for Grandma or Grandad — capture their life story in their own words. Guided questions, voice recordings, and a beautifully printed keepsake book. UK delivery.',
+  schema: faqSchema,
 })
 
 const showDeadline = computed(() => canStillOrderPrint())
@@ -313,28 +347,7 @@ const steps = [
   },
 ]
 
-const faqs = [
-  {
-    q: 'What if my grandparents are not good with technology?',
-    a: 'They do not need to be. They can answer by speaking instead of typing — they tap one button and talk, and we turn it into text automatically. Plenty of families do it together, with a grandchild holding the phone while the grandparent talks.',
-  },
-  {
-    q: 'How long does it take them to finish?',
-    a: 'There is no requirement to finish. Some people answer everything in a fortnight, others do one question a week for a year. The book can be printed at any point, with however many answers exist at the time.',
-  },
-  {
-    q: 'When do I need to order by for Christmas?',
-    a: `Printed books take roughly 10 to 14 days including UK delivery, so order by ${PRINT_CUTOFF_LABEL} to be safe. Digital keepsakes have no deadline at all — you can buy one on Christmas Eve and it works immediately.`,
-  },
-  {
-    q: 'Can several of us chip in?',
-    a: 'Yes. One person buys and shares the gift link, and the rest of the family can be invited into the story afterwards to read along, listen to the recordings, and add their own comments.',
-  },
-  {
-    q: 'What if they never get round to it?',
-    a: 'Their answers are saved forever, so nothing is wasted if they stop and come back months later. In practice the hardest part is the first question, which is why we suggest doing that one together.',
-  },
-]
+
 
 /**
  * TODO — this is built but never injected into the page.
@@ -342,15 +355,7 @@ const faqs = [
  * Wire it up the same way MilestoneBirthdayGiftView.vue does, or send
  * useSeo.ts over and it can be added here properly.
  */
-const faqSchema = {
-  '@context': 'https://schema.org',
-  '@type': 'FAQPage',
-  mainEntity: faqs.map((f) => ({
-    '@type': 'Question',
-    name: f.q,
-    acceptedAnswer: { '@type': 'Answer', text: f.a },
-  })),
-}
+
 
 const relatedLinks = [
   { to: '/questions-to-ask-elderly-parents', label: 'Questions to ask elderly parents' },

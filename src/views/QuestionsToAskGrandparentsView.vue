@@ -186,46 +186,6 @@ import { computed } from 'vue'
 import EmailCaptureForm from '../components/Marketing/EmailCaptureForm.vue'
 import { useSeo } from '../composables/useSeo'
 
-useSeo({
-  title: 'Questions to Ask Your Grandparents Before It\'s Too Late',
-  description: '80 meaningful questions to ask your grandparents about their childhood, history, family traditions, values, and legacy. Preserve their stories before they\'re lost.',
-  canonical: 'https://tellmeyourstory.uk/questions-to-ask-your-grandparents',
-  schema: {
-    '@context': 'https://schema.org',
-    '@graph': [
-      {
-        '@type': 'Article',
-        headline: 'Questions to Ask Your Grandparents Before It\'s Too Late',
-        description: '80 meaningful questions to ask your grandparents about their childhood, history, family traditions, values, and legacy.',
-        author: { '@type': 'Person', name: 'Mark', url: 'https://tellmeyourstory.uk' },
-        publisher: {
-          '@type': 'Organization',
-          name: 'Tell Me Your Story',
-          url: 'https://tellmeyourstory.uk',
-          logo: { '@type': 'ImageObject', url: 'https://tellmeyourstory.uk/logo/logo-full-new.png' },
-        },
-        datePublished: '2026-05-05',
-        dateModified: '2026-05-05',
-        url: 'https://tellmeyourstory.uk/questions-to-ask-your-grandparents',
-        mainEntityOfPage: { '@type': 'WebPage', '@id': 'https://tellmeyourstory.uk/questions-to-ask-your-grandparents' },
-      },
-      {
-        '@type': 'FAQPage',
-        mainEntity: faqs.map((f) => ({
-          '@type': 'Question',
-          name: f.q,
-          acceptedAnswer: { '@type': 'Answer', text: f.a },
-        })),
-      },
-    ],
-  },
-})
-
-/** Single source of truth — the description can never drift from the list again. */
-const totalQuestions = computed(() =>
-  chapters.reduce((sum, chapter) => sum + chapter.questions.length, 0),
-)
-
 const faqs = [
   {
     q: 'What are good questions to ask your grandparents?',
@@ -403,6 +363,48 @@ const chapters = [
     ],
   },
 ]
+
+useSeo({
+  title: 'Questions to Ask Your Grandparents Before It\'s Too Late',
+  description: '80 meaningful questions to ask your grandparents about their childhood, history, family traditions, values, and legacy. Preserve their stories before they\'re lost.',
+  canonical: 'https://tellmeyourstory.uk/questions-to-ask-your-grandparents',
+  schema: {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'Article',
+        headline: 'Questions to Ask Your Grandparents Before It\'s Too Late',
+        description: '80 meaningful questions to ask your grandparents about their childhood, history, family traditions, values, and legacy.',
+        author: { '@type': 'Person', name: 'Mark', url: 'https://tellmeyourstory.uk' },
+        publisher: {
+          '@type': 'Organization',
+          name: 'Tell Me Your Story',
+          url: 'https://tellmeyourstory.uk',
+          logo: { '@type': 'ImageObject', url: 'https://tellmeyourstory.uk/logo/logo-full-new.png' },
+        },
+        datePublished: '2026-05-05',
+        dateModified: '2026-05-05',
+        url: 'https://tellmeyourstory.uk/questions-to-ask-your-grandparents',
+        mainEntityOfPage: { '@type': 'WebPage', '@id': 'https://tellmeyourstory.uk/questions-to-ask-your-grandparents' },
+      },
+      {
+        '@type': 'FAQPage',
+        mainEntity: faqs.map((f) => ({
+          '@type': 'Question',
+          name: f.q,
+          acceptedAnswer: { '@type': 'Answer', text: f.a },
+        })),
+      },
+    ],
+  },
+})
+
+/** Single source of truth — the description can never drift from the list again. */
+const totalQuestions = computed(() =>
+  chapters.reduce((sum, chapter) => sum + chapter.questions.length, 0),
+)
+
+
 </script>
 
 <style scoped>
