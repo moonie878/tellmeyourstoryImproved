@@ -149,17 +149,32 @@ function startServer(shell) {
 
 // ─── Page setup ───────────────────────────────────────────────────────────────
 
+/**
+ * We deliberately abort image/font/media requests to keep rendering fast. A
+ * page with a <video> or <audio> element then throws a NetworkError that has
+ * nothing to do with the page being broken — /help does exactly this. So the
+ * aborts are counted, and network-shaped errors are only treated as noise when
+ * we actually caused some.
+ */
+const NETWORK_ERROR = /NetworkError|Failed to fetch|Load failed|ERR_ABORTED|ERR_FAILED|net::/i
+
 async function newPage(browser) {
   const page = await browser.newPage()
+  const aborted = []
   // Tell the app it's being prerendered (read in src/main.ts).
   await page.evaluateOnNewDocument(() => {
     window.__TMYS_PRERENDER__ = true
   })
   await page.setRequestInterception(true)
   page.on('request', (req) => {
-    if (['image', 'font', 'media'].includes(req.resourceType())) req.abort()
-    else req.continue()
+    if (['image', 'font', 'media'].includes(req.resourceType())) {
+      aborted.push(req.url())
+      req.abort()
+    } else {
+      req.continue()
+    }
   })
+  page.__abortedRequests = aborted
   return page
 }
 
@@ -248,10 +263,18 @@ async function renderRoute(browser, route, shellTitle) {
     const fatal = []
     const warnings = []
 
-    if (jsErrors.length) {
+    // Errors we provoked by aborting media don't count against the page.
+    const selfInflicted = page.__abortedRequests.length > 0
+    const realErrors = jsErrors.filter((e) => !(selfInflicted && NETWORK_ERROR.test(e)))
+    const noiseErrors = jsErrors.filter((e) => !realErrors.includes(e))
+
+    if (realErrors.length) {
       // The one that matters most. A component that throws during setup leaves
       // the layout standing, so every other signal still looks healthy.
-      fatal.push(`JS error during render: ${jsErrors.slice(0, 2).join(' | ')}`)
+      fatal.push(`JS error during render: ${realErrors.slice(0, 2).join(' | ')}`)
+    }
+    if (noiseErrors.length) {
+      warnings.push(`${noiseErrors.length} network error(s) from aborted media — expected on pages with video or audio`)
     }
     if (!head.h1) {
       fatal.push('no <h1> — the view almost certainly failed to mount')
