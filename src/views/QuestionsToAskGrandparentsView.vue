@@ -364,17 +364,21 @@ const chapters = [
   },
 ]
 
+/** Single source of truth — the description can never drift from the list again. */
+const totalQuestions = computed(() =>
+  chapters.reduce((sum, chapter) => sum + chapter.questions.length, 0),
+)
+
 useSeo({
   title: 'Questions to Ask Your Grandparents Before It\'s Too Late',
-  description: '80 meaningful questions to ask your grandparents about their childhood, history, family traditions, values, and legacy. Preserve their stories before they\'re lost.',
-  canonical: 'https://tellmeyourstory.uk/questions-to-ask-your-grandparents',
+  description: `${totalQuestions.value} meaningful questions to ask your grandparents about their childhood, history, family traditions, values, and legacy. Preserve their stories before they\'re lost.`,
   schema: {
     '@context': 'https://schema.org',
     '@graph': [
       {
         '@type': 'Article',
         headline: 'Questions to Ask Your Grandparents Before It\'s Too Late',
-        description: '80 meaningful questions to ask your grandparents about their childhood, history, family traditions, values, and legacy.',
+        description: `${totalQuestions.value} meaningful questions to ask your grandparents about their childhood, history, family traditions, values, and legacy.`,
         author: { '@type': 'Person', name: 'Mark', url: 'https://tellmeyourstory.uk' },
         publisher: {
           '@type': 'Organization',
@@ -399,10 +403,7 @@ useSeo({
   },
 })
 
-/** Single source of truth — the description can never drift from the list again. */
-const totalQuestions = computed(() =>
-  chapters.reduce((sum, chapter) => sum + chapter.questions.length, 0),
-)
+
 
 
 </script>
