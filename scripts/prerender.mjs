@@ -8,12 +8,18 @@
  *   set in main.ts), so there is no list to maintain here.
  * - The untouched Vite index.html is saved as dist/spa-shell.html. Vercel serves
  *   it for every route that isn't prerendered (dashboard, story editor, /listen…),
- *   so those never receive the homepage's HTML.
- * - Each page is checked: the head must have been updated for that path, and the
- *   canonical should point at itself.
+ *   so those never receive the homepage's HTML. The copy written to disk gets a
+ *   noindex meta, so those routes stop showing up in Search Console as
+ *   duplicates of the homepage.
+ * - Each page is CHECKED, and a page that fails its checks FAILS THE BUILD.
+ *   This is the important part: a Vue component that throws during setup still
+ *   produces a page with a header and footer, a canonical, and a correct
+ *   data-seo-path. It looks fine to a naive check and is worthless to Google.
+ *   That is exactly how /questions-to-ask-your-grandparents shipped broken.
  *
  * Usage:  vite build && node scripts/prerender.mjs
- * Env:    PRERENDER_ALLOW_FAILURES=1  → don't fail the build if a page errors
+ * Env:    PRERENDER_ALLOW_FAILURES=1  → report problems but exit 0 anyway
+ *         PRERENDER_MIN_WORDS=120     → word floor below which a page warns
  */
 
 import { readFile, writeFile, mkdir, copyFile } from 'fs/promises'
@@ -33,6 +39,11 @@ const BASE_URL = `http://localhost:${PORT}`
 const CONCURRENCY = 4
 const NAV_TIMEOUT = 30_000
 const SEO_TIMEOUT = 10_000
+
+const ALLOW_FAILURES = process.env.PRERENDER_ALLOW_FAILURES === '1'
+const MIN_WORDS = Number(process.env.PRERENDER_MIN_WORDS || 120)
+
+const NOINDEX_META = '<meta name="robots" content="noindex, follow">'
 
 const MIME_TYPES = {
   '.html': 'text/html; charset=utf-8',
@@ -66,6 +77,23 @@ function canonicalUrl(path) {
   return p === '/' ? `${SITE_URL}/` : `${SITE_URL}${p}`
 }
 
+function titleOf(html) {
+  return (String(html).match(/<title[^>]*>([\s\S]*?)<\/title>/i)?.[1] ?? '').trim()
+}
+
+/** The shell must never carry noindex while we render real pages from it. */
+function stripNoindex(html) {
+  return String(html).replace(/\s*<meta\s+name=["']robots["'][^>]*noindex[^>]*>/gi, '')
+}
+
+/** The copy Vercel serves for unmatched routes should not be indexable. */
+function addNoindex(html) {
+  const clean = stripNoindex(html)
+  return clean.includes('<head>')
+    ? clean.replace('<head>', `<head>\n    ${NOINDEX_META}`)
+    : clean
+}
+
 /**
  * Keep an untouched copy of Vite's index.html. On a rebuild without
  * `vite build`, dist/index.html is already the prerendered homepage, so reuse
@@ -82,7 +110,8 @@ async function prepareShell() {
     throw new Error('dist/index.html is already prerendered and no spa-shell.html exists — run `vite build` first')
   }
 
-  return readFile(SHELL_FILE)
+  // A previous run may have written the noindex copy over it; serve it clean.
+  return stripNoindex(await readFile(SHELL_FILE, 'utf-8'))
 }
 
 // ─── Static server ────────────────────────────────────────────────────────────
@@ -153,7 +182,7 @@ async function getRoutes(browser) {
       timeout: SEO_TIMEOUT,
     })
     const routes = await page.evaluate(() => window.__TMYS_PRERENDER_ROUTES__)
-    return routes.map(normalisePath)
+    return routes.map((r) => normalisePath(r))
   } catch (err) {
     const state = await page
       .evaluate(() => ({
@@ -177,10 +206,10 @@ async function getRoutes(browser) {
 
 // ─── Render one route ─────────────────────────────────────────────────────────
 
-async function renderRoute(browser, route) {
+async function renderRoute(browser, route, shellTitle) {
   const page = await newPage(browser)
-  const errors = []
-  page.on('pageerror', (err) => errors.push(err.message))
+  const jsErrors = []
+  page.on('pageerror', (err) => jsErrors.push(err.message))
 
   try {
     await page.goto(`${BASE_URL}${route}`, { waitUntil: 'networkidle0', timeout: NAV_TIMEOUT })
@@ -197,11 +226,15 @@ async function renderRoute(browser, route) {
 
     const head = await page.evaluate(() => {
       document.documentElement.setAttribute('data-prerendered', 'true')
+      const text = (document.body?.innerText || '').trim()
       return {
         title: document.title,
         canonical: document.querySelector('link[rel="canonical"]')?.getAttribute('href') ?? null,
         robots: document.querySelector('meta[name="robots"]')?.getAttribute('content') ?? '',
+        description: document.querySelector('meta[name="description"]')?.getAttribute('content') ?? '',
         h1: document.querySelector('h1')?.textContent?.trim() ?? '',
+        h1Count: document.querySelectorAll('h1').length,
+        words: text ? text.split(/\s+/).length : 0,
       }
     })
 
@@ -210,17 +243,38 @@ async function renderRoute(browser, route) {
     await mkdir(outputDir, { recursive: true })
     await writeFile(join(outputDir, 'index.html'), html, 'utf-8')
 
+    // ── Checks ───────────────────────────────────────────────────────────────
+    // Fatal = the page is not fit to be indexed. These stop the build.
+    const fatal = []
     const warnings = []
-    if (head.canonical !== canonicalUrl(route)) {
-      warnings.push(`canonical is ${head.canonical} (expected ${canonicalUrl(route)}) — remove the canonical: option from this view's useSeo()`)
-    }
-    if (head.robots.includes('noindex')) warnings.push('page is noindex but is being prerendered')
-    if (!head.h1) warnings.push('no <h1> on the page')
-    if (errors.length) warnings.push(`JS errors: ${errors.slice(0, 2).join(' | ')}`)
 
-    return { route, ok: true, title: head.title, warnings }
+    if (jsErrors.length) {
+      // The one that matters most. A component that throws during setup leaves
+      // the layout standing, so every other signal still looks healthy.
+      fatal.push(`JS error during render: ${jsErrors.slice(0, 2).join(' | ')}`)
+    }
+    if (!head.h1) {
+      fatal.push('no <h1> — the view almost certainly failed to mount')
+    }
+    if (route !== '/' && shellTitle && head.title === shellTitle) {
+      fatal.push(`title is still the shell's ("${shellTitle}") — this view's useSeo() never ran`)
+    }
+    if (head.canonical !== canonicalUrl(route)) {
+      fatal.push(`canonical is ${head.canonical} (expected ${canonicalUrl(route)}) — remove the canonical: option from this view's useSeo()`)
+    }
+    if (head.robots.includes('noindex')) {
+      fatal.push('page is noindex but is being prerendered')
+    }
+
+    if (head.h1Count > 1) warnings.push(`${head.h1Count} <h1> elements`)
+    if (head.words < MIN_WORDS) warnings.push(`only ${head.words} words of text`)
+    if (!head.description) warnings.push('no meta description')
+    if (head.title.length > 60) warnings.push(`title is ${head.title.length} chars — Google truncates past ~60`)
+    if (head.description.length > 160) warnings.push(`meta description is ${head.description.length} chars`)
+
+    return { route, ok: true, title: head.title, description: head.description, words: head.words, fatal, warnings }
   } catch (err) {
-    return { route, ok: false, error: err.message }
+    return { route, ok: false, error: err.message, fatal: [err.message], warnings: [] }
   } finally {
     await page.close()
   }
@@ -252,6 +306,7 @@ async function prerender() {
   }
 
   const shell = await prepareShell()
+  const shellTitle = titleOf(shell)
   const server = await startServer(shell)
   const browser = await puppeteer.launch({
     args: chromium.args,
@@ -260,7 +315,7 @@ async function prerender() {
     headless: chromium.headless,
   })
 
-  let results = []
+  const results = []
 
   try {
     const routes = await getRoutes(browser)
@@ -271,43 +326,79 @@ async function prerender() {
     const workers = Array.from({ length: CONCURRENCY }, async () => {
       while (queue.length) {
         const route = queue.shift()
-        const result = await renderRoute(browser, route)
+        const result = await renderRoute(browser, route, shellTitle)
         results.push(result)
-        if (result.ok) {
-          console.log(`  ✓ ${route}${result.warnings.length ? '  ⚠' : ''}`)
-        } else {
+        if (!result.ok) {
           console.error(`  ✗ ${route} — ${result.error}`)
+        } else if (result.fatal.length) {
+          console.error(`  ✗ ${route}`)
+        } else {
+          console.log(`  ✓ ${route}${result.warnings.length ? '  ⚠' : ''}`)
         }
       }
     })
     await Promise.all(workers)
 
-    const rendered = results.filter((r) => r.ok)
-    await writeSitemap(rendered.map((r) => r.route))
+    // Duplicate titles and descriptions are cross-page problems, so they're
+    // judged after everything has rendered.
+    const healthy = results.filter((r) => r.ok && !r.fatal.length)
+    const byTitle = new Map()
+    for (const r of healthy) byTitle.set(r.title, [...(byTitle.get(r.title) ?? []), r.route])
+    for (const [title, rs] of byTitle) {
+      if (rs.length > 1) {
+        for (const r of healthy.filter((x) => rs.includes(x.route))) {
+          r.fatal.push(`duplicate title "${title}" — also on ${rs.filter((p) => p !== r.route).join(', ')}`)
+        }
+      }
+    }
 
-    // Warnings summary
-    const warned = rendered.filter((r) => r.warnings.length)
+    const byDesc = new Map()
+    for (const r of healthy) {
+      if (!r.description) continue
+      byDesc.set(r.description, [...(byDesc.get(r.description) ?? []), r.route])
+    }
+    for (const [, rs] of byDesc) {
+      if (rs.length > 1) {
+        for (const r of healthy.filter((x) => rs.includes(x.route))) {
+          r.warnings.push(`duplicate meta description — also on ${rs.filter((p) => p !== r.route).join(', ')}`)
+        }
+      }
+    }
+
+    // Only pages that passed every fatal check belong in the sitemap.
+    const indexable = results.filter((r) => r.ok && !r.fatal.length)
+    await writeSitemap(indexable.map((r) => r.route))
+
+    // Vercel serves this for routes we didn't prerender. Keep it out of the index.
+    await writeFile(SHELL_FILE, addNoindex(shell), 'utf-8')
+
+    const warned = indexable.filter((r) => r.warnings.length)
     if (warned.length) {
-      console.log('\n  ⚠ Warnings:')
+      console.log('\n  ⚠ Warnings (not blocking):')
       for (const r of warned) {
         for (const w of r.warnings) console.log(`    ${r.route}: ${w}`)
       }
     }
 
-    // Duplicate titles
-    const byTitle = new Map()
-    for (const r of rendered) byTitle.set(r.title, [...(byTitle.get(r.title) ?? []), r.route])
-    const dupes = [...byTitle.entries()].filter(([, rs]) => rs.length > 1)
-    if (dupes.length) {
-      console.log('\n  ⚠ Duplicate titles (give each page its own useSeo title):')
-      for (const [title, rs] of dupes) console.log(`    "${title}" → ${rs.join(', ')}`)
+    const broken = results.filter((r) => r.fatal.length)
+    if (broken.length) {
+      console.error('\n  ✗ BROKEN PAGES — these are excluded from the sitemap:')
+      for (const r of broken) {
+        for (const f of r.fatal) console.error(`    ${r.route}: ${f}`)
+      }
     }
 
-    const failed = results.filter((r) => !r.ok)
-    console.log(`\n  Done: ${rendered.length} rendered, ${failed.length} failed, sitemap has ${rendered.length} URLs\n`)
+    console.log(
+      `\n  Done: ${indexable.length} indexable, ${broken.length} broken, sitemap has ${indexable.length} URLs\n`,
+    )
 
-    if (failed.length && process.env.PRERENDER_ALLOW_FAILURES !== '1') {
-      process.exitCode = 1
+    if (broken.length) {
+      if (ALLOW_FAILURES) {
+        console.warn('  PRERENDER_ALLOW_FAILURES=1 — continuing despite the above.\n')
+      } else {
+        console.error('  Build failed. Fix the pages above, or set PRERENDER_ALLOW_FAILURES=1 to ship anyway.\n')
+        process.exitCode = 1
+      }
     }
   } finally {
     await browser.close()
