@@ -23,8 +23,44 @@
  */
 
 import { readFile } from 'fs/promises'
-import { existsSync } from 'fs'
+import { existsSync, readFileSync } from 'fs'
 import { resolve, join } from 'path'
+
+/**
+ * Node does not read .env on its own, and this script has no dependencies, so
+ * it parses one itself. Checks .env and .env.local, and never overwrites a
+ * variable that is already set in the real environment.
+ */
+function loadEnv() {
+  const checked = []
+  for (const name of ['.env', '.env.local']) {
+    const path = resolve(name)
+    checked.push(path)
+    if (!existsSync(path)) continue
+    const text = readFileSync(path, 'utf-8').replace(/^﻿/, '')
+    for (const line of text.split(/\r?\n/)) {
+      const trimmed = line.trim()
+      if (!trimmed || trimmed.startsWith('#')) continue
+      const eq = trimmed.indexOf('=')
+      if (eq === -1) continue
+      const key = trimmed.slice(0, eq).trim().replace(/^export\s+/, '')
+      let value = trimmed.slice(eq + 1).trim()
+      // strip matching quotes, and anything after an unquoted #
+      if (
+        (value.startsWith('"') && value.endsWith('"')) ||
+        (value.startsWith("'") && value.endsWith("'"))
+      ) {
+        value = value.slice(1, -1)
+      } else {
+        value = value.split(' #')[0].trim()
+      }
+      if (!(key in process.env)) process.env[key] = value
+    }
+  }
+  return checked
+}
+
+const envFilesChecked = loadEnv()
 
 const SITE = 'https://tellmeyourstory.uk'
 const HOST = 'tellmeyourstory.uk'
@@ -38,9 +74,15 @@ const STATE = resolve('scripts/indexnow-state.json')
 const ALL = process.argv.includes('--all')
 const DRY = process.argv.includes('--dry')
 
-const KEY = process.env.INDEXNOW_KEY
+const KEY = (process.env.INDEXNOW_KEY || '').trim()
 if (!KEY) {
-  console.error('\n  INDEXNOW_KEY is not set. Put it in .env first.\n')
+  console.error('\n  INDEXNOW_KEY not found.')
+  console.error('  Looked in the environment and in:')
+  for (const f of envFilesChecked) {
+    console.error(`    ${f} ${existsSync(f) ? '(exists)' : '(not found)'}`)
+  }
+  console.error('\n  The line should read:  INDEXNOW_KEY=your-key-here')
+  console.error('  Run this from the project root, where .env lives.\n')
   process.exit(1)
 }
 
