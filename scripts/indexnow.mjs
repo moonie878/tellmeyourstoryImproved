@@ -73,6 +73,10 @@ const STATE = resolve('scripts/indexnow-state.json')
 
 const ALL = process.argv.includes('--all')
 const DRY = process.argv.includes('--dry')
+// Default to the LIVE sitemap. A local dist/ is whatever you last built on this
+// machine, which on a Vercel project is often months out of date — submitting
+// from it means telling Bing to crawl routes that no longer exist.
+const LOCAL = process.argv.includes('--local')
 
 const KEY = (process.env.INDEXNOW_KEY || '').trim()
 if (!KEY) {
@@ -94,13 +98,30 @@ const readJson = async (p, fallback) => {
   }
 }
 
-async function sitemapUrls() {
-  if (!existsSync(SITEMAP)) {
-    console.error('  dist/sitemap.xml not found - run the build first.')
+async function sitemapXml() {
+  if (LOCAL) {
+    if (!existsSync(SITEMAP)) {
+      console.error('  dist/sitemap.xml not found - run the build first.')
+      process.exit(1)
+    }
+    console.log('  Reading dist/sitemap.xml (--local). Make sure you just built.')
+    return readFile(SITEMAP, 'utf-8')
+  }
+  const res = await fetch(`${SITE}/sitemap.xml`)
+  if (!res.ok) {
+    console.error(`  Could not fetch ${SITE}/sitemap.xml - HTTP ${res.status}`)
     process.exit(1)
   }
-  const xml = await readFile(SITEMAP, 'utf-8')
-  return [...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1])
+  return res.text()
+}
+
+async function sitemapUrls(xml) {
+  const urls = [...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1])
+  if (!urls.length) {
+    console.error('  No <loc> entries found in the sitemap.')
+    process.exit(1)
+  }
+  return urls
 }
 
 /**
@@ -108,7 +129,7 @@ async function sitemapUrls() {
  * knows this - it hashes each page's visible text. If you aren't using the
  * manifest, this falls back to a local record of what was last submitted.
  */
-async function changedUrls(all) {
+async function changedUrls(all, xml) {
   const manifest = await readJson(MANIFEST, null)
   const state = await readJson(STATE, {})
 
@@ -125,7 +146,6 @@ async function changedUrls(all) {
   }
 
   // No manifest: fall back to lastmod dates in the sitemap.
-  const xml = await readFile(SITEMAP, 'utf-8')
   const entries = [...xml.matchAll(/<loc>([^<]+)<\/loc>\s*<lastmod>([^<]+)<\/lastmod>/g)]
   if (!entries.length) return { urls: all, nextState: null }
 
@@ -140,12 +160,13 @@ async function changedUrls(all) {
 }
 
 async function main() {
-  const all = await sitemapUrls()
+  const xml = await sitemapXml()
+  const all = await sitemapUrls(xml)
   let urls = all
   let nextState = null
 
   if (!ALL) {
-    const result = await changedUrls(all)
+    const result = await changedUrls(all, xml)
     urls = result.urls
     nextState = result.nextState
   }
