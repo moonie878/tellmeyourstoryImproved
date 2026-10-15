@@ -156,6 +156,7 @@ const routes: RouteRecordRaw[] = [
   {
   path: '/admin/purchases',
   component: () => import('../views/AdminPurchasesView.vue'),
+  meta: { requiresAuth: true, prerender: false },
 },
 
   // ── 404 (must be last) ────────────────────────────────────────────────────
