@@ -21,7 +21,7 @@
               For help with your account, exports, payments, or any technical issues.
             </p>
             <p class="mt-4 text-sm font-medium text-stone-900">
-              hello@tellmeyourstory.uk
+              mark-griffiths@tellmeyourstory.uk
             </p>
           </div>
 
@@ -31,7 +31,7 @@
               If you’ve created something meaningful and would like to share your thoughts, I’d be so grateful to hear about it.
             </p>
             <p class="mt-4 text-sm font-medium text-stone-900">
-              hello@tellmeyourstory.uk
+              mark-griffiths@tellmeyourstory.uk
             </p>
           </div>
         </div>
