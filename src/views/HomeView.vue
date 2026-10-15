@@ -11,11 +11,11 @@
       <div class="relative mx-auto max-w-6xl">
         <div class="grid items-center gap-12 md:grid-cols-2 md:gap-16">
 
-                    <!-- Left — text -->
+                   <!-- Left — text -->
           <div class="hero-text pb-12 text-center md:text-left">
             <div class="eyebrow">
               <span class="eyebrow-dot"></span>
-              No subscription · Built in the UK
+              For anyone with ageing parents or grandparents
             </div>
 
             <h1 class="mt-5 font-display text-[2.6rem] font-bold leading-[1.1] tracking-[-0.02em] text-[#1C1917] sm:text-5xl md:text-[3.6rem]">
@@ -23,11 +23,11 @@
             </h1>
 
             <p class="mx-auto mt-6 max-w-lg text-base leading-[1.8] text-[#5C534E] sm:text-lg md:mx-0">
-              Almost everyone says it after a parent or grandparent dies. The big facts survive — where they were born, what they did for a living. What disappears is everything else: what their childhood home smelled like, what frightened them, how they actually met.
+              Almost everyone says it after a parent or grandparent dies — and by then it is too late. The big facts survive. What disappears is what their childhood home smelled like, what frightened them, how they actually met.
             </p>
 
-            <p class="mx-auto mt-4 max-w-lg text-base font-semibold leading-[1.8] text-[#1C1917] sm:text-lg md:mx-0">
-              Tell Me Your Story asks the hundred questions nobody thinks to ask — and turns their answers into a printed book with their voice inside it.
+            <p class="mx-auto mt-4 max-w-lg text-base leading-[1.8] text-[#5C534E] sm:text-lg md:mx-0">
+              <strong class="font-semibold text-[#1C1917]">If your mum, dad or grandparents are getting older and you have never properly asked them about their life, this is how you do it.</strong> Tell Me Your Story asks the hundred questions nobody thinks to ask, and turns their answers into a printed book with their voice inside it.
             </p>
 
             <!-- Whose story? -->
@@ -47,6 +47,7 @@
             <div class="mt-5 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs text-[#716963] md:justify-start">
               <span class="flex items-center gap-1.5"><span class="check">✓</span> 5 questions free</span>
               <span class="flex items-center gap-1.5"><span class="check">✓</span> No card needed</span>
+              <span class="flex items-center gap-1.5"><span class="check">✓</span> No subscription</span>
               <router-link to="/example" class="font-medium text-[#7C5C3B] underline-offset-4 hover:underline" @click="trackExampleStory">
                 See a real example →
               </router-link>
