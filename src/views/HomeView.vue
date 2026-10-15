@@ -11,7 +11,7 @@
       <div class="relative mx-auto max-w-6xl">
         <div class="grid items-center gap-12 md:grid-cols-2 md:gap-16">
 
-          <!-- Left — text -->
+                    <!-- Left — text -->
           <div class="hero-text pb-12 text-center md:text-left">
             <div class="eyebrow">
               <span class="eyebrow-dot"></span>
@@ -19,12 +19,15 @@
             </div>
 
             <h1 class="mt-5 font-display text-[2.6rem] font-bold leading-[1.1] tracking-[-0.02em] text-[#1C1917] sm:text-5xl md:text-[3.6rem]">
-              The memory book that
-              <em class="italic text-[#7C5C3B]">plays their voice</em>
+              <em class="italic text-[#7C5C3B]">“I wish I'd asked more.”</em>
             </h1>
 
             <p class="mx-auto mt-6 max-w-lg text-base leading-[1.8] text-[#5C534E] sm:text-lg md:mx-0">
-              Ask them guided questions. They speak or type their answers. We turn it into a printed book with a QR code by every story — scan it, and hear them tell it.
+              Almost everyone says it after a parent or grandparent dies. The big facts survive — where they were born, what they did for a living. What disappears is everything else: what their childhood home smelled like, what frightened them, how they actually met.
+            </p>
+
+            <p class="mx-auto mt-4 max-w-lg text-base font-semibold leading-[1.8] text-[#1C1917] sm:text-lg md:mx-0">
+              Tell Me Your Story asks the hundred questions nobody thinks to ask — and turns their answers into a printed book with their voice inside it.
             </p>
 
             <!-- Whose story? -->
@@ -76,6 +79,23 @@
             </div>
           </div>
 
+        </div>
+      </div>
+    </section>
+
+        <!-- ═══════════════════════════════════════ -->
+    <!-- 1b. WHY YOU'D WANT ONE                  -->
+    <!-- ═══════════════════════════════════════ -->
+    <section class="reveal bg-white px-5 py-16 sm:px-8 sm:py-20">
+      <div class="mx-auto max-w-5xl">
+        <div class="section-label text-center">Why bother</div>
+        <h2 class="section-title mt-3 text-center">Why now, and not later</h2>
+
+        <div class="mt-12 grid gap-6 sm:grid-cols-2">
+          <div v-for="reason in whyNow" :key="reason.title" class="why-card">
+            <h3 class="why-card-title">{{ reason.title }}</h3>
+            <p class="why-card-body">{{ reason.body }}</p>
+          </div>
         </div>
       </div>
     </section>
@@ -621,6 +641,25 @@ onMounted(() => {
 
 const printFrom = `£${PRINTED_BOOK_FROM_PRICE.toFixed(2)}`
 
+const whyNow = [
+  {
+    title: 'Because "later" is the problem',
+    body: 'Everyone intends to ask. Almost nobody does. And the moment it becomes urgent — a diagnosis, a fall, a hospital admission — is usually the moment it is too late.',
+  },
+  {
+    title: "Because they won't write it down themselves",
+    body: 'Ask your dad to write his memoirs and he will say nobody would be interested. Ask him twelve specific questions about his first job and he will talk for an hour.',
+  },
+  {
+    title: 'Because the voice is what you miss most',
+    body: 'You will have hundreds of photographs. A recording of them telling a story, in their own words, at their own pace — almost nobody has that, and it is the thing people say they would give anything for.',
+  },
+  {
+    title: 'Because the alternative costs thousands',
+    body: `A professional memoir service runs from £1,000 to £30,000. This starts at £3.99, and a printed hardback is ${printFrom} including UK delivery.`,
+  },
+]
+
 // Hero "Whose story?" buttons → /register?type=…
 // `type` must match an id in src/data/storyTypes.ts (unknown ids are ignored).
 const storyOptions = [
@@ -935,4 +974,10 @@ h1 { font-family: 'Playfair Display', Georgia, serif; }
 @media (prefers-reduced-motion: reduce) {
   .reveal { opacity: 1; transform: none; transition: none; }
 }
+
+/* ── Why now cards ──────────────────────── */
+.why-card { background: #FAF7F4; border: 1px solid #E8E0D8; border-radius: 24px; padding: 28px; }
+.why-card-title { font-family: 'Playfair Display', Georgia, serif; font-size: 1.15rem; font-weight: 700; color: #1C1917; line-height: 1.3; }
+.why-card-body { margin-top: 10px; font-size: 16px; line-height: 1.75; color: #5C534E; }
+
 </style>
