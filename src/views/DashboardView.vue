@@ -846,6 +846,19 @@ function hasPrintAccess() {
 
 // ─── Image helpers ────────────────────────────────────────────────────────────
 
+function debugPdfEnabled() {
+  try { return localStorage.getItem('tmys-debug-pdf') === '1' } catch { return false }
+}
+
+function downloadBlob(blob: Blob, filename: string) {
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = filename
+  a.click()
+  setTimeout(() => URL.revokeObjectURL(url), 10_000)
+}
+
 async function loadImageAsBase64(url: string): Promise<string> {
   const response = await fetch(url)
   const blob     = await response.blob()
@@ -1021,6 +1034,16 @@ console.log('Converted dims mm:', luluWidth, luluHeight)
              : podId === '0600X0900.FC.PRE.CW.080CW444.GXX' ? 'hardcover' 
              : 'softcover',
     })
+
+if (debugPdfEnabled()) {
+  const stamp = `${podId}-${actualPageCount}p`
+  downloadBlob(coverBlob, `cover-${stamp}.pdf`)
+  downloadBlob(interiorBlob, `interior-${stamp}.pdf`)
+  console.log(
+    `[debug] saved cover + interior · ${podId} · ${actualPageCount} pages · ` +
+    `sheet ${luluWidth}x${luluHeight}mm · spine ${luluSpine}mm`,
+  )
+}
 
     // Generate separate cover for photo book — premium softcover dimensions
 let photoBookCoverBlob: Blob | null = null
