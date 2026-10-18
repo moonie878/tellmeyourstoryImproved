@@ -20,19 +20,49 @@ import { EBGaramondBoldItalic } from '../fonts/EBGaramond-BoldItalic'
 //   On softcover they are the same number. On a hardcover case wrap they are
 //   not, because the board is cut larger than the page.
 //
-// Why that matters (the 2026 hardcover bugs, in order):
-//   June–Sept: the code laid out as though only the 3.175mm bleed was lost, so
-//   the front footer printed 13mm outside the finished cover, the content block
-//   centred 9mm too high, and two hand-tuned "nudge" constants pushed the front
-//   panel a further 3mm sideways.
-//   October: fixing that with a single 22.225mm constant over-corrected. The
-//   board overhangs the page by 3.175mm on the fore-edge, so only 19.05mm is
-//   truly lost — treating all of it as lost pulled both panels 1.5875mm toward
-//   the spine. Front cover printed left, back cover printed right, spine and
-//   vertical placement correct (the overhang is symmetric at head and tail).
+// ─── Where the hardcover numbers come from (read this before changing them) ───
+//
+// They are MEASURED from Lulu's own cover template for
+// 0600X0900.FC.PRE.CW.080CW444.GXX, not derived. The template's own text:
+//
+//     TOTAL DOCUMENT SIZE (with wrap)  14" x 10.75"  (355.6mm x 273.05mm)
+//     BOOK TRIM SIZE                   6.25" x 9.5"  (158.75mm x 241.3mm)
+//     WRAP AREA (from wrap edge)       0.625"        (15.875mm)
+//     SAFETY MARGIN (from wrap edge)   0.625"        (15.875mm)
+//     Spine width                      0.25"         (6.35mm)  [at 66 pages]
+//
+// and its drawn rectangles, on a 355.6mm sheet:
+//
+//     back board   15.875 .. 174.625      (158.75mm wide)
+//     spine       174.625 .. 180.975      (6.35mm)
+//     front board 180.975 .. 339.725      (158.75mm wide)
+//     safe area    31.75  .. 158.75  and  196.85 .. 323.85
+//
+// Two things follow, and both were wrong here before October 2026:
+//   1. The wrap that folds under is 15.875mm (0.625in), not 19.05mm.
+//   2. The board overhangs the page by 6.35mm (0.25in), not 3.175mm (0.125in).
+//      Someone assumed an eighth of an inch where Lulu uses a quarter.
+//   3. The boards butt straight onto the spine folds. There is NO hinge gap.
+//
+// History of the 2026 hardcover bugs, in order:
+//   June-Sept: the code laid out as though only the 3.175mm bleed was lost, so
+//   the front footer printed 13mm outside the finished cover and the content
+//   block centred 9mm too high.
+//   October: corrected to 22.225mm, which over-corrected and pulled both panels
+//   1.5875mm toward the spine. Front printed left, back printed right.
+//   Also October: corrected again to 19.05mm on the assumption of a 3.175mm
+//   overhang. Still 3.175mm too much, so the panels stayed 1.5875mm toward the
+//   spine and the next printed book was still visibly off.
+//   This version: 15.875mm, read off Lulu's template. Every panel edge now
+//   lands exactly on the template's lines.
+//
+// WARNING — softcover and dustjacket have NOT been checked this way. Their
+// LOST_EDGE values are still assumptions. Download the templates for
+// 0600X0900.FC.STD.PB.060UW444.MXX and 0600X0900.FC.PRE.LW.080CW444.GNG and do
+// the same measurement before trusting a printed one.
 
-const TRIM_W = 152.4   // mm — 6in. Fallback sizing only; never used for layout.
-const TRIM_H = 228.6   // mm — 9in. Fallback sizing only; never used for layout.
+const TRIM_W = 152.4   // mm — 6in page. Fallback sizing only; never used for layout.
+const TRIM_H = 228.6   // mm — 9in page. Fallback sizing only; never used for layout.
 const FLAP_W = 76.2    // mm — standard 3in dust jacket flap
 
 /**
@@ -40,9 +70,9 @@ const FLAP_W = 76.2    // mm — standard 3in dust jacket flap
  * plus the spine, per side. Use this to derive or estimate the sheet size,
  * never to position anything.
  *
- * Confirmed against Lulu's published spec for
- * 0600X0900.FC.PRE.CW.080CW444.GXX: a 365.12mm sheet with a 15.88mm spine
- * leaves (365.12 - 152.4*2 - 15.88) / 2 = 22.225mm per side.
+ * For hardcover this stays 22.225 even though the wrap is 15.875, because
+ * 15.875 + 158.75 (board) === 22.225 + 152.4 (page). The sheet and the spine
+ * come out identical either way; only the LAYOUT differs.
  */
 const EDGE_ALLOWANCE: Record<string, number> = {
   softcover:  3.175,
@@ -54,39 +84,42 @@ const EDGE_ALLOWANCE: Record<string, number> = {
  * LAYOUT — how much of each outer edge is genuinely gone once the cover is
  * finished, i.e. where the visible cover actually begins.
  *
- *  softcover / dustjacket — 3.175mm (0.125in) bleed, trimmed off.
- *  hardcover case wrap    — 19.05mm (0.75in) folded under the board.
- *
- * This is NOT the same as EDGE_ALLOWANCE, and conflating the two is what
- * caused the October 2026 hardcover bug. On a case wrap the board is cut
- * 3.175mm LARGER than the trimmed page, so of the 22.225mm allowance only
- * 19.05mm disappears — the remaining 3.175mm is board you can see and hold.
- *
- * Treating all 22.225mm as lost pulled both panel centres 1.5875mm toward
- * the spine (half the overhang each), which printed as a front cover shifted
- * left and a back cover shifted right. Vertically it cancelled out, because
- * the overhang is symmetric at head and tail — which is why the spine and the
- * vertical placement looked correct while the panels did not.
+ *  softcover / dustjacket — 3.175mm (0.125in) bleed, trimmed off. UNVERIFIED.
+ *  hardcover case wrap    — 15.875mm (0.625in) folded under the board,
+ *                           measured from Lulu's template. See the block above.
  */
 const LOST_EDGE: Record<string, number> = {
   softcover:  3.175,
-  hardcover:  19.05,
+  hardcover:  15.875,
   dustjacket: 3.175,
 }
 
 /**
  * How much larger the board is than the trimmed page, on the fore-edge, head
- * and tail — never on the spine edge, where the hinge is. Kept for the
+ * and tail — never on the spine edge, where the hinge is. Used for the
  * geometry log so the numbers can be checked against a finished book.
+ *
+ * Hardcover: 6.35mm. A 6x9in page gets a 6.25 x 9.5in board.
  */
 const BOARD_OVERHANG: Record<string, number> = {
   softcover:  0,
-  hardcover:  3.175,
+  hardcover:  6.35,
   dustjacket: 0,
 }
 
-/** Keep text and rules at least this far inside the visible edge. */
-const SAFE_MARGIN = 8 // mm
+/**
+ * Keep text and rules at least this far inside the visible edge.
+ *
+ * Hardcover is 15.875mm because that is what Lulu's template marks as the
+ * safety margin, measured from the wrap edge. With LOST_EDGE at 15.875 that
+ * puts the content box at 31.75 .. 241.30mm on a 273.05mm sheet, which is
+ * exactly the white safe area the template draws.
+ */
+const SAFE_MARGIN: Record<string, number> = {
+  softcover:  8,
+  hardcover:  15.875,
+  dustjacket: 8,
+}
 
 const IMG_QUALITY = 0.85
 
@@ -157,6 +190,7 @@ interface CoverGeometry {
   totalW: number
   totalH: number
   edge: number
+  safe: number
   spine: number
   spineLeft: number
   spineRight: number
@@ -176,9 +210,13 @@ interface CoverGeometry {
  * Derives every panel edge from the finished sheet.
  *
  * The cover is always symmetrical about the spine, so the spine sits dead
- * centre and each panel runs from the spine out to the edge allowance. No
- * panel width is assumed — it falls out of the arithmetic, which is what
- * keeps hardcover and softcover correct with the same code.
+ * centre and each panel runs from the spine out to the visible edge. No panel
+ * width is assumed — it falls out of the arithmetic, which is what keeps
+ * hardcover and softcover correct with the same code.
+ *
+ * On a 355.6mm hardcover sheet with a 6.35mm spine this produces:
+ *   back  15.875 .. 174.625   front 180.975 .. 339.725   both 158.75mm wide
+ * which is exactly what Lulu's template draws.
  */
 function buildGeometry(
   totalW: number,
@@ -190,6 +228,7 @@ function buildGeometry(
   // The sheet allowance (EDGE_ALLOWANCE) is deliberately not used here; it is
   // larger than this on a case wrap and using it shifts both panels inward.
   const edge = LOST_EDGE[bindingType] ?? LOST_EDGE.softcover
+  const safe = SAFE_MARGIN[bindingType] ?? SAFE_MARGIN.softcover
   const sheetEdge = EDGE_ALLOWANCE[bindingType] ?? EDGE_ALLOWANCE.softcover
   const isDustJacket = bindingType === 'dustjacket'
   const flap = isDustJacket ? FLAP_W : 0
@@ -201,8 +240,9 @@ function buildGeometry(
   const spineLeft  = (totalW - spine) / 2
   const spineRight = spineLeft + spine
 
-  // Panels run from the spine out to the visible edge — on a hardcover that is
-  // the board edge, which sits 3.175mm proud of the trimmed page.
+  // Panels run from the spine fold out to the visible edge. On a case wrap the
+  // boards butt straight onto the spine folds — Lulu's template shows no joint
+  // gap, so nothing is inset here.
   const backLeft   = edge + flap
   const backRight  = spineLeft
   const frontLeft  = spineRight
@@ -212,6 +252,7 @@ function buildGeometry(
     totalW,
     totalH,
     edge,
+    safe,
     spine,
     spineLeft,
     spineRight,
@@ -223,8 +264,8 @@ function buildGeometry(
     frontRight,
     frontCX:  (frontLeft + frontRight) / 2,
     panelW:   frontRight - frontLeft,
-    contentTop: edge + SAFE_MARGIN,
-    contentBot: totalH - edge - SAFE_MARGIN,
+    contentTop: edge + safe,
+    contentBot: totalH - edge - safe,
   }
 }
 
@@ -310,14 +351,16 @@ export async function generateCoverPDF(options: CoverOptions): Promise<Blob> {
 
   const g = buildGeometry(totalW, totalH, spine, bindingType)
 
-  // Panel centres are logged so a finished book can be checked against them:
-  // measure the printed block's two side margins — they should match.
+  // Panel edges are logged so they can be checked against Lulu's template:
+  // open the template for this pod id and compare these numbers to its lines.
   console.log(
-    `Cover PDF (${bindingType}): ${g.totalW.toFixed(2)}×${g.totalH.toFixed(2)}mm · ` +
-    `spine ${g.spine.toFixed(2)}mm · visible panel ${g.panelW.toFixed(2)}mm ` +
+    `Cover PDF (${bindingType}): ${g.totalW.toFixed(2)}x${g.totalH.toFixed(2)}mm · ` +
+    `spine ${g.spine.toFixed(2)}mm (${spineSource}) · visible panel ${g.panelW.toFixed(2)}mm ` +
     `(page ${TRIM_W} + ${(BOARD_OVERHANG[bindingType] ?? 0).toFixed(3)}mm board) · ` +
-    `visible edge ${g.edge.toFixed(3)}mm · safe band ${g.contentTop.toFixed(1)}–${g.contentBot.toFixed(1)}mm · ` +
-    `centres back ${g.backCX.toFixed(3)} front ${g.frontCX.toFixed(3)}`,
+    `wrap ${g.edge.toFixed(3)}mm · safe ${g.safe.toFixed(3)}mm · ` +
+    `back ${g.backLeft.toFixed(3)}..${g.backRight.toFixed(3)} · ` +
+    `front ${g.frontLeft.toFixed(3)}..${g.frontRight.toFixed(3)} · ` +
+    `content ${g.contentTop.toFixed(2)}..${g.contentBot.toFixed(2)} down`,
   )
 
   // ── Document ───────────────────────────────────────────────────────────────
@@ -632,5 +675,8 @@ export function getCoverDimensions(
     edge_mm:   sheetEdge,
     /** Per-side loss — where the visible cover starts. For layout. */
     visible_edge_mm: lostEdge,
+    /** Finished board size — page plus overhang. */
+    board_w_mm: TRIM_W + (BOARD_OVERHANG[bindingType] ?? 0),
+    board_h_mm: TRIM_H + (BOARD_OVERHANG[bindingType] ?? 0) * 2,
   }
 }
