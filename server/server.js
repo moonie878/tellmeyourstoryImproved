@@ -7,6 +7,7 @@ const Groq = require('groq-sdk')
 const crypto = require('crypto')
 const multer = require('multer')
 const { Resend } = require('resend')
+const { storeRecording } = require('./audio')
 require('dotenv').config()
 
 const app = express()
@@ -1903,15 +1904,13 @@ app.post('/storyteller/:token/recording', upload.single('audio'), async (req, re
     if (storytellerLimitReached(ctx, sectionId)) return res.status(402).json({ error: 'limit', limitReached: true })
 
     const type = req.file.mimetype || 'audio/mp4'
-    const ext = type.includes('webm') ? 'webm' : type.includes('ogg') ? 'ogg' : 'mp4'
-    const path = `${link.project_id}/${sectionId}-${Date.now()}.${ext}`
-
-    const { error: upErr } = await supabaseAdmin.storage
-      .from('voice-recordings')
-      .upload(path, req.file.buffer, { contentType: type, upsert: true })
-    if (upErr) throw upErr
-
-    const { data: { publicUrl } } = supabaseAdmin.storage.from('voice-recordings').getPublicUrl(path)
+       const { publicUrl } = await storeRecording({
+     supabaseAdmin,
+     buffer: req.file.buffer,
+     mimeType: type,
+     projectId: link.project_id,
+     sectionId,
+   })
 
     const { data: rec, error: dbErr } = await supabaseAdmin
       .from('voice_recordings')
