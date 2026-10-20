@@ -54,7 +54,7 @@ function pickMimeType(): string | undefined {
   if (typeof MediaRecorder === 'undefined' || typeof MediaRecorder.isTypeSupported !== 'function') {
     return undefined
   }
-  const candidates = ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4', 'audio/ogg;codecs=opus', 'audio/ogg']
+ const candidates = ['audio/mp4', 'audio/webm;codecs=opus', 'audio/webm', 'audio/ogg;codecs=opus', 'audio/ogg']
   return candidates.find((t) => MediaRecorder.isTypeSupported(t))
 }
 
@@ -251,7 +251,7 @@ export function useVoiceRecording() {
 
   // ── Save recording to Supabase ───────────────────────────────────────────────
 
-  async function saveRecording(
+    async function saveRecording(
     blob: Blob,
     transcript: string,
     durationSeconds: number,
@@ -262,17 +262,28 @@ export function useVoiceRecording() {
     clearError()
 
     try {
-      const filename = `${projectId}/${sectionId}-${Date.now()}.${extensionFor(blob.type)}`
+      // Uploads go via the server now, which transcodes to MP3 first.
+      // MediaRecorder hands Chrome a WebM file, and iOS Safari cannot play
+      // WebM at all — so a recording made on an Android phone was silent for
+      // every iPhone that scanned its QR code in the printed book.
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session?.access_token) throw new Error('Not signed in')
 
-      const { error: uploadError } = await supabase.storage
-        .from('voice-recordings')
-        .upload(filename, blob, { contentType: blob.type || 'audio/mp4', upsert: true })
+      const form = new FormData()
+      form.append('audio', blob, `recording.${extensionFor(blob.type)}`)
+      form.append('projectId', projectId)
+      form.append('sectionId', sectionId)
 
-      if (uploadError) throw new Error(`Upload failed: ${uploadError.message}`)
+      const response = await fetch(`${SERVER_URL}/voice/store`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${session.access_token}` },
+        body: form,
+      })
 
-      const { data: { publicUrl } } = supabase.storage
-        .from('voice-recordings')
-        .getPublicUrl(filename)
+      if (!response.ok) throw new Error(`Upload failed: ${await response.text()}`)
+
+      const { audioUrl } = await response.json()
+      if (!audioUrl) throw new Error('Upload failed: no URL returned')
 
       const { data, error: dbError } = await supabase
         .from('voice_recordings')
@@ -280,7 +291,7 @@ export function useVoiceRecording() {
           {
             section_id:       sectionId,
             project_id:       projectId,
-            audio_url:        publicUrl,
+            audio_url:        audioUrl,
             transcript,
             duration_seconds: durationSeconds,
           },
