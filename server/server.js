@@ -1855,6 +1855,49 @@ app.get('/storyteller/:token', async (req, res) => {
   }
 })
 
+// Store a voice recording from the signed-in app, transcoded to MP3.
+// The browser used to upload straight to Supabase, where RLS checked who it
+// was. Doing the upload here would lose that, so it's checked explicitly.
+app.post('/voice/store', upload.single('audio'), async (req, res) => {
+  try {
+    if (!req.file) return res.status(400).json({ error: 'No audio file provided' })
+
+    const { projectId, sectionId } = req.body
+    if (!projectId || !sectionId) {
+      return res.status(400).json({ error: 'Missing projectId or sectionId' })
+    }
+
+    const token = (req.headers.authorization || '').replace(/^Bearer\s+/i, '')
+    if (!token) return res.status(401).json({ error: 'Not signed in' })
+
+    const { data: { user }, error: authErr } = await supabaseAdmin.auth.getUser(token)
+    if (authErr || !user) return res.status(401).json({ error: 'Not signed in' })
+
+    const { data: project } = await supabaseAdmin
+      .from('story_projects')
+      .select('user_id')
+      .eq('id', projectId)
+      .maybeSingle()
+
+    if (!project || project.user_id !== user.id) {
+      return res.status(403).json({ error: 'Not your story' })
+    }
+
+    const { publicUrl, transcoded } = await storeRecording({
+      supabaseAdmin,
+      buffer: req.file.buffer,
+      mimeType: req.file.mimetype,
+      projectId,
+      sectionId,
+    })
+
+    res.json({ audioUrl: publicUrl, transcoded })
+  } catch (err) {
+    console.error('Voice store error:', err.message)
+    res.status(500).json({ error: 'Could not save the recording' })
+  }
+})
+
 // Save a typed (or transcribed) answer
 app.post('/storyteller/:token/answer', async (req, res) => {
   try {
