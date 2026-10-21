@@ -291,8 +291,7 @@ const totalQuestions = computed(() =>
 
 useSeo({
   title: `${totalQuestions.value} Questions to Ask Your Grandma About Her Life`,
-  description: `${totalQuestions.value} questions to ask your grandma — her childhood, the world she grew up in, love, motherhood, everyday life and the wisdom she has gathered. Free to read and print.`,
-  canonical: 'https://tellmeyourstory.uk/questions-to-ask-your-grandma',
+description: `${totalQuestions.value} questions to ask your grandma — her childhood, the world she grew up in, love, motherhood, and the wisdom she has gathered. Free to read and print.`,  canonical: 'https://tellmeyourstory.uk/questions-to-ask-your-grandma',
   type: 'article',
   schema: {
     '@context': 'https://schema.org',

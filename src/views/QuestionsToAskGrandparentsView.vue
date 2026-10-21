@@ -378,8 +378,7 @@ useSeo({
       {
         '@type': 'Article',
         headline: 'Questions to Ask Your Grandparents Before It\'s Too Late',
-        description: `${totalQuestions.value} meaningful questions to ask your grandparents about their childhood, history, family traditions, values, and legacy.`,
-        author: { '@type': 'Person', name: 'Mark', url: 'https://tellmeyourstory.uk' },
+description: `${totalQuestions.value} meaningful questions to ask your grandparents about their childhood, family traditions, values and legacy. Preserve their stories before they are lost.`,        author: { '@type': 'Person', name: 'Mark', url: 'https://tellmeyourstory.uk' },
         publisher: {
           '@type': 'Organization',
           name: 'Tell Me Your Story',
