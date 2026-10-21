@@ -209,6 +209,7 @@
 <script setup lang="ts">
 import StorytellerPromo from '../components/Marketing/StorytellerPromo.vue'
 import { useSeo } from '../composables/useSeo'
+import { productSchema } from '../lib/seoSchema'
 
 const tiers = [
   { name: 'Story Gift',            price: '3.99',  desc: 'PDF keepsake for one story',           featured: false },
@@ -226,8 +227,13 @@ const giftFor = [
 
 useSeo({
   title: 'Christmas Gift Ideas 2026 — Give the Gift of Their Story',
-  description: 'The most meaningful Christmas gift — help a loved one capture their life story in their own words. Voice recordings and a printed keepsake book. Tell Me Your Story.',
+  description:
+    'The Christmas gift nobody else thinks of: their life story in their own voice, printed as a keepsake book. Order printed books by 3 December.',
   canonical: 'https://tellmeyourstory.uk/christmas',
+  schema: productSchema({
+    path: '/christmas',
+    description: 'A life story keepsake book with QR codes that play the storyteller’s own voice, given as a Christmas gift.',
+  }),
 })
 </script>
 

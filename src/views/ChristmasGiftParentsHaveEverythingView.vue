@@ -232,7 +232,7 @@ import StorytellerPromo from '../components/Marketing/StorytellerPromo.vue'
 import { computed } from 'vue'
 import { PRINTED_BOOK_FROM_PRICE } from '../lib/printPricing'
 import { useSeo } from '../composables/useSeo'
-
+import { faqPageSchema } from '../lib/seoSchema'
 import { PRINT_CUTOFF_LABEL, canStillOrderPrint } from '../lib/christmas'
 
 const showDeadline = computed(() => canStillOrderPrint())
@@ -297,8 +297,9 @@ const faqs = [
 useSeo({
   title: 'Christmas Gifts for Parents Who Have Everything',
   description:
-    "Stuck for a Christmas gift for parents who say don't get me anything? Capture their life story in their own words and voice — a keepsake that takes up no space. From £3.99.",
+    "Stuck for a gift for parents who say don't get me anything? Their life story in their own voice — a keepsake that takes up no shelf space. From £3.99.",
   canonical: 'https://tellmeyourstory.uk/christmas-gift-for-parents-who-have-everything',
+  schema: faqPageSchema(faqs),
 })
 
 const relatedLinks = [

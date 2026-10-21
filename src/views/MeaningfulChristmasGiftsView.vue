@@ -188,17 +188,26 @@ import StorytellerPromo from '../components/Marketing/StorytellerPromo.vue'
 import { computed } from 'vue'
 import { PRINTED_BOOK_FROM_PRICE } from '../lib/printPricing'
 import { useSeo } from '../composables/useSeo'
+import { faqPageSchema, graph } from '../lib/seoSchema'
 
 import { PRINT_CUTOFF_LABEL, canStillOrderPrint } from '../lib/christmas'
 
 const showDeadline = computed(() => canStillOrderPrint())
 
-useSeo({
-  title: 'Meaningful Christmas Gifts — 8 Ideas That Get Kept',
-  description:
-    'Eight meaningful Christmas gift ideas that get kept rather than recycled — from restored family photos to recording a life story in their own voice. Several cost nothing.',
-  canonical: 'https://tellmeyourstory.uk/meaningful-christmas-gifts',
-})
+const tests = [
+  {
+    q: 'Could you have bought it for anyone?',
+    a: 'If the same present would have worked for a colleague, a neighbour or your postman, it is not really a gift for that person. Meaningful presents are usually slightly awkward to explain to anyone outside the family, because they depend on something only you know.',
+  },
+  {
+    q: 'Will it still exist in ten years?',
+    a: 'Consumables and gadgets are gone within a year or two. Things that carry information — photographs, recordings, handwriting, stories — tend to survive, and get more valuable as the people in them get older.',
+  },
+  {
+    q: 'Does it cost you something other than money?',
+    a: 'Thought, time, a difficult conversation, an afternoon spent digging through a box of old photos. The presents people remember almost always cost the giver something that could not be put on a card.',
+  },
+]
 
 const ideas = [
   {
@@ -238,20 +247,7 @@ const ideas = [
   },
 ]
 
-const tests = [
-  {
-    q: 'Could you have bought it for anyone?',
-    a: 'If the same present would have worked for a colleague, a neighbour or your postman, it is not really a gift for that person. Meaningful presents are usually slightly awkward to explain to anyone outside the family, because they depend on something only you know.',
-  },
-  {
-    q: 'Will it still exist in ten years?',
-    a: 'Consumables and gadgets are gone within a year or two. Things that carry information — photographs, recordings, handwriting, stories — tend to survive, and get more valuable as the people in them get older.',
-  },
-  {
-    q: 'Does it cost you something other than money?',
-    a: 'Thought, time, a difficult conversation, an afternoon spent digging through a box of old photos. The presents people remember almost always cost the giver something that could not be put on a card.',
-  },
-]
+
 
 const listSchema = {
   '@context': 'https://schema.org',
@@ -266,6 +262,16 @@ const listSchema = {
     })),
   ],
 }
+
+useSeo({
+  title: 'Meaningful Christmas Gifts — 8 Ideas That Get Kept',
+  description:
+    'Eight Christmas gift ideas that get kept rather than recycled, from restored family photos to recording a life story. Several of them cost nothing.',
+  canonical: 'https://tellmeyourstory.uk/meaningful-christmas-gifts',
+  schema: graph(faqPageSchema(tests), listSchema),
+})
+
+
 
 const relatedLinks = [
   { to: '/christmas-gifts-for-grandparents', label: 'Gifts for grandparents' },

@@ -167,6 +167,7 @@
 
 <script setup lang="ts">
 import { useSeo } from '../composables/useSeo'
+import { productSchema } from '../lib/seoSchema'
 
 const gifts = [
   { icon: '📖', title: 'A life story book — Tell Me Your Story', tag: 'Most meaningful', highlight: true, negative: false, desc: '100+ guided questions, voice recordings, and a beautifully printed book. Their stories, their voice, preserved forever. A gift that lasts for generations.' },
@@ -203,9 +204,14 @@ const tiers = [
 ]
 
 useSeo({
-  title: 'Gifts for Parents Who Have Everything UK 2026 — Tell Me Your Story',
-  description: 'The best gift for parents who have everything — capture their life story in a beautiful keepsake book. Guided questions, voice recordings, printed keepsake book. From £3.99.',
+  title: 'Gifts for Parents Who Have Everything — UK 2026',
+  description:
+    "They don't need more things. Capture their life story in their own words and voice, printed as a keepsake book. From £3.99, no subscription.",
   canonical: 'https://tellmeyourstory.uk/gifts-for-parents-who-have-everything',
+  schema: productSchema({
+    path: '/gifts-for-parents-who-have-everything',
+    description: 'A life story keepsake book for parents who already have everything — their own words, their own voice, printed and bound.',
+  }),
 })
 </script>
 

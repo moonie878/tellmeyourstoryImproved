@@ -168,6 +168,7 @@
 
 <script setup lang="ts">
 import { useSeo } from '../composables/useSeo'
+import { productSchema } from '../lib/seoSchema'
 
 const occasions = [
   { icon: '🎄', title: 'Christmas',         desc: 'The most meaningful gift under the tree — something that will matter long after the wrapping paper is gone.' },
@@ -186,9 +187,14 @@ const tiers = [
 ]
 
 useSeo({
-  title: 'Unique Gift for Elderly Parents UK 2026 — Tell Me Your Story | Life Story Keepsake Book',
-  description: 'The most meaningful gift for an elderly parent who has everything. Capture their life story in their own words — guided questions, voice recordings, and a beautifully printed book. UK delivery.',
+  title: 'Unique Gifts for Elderly Parents — UK 2026',
+  description:
+    'A gift for parents who already have everything: their life story in their own voice, printed as a hardback with QR codes. UK delivery included.',
   canonical: 'https://tellmeyourstory.uk/unique-gift-for-elderly-parents',
+  schema: productSchema({
+    path: '/unique-gift-for-elderly-parents',
+    description: 'A life story keepsake book for an elderly parent — guided questions answered by speaking or typing, printed with QR codes that play their voice.',
+  }),
 })
 </script>
 
