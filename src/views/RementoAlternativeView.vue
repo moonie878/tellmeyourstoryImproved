@@ -291,7 +291,7 @@ const faqs = [
 
 useSeo({
   title: 'Remento Alternative UK (2026) — Pay Once, Type or Speak',
-  description: 'Comparing Remento in the UK? Tell Me Your Story is a one-time payment in pounds: type or speak each answer, with a QR code beside every recorded story. Try 5 questions free.',
+  description: 'Comparing Remento in the UK? Tell Me Your Story is one payment in pounds: type or speak each answer, with a QR code beside every recording. 5 questions free.',
   schema: {
     '@context': 'https://schema.org',
     '@type': 'FAQPage',

@@ -158,8 +158,8 @@ const features = [
 ]
 
 useSeo({
-  title: 'Free Printable — 50 Questions to Ask Your Parents Before It\'s Too Late',
-  description: 'Download a free printable with 50 questions to ask your parents or grandparents. 5 chapters covering childhood, love, work, and legacy. No email required — instant download.',
+  title: 'Free Printable: 50 Questions to Ask Your Parents',
+  description: 'A free printable with 50 questions to ask your parents or grandparents, across childhood, love, work and legacy. No email required — instant download.',
   canonical: 'https://tellmeyourstory.uk/resources/50-questions-printable',
 })
 </script>

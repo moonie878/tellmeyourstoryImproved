@@ -1,0 +1,163 @@
+{
+ "_note": "old -> new for useSeo title/description. Old strings must match the source exactly.",
+
+ "FathersDayGiftGrandadView.vue": {
+  "title": "Father's Day Gifts for Grandad 2026 — His Life Story",
+  "description": "The Father's Day gift Grandad can't already have: his life story in his own words and voice, printed as a keepsake book. From £3.99, gift link sent instantly."
+ },
+ "MothersDayGiftView.vue": {
+  "title": "Mother's Day Gift Ideas 2027 — Her Life Story",
+  "description": "A Mother's Day gift she'll keep: Mum or Grandma's life story in her own words and voice, printed as a keepsake book. From £3.99, no subscription."
+ },
+ "AnniversaryGiftView.vue": {
+  "title": "Anniversary Gift Ideas 2026 — Their Love Story",
+  "description": "An anniversary gift for a couple who have everything: their love story captured in a printed keepsake book. Silver, golden and diamond. From £3.99."
+ },
+ "PersonalisedGiftForGrandparentsView.vue": {
+  "title": "Personalised Gifts for Grandparents That Mean Something",
+  "description": "Personalised gift ideas for grandparents that go beyond a name on a mug — memory gifts, keepsakes, and how to capture their life story in a printed book."
+ },
+ "FreeQuestionsDownloadView.vue": {
+  "title": "Free Printable: 50 Questions to Ask Your Parents",
+  "description": "A free printable with 50 questions to ask your parents or grandparents, across childhood, love, work and legacy. No email required — instant download."
+ },
+ "BereavementGiftIdeasView.vue": {
+  "title": "Bereavement Gift Ideas — Meaningful Gifts for Grieving",
+  "description": "Bereavement gift ideas that go beyond flowers and food: memory tributes, practical support, and how to make a life story book honouring the person who died."
+ },
+ "QuestionsToAskDyingParentView.vue": {
+  "title": "Questions to Ask a Dying Parent — A Gentle Guide",
+  "description": "A gentle guide to the conversations worth having before it's too late: what to ask a parent nearing the end of life, and how to capture what they share."
+ },
+ "EndOfLifeQuestionsToAskParentsView.vue": {
+  "title": "End of Life Questions to Ask Your Parents — A Guide",
+  "description": "The practical end of life questions families forget to ask — funeral wishes, important documents, and the things left unsaid. A gentle conversation guide."
+ },
+ "FamilyHistoryBookView.vue": {
+  "title": "Family History Book UK — Beyond the Family Tree",
+  "description": "Create a family history book that goes beyond names and dates. Guided questions, voice recordings and a printed book — your family's living memory, kept."
+ },
+ "LifeStoryWorkInCareHomesView.vue": {
+  "title": "Life Story Work in Care Homes — A Practical Guide",
+  "description": "What life story work is, why care homes use it, and how families and care teams can do it well — including how to share a resident's story with their home."
+ },
+ "LifeStoryBookView.vue": {
+  "title": "Create a Life Story Book in Their Own Words",
+  "description": "Create a life story book for a parent or grandparent: 100+ guided questions, voice recordings, and a printed hardback. Free to start, UK delivery included."
+ },
+ "GiftForSomeoneWhoHasEverythingView.vue": {
+  "title": "Gift for Someone Who Has Everything — UK 2026",
+  "description": "For the person who needs nothing: their life story captured in a printed keepsake book, in their own words and voice. Guided questions, from £3.99."
+ },
+ "LegacyLetterToChildrenView.vue": {
+  "title": "How to Write a Legacy Letter — Guide & Examples",
+  "description": "A legacy letter passes on what a will can't — your values, your wisdom, your hopes. How to write one, with prompts, examples and step-by-step advice."
+ },
+ "LifeStoryInterviewQuestionsView.vue": {
+  "title": "Life Story Interview Questions — 100 by Chapter"
+ },
+ "HowToRecordGrandparentsStoryView.vue": {
+  "title": "How to Record Your Grandparent's Life Story",
+  "description": "How to record your grandparent's life story: what equipment to use, which questions to ask, how to get them talking, and how to make it something permanent."
+ },
+ "HowToWriteALifeStoryView.vue": {
+  "title": "How to Write a Life Story — Step-by-Step Guide",
+  "description": "How to capture a loved one's life story: the questions to ask, how to set the scene, the mistakes to avoid, and how to turn it into a keepsake. Free to start."
+ },
+ "LifeStoryVideoView.vue": {
+  "title": "Life Story Video UK — Their Story as a Film",
+  "description": "Turn a loved one's life story into a video keepsake. Their answers, photos and music, exported as 1080p HD to share or play at a celebration of life. £19.99."
+ },
+ "QuestionsToAskYourMumView.vue": {
+  "title": "Questions to Ask Your Mum — 100 by Chapter"
+ },
+ "FathersDayView.vue": {
+  "title": "Father's Day Gift Ideas 2026 — Give Dad His Story"
+ },
+ "StoryworthAlternativeView.vue": {
+  "title": "Storyworth Alternative UK 2026 — Pay Once",
+  "description": "Comparing Storyworth in the UK? Tell Me Your Story is one payment, with voice recording on every plan and a QR code beside every story. Try 5 questions free."
+ },
+
+ "BestMemoryBookAppsView.vue": {
+  "description": "The best memory book apps for UK families, compared honestly: StoryKeeper, Storyworth, Remento, Tell Me Your Story and paper journals. Prices in pounds."
+ },
+ "BlogCelebrationOfLifeVideoView.vue": {
+  "description": "How to create a celebration of life video: what to include, how to keep it personal and joyful, and how to show it at the service. Free to preview, £19.99."
+ },
+ "BlogFreeMemorialSlideshowView.vue": {
+  "description": "Create a memorial slideshow for a funeral or celebration of life. Upload photos, add music, ready in minutes. No account needed. Free to preview, £19.99."
+ },
+ "BlogFuneralSlideshowIdeasView.vue": {
+  "description": "Ideas for a funeral slideshow that honours a life: which photos to choose, what music works, how to structure it, and how to make it feel personal."
+ },
+ "BlogHowToRecordView.vue": {
+  "description": "How to capture your parent's memories: what equipment you need, how to get them talking, and how to turn the recordings into a keepsake your family keeps."
+ },
+ "BlogQuestionsView.vue": {
+  "description": "The questions most families never think to ask until it's too late. 100 questions for your parents or grandparents, across 10 chapters of their life."
+ },
+ "ChristmasGiftsGrandparentsView.vue": {
+  "description": "The Christmas gift Grandma or Grandad can't already have: their life story in their own words and voice, printed as a keepsake book. UK delivery included."
+ },
+ "DementiaLifeStoryBookView.vue": {
+  "description": "Create a life story book for someone with dementia, capturing their memories and voice while they can still share them. Used in care settings. Free to start."
+ },
+ "EndOfLifeGiftView.vue": {
+  "description": "A meaningful end of life gift: help someone capture their memories, stories and voice in a printed keepsake book. 100+ guided questions, from £3.99."
+ },
+ "GuidesView.vue": {
+  "description": "Every guide in one place: questions to ask parents and grandparents, how to record their stories, gift ideas, honest comparisons, and later-life guides."
+ },
+ "HowToCaptureParentsLifeStoryView.vue": {
+  "description": "How to record your parents' life story: the questions to ask, the tools to use, and how to turn their answers into a keepsake book. Free to start."
+ },
+ "JournalAlternativeView.vue": {
+  "description": "Like the guided journals, but they can type or speak — and a QR code in the printed book plays their voice. Mum, Dad, Nan and Grandad editions. Try free."
+ },
+ "KeepsakeBookView.vue": {
+  "description": "Create a life story keepsake book for a parent or grandparent: 100+ guided questions, voice recordings, photos, and a printed book delivered to your door."
+ },
+ "MemorialBookView.vue": {
+  "description": "Create a memorial book that captures a loved one's life, memories and voice. Guided questions, voice recordings, and a printed book delivered to your door."
+ },
+ "MemoryBookVsMemoryBoxView.vue": {
+  "description": "Memory book or memory box for someone with dementia? The real difference, what each is best for, and how to do either one well. A gentle, honest guide."
+ },
+ "PricingView.vue": {
+  "description": "Start free with 5 questions, no time limit. Unlock a printed keepsake book or video when you're ready. One payment — no subscription, no renewal."
+ },
+ "QuestionsAboutChildhoodView.vue": {
+  "description": "50 questions to ask about someone's childhood — home, school, friends, food and feelings. Use them in conversation, or capture the answers forever."
+ },
+ "QuestionsAboutFamilyHistoryView.vue": {
+  "description": "60 questions to ask relatives about family history: where the family came from, what they lived through, and the stories behind the names."
+ },
+ "QuestionsToAskElderlyParentsView.vue": {
+  "description": "100 questions to ask your elderly parents, across 10 chapters of their life — plus how to start the conversation and how to keep what they tell you."
+ },
+ "RementoAlternativeView.vue": {
+  "description": "Comparing Remento in the UK? Tell Me Your Story is one payment in pounds: type or speak each answer, with a QR code beside every recording. 5 questions free."
+ },
+ "RementoReviewView.vue": {
+  "description": "An honest Remento review for UK families: how voice recording and AI writing work, what it really costs from the UK, and who it suits. Checked Oct 2026."
+ },
+ "RementoVsTellMeYourStoryView.vue": {
+  "description": "Remento vs Tell Me Your Story for UK families: dollars vs pounds, voice-only vs type or speak, AI writing, QR codes, UK delivery, yearly vs one payment."
+ },
+ "ReminiscenceTherapyLifeStoryView.vue": {
+  "description": "Reminiscence therapy uses memories to improve wellbeing, especially in dementia. How it works, the evidence behind it, and how a life story book supports it."
+ },
+ "StorykeeperAlternativeView.vue": {
+  "description": "Comparing StoryKeeper? Answer 5 questions free, then pay once from £3.99, with a QR code beside every recording. Print a book only if you want one."
+ },
+ "StorykeeperReviewView.vue": {
+  "description": "An honest StoryKeeper review for UK families: what £79 or £99 gets you, voice recording, QR codes and the hardcover book. Checked Oct 2026."
+ },
+ "StoryworthVsTellMeYourStoryView.vue": {
+  "description": "Storyworth vs Tell Me Your Story for UK families: price in pounds, voice recording, QR codes in the book, delivery, and annual plan vs one payment."
+ },
+ "WhatIsALifeStoryBookView.vue": {
+  "description": "What is a life story book? What goes inside, who they're for, how to create one, and why families are making them before it's too late."
+ }
+}

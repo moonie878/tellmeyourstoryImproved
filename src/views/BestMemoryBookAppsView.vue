@@ -372,7 +372,7 @@ const faqs = [
 
 useSeo({
   title: 'Best Memory Book Apps UK (2026): 5 Options Compared',
-  description: 'The best memory book apps for UK families compared honestly: StoryKeeper, Storyworth, Remento, Tell Me Your Story and paper journals — prices in pounds, voice recording and QR codes.',
+  description: 'The best memory book apps for UK families, compared honestly: StoryKeeper, Storyworth, Remento, Tell Me Your Story and paper journals. Prices in pounds.',
   type: 'article',
   schema: {
     '@context': 'https://schema.org',

@@ -238,8 +238,8 @@ const tiers = [
 ]
 
 useSeo({
-  title: 'Create a Life Story Book — Capture Their Story in Their Own Words',
-  description: 'Create a life story book for a parent or grandparent. 100+ guided questions, voice recordings, and a beautifully printed book. Free to start — UK delivery from £21.99.',
+  title: 'Create a Life Story Book in Their Own Words',
+  description: 'Create a life story book for a parent or grandparent: 100+ guided questions, voice recordings, and a printed hardback. Free to start, UK delivery included.',
   canonical: 'https://tellmeyourstory.uk/life-story-book',
 })
 </script>

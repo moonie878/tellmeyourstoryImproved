@@ -163,8 +163,8 @@ const tiers = [
 ]
 
 useSeo({
-  title: 'Gift for Someone Who Has Everything UK 2026 — Tell Me Your Story',
-  description: 'The best gift for someone who has everything — capture their life story in a beautiful keepsake book. Guided questions, voice recordings, printed keepsake book. From £3.99.',
+  title: 'Gift for Someone Who Has Everything — UK 2026',
+  description: 'For the person who needs nothing: their life story captured in a printed keepsake book, in their own words and voice. Guided questions, from £3.99.',
   canonical: 'https://tellmeyourstory.uk/gift-for-someone-who-has-everything',
 })
 </script>

@@ -206,7 +206,7 @@ import { useSeo } from '../composables/useSeo'
 
 useSeo({
   title: 'Funeral Slideshow Ideas — A Complete Guide (2026)',
-  description: 'Practical ideas for creating a funeral slideshow that truly honours a life — which photos to choose, what music to use, how to structure it, and how to make it feel personal.',
+  description: 'Ideas for a funeral slideshow that honours a life: which photos to choose, what music works, how to structure it, and how to make it feel personal.',
   canonical: 'https://tellmeyourstory.uk/blog/funeral-slideshow-ideas',
   schema: {
     '@context': 'https://schema.org',

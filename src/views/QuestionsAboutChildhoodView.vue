@@ -217,7 +217,7 @@ const reasons = [
 
 useSeo({
   title: '50 Questions to Ask About Childhood Memories (Free List)',
-  description: '50 thoughtful questions to ask about someone\'s childhood — covering home, school, friends, food, and feelings. Use them in conversation, or capture the answers forever with Tell Me Your Story.',
+  description: '50 questions to ask about someone\'s childhood — home, school, friends, food and feelings. Use them in conversation, or capture the answers forever.',
   canonical: 'https://tellmeyourstory.uk/questions-about-childhood',
 })
 </script>

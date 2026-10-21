@@ -219,7 +219,7 @@ const costs = [
 
 useSeo({
   title: 'Remento Review UK (2026): Pros, Cons and Real Costs',
-  description: 'An honest Remento review for UK families: how the voice recording and AI writing work, what it really costs from the UK, and who it suits. Checked September 2026.',
+  description: 'An honest Remento review for UK families: how voice recording and AI writing work, what it really costs from the UK, and who it suits. Checked Oct 2026.',
 })
 </script>
 

@@ -291,8 +291,8 @@ const faqs = [
 ]
 
 useSeo({
-  title: 'Storyworth Alternative UK (2026) — Pay Once, Keep Their Voice',
-  description: `Comparing Storyworth in the UK? Tell Me Your Story is a one-time payment with voice recording on every plan and a QR code beside every story. Try 5 questions free.`,
+  title: 'Storyworth Alternative UK 2026 — Pay Once',
+  description: `Comparing Storyworth in the UK? Tell Me Your Story is one payment, with voice recording on every plan and a QR code beside every story. Try 5 questions free.`,
   schema: {
     '@context': 'https://schema.org',
     '@type': 'FAQPage',

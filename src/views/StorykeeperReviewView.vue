@@ -226,7 +226,7 @@ const costs = [
 
 useSeo({
   title: 'StoryKeeper Review UK (2026): Is It Worth £79?',
-  description: 'An honest StoryKeeper review for UK families: what £79 or £99 gets you, voice and video recording, QR codes, the hardcover book, and who it suits. Checked September 2026.',
+  description: 'An honest StoryKeeper review for UK families: what £79 or £99 gets you, voice recording, QR codes and the hardcover book. Checked Oct 2026.',
 })
 </script>
 

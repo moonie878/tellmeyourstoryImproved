@@ -267,7 +267,7 @@ const faqs = [
 
 useSeo({
   title: 'Dementia Life Story Book UK — Preserve Their Memories',
-  description: 'Create a life story book for someone with dementia — capturing their memories, voice, and personality while they can still share them. Used in care settings and treasured by families. Free to start.',
+  description: 'Create a life story book for someone with dementia, capturing their memories and voice while they can still share them. Used in care settings. Free to start.',
   canonical: 'https://tellmeyourstory.uk/dementia-life-story-book',
   schema: {
     '@context': 'https://schema.org',

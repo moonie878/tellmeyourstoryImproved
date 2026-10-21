@@ -204,7 +204,7 @@ const faqs = [
 
 useSeo({
   title: 'Memory Book vs Memory Box for Dementia — Which Is Right?',
-  description: 'Memory book vs memory box for someone with dementia — the real difference, what each is best for, and practical tips for doing either well. A gentle, honest guide.',
+  description: 'Memory book or memory box for someone with dementia? The real difference, what each is best for, and how to do either one well. A gentle, honest guide.',
   canonical: 'https://tellmeyourstory.uk/memory-book-vs-memory-box',
   schema: {
     '@context': 'https://schema.org',

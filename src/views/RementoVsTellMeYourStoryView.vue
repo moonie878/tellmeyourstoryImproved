@@ -261,7 +261,7 @@ const faqs = [
 
 useSeo({
   title: 'Remento vs Tell Me Your Story — Honest UK Comparison 2026',
-  description: 'Remento vs Tell Me Your Story compared for UK families: dollars vs pounds, voice-only vs type or speak, AI writing, QR codes, UK delivery and yearly plan vs one-time payment.',
+  description: 'Remento vs Tell Me Your Story for UK families: dollars vs pounds, voice-only vs type or speak, AI writing, QR codes, UK delivery, yearly vs one payment.',
   schema: {
     '@context': 'https://schema.org',
     '@type': 'FAQPage',

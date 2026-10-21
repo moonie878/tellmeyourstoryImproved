@@ -235,7 +235,7 @@ const faqs = [
 
 useSeo({
   title: '"Tell Me Your Story" Journal Alternative — With Their Voice',
-  description: 'Like the "Tell Me Your Story" guided journals, but they can type or speak — and a QR code in the printed book plays their voice. Mum, Dad, Nan and Grandad editions. Try free.',
+  description: 'Like the guided journals, but they can type or speak — and a QR code in the printed book plays their voice. Mum, Dad, Nan and Grandad editions. Try free.',
   schema: {
     '@context': 'https://schema.org',
     '@type': 'FAQPage',

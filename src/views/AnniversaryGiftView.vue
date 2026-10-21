@@ -175,8 +175,8 @@ const tiers = [
 ]
 
 useSeo({
-  title: 'Anniversary Gift Ideas 2026 — Tell Me Your Story | Life Story Keepsake Book',
-  description: 'The most meaningful anniversary gift — capture a couple\'s love story in a beautiful keepsake book. Perfect for silver, golden and diamond anniversaries. printed book from £21.99, from £3.99.',
+  title: 'Anniversary Gift Ideas 2026 — Their Love Story',
+  description: 'An anniversary gift for a couple who have everything: their love story captured in a printed keepsake book. Silver, golden and diamond. From £3.99.',
   canonical: 'https://tellmeyourstory.uk/anniversary-gift-ideas',
 })
 </script>

@@ -262,7 +262,7 @@ const faqs = [
 
 useSeo({
   title: 'Storyworth vs Tell Me Your Story — Honest UK Comparison 2026',
-  description: 'Storyworth vs Tell Me Your Story compared for UK families: price in pounds, voice recording, QR codes in the book, delivery, and annual plan vs one-time payment.',
+  description: 'Storyworth vs Tell Me Your Story for UK families: price in pounds, voice recording, QR codes in the book, delivery, and annual plan vs one payment.',
   schema: {
     '@context': 'https://schema.org',
     '@type': 'FAQPage',

@@ -292,7 +292,7 @@ const faqs = [
 
 useSeo({
   title: 'Questions to Ask About Family History — Discover Your Roots',
-  description: '60 questions to ask relatives about family history — where the family came from, what they lived through, and the stories behind the names. Plus how to research it.',
+  description: '60 questions to ask relatives about family history: where the family came from, what they lived through, and the stories behind the names.',
   canonical: 'https://tellmeyourstory.uk/questions-about-family-history',
   type: 'article',
   schema: {

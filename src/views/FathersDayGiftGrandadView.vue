@@ -198,8 +198,8 @@ const tiers = [
 ]
 
 useSeo({
-  title: 'Father\'s Day Gift for Grandad 2026 — Tell Me Your Story | Life Story Keepsake Book',
-  description: 'The most meaningful Father\'s Day gift for Grandad — capture his life story in his own words and voice. 100+ guided questions, printed keepsake book. Gift link sent instantly. From £3.99.',
+  title: 'Father\'s Day Gifts for Grandad 2026 — His Life Story',
+  description: 'The Father\'s Day gift Grandad can\'t already have: his life story in his own words and voice, printed as a keepsake book. From £3.99, gift link sent instantly.',
   canonical: 'https://tellmeyourstory.uk/fathers-day-gift-for-grandad',
 })
 </script>

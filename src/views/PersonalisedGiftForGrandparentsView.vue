@@ -205,8 +205,8 @@ const faqs = [
 ]
 
 useSeo({
-  title: 'Personalised Gifts for Grandparents — Ideas That Actually Mean Something',
-  description: 'Personalised gift ideas for grandparents that go beyond a name on a mug — memory gifts, keepsakes, experiences, and how to capture their life story in a printed book. Free to start.',
+  title: 'Personalised Gifts for Grandparents That Mean Something',
+  description: 'Personalised gift ideas for grandparents that go beyond a name on a mug — memory gifts, keepsakes, and how to capture their life story in a printed book.',
   canonical: 'https://tellmeyourstory.uk/personalised-gift-for-grandparents',
   schema: {
     '@context': 'https://schema.org',

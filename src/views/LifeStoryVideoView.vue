@@ -171,8 +171,8 @@ const uses = [
 ]
 
 useSeo({
-  title: 'Life Story Video UK — Export a Life Story as a Beautiful Video',
-  description: 'Turn a loved one\'s life story into a beautiful video keepsake. Their answers, photos, and music — exported as a 1080p HD video ready to share or play at a celebration of life. From £19.99.',
+  title: 'Life Story Video UK — Their Story as a Film',
+  description: 'Turn a loved one\'s life story into a video keepsake. Their answers, photos and music, exported as 1080p HD to share or play at a celebration of life. £19.99.',
   canonical: 'https://tellmeyourstory.uk/life-story-video',
 })
 </script>

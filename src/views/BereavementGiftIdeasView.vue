@@ -211,8 +211,8 @@ const faqs = [
 ]
 
 useSeo({
-  title: 'Bereavement Gift Ideas — Meaningful Gifts for Someone Who Is Grieving',
-  description: 'Thoughtful bereavement gift ideas that go beyond flowers and food. Memory tributes, practical support, comfort gifts, and how to create a life story book that honours the person who has died.',
+  title: 'Bereavement Gift Ideas — Meaningful Gifts for Grieving',
+  description: 'Bereavement gift ideas that go beyond flowers and food: memory tributes, practical support, and how to make a life story book honouring the person who died.',
   canonical: 'https://tellmeyourstory.uk/bereavement-gift-ideas',
   schema: {
     '@context': 'https://schema.org',

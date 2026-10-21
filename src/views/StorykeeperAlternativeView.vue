@@ -291,7 +291,7 @@ const faqs = [
 
 useSeo({
   title: 'StoryKeeper Alternative UK (2026) — Try It Free First',
-  description: 'Comparing StoryKeeper? Tell Me Your Story lets you answer 5 questions free, then pay once from £3.99, with a QR code beside every recorded story. Print only if you want to.',
+  description: 'Comparing StoryKeeper? Answer 5 questions free, then pay once from £3.99, with a QR code beside every recording. Print a book only if you want one.',
   schema: {
     '@context': 'https://schema.org',
     '@type': 'FAQPage',

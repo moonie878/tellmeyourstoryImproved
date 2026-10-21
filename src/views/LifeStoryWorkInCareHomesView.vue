@@ -238,8 +238,8 @@ const faqs = [
 ]
 
 useSeo({
-  title: 'Life Story Work in Care Homes — A Guide for Families and Care Teams',
-  description: 'Life story work helps care home residents feel seen, valued and understood. A guide to what it is, why it matters, what to include, and how to create a life story for someone in care. Free to start.',
+  title: 'Life Story Work in Care Homes — A Practical Guide',
+  description: 'What life story work is, why care homes use it, and how families and care teams can do it well — including how to share a resident\'s story with their home.',
   canonical: 'https://tellmeyourstory.uk/life-story-work-in-care-homes',
   schema: {
     '@context': 'https://schema.org',

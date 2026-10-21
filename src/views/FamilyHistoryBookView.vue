@@ -169,8 +169,8 @@ const features = [
 ]
 
 useSeo({
-  title: 'Family History Book UK — Capture the Stories Behind Your Family Tree',
-  description: 'Create a family history book that goes beyond names and dates. Guided questions, voice recordings, and a beautifully printed book — the living memory of your family, preserved forever.',
+  title: 'Family History Book UK — Beyond the Family Tree',
+  description: 'Create a family history book that goes beyond names and dates. Guided questions, voice recordings and a printed book — your family\'s living memory, kept.',
   canonical: 'https://tellmeyourstory.uk/family-history-book',
 })
 </script>

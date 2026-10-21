@@ -133,8 +133,8 @@ const tiers = [
 ]
 
 useSeo({
-  title: 'Mother\'s Day Gift Ideas 2027 — Tell Me Your Story | Life Story Keepsake Book',
-  description: 'The most meaningful Mother\'s Day gift — capture Mum or Grandma\'s life story in a beautiful keepsake book. Guided questions, voice recordings, printed keepsake book. From £3.99.',
+  title: 'Mother\'s Day Gift Ideas 2027 — Her Life Story',
+  description: 'A Mother\'s Day gift she\'ll keep: Mum or Grandma\'s life story in her own words and voice, printed as a keepsake book. From £3.99, no subscription.',
   canonical: 'https://tellmeyourstory.uk/mothers-day-gift-ideas',
 })
 </script>

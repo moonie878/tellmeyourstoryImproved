@@ -219,7 +219,7 @@ const faqs = [
 
 useSeo({
   title: 'Reminiscence Therapy & Life Story Work — A Guide',
-  description: 'Reminiscence therapy uses memories to improve wellbeing — particularly for older people and those with dementia. A guide to how it works, the evidence behind it, and how a life story book supports it.',
+  description: 'Reminiscence therapy uses memories to improve wellbeing, especially in dementia. How it works, the evidence behind it, and how a life story book supports it.',
   canonical: 'https://tellmeyourstory.uk/reminiscence-therapy-life-story',
   schema: {
     '@context': 'https://schema.org',

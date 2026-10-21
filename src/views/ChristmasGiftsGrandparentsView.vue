@@ -299,7 +299,7 @@ const faqSchema = {
 // No canonical needed: it defaults to this page's own URL.
 useSeo({
   title: 'Christmas Gifts for Grandparents 2026 | Tell Me Your Story',
-  description: 'The best Christmas gift for Grandma or Grandad — capture their life story in their own words. Guided questions, voice recordings, and a beautifully printed keepsake book. UK delivery.',
+  description: 'The Christmas gift Grandma or Grandad can\'t already have: their life story in their own words and voice, printed as a keepsake book. UK delivery included.',
   schema: faqSchema,
 })
 

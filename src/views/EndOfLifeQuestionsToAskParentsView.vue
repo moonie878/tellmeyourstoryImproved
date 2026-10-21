@@ -245,8 +245,8 @@ const faqs = [
 ]
 
 useSeo({
-  title: 'End of Life Questions for Parents — The Practical Conversation Guide',
-  description: 'Practical end of life questions to ask a parent — funeral wishes, important documents, and things left unsaid. A gentle guide to the conversation most families never have.',
+  title: 'End of Life Questions to Ask Your Parents — A Guide',
+  description: 'The practical end of life questions families forget to ask — funeral wishes, important documents, and the things left unsaid. A gentle conversation guide.',
   canonical: 'https://tellmeyourstory.uk/end-of-life-questions-to-ask-parents',
   schema: {
     '@context': 'https://schema.org',

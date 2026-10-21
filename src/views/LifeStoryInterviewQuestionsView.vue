@@ -205,7 +205,7 @@ const chapters = [
 ]
 
 useSeo({
-  title: 'Life Story Interview Questions: 100 Questions by Chapter (2026)',
+  title: 'Life Story Interview Questions — 100 by Chapter',
   description: '100 life story interview questions, organised by chapter: childhood, love, work, family, hard times, and legacy. Free to use — start your interview today.',
   canonical: 'https://tellmeyourstory.uk/life-story-interview-questions',
 })

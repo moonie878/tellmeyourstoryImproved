@@ -396,7 +396,7 @@ const faqs = [
 
 useSeo({
   title: '100 Questions to Ask Elderly Parents About Their Life',
-  description: 'The questions most families never think to ask elderly parents — until it\'s too late. 100 meaningful questions across 10 chapters of their life, with advice on how to have the conversations and capture what they share.',
+  description: '100 questions to ask your elderly parents, across 10 chapters of their life — plus how to start the conversation and how to keep what they tell you.',
   canonical: 'https://tellmeyourstory.uk/questions-to-ask-elderly-parents',
   schema: {
     '@context': 'https://schema.org',
