@@ -285,12 +285,11 @@ useSeo({
     '@graph': [
       {
         '@type': 'FAQPage',
-        mainEntity: [
-          { '@type': 'Question', name: 'How do you write a life story?', acceptedAnswer: { '@type': 'Answer', text: 'Start with good questions — specific, open-ended ones that can\'t be answered with yes or no. Create a relaxed environment. Record if you can. Edit lightly to preserve their voice. Then turn it into something permanent — a PDF, a printed book, or a platform like Tell Me Your Story.' } },
-          { '@type': 'Question', name: 'How long does it take to write a life story?', acceptedAnswer: { '@type': 'Answer', text: 'It depends on how much you want to capture. A single sitting of a few hours can produce something meaningful. Most families find it works best spread over several sessions — a few questions at a time, returned to over weeks or months.' } },
-          { '@type': 'Question', name: 'Where do you start when writing a life story?', acceptedAnswer: { '@type': 'Answer', text: 'Start wherever the energy is. Childhood memories tend to be the most vivid and easiest to access. But if they\'re more animated about their working life or a particular story, start there.' } },
-          { '@type': 'Question', name: 'What should a life story include?', acceptedAnswer: { '@type': 'Answer', text: 'Childhood and origins, school years, work and career, love and relationships, family life, hard times, proudest moments, and legacy. You don\'t need to cover everything — even a handful of vivid answers creates something meaningful.' } },
-        ]
+        mainEntity: faqs.map((f) => ({
+          '@type': 'Question',
+          name: f.q,
+          acceptedAnswer: { '@type': 'Answer', text: f.a },
+        }))
       },
       {
         '@type': 'HowTo',

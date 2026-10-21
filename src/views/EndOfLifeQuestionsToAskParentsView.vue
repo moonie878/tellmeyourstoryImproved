@@ -253,11 +253,11 @@ useSeo({
     '@graph': [
       {
         '@type': 'FAQPage',
-        mainEntity: [
-          { '@type': 'Question', name: 'What is the difference between this and questions about their life story?', acceptedAnswer: { '@type': 'Answer', text: 'Life story questions focus on memories. This page focuses on practical end of life wishes - funeral preferences, documents, and things left unsaid.' } },
-          { '@type': 'Question', name: 'When is the right time to ask these questions?', acceptedAnswer: { '@type': 'Answer', text: 'Earlier is generally easier than later. Many families bring these questions up gradually, over several quiet conversations.' } },
-          { '@type': 'Question', name: 'What if they do not want to talk about it?', acceptedAnswer: { '@type': 'Answer', text: 'That is normal and worth respecting. Let them lead, and revisit gently another time if today is not the right day.' } },
-        ]
+        mainEntity: faqs.map((f) => ({
+          '@type': 'Question',
+          name: f.q,
+          acceptedAnswer: { '@type': 'Answer', text: f.a },
+        }))
       }
     ]
   }

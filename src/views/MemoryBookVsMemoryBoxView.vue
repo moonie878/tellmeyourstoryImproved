@@ -211,11 +211,11 @@ useSeo({
     '@graph': [
       {
         '@type': 'FAQPage',
-        mainEntity: [
-          { '@type': 'Question', name: 'What is the main difference between a memory box and a memory book?', acceptedAnswer: { '@type': 'Answer', text: 'A memory box is a physical collection of objects used as sensory prompts. A memory book is a structured collection of photos and stories that can capture the actual words behind each memory.' } },
-          { '@type': 'Question', name: 'Can I use a memory box and a memory book together?', acceptedAnswer: { '@type': 'Answer', text: 'Yes. Objects from a memory box can become prompts for questions in a memory book, capturing the story behind each item.' } },
-          { '@type': 'Question', name: 'Should I avoid asking do you remember questions?', acceptedAnswer: { '@type': 'Answer', text: 'It is often gentler to share the memory yourself first, rather than directly asking do you remember, which can cause distress.' } },
-        ]
+        mainEntity: faqs.map((f) => ({
+          '@type': 'Question',
+          name: f.q,
+          acceptedAnswer: { '@type': 'Answer', text: f.a },
+        }))
       }
     ]
   }

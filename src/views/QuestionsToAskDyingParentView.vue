@@ -345,13 +345,11 @@ useSeo({
     '@graph': [
       {
         '@type': 'FAQPage',
-        mainEntity: [
-          { '@type': 'Question', name: 'Is it okay to ask a dying person about their life?', acceptedAnswer: { '@type': 'Answer', text: 'Yes — research in palliative care shows that life review is deeply meaningful for most people nearing the end of their life. It helps them feel seen, valued, and at peace. Most people want to be asked. The key is to go gently and follow their lead.' } },
-          { '@type': 'Question', name: 'What if they don\'t want to talk?', acceptedAnswer: { '@type': 'Answer', text: 'Always respect their wishes. Never push. Try lighter, more nostalgic questions first — funny memories, favourite things — and see where the conversation naturally goes. If they don\'t want to talk, your presence matters more than any question.' } },
-          { '@type': 'Question', name: 'How do I start the conversation?', acceptedAnswer: { '@type': 'Answer', text: 'The easiest way is to start with something you\'re genuinely curious about. "Tell me about where you grew up" is often enough to open the door.' } },
-          { '@type': 'Question', name: 'Should I record the conversation?', acceptedAnswer: { '@type': 'Answer', text: 'If they\'re comfortable with it, yes. A voice recording captures things written notes can\'t — their accent, the way they laugh, the pauses before they answer. Tell Me Your Story has built-in voice recording that saves directly to their keepsake book.' } },
-          { '@type': 'Question', name: 'What if I get emotional during the conversation?', acceptedAnswer: { '@type': 'Answer', text: 'That\'s completely normal. Shared emotion often deepens a conversation. You don\'t need to hold it together. Sometimes the most meaningful exchanges happen when both of you are moved.' } },
-        ]
+        mainEntity: faqs.map((f) => ({
+          '@type': 'Question',
+          name: f.q,
+          acceptedAnswer: { '@type': 'Answer', text: f.a },
+        }))
       }
     ]
   }

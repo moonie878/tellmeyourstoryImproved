@@ -403,13 +403,11 @@ useSeo({
     '@graph': [
       {
         '@type': 'FAQPage',
-        mainEntity: [
-          { '@type': 'Question', name: 'What questions should I ask my elderly parents?', acceptedAnswer: { '@type': 'Answer', text: 'Start with childhood — where they grew up, their earliest memories, what their home was like. These tend to be the easiest questions to answer and the most vivid memories. From there, follow the conversation wherever it goes naturally.' } },
-          { '@type': 'Question', name: 'How do I get my parents to talk about their life?', acceptedAnswer: { '@type': 'Answer', text: 'Don\'t present a list. Ask one question and follow where it leads. Use old photos as conversation starters. Ask about senses rather than facts. And be genuinely curious rather than conducting an interview.' } },
-          { '@type': 'Question', name: 'What if my parent has memory loss or dementia?', acceptedAnswer: { '@type': 'Answer', text: 'Long-term memories often remain stronger than short-term ones in older age. Use photos, sensory prompts, and emotional questions rather than factual ones.' } },
-          { '@type': 'Question', name: 'How do I capture what they tell me?', acceptedAnswer: { '@type': 'Answer', text: 'Ask permission to record on your phone — even a voice memo is precious. Or use Tell Me Your Story, which guides them through questions by voice or text and turns their answers into a beautifully printed keepsake book automatically.' } },
-          { '@type': 'Question', name: 'How many questions should I ask at once?', acceptedAnswer: { '@type': 'Answer', text: 'One or two per conversation is enough. The best conversations follow a single question wherever it leads. Come back over multiple visits.' } },
-        ]
+        mainEntity: faqs.map((f) => ({
+          '@type': 'Question',
+          name: f.q,
+          acceptedAnswer: { '@type': 'Answer', text: f.a },
+        }))
       }
     ]
   }

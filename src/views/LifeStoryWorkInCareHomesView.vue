@@ -246,12 +246,11 @@ useSeo({
     '@graph': [
       {
         '@type': 'FAQPage',
-        mainEntity: [
-          { '@type': 'Question', name: 'What is life story work in care homes?', acceptedAnswer: { '@type': 'Answer', text: 'Life story work in care homes is the process of capturing a resident\'s history, memories, preferences, and personality — and using that information to provide more personalised, person-centred care.' } },
-          { '@type': 'Question', name: 'Is life story work evidence-based?', acceptedAnswer: { '@type': 'Answer', text: 'Yes. Life story work is endorsed by the Alzheimer\'s Society, NHS England, and the Social Care Institute for Excellence (SCIE) as a component of good dementia care.' } },
-          { '@type': 'Question', name: 'What should a care home life story document include?', acceptedAnswer: { '@type': 'Answer', text: 'For daily care: preferred name, routines, food preferences, music, and things that comfort or cause distress. For the keepsake: childhood memories, working life, family history, values, and what they want to be remembered for.' } },
-          { '@type': 'Question', name: 'When is the right time to create a life story for someone moving into care?', acceptedAnswer: { '@type': 'Answer', text: 'As early as possible — ideally before they move in, while they can still contribute in their own words. But it\'s never too late.' } },
-        ]
+        mainEntity: faqs.map((f) => ({
+          '@type': 'Question',
+          name: f.q,
+          acceptedAnswer: { '@type': 'Answer', text: f.a },
+        }))
       }
     ]
   }

@@ -226,11 +226,11 @@ useSeo({
     '@graph': [
       {
         '@type': 'FAQPage',
-        mainEntity: [
-          { '@type': 'Question', name: 'What is reminiscence therapy?', acceptedAnswer: { '@type': 'Answer', text: 'Reminiscence therapy is a structured approach that uses the recall of past experiences to improve psychological wellbeing. It\'s widely used with older adults and people living with dementia.' } },
-          { '@type': 'Question', name: 'Does reminiscence therapy work for dementia?', acceptedAnswer: { '@type': 'Answer', text: 'Yes. Research shows reminiscence therapy can reduce depression and anxiety in people with dementia, improve mood and engagement, and strengthen relationships between residents and care staff.' } },
-          { '@type': 'Question', name: 'How does a life story book support reminiscence therapy?', acceptedAnswer: { '@type': 'Answer', text: 'A life story book serves as both the process and the outcome of reminiscence work. Creating it is itself therapeutic. The finished book then becomes a resource for ongoing reminiscence work.' } },
-        ]
+        mainEntity: faqs.map((f) => ({
+          '@type': 'Question',
+          name: f.q,
+          acceptedAnswer: { '@type': 'Answer', text: f.a },
+        }))
       }
     ]
   }

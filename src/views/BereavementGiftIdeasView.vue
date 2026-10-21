@@ -219,12 +219,11 @@ useSeo({
     '@graph': [
       {
         '@type': 'FAQPage',
-        mainEntity: [
-          { '@type': 'Question', name: 'What is an appropriate bereavement gift?', acceptedAnswer: { '@type': 'Answer', text: 'The most meaningful bereavement gifts either preserve the memory of the person who has died, provide practical support during a difficult time, or offer something to look forward to.' } },
-          { '@type': 'Question', name: 'How much should you spend on a bereavement gift?', acceptedAnswer: { '@type': 'Answer', text: 'The amount matters much less than the thoughtfulness. A handwritten letter with a specific memory often means more than an expensive hamper. For a close friend or family member, £30–£100 is a reasonable range.' } },
-          { '@type': 'Question', name: 'What should you not give as a bereavement gift?', acceptedAnswer: { '@type': 'Answer', text: 'Avoid anything that implies the person should be feeling better or moving on. Also avoid gifts that are too impersonal or that require effort from the grieving person.' } },
-          { '@type': 'Question', name: 'Can you create a life story book after someone has died?', acceptedAnswer: { '@type': 'Answer', text: 'Yes. Tell Me Your Story can be used to create a tribute book after a loss, drawing on family memories and stories. Family members contribute what they remember and the result is a permanent record of a life that mattered.' } },
-        ]
+        mainEntity: faqs.map((f) => ({
+          '@type': 'Question',
+          name: f.q,
+          acceptedAnswer: { '@type': 'Answer', text: f.a },
+        }))
       }
     ]
   }

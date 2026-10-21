@@ -181,11 +181,11 @@ useSeo({
     '@graph': [
       {
         '@type': 'FAQPage',
-        mainEntity: [
-          { '@type': 'Question', name: 'What is the difference between an obituary and a death notice?', acceptedAnswer: { '@type': 'Answer', text: 'A death notice is short and factual. An obituary is longer and more personal, telling the story of someone\'s life.' } },
-          { '@type': 'Question', name: 'How long should an obituary be?', acceptedAnswer: { '@type': 'Answer', text: 'It depends where it is published. Newspapers often have space limits, while online platforms usually allow more length.' } },
-          { '@type': 'Question', name: 'Can I use someone\'s own words in their obituary?', acceptedAnswer: { '@type': 'Answer', text: 'Yes. If their life story or memories were captured beforehand, drawing on their own words can make the obituary feel genuinely like them.' } },
-        ]
+        mainEntity: faqs.map((f) => ({
+          '@type': 'Question',
+          name: f.q,
+          acceptedAnswer: { '@type': 'Answer', text: f.a },
+        }))
       }
     ]
   }

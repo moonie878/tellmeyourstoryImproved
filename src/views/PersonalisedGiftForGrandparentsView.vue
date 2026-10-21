@@ -213,11 +213,11 @@ useSeo({
     '@graph': [
       {
         '@type': 'FAQPage',
-        mainEntity: [
-          { '@type': 'Question', name: 'What is the best personalised gift for a grandparent?', acceptedAnswer: { '@type': 'Answer', text: 'The best personalised gifts capture something specific about them. A life story book, a family portrait, a recipe book, or a personalised photo book all work well. The key is specificity — something that could only be given to them.' } },
-          { '@type': 'Question', name: 'What can you get a grandparent who has everything?', acceptedAnswer: { '@type': 'Answer', text: 'For grandparents who have everything materially, the most meaningful gifts are experiences, memories, or something that captures their story. A life story book, an afternoon tea, or a charitable donation in their name.' } },
-          { '@type': 'Question', name: 'What is a good gift for a grandparent\'s 80th birthday?', acceptedAnswer: { '@type': 'Answer', text: 'A life story book capturing 80 years of memories in a beautifully printed book is the most meaningful option. A family photoshoot, commissioned portrait, or personalised map also work well for milestone birthdays.' } },
-        ]
+        mainEntity: faqs.map((f) => ({
+          '@type': 'Question',
+          name: f.q,
+          acceptedAnswer: { '@type': 'Answer', text: f.a },
+        }))
       }
     ]
   }

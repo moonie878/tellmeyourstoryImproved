@@ -149,6 +149,10 @@
             <p class="text-sm font-semibold text-stone-900 group-hover:text-[#7C5C3B]">Gift for Someone Who Has Everything</p>
             <p class="mt-1 text-xs text-stone-500">The broader gift guide for any occasion</p>
           </router-link>
+           <router-link to="/christmas-gift-ideas-for-grandparents" class="rounded-2xl border border-stone-200 p-4 hover:border-[#7C5C3B] transition group">
+            <p class="text-sm font-semibold text-stone-900 group-hover:text-[#7C5C3B]">Gift for Grandparents</p>
+            <p class="mt-1 text-xs text-stone-500">The most meaningful gift for grandparents</p>
+          </router-link>
         </div>
       </div>
     </section>

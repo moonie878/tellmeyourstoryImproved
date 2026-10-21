@@ -264,13 +264,11 @@ useSeo({
     '@graph': [
       {
         '@type': 'FAQPage',
-        mainEntity: [
-          { '@type': 'Question', name: 'What is a legacy letter?', acceptedAnswer: { '@type': 'Answer', text: 'A legacy letter is a personal document that passes on the non-material things that matter: your values, your life lessons, your love, and your hopes for the future. Unlike a legal will, it has no formal requirements.' } },
-          { '@type': 'Question', name: 'What is the difference between a legacy letter and an ethical will?', acceptedAnswer: { '@type': 'Answer', text: 'They\'re the same thing described differently. An ethical will is the traditional term. A legacy letter is a more modern and accessible description of the same document.' } },
-          { '@type': 'Question', name: 'How long should a legacy letter be?', acceptedAnswer: { '@type': 'Answer', text: 'There\'s no right length. Some of the most powerful legacy letters are a single page. What matters is that it\'s honest and specific — not how long it is.' } },
-          { '@type': 'Question', name: 'When should you write a legacy letter?', acceptedAnswer: { '@type': 'Answer', text: 'Now. Don\'t wait until you\'re facing the end of your life. A legacy letter is more useful and more honest when written from the middle of a life — and it can be updated over the years.' } },
-          { '@type': 'Question', name: 'Should I give my legacy letter to my children now or leave it with my will?', acceptedAnswer: { '@type': 'Answer', text: 'Both approaches work. Sharing it now opens a conversation. Leaving it with your will means they receive it when it may mean most. Some people do both.' } },
-        ]
+        mainEntity: faqs.map((f) => ({
+          '@type': 'Question',
+          name: f.q,
+          acceptedAnswer: { '@type': 'Answer', text: f.a },
+        }))
       }
     ]
   }

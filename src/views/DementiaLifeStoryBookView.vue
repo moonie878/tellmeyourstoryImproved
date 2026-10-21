@@ -274,14 +274,11 @@ useSeo({
     '@graph': [
       {
         '@type': 'FAQPage',
-        mainEntity: [
-          { '@type': 'Question', name: 'What is a dementia life story book?', acceptedAnswer: { '@type': 'Answer', text: 'A dementia life story book is a structured record of a person\'s life — their history, preferences, memories, and personality — created to help maintain their identity and dignity as dementia progresses. It\'s used in care settings and as a family keepsake.' } },
-          { '@type': 'Question', name: 'Is life story work evidence-based in dementia care?', acceptedAnswer: { '@type': 'Answer', text: 'Yes. Life story work is recognised by the Alzheimer\'s Society, NHS England, and the Care Quality Commission as a valuable component of person-centred dementia care.' } },
-          { '@type': 'Question', name: 'Can someone with dementia create a life story book?', acceptedAnswer: { '@type': 'Answer', text: 'Yes, often more than families expect. Long-term memories often remain relatively intact even in mid-stage dementia. Sensory prompts and old photographs are particularly effective.' } },
-          { '@type': 'Question', name: 'When is the right time to create a dementia life story book?', acceptedAnswer: { '@type': 'Answer', text: 'As early as possible — ideally at or before diagnosis. But it\'s never too late. Family can contribute at any stage.' } },
-          { '@type': 'Question', name: 'Can I share a life story book with a care home?', acceptedAnswer: { '@type': 'Answer', text: 'Yes, and care homes actively welcome this. Tell Me Your Story lets you share a private link with care staff or order a printed copy for the home.' } },
-          { '@type': 'Question', name: 'What if they can no longer answer questions themselves?', acceptedAnswer: { '@type': 'Answer', text: 'Family members can create the life story using their own memories — stories they\'ve been told, experiences they shared, knowledge of the person\'s life and character.' } },
-        ]
+        mainEntity: faqs.map((f) => ({
+          '@type': 'Question',
+          name: f.q,
+          acceptedAnswer: { '@type': 'Answer', text: f.a },
+        }))
       }
     ]
   }

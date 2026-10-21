@@ -266,11 +266,11 @@ useSeo({
     '@graph': [
       {
         '@type': 'FAQPage',
-        mainEntity: [
-          { '@type': 'Question', name: 'How do I get my grandparent to open up about their life?', acceptedAnswer: { '@type': 'Answer', text: 'Start with something light and sensory. "What did your childhood home smell like?" works better than "Tell me about your childhood." Use old photographs as conversation starters.' } },
-          { '@type': 'Question', name: 'What is the best way to record a grandparent\'s story?', acceptedAnswer: { '@type': 'Answer', text: 'A smartphone voice memo is enough for family use. Place it between you in a quiet room. Tell Me Your Story provides the most structured approach — guided questions, built-in recording, and automatic keepsake book production.' } },
-          { '@type': 'Question', name: 'How do I preserve my grandparent\'s story?', acceptedAnswer: { '@type': 'Answer', text: 'Back up recordings to at least two locations immediately. Create a physical copy — either a printed book or stored USB. Share copies with other family members.' } },
-        ]
+        mainEntity: faqs.map((f) => ({
+          '@type': 'Question',
+          name: f.q,
+          acceptedAnswer: { '@type': 'Answer', text: f.a },
+        }))
       },
       {
         '@type': 'HowTo',
