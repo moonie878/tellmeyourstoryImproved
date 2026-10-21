@@ -77,6 +77,7 @@ import { openCookieSettings } from '../../lib/consent'
 const year = new Date().getFullYear()
 
 // Every link here is a real route — keep in sync with src/router/index.ts.
+// Every link here is a real route — keep in sync with src/router/index.ts.
 const columns = [
   {
     title: 'Tell Me Your Story',
@@ -84,7 +85,9 @@ const columns = [
       { to: '/example', label: 'See an example' },
       { to: '/pricing', label: 'Pricing' },
       { to: '/gift', label: 'Give as a gift' },
+      { to: '/life-story-book', label: 'Life story book' },
       { to: '/tribute', label: 'Tribute video' },
+      { to: '/life-story-video', label: 'Life story video' },
       { to: '/my-story', label: 'Our story' },
       { to: '/help', label: 'Help & guides' },
       { to: '/contact', label: 'Contact' },
@@ -105,6 +108,7 @@ const columns = [
   {
     title: 'Gift ideas',
     links: [
+      { to: '/christmas', label: 'Christmas gift ideas' },
       { to: '/christmas-gifts-for-grandparents', label: 'Christmas gifts for grandparents' },
       { to: '/meaningful-christmas-gifts', label: 'Meaningful Christmas gifts' },
       { to: '/mothers-day-gift-ideas', label: "Mother's Day gifts" },
@@ -130,6 +134,7 @@ const columns = [
       { to: '/life-story-work-in-care-homes', label: 'Life story work in care homes' },
       { to: '/dementia-life-story-book', label: 'Dementia life story book' },
       { to: '/reminiscence-therapy-life-story', label: 'Reminiscence therapy' },
+      { to: '/memorial-book', label: 'Memorial book' },
       { to: '/end-of-life-gift', label: 'End of life gifts' },
       { to: '/end-of-life-questions-to-ask-parents', label: 'End of life questions' },
     ],

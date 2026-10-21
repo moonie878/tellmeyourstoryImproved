@@ -109,6 +109,7 @@ const groups = [
       { to: '/write-your-own-life-story', title: 'Write your own life story', summary: 'For anyone who wants to leave their own story for the family.' },
       { to: '/legacy-letter-to-children', title: 'Writing a legacy letter', summary: 'How to write a letter your children will keep.' },
       { to: '/what-is-a-life-story-book', title: 'What is a life story book?', summary: 'What goes in one, and the different ways to make one.' },
+            { to: '/life-story-book', title: 'Life story book', summary: 'How a life story book comes together, from first question to finished copy.' },
     ],
   },
   {
@@ -116,6 +117,7 @@ const groups = [
     title: 'Gift ideas',
     intro: 'Meaningful gifts for the people who say they don\'t want anything.',
     guides: [
+            { to: '/christmas', title: 'Christmas gift ideas', summary: 'Every Christmas idea in one place, with the printed-book ordering dates.' },
       { to: '/christmas-gifts-for-grandparents', title: 'Christmas gifts for grandparents', summary: 'Their life story in their own voice — and other gifts they will keep.' },
       { to: '/meaningful-christmas-gifts', title: 'Meaningful Christmas gifts', summary: 'Ideas that get kept long after the wrapping paper is gone.' },
       { to: '/christmas-gift-for-parents-who-have-everything', title: 'Christmas gifts for parents who have everything', summary: 'When they really don\'t need more things.' },
@@ -170,6 +172,7 @@ const groups = [
       { to: '/how-to-write-an-obituary', title: 'How to write an obituary', summary: 'What to include, and examples to help you start.' },
       { to: '/memorial-book', title: 'Memorial book', summary: 'Gathering stories and memories into a book to keep.' },
       { to: '/bereavement-gift-ideas', title: 'Bereavement gift ideas', summary: 'Thoughtful ways to support someone who is grieving.' },
+            { to: '/life-story-video', title: 'Life story video', summary: 'Turning their answers, photos and voice into a film to play or share.' },
     ],
   },
 ]
