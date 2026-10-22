@@ -45,7 +45,10 @@
             See a finished book
           </router-link>
         </div>
-
+        <p class="mt-5 text-sm text-[#5C534E]">
+          Buying for someone else this year?
+          <router-link to="/christmas" class="text-[#7C5C3B] underline hover:no-underline">See all our Christmas gift ideas →</router-link>
+        </p>
         <div class="mt-6 flex flex-wrap justify-center gap-x-5 gap-y-2 text-xs text-[#A89880]">
           <span>One-time payment</span>
           <span>No subscription</span>

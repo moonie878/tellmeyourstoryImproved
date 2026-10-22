@@ -33,7 +33,9 @@
           <p>A grandchild reading it in thirty years should feel like they actually knew their grandparent. Not just what they looked like in photos — but what made them laugh, what they believed, what they'd been through, and what they wanted their family to know.</p>
           <p>That's what a life story keepsake book is. And Tell Me Your Story makes it simple to create one — guided questions, voice recording, photos, and professional printing all in one place.</p>
         </div>
-        <div class="mt-6 flex flex-wrap justify-center gap-3">
+               <div class="mt-6 flex flex-wrap justify-center gap-3">
+          <router-link to="/life-story-book" class="text-xs text-[#7C5C3B] underline hover:no-underline">How a life story book is made →</router-link>
+          <span class="text-xs text-stone-300">·</span>
           <router-link to="/what-is-a-life-story-book" class="text-xs text-[#7C5C3B] underline hover:no-underline">What is a life story book? →</router-link>
           <span class="text-xs text-stone-300">·</span>
           <router-link to="/life-story-questions" class="text-xs text-[#7C5C3B] underline hover:no-underline">See the questions inside →</router-link>

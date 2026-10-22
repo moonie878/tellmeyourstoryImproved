@@ -37,6 +37,11 @@
           <p>
             A meaningful gift usually has one of three things going for it. It took thought rather than money. It carries something that can't be bought — a memory, a voice, a piece of family history. Or it gives the person time and attention rather than an object to find a home for.
           </p>
+                    <p>
+            If you're specifically shopping for Christmas, our
+            <router-link to="/christmas" class="text-[#7C5C3B] underline hover:no-underline">Christmas gift ideas page</router-link>
+            has the printed-book ordering dates alongside the ideas below.
+          </p>
           <p>
             Everything below does at least one of those. We've put ours first because we think it's the strongest of them, but the rest are genuinely good ideas and several cost nothing at all.
           </p>

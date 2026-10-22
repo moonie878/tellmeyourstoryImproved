@@ -404,11 +404,15 @@
           <div class="why-card"><span class="why-icon">💛</span><p class="why-card-title">Their words</p><p class="why-card-desc">Add a tribute that becomes a beautiful quote slide woven through the video.</p></div>
           <div class="why-card"><span class="why-icon">🎬</span><p class="why-card-title">Full HD MP4</p><p class="why-card-desc">Download and share with family, play at a memorial service, or keep it forever.</p></div>
         </div>
-        <div class="upsell-card">
+                <div class="upsell-card">
           <p class="upsell-eyebrow">Want more than a tribute video?</p>
           <h3 class="upsell-title">Capture their full life story with Tell Me Your Story</h3>
           <p class="upsell-desc">100 guided questions across 10 chapters. Every answer turns into a beautifully designed keepsake book — a complete record of their life, in their own words.</p>
           <router-link to="/register" class="upsell-btn">Start capturing their story — it's free →</router-link>
+          <p class="upsell-note">
+            Or see how a finished story becomes a
+            <router-link to="/life-story-video">life story video</router-link>.
+          </p>
         </div>
       </div>
     </section>
@@ -1327,6 +1331,15 @@ async function verifyAndGenerate(sessionId: string) {
   position: relative;
   width: 100%;
   height: 100%;
+}
+
+.upsell-note {
+  margin-top: 0.75rem;
+  font-size: 0.8125rem;
+  opacity: 0.8;
+}
+.upsell-note a {
+  text-decoration: underline;
 }
 
 .video-badge {
