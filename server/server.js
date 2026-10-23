@@ -161,9 +161,19 @@ app.post(
     }
 
     if (event.type === 'checkout.session.completed') {
-      const session     = event.data.object
+           const session     = event.data.object
       const userId      = session.metadata?.userId
-      const storyType   = session.metadata?.storyType || null
+
+      // Stripe metadata is always strings, so an absent value can arrive as
+      // the text "null" or "undefined". `|| null` does not catch those — a
+      // non-empty string is truthy — which is how user_access ended up
+      // holding both real NULL and the four characters 'null'.
+      const rawStoryType = session.metadata?.storyType
+      const storyType =
+        !rawStoryType || rawStoryType === 'null' || rawStoryType === 'undefined'
+          ? null
+          : rawStoryType
+
       const purchaseType = session.metadata?.purchaseType || 'single_story'
 
       console.log('Payment completed, purchaseType:', purchaseType, 'userId:', userId)
@@ -271,7 +281,7 @@ app.post(
         }
       }
 
-      // ── Regular user purchase ──────────────────────────────────────────────
+           // ── Regular user purchase ──────────────────────────────────────────────
       else if (userId) {
         let accessRows = []
 
@@ -294,15 +304,28 @@ app.post(
           accessRows = [
             { user_id: userId, access_type: 'story',  story_type: 'all' },
             { user_id: userId, access_type: 'export', variant: 'with_images' },
-            { user_id: userId, access_type: 'print',  variant: 'premium' },
           ]
         }
 
+        // Every paid tier can order a printed book. /pricing says so in three
+        // places ("Available on all paid tiers"), and until October 2026 only
+        // all_images actually granted it — so three in four paying customers
+        // were told they could order a book and never saw the button.
+        // The printed book is a separate £21.99+ purchase, so there is nothing
+        // to protect here: anyone blocked is someone who cannot pay you.
+        if (accessRows.length > 0) {
+          accessRows.push({
+            user_id: userId,
+            access_type: 'print',
+            variant: purchaseType === 'all_images' ? 'premium' : 'standard',
+          })
+        }
+
         // Add to Resend contacts
-  const { data: { user: purchaseUser } } = await supabaseAdmin.auth.admin.getUserById(userId)
-  if (purchaseUser?.email) {
-    await addToResendContacts(purchaseUser.email)
-  }
+        const { data: { user: purchaseUser } } = await supabaseAdmin.auth.admin.getUserById(userId)
+        if (purchaseUser?.email) {
+          await addToResendContacts(purchaseUser.email)
+        }
 
         if (accessRows.length > 0) {
           const { error } = await supabaseAdmin
@@ -2535,10 +2558,16 @@ app.post('/redeem-gift', async (req, res) => {
         : res.status(404).json({ error: 'Gift not found' })
     }
 
+    // A gift grants the same access the buyer paid for. The print row was
+    // missing entirely until October 2026, so no gift recipient could order a
+    // printed book however much the giver spent. `variant` also had
+    // gift.story_type copied into it, which is what created the story/dad/dad
+    // row in user_access.
     const accessRows = [
-  { user_id: userId, access_type: 'story',  story_type: gift.story_type, variant: gift.story_type },
-  { user_id: userId, access_type: 'export', story_type: gift.story_type, variant: gift.variant },
-]
+      { user_id: userId, access_type: 'story',  story_type: gift.story_type },
+      { user_id: userId, access_type: 'export', story_type: gift.story_type, variant: gift.variant },
+      { user_id: userId, access_type: 'print',  variant: gift.variant === 'with_images' ? 'premium' : 'standard' },
+    ]
 
     const { error: accessError } = await supabaseAdmin
       .from('user_access')

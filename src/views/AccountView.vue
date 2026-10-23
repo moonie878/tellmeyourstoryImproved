@@ -262,7 +262,11 @@ const hasFullAccess = computed(() =>
 )
 
 const hasPrintAccess = computed(() =>
-  userAccess.value.some(a => a.access_type === 'print' || a.variant === 'with_images')
+  userAccess.value.some(a =>
+    a.access_type === 'print' ||
+    a.variant === 'premium' ||
+    a.variant === 'with_images'
+  )
 )
 
 const hasExportAccess = computed(() =>
