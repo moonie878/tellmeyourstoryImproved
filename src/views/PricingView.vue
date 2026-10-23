@@ -366,8 +366,14 @@
       @click.self="showProjectPicker = false"
     >
       <div class="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl">
-        <h3 class="text-base font-semibold text-[#1C1917]">Which story is this for?</h3>
-        <p class="mt-1.5 text-sm text-[#8C847E]">Choose the story you'd like to upgrade.</p>
+        <h3 class="text-base font-semibold text-[#1C1917]">
+          {{ unlocksEverything ? 'Pick any story to continue' : 'Which story is this for?' }}
+        </h3>
+        <p class="mt-1.5 text-sm text-[#8C847E]">
+          {{ unlocksEverything
+            ? 'This unlocks all of your stories — choosing one here just decides where you land afterwards.'
+            : "Choose the story you'd like to upgrade." }}
+        </p>
         <div class="mt-4 space-y-2">
           <button
             v-for="proj in userProjects"
@@ -391,7 +397,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useSeo } from '../composables/useSeo'
 import { supabase } from '../lib/supabase'
@@ -408,6 +414,13 @@ const isLoggedIn = ref(false)
 const userProjects = ref<Array<{ id: string; title: string | null }>>([])
 const showProjectPicker = ref(false)
 const pendingTier = ref<string | null>(null)
+
+// All Stories and Premium unlock every story, so the picker is only choosing
+// where the customer lands after paying — not what they are buying. Saying so
+// is the difference between a confident purchase and an abandoned one.
+const unlocksEverything = computed(
+  () => pendingTier.value === 'tier3' || pendingTier.value === 'tier4'
+)
 
 onMounted(async () => {
   const { data: { user } } = await supabase.auth.getUser()
@@ -429,30 +442,31 @@ function goToCheckout(tier: string, projectId: string) {
 }
 
 function handleTierClick(tier: string) {
- if (!isLoggedIn.value) {
-  router.push(`/register?plan=${tier}`)
-  return
-}
-
- if (userProjects.value.length === 0) {
-  router.push(`/dashboard?plan=${tier}`)
-  return
-}
-
-  // Tier 3 and Tier 4 unlock access across ALL of the user's stories,
-  // not just one — so there's nothing to pick. Just use any project
-  // (most recent) as the redirect anchor for the Stripe success/cancel URL.
-  if (tier === 'tier3' || tier === 'tier4') {
-    goToCheckout(tier, userProjects.value[0].id)
+  if (!isLoggedIn.value) {
+    router.push(`/register?plan=${tier}`)
     return
   }
 
+  if (userProjects.value.length === 0) {
+    router.push(`/dashboard?plan=${tier}`)
+    return
+  }
+
+  // One story — nothing to choose.
   if (userProjects.value.length === 1) {
     goToCheckout(tier, userProjects.value[0].id)
     return
   }
 
-  // Multiple projects, tier1/tier2 (single-story tiers) — ask which one
+  // More than one story: always ask, every tier.
+  //
+  // tier3 and tier4 unlock every story, so the project picked here is only an
+  // anchor for Stripe's return URL. This used to skip the picker and silently
+  // use userProjects[0] — the most recently CREATED story — which showed people
+  // a story name they weren't expecting at checkout and made it look as though
+  // the upgrade was about to go to the wrong story. A customer stopped buying
+  // over exactly that on 23 October 2026. The picker's wording below explains
+  // that these tiers cover everything, so the choice can't be got wrong.
   pendingTier.value = tier
   showProjectPicker.value = true
 }
