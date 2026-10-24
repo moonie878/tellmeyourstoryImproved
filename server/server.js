@@ -2364,6 +2364,111 @@ app.post('/create-print-checkout', async (req, res) => {
   }
 })
 
+// ─── Redeem a print credit ────────────────────────────────────────────────────
+//
+// The Keepsake (£79) includes one printed hardback. This is how it gets ordered
+// without a second payment. It deliberately mirrors /create-print-checkout —
+// same page-count validation, same bracket lookup, same metadata shape — so the
+// dashboard's existing post-payment flow works unchanged.
+//
+// The credit is claimed with a conditional update (used_at is null) BEFORE
+// anything else happens. Two tabs, a double click or a retry therefore cannot
+// spend the same credit twice: the second update matches no rows.
+app.post('/redeem-print-credit', async (req, res) => {
+  try {
+    const auth = req.headers.authorization || ''
+    const token = auth.startsWith('Bearer ') ? auth.slice(7) : null
+    if (!token) return res.status(401).json({ error: 'Not signed in' })
+
+    const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token)
+    if (authError || !user) return res.status(401).json({ error: 'Not signed in' })
+
+    const { storyId, podId, pageCount } = req.body
+    if (!storyId) return res.status(400).json({ error: 'Missing story' })
+
+    // The story must belong to them.
+    const { data: story } = await supabaseAdmin
+      .from('story_projects')
+      .select('id')
+      .eq('id', storyId)
+      .eq('user_id', user.id)
+      .maybeSingle()
+    if (!story) return res.status(403).json({ error: 'Not your story' })
+
+    const product = PRINT_PRODUCTS[podId]
+    if (!product) return res.status(400).json({ error: 'That book format is not available' })
+
+    const pages = parseInt(pageCount, 10)
+    const bracket = product.brackets.find((b) => pages > 0 && pages <= b.maxPages)
+    if (!bracket) {
+      return res.status(400).json({
+        error: 'This book is longer than we can print online — please get in touch and we will sort it out.',
+      })
+    }
+
+    // Claim a credit first. If this matches no rows, they have none left.
+    const { data: credits, error: claimError } = await supabaseAdmin
+      .from('print_credits')
+      .update({ used_at: new Date().toISOString(), used_for_story: storyId })
+      .eq('user_id', user.id)
+      .is('used_at', null)
+      .select('id')
+      .limit(1)
+
+    if (claimError) {
+      console.error('Credit claim failed:', claimError.message)
+      return res.status(500).json({ error: 'Could not start your print order' })
+    }
+    if (!credits || credits.length === 0) {
+      return res.status(402).json({ error: 'No print credit available' })
+    }
+
+    const credit = credits[0]
+    const printSessionId = `credit_${credit.id}`
+
+    const metadata = {
+      userId:   user.id,
+      storyId,
+      purchaseType: 'printed_book_credit',
+      quantity: '1',
+      podId,
+      binding:  product.label,
+      amount:   String(bracket.amount),
+      pageCount: String(pages),
+      includesPhotoBook: String(!!product.includesPhotoBook),
+      creditId: credit.id,
+    }
+
+    const { error: sessionError } = await supabaseAdmin
+      .from('print_sessions')
+      .insert({ id: printSessionId, user_id: user.id, story_id: storyId, metadata })
+
+    if (sessionError) {
+      console.error('Print session insert failed:', sessionError.message)
+      // Hand the credit back rather than silently eating it.
+      await supabaseAdmin
+        .from('print_credits')
+        .update({ used_at: null, used_for_story: null })
+        .eq('id', credit.id)
+      return res.status(500).json({ error: 'Could not start your print order' })
+    }
+
+    await supabaseAdmin
+      .from('print_credits')
+      .update({ print_session_id: printSessionId })
+      .eq('id', credit.id)
+
+    console.log('Print credit redeemed:', credit.id, 'for story', storyId)
+
+    res.json({
+      url: `${FRONTEND_URL}/dashboard?print=success&story=${storyId}&session_id=${printSessionId}`,
+    })
+  } catch (err) {
+    console.error('Print credit redemption error:', err)
+    res.status(500).json({ error: 'Could not start your print order' })
+  }
+})
+
 app.get('/stripe-session/:sessionId', async (req, res) => {
   try {
     // Credit redemptions are not Stripe sessions — same metadata shape, our
