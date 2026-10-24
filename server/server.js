@@ -2248,6 +2248,7 @@ const PRICE_PURCHASE_TYPES = {
   'price_1TJvd3R13CJL70CCmOGoDDVT': 'single_images',
   'price_1TJvdJR13CJL70CCrdpt1bg0': 'all_text',
   'price_1TJvdiR13CJL70CCqAqRBjZq': 'all_images',
+  'price_1UUCwsR13CJL70CCsfJvdFlr': 'bundle_hardback',
 }
 
 app.post('/create-checkout-session', async (req, res) => {
