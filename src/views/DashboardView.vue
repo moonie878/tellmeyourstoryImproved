@@ -119,16 +119,25 @@
             <div>
               <p class="text-sm font-semibold text-stone-900">Unlock the full story</p>
               <p class="mt-1 text-sm leading-relaxed text-stone-600">
-                You have 5 free questions. Upgrade for all 100+, voice recording, export and printing.
+                You have 5 free questions. The Keepsake gives you all 100+, photos,
+                and a printed hardback posted to you — £79, nothing else to pay.
               </p>
             </div>
           </div>
-          <router-link
-            to="/pricing"
-            class="flex-shrink-0 rounded-full bg-[#7C5C3B] px-5 py-2.5 text-center text-sm font-semibold text-white transition hover:opacity-90"
-          >
-            View plans — from £3.99
-          </router-link>
+          <div class="flex flex-shrink-0 flex-col items-stretch gap-2 sm:items-end">
+            <router-link
+              to="/pricing#keepsake"
+              class="rounded-full bg-[#7C5C3B] px-5 py-2.5 text-center text-sm font-semibold text-white transition hover:opacity-90"
+            >
+              Get The Keepsake — £79
+            </router-link>
+            <router-link
+              to="/pricing"
+              class="text-center text-xs text-stone-500 underline transition hover:text-[#7C5C3B]"
+            >
+              Or see all plans from £3.99
+            </router-link>
+          </div>
         </div>
       </section>
 
@@ -927,7 +936,15 @@ async function startPrintOrder(story: any) {
         }),
       })
 
-      const creditResult = await creditResponse.json()
+      // Parse defensively: a 404 or a Render error page is HTML, not JSON, and
+      // response.json() on it throws a SyntaxError that says nothing useful
+      // about what actually went wrong.
+      let creditResult: any = {}
+      try {
+        creditResult = await creditResponse.json()
+      } catch {
+        creditResult = {}
+      }
 
       if (creditResponse.ok && creditResult.url) {
         window.location.href = creditResult.url
@@ -935,9 +952,13 @@ async function startPrintOrder(story: any) {
       }
 
       // 402 means the credit was already spent — fall through and charge.
-      // Anything else is a real failure and should not quietly become a sale.
+      // Anything else is a real failure and must NOT quietly become a sale:
+      // someone holding a credit should see an error, not a payment screen
+      // for a book they have already bought.
       if (creditResponse.status !== 402) {
-        throw new Error(creditResult.error || 'Could not start your print order')
+        throw new Error(
+          creditResult.error || `Could not redeem your included book (${creditResponse.status}).`,
+        )
       }
 
       printCreditCount.value = 0

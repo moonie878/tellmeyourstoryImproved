@@ -26,7 +26,7 @@
       physical book, and burying it as a sixth column would make it look
       like more of the same.
     -->
-    <section class="px-5 pb-10 sm:px-8">
+    <section id="keepsake" class="scroll-mt-20 px-5 pb-10 sm:px-8">
       <div class="mx-auto max-w-6xl">
         <div class="overflow-hidden rounded-3xl bg-[#1C1917]">
           <div class="grid items-center gap-8 p-8 sm:p-10 md:grid-cols-[1.4fr_1fr]">

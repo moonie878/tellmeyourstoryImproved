@@ -128,6 +128,17 @@ const GIFT_PRODUCTS = {
     storyType:   'all',
     amount:      1799,
   },
+  // The Keepsake — the only gift that includes the printed book itself. The
+  // recipient gets a print credit at redemption (see /redeem-gift), so they
+  // order their hardback without ever seeing a price.
+  'keepsake': {
+    label:      'The Keepsake',
+    description: 'Everything, plus a printed hardback posted to them',
+    accessType:  'export',
+    variant:     'premium',
+    storyType:   'all',
+    amount:      7900,
+  },
 }
 
 // ─── Middleware ───────────────────────────────────────────────────────────────
@@ -2724,6 +2735,25 @@ app.post('/redeem-gift', async (req, res) => {
         .update({ redeemed_by: null, redeemed_at: null })
         .eq('token', token)
       return res.status(500).json({ error: 'Failed to grant access' })
+    }
+
+    // The Keepsake gift includes the printed hardback. The credit is what lets
+    // the recipient order it without ever being shown a price — which is the
+    // whole point of giving it.
+    //
+    // The gift was claimed atomically above, so this runs at most once per
+    // gift. The token is used as the idempotency key rather than the buyer's
+    // Stripe session, so a buyer who buys one bundle and gifts another gets
+    // two distinct credits.
+    if (gift.product_key === 'keepsake') {
+      const { error: creditError } = await supabaseAdmin
+        .from('print_credits')
+        .upsert(
+          { user_id: userId, source: 'gift', stripe_session_id: `gift_${token}` },
+          { onConflict: 'stripe_session_id' },
+        )
+      if (creditError) console.error('Gift print credit grant failed:', creditError.message, token)
+      else console.log('Gift print credit granted to', userId)
     }
 
       // After successful redemption

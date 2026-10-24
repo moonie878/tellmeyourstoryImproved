@@ -104,7 +104,54 @@
         </p>
       </div>
 
-      <div class="mt-10 grid gap-4 sm:grid-cols-2">
+      <!--
+        The Keepsake sits above the grid, full width. It is the only gift that
+        includes the printed book, so putting it in the 2x2 would both make an
+        odd fifth cell and bury the one option where the recipient never sees a
+        price at all.
+      -->
+      <div v-if="keepsake" class="mt-10 overflow-hidden rounded-3xl bg-[#1C1917]">
+        <div class="grid items-center gap-6 p-7 sm:p-8 md:grid-cols-[1.5fr_1fr]">
+          <div>
+            <p class="text-[10px] font-medium uppercase tracking-[0.2em] text-[#9C7C5C]">
+              The whole gift — nothing left for them to buy
+            </p>
+            <h3 class="mt-2.5 font-display text-2xl font-bold text-white">{{ keepsake.label }}</h3>
+            <p class="mt-2 text-sm leading-6 text-[#A8A29E]">{{ keepsake.description }}</p>
+            <ul class="mt-4 grid gap-2 sm:grid-cols-2">
+              <li
+                v-for="feature in keepsake.features"
+                :key="feature"
+                class="flex items-start gap-2 text-[13px] leading-5 text-[#E8DDD0]"
+              >
+                <span class="mt-0.5 flex-shrink-0 text-[#9C7C5C]">✓</span>{{ feature }}
+              </li>
+            </ul>
+          </div>
+
+          <div class="flex flex-col items-start gap-3 md:items-end md:text-right">
+            <div>
+              <div class="flex items-baseline gap-2 md:justify-end">
+                <span class="font-display text-4xl font-bold text-white">£{{ keepsake.displayPrice }}</span>
+                <span v-if="keepsake.originalPrice" class="text-sm text-[#6C6460] line-through">£{{ keepsake.originalPrice }}</span>
+              </div>
+              <p class="mt-1 text-[11px] text-[#9C7C5C]">Hardback and UK delivery included</p>
+            </div>
+            <button
+              @click="selectProduct(keepsake)"
+              class="w-full rounded-full bg-white px-8 py-3 text-sm font-semibold text-[#1C1917] transition hover:opacity-90 md:w-auto"
+            >
+              Gift this
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <p class="mt-8 text-center text-xs font-medium uppercase tracking-[0.2em] text-stone-400">
+        Or a digital gift
+      </p>
+
+      <div class="mt-5 grid gap-4 sm:grid-cols-2">
 
         <div
           v-for="product in products"
@@ -437,6 +484,35 @@ const products = computed<GiftProduct[]>(() => {
     discountPercent: campaignDiscount,
   },
 ]
+})
+
+/**
+ * The Keepsake — rendered separately, above the grid.
+ *
+ * Kept out of `products` so the 2x2 of digital gifts stays a 2x2, and because
+ * this is the only gift where the recipient never has to pay for anything
+ * afterwards. Same campaign discount as everything else.
+ */
+const keepsake = computed<GiftProduct>(() => {
+  const campaignDiscount = campaignDiscountRef.value
+  return {
+    key: 'keepsake',
+    label: 'The Keepsake',
+    description: 'Everything included, and a printed hardback posted to them — with QR codes that play their voice.',
+    displayPrice: price(79),
+    originalPrice: campaignDiscount ? '79.00' : undefined,
+    saving: campaignDiscount ? `${campaignDiscount}%` : undefined,
+    features: [
+      'All 100+ guided questions',
+      'Every story type unlocked',
+      'Photos throughout the book',
+      'Voice recording on every answer',
+      'A printed hardback, posted to them',
+      'Nothing more for them to pay',
+    ],
+    featured: true,
+    discountPercent: campaignDiscount,
+  }
 })
 
 const selectedKey = ref<string | null>(null)
