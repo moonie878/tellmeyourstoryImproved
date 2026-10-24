@@ -84,7 +84,39 @@
 
           <!-- Tier picker -->
           <div class="border-t border-stone-100 px-6 py-5 sm:px-8">
-            <p class="mb-3 text-center text-xs font-medium uppercase tracking-widest text-stone-400">Choose your plan</p>
+
+            <!--
+              The Keepsake sits above the grid, full width, because this is the
+              highest-intent moment in the product: they have just written
+              several pages about someone they love and hit the wall. A printed
+              book in their hands is what they actually want here — a PDF export
+              is the consolation prize, not the headline.
+            -->
+            <button
+              @click="$emit('upgrade', 'bundle')"
+              class="relative w-full overflow-hidden rounded-2xl bg-[#1C1917] p-4 text-left transition hover:opacity-95"
+            >
+              <span class="absolute -top-px right-3 rounded-b-lg bg-[#9C7C5C] px-2 py-0.5 text-[9px] font-medium text-white">
+                Everything included
+              </span>
+              <div class="flex items-center justify-between gap-4">
+                <div class="min-w-0">
+                  <p class="font-serif text-base font-semibold text-white">The Keepsake</p>
+                  <p class="mt-1 text-[11px] leading-snug text-[#A8A29E]">
+                    All {{ remainingQuestions }}+ remaining questions, photos, and a printed
+                    hardback posted to you — with QR codes that play their voice.
+                  </p>
+                </div>
+                <div class="flex-shrink-0 text-right">
+                  <p class="font-serif text-2xl font-bold text-white">£79</p>
+                  <p class="text-[9px] text-[#9C7C5C]">book included</p>
+                </div>
+              </div>
+            </button>
+
+            <p class="mb-3 mt-5 text-center text-xs font-medium uppercase tracking-widest text-stone-400">
+              Or just unlock the questions
+            </p>
 
             <div class="grid grid-cols-2 gap-2">
               <button

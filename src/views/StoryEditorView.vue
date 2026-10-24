@@ -498,6 +498,7 @@ const {
   upgradeSingleImages,
   upgradeAllText,
   upgradeAllImages,
+  upgradeBundleHardback,
   upgradeWithImages,
 } = useStoryCheckout(checkoutLoading, projectId, project, hasAllStoriesAccess, saveCurrentAnswerBeforeCheckout)
 
@@ -651,6 +652,7 @@ onMounted(async () => {
       tier2: upgradeSingleImages,
       tier3: upgradeAllText,
       tier4: upgradeAllImages,
+      bundle: upgradeBundleHardback,
     }
     const handler = tierHandlers[upgradeParam]
     if (handler) {
@@ -662,7 +664,7 @@ onMounted(async () => {
   // ─── Auto-checkout from register-as-premium ───────────────────────────────
 const planParam = route.query.plan as string | undefined
 
-if (planParam && ['tier1', 'tier2', 'tier3', 'tier4'].includes(planParam)) {
+if (planParam && ['tier1', 'tier2', 'tier3', 'tier4', 'bundle'].includes(planParam)) {
   // Clear param
   router.replace({ query: { ...route.query, plan: undefined } })
 
@@ -671,6 +673,7 @@ if (planParam && ['tier1', 'tier2', 'tier3', 'tier4'].includes(planParam)) {
     tier2: upgradeSingleImages,
     tier3: upgradeAllText,
     tier4: upgradeAllImages,
+    bundle: upgradeBundleHardback,
   }
 
   // Small delay to let the editor fully initialise
@@ -757,6 +760,7 @@ function upgradeFromGate(tier: string) {
     tier2: upgradeSingleImages,
     tier3: upgradeAllText,
     tier4: upgradeAllImages,
+    bundle: upgradeBundleHardback,
   }
 
   handlers[tier]?.()

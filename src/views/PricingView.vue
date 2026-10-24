@@ -19,9 +19,63 @@
       </div>
     </section>
 
+    <!-- ── The Keepsake — everything in one price ──────────────────────── -->
+    <!--
+      Deliberately above the comparison table and outside it. The table
+      compares digital tiers; this is the only option that includes the
+      physical book, and burying it as a sixth column would make it look
+      like more of the same.
+    -->
+    <section class="px-5 pb-10 sm:px-8">
+      <div class="mx-auto max-w-6xl">
+        <div class="overflow-hidden rounded-3xl bg-[#1C1917]">
+          <div class="grid items-center gap-8 p-8 sm:p-10 md:grid-cols-[1.4fr_1fr]">
+
+            <div>
+              <p class="text-[10px] font-medium uppercase tracking-[0.2em] text-[#9C7C5C]">
+                Everything included
+              </p>
+              <h2 class="mt-3 font-display text-2xl font-bold text-white sm:text-3xl">
+                The Keepsake
+              </h2>
+              <p class="mt-3 max-w-xl text-sm leading-7 text-[#A8A29E]">
+                Their life story, printed as a hardback with their voice in it.
+                All 100+ questions, photos, and one hardback book posted to you.
+                Nothing else to pay.
+              </p>
+              <ul class="mt-5 grid gap-2 sm:grid-cols-2">
+                <li v-for="f in keepsakeFeatures" :key="f" class="flex items-start gap-2 text-sm text-[#E8DDD0]">
+                  <span class="mt-0.5 flex-shrink-0 text-[#9C7C5C]">✓</span>
+                  {{ f }}
+                </li>
+              </ul>
+            </div>
+
+            <div class="flex flex-col items-start gap-4 md:items-end md:text-right">
+              <div>
+                <p class="font-display text-5xl font-bold text-white">£79</p>
+                <p class="mt-1 text-xs text-[#9C7C5C]">One payment · hardback and UK delivery included</p>
+              </div>
+              <button
+                @click="handleTierClick('bundle')"
+                class="w-full rounded-full bg-white px-8 py-3.5 text-sm font-semibold text-[#1C1917] transition hover:opacity-90 md:w-auto"
+              >
+                Get The Keepsake
+              </button>
+              <p class="text-xs text-[#6C6460]">Extra copies £45 each</p>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- Table — desktop -->
     <section class="px-5 pb-8 sm:px-8">
       <div class="mx-auto max-w-6xl">
+        <p class="mb-5 text-center text-sm text-[#8C847E]">
+          Or choose a digital plan and order a printed book separately.
+        </p>
         <div class="hidden overflow-hidden rounded-3xl border border-[#E8DDD0] bg-white md:block">
           <table class="w-full border-collapse">
             <thead>
@@ -419,7 +473,9 @@ const pendingTier = ref<string | null>(null)
 // where the customer lands after paying — not what they are buying. Saying so
 // is the difference between a confident purchase and an abandoned one.
 const unlocksEverything = computed(
-  () => pendingTier.value === 'tier3' || pendingTier.value === 'tier4'
+  () => pendingTier.value === 'tier3'
+    || pendingTier.value === 'tier4'
+    || pendingTier.value === 'bundle'
 )
 
 onMounted(async () => {
@@ -477,6 +533,15 @@ function selectProjectForUpgrade(projectId: string) {
   showProjectPicker.value = false
 }
 
+const keepsakeFeatures = [
+  'All 100+ guided questions',
+  'Every story type unlocked',
+  'Photos in your book',
+  'Voice recording on every answer',
+  'A printed hardback, posted to you',
+  'QR codes that play their voice',
+]
+
 const printedBookFeatures = [
   'Professionally printed 6×9 softcover',
   'Chapters, layouts and cover image',
@@ -521,6 +586,24 @@ const extrasRows = [
 ]
 
 const mobilePlans = [
+  {
+    name: 'The Keepsake',
+    tier: 'bundle',
+    price: '£79',
+    badge: '✦ Everything included',
+    featured: false,
+    premium: true,
+    cta: 'Get The Keepsake',
+    features: [
+      'All 100+ guided questions',
+      'Every story type unlocked',
+      'Photos in your book',
+      'Voice recording on every answer',
+      'A printed hardback, posted to you',
+      'QR codes that play their voice',
+      'Extra copies £45 each',
+    ],
+  },
   {
     name: 'Free',
     tier: null,

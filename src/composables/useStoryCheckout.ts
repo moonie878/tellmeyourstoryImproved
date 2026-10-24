@@ -127,6 +127,25 @@ export function useStoryCheckout(
     })
   }
 
+  /**
+   * The Keepsake — £79.
+   *
+   * Same access as tier4, plus a print credit granted by the webhook, which is
+   * what lets them order the hardback without paying a second time. The point
+   * is that there is no second time: one price, book included.
+   */
+  async function upgradeBundleHardback() {
+    track('upgrade_clicked', {
+      type: 'bundle',
+      projectId,
+    })
+
+    await startCheckout({
+      priceId: 'price_1UUCwsR13CJL70CCsfJvdFlr',
+      purchaseType: 'bundle_hardback',
+    })
+  }
+
   async function upgradeWithImages() {
     const purchaseType = hasAllStoriesAccess.value ? 'all_images' : 'single_images'
     const priceId = hasAllStoriesAccess.value
@@ -145,6 +164,7 @@ export function useStoryCheckout(
     upgradeSingleImages,
     upgradeAllText,
     upgradeAllImages,
+    upgradeBundleHardback,
     upgradeWithImages,
   }
 }

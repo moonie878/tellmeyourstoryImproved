@@ -471,6 +471,9 @@
                 </div>
                 <p class="mt-0.5 text-xs text-stone-500">{{ b.desc }}</p>
               </button>
+              <p v-if="printCreditCount > 0" class="rounded-xl bg-[#F0F5F1] px-4 py-3 text-center text-sm font-semibold text-[#3B6D11]">
+                Your printed book is included — nothing more to pay.
+              </p>
               <p class="pt-1 text-center text-xs text-stone-500">
                 {{ bindingModalPageCount }} pages · UK delivery included · usually arrives in 10–14 days
               </p>
@@ -488,7 +491,7 @@
                 @click="startPrintOrder(bindingModalStory)"
                 :disabled="!bindingModalPricesReady"
                 class="flex-1 rounded-full bg-[#7C5C3B] py-2.5 text-sm font-semibold text-white transition hover:opacity-90 disabled:opacity-50"
-              >Continue to payment</button>
+              >{{ printCreditCount > 0 ? 'Order my book' : 'Continue to payment' }}</button>
             </div>
           </div>
 
@@ -641,6 +644,24 @@ const selectedBindingId = ref<BindingId>('softcover')
 const bindingModalPricesReady  = ref(false)
 const bindingModalPageCount    = ref<number | null>(null)
 const bindingModalInteriorBlob = ref<Blob | null>(null)
+
+// The Keepsake (£79) includes one printed hardback. The credit is how that
+// gets ordered without charging again — see /redeem-print-credit in server.js.
+const printCreditCount = ref(0)
+
+async function loadPrintCredits() {
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) { printCreditCount.value = 0; return }
+
+  const { count, error } = await supabase
+    .from('print_credits')
+    .select('*', { count: 'exact', head: true })
+    .eq('user_id', user.id)
+    .is('used_at', null)
+
+  if (error) { console.error('Print credits error:', error.message); printCreditCount.value = 0; return }
+  printCreditCount.value = count || 0
+}
 
 import { BINDING_CONFIGS, getPrintPrice, type BindingId } from '../lib/printPricing'
 import { christmasPhase, PRINT_CUTOFF_LABEL } from '../lib/christmas'
@@ -885,6 +906,43 @@ async function startPrintOrder(story: any) {
     const pageCount = bindingModalPageCount.value || 0
     const price = getPrintPrice(binding.id, pageCount)
 
+    // The Keepsake (£79) includes one printed hardback. If they have an
+    // unspent credit, redeem it instead of charging again. The endpoint
+    // returns the same success URL Stripe would have, so everything that
+    // happens after this point is unchanged.
+    if (printCreditCount.value > 0) {
+      const { data: { session } } = await supabase.auth.getSession()
+
+      const creditResponse = await fetch(`${API_BASE}/redeem-print-credit`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${session?.access_token}`,
+        },
+        body: JSON.stringify({
+          storyId:    story.id,
+          storyTitle: story.title || 'My Story',
+          podId:      binding.podId,
+          pageCount,
+        }),
+      })
+
+      const creditResult = await creditResponse.json()
+
+      if (creditResponse.ok && creditResult.url) {
+        window.location.href = creditResult.url
+        return
+      }
+
+      // 402 means the credit was already spent — fall through and charge.
+      // Anything else is a real failure and should not quietly become a sale.
+      if (creditResponse.status !== 402) {
+        throw new Error(creditResult.error || 'Could not start your print order')
+      }
+
+      printCreditCount.value = 0
+    }
+
     console.log('Sending to checkout:', {
       amount: Math.round(price * 100),
       podId: binding.podId,
@@ -1089,6 +1147,8 @@ if (includesPhotoBook) {
 function onOrdered(printJobId: string) {
   printModalOpen.value = false
   track('print_book_ordered', { print_job_id: printJobId })
+  // A credit may have just been spent — don't leave "included" showing.
+  loadPrintCredits()
 }
 
 // ─── CRUD ─────────────────────────────────────────────────────────────────────
@@ -1173,6 +1233,7 @@ async function loadUserAccess() {
 
 onMounted(async () => {
   await loadUserAccess()
+  await loadPrintCredits()
   await fetchStories()
 
   // Detect return from Stripe print payment
@@ -1194,7 +1255,7 @@ onMounted(async () => {
   // their email and then log in via /login instead of clicking the link.
   // The backup is only trusted for a brand-new account (under 24h old) so a
   // stale value can never send an existing user to checkout by surprise.
-  const VALID_PLANS = ['tier1', 'tier2', 'tier3', 'tier4']
+  const VALID_PLANS = ['tier1', 'tier2', 'tier3', 'tier4', 'bundle']
   const PLAN_STORAGE_KEY = 'tmys-pending-plan'
 
   let storedPlan: string | null = null

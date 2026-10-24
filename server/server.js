@@ -300,7 +300,14 @@ app.post(
             { user_id: userId, access_type: 'story',  story_type: 'all' },
             { user_id: userId, access_type: 'export', variant: 'text_only' },
           ]
-        } else if (purchaseType === 'all_images') {
+               } else if (purchaseType === 'all_images') {
+          accessRows = [
+            { user_id: userId, access_type: 'story',  story_type: 'all' },
+            { user_id: userId, access_type: 'export', variant: 'with_images' },
+          ]
+        } else if (purchaseType === 'bundle_hardback') {
+          // The Keepsake, £79 — same access as all_images. What makes it a
+          // bundle is the print credit granted below, not the access rows.
           accessRows = [
             { user_id: userId, access_type: 'story',  story_type: 'all' },
             { user_id: userId, access_type: 'export', variant: 'with_images' },
@@ -317,7 +324,7 @@ app.post(
           accessRows.push({
             user_id: userId,
             access_type: 'print',
-            variant: purchaseType === 'all_images' ? 'premium' : 'standard',
+                        variant: (purchaseType === 'all_images' || purchaseType === 'bundle_hardback') ? 'premium' : 'standard',
           })
         }
 
@@ -335,7 +342,18 @@ app.post(
           if (error) console.error('Supabase access error:', error.message)
           else console.log('Access granted for user:', userId)
         }
+         if (purchaseType === 'bundle_hardback') {
+          const { error: creditError } = await supabaseAdmin
+            .from('print_credits')
+            .upsert(
+              { user_id: userId, source: 'bundle', stripe_session_id: session.id },
+              { onConflict: 'stripe_session_id' },
+            )
+          if (creditError) console.error('Print credit grant failed:', creditError.message, session.id)
+          else console.log('Print credit granted to', userId)
+        }
       }
+      
 
       // ── Tribute video ──────────────────────────────────────────────────────
       if (session.metadata?.product === 'tribute-video') {
@@ -2345,7 +2363,27 @@ app.post('/create-print-checkout', async (req, res) => {
   }
 })
 
+app.get('/stripe-session/:sessionId', async (req, res) => {
+  try {
+    // Credit redemptions are not Stripe sessions — same metadata shape, our
+    // own table. Checked first so the dashboard's success flow is unchanged.
+    if (req.params.sessionId.startsWith('credit_')) {
+      const { data, error } = await supabaseAdmin
+        .from('print_sessions')
+        .select('metadata')
+        .eq('id', req.params.sessionId)
+        .maybeSingle()
+      if (error || !data) return res.status(404).json({ error: 'Session not found' })
+      return res.json({ metadata: data.metadata })
+    }
 
+    const session = await stripe.checkout.sessions.retrieve(req.params.sessionId)
+    res.json({ metadata: session.metadata })
+  } catch (err) {
+    console.error('Session fetch error:', err)
+    res.status(500).json({ error: 'Failed to fetch session' })
+  }
+})
 
 // ─── Tribute video checkout ───────────────────────────────────────────────────
 // TributePaymentModal.vue has always POSTed here, but the route was never
@@ -2402,6 +2440,8 @@ app.post('/create-tribute-checkout', async (req, res) => {
   }
 })
 
+
+
 app.post('/verify-tribute-payment', async (req, res) => {
   try {
     const { sessionId } = req.body
@@ -2418,15 +2458,7 @@ app.post('/verify-tribute-payment', async (req, res) => {
   }
 })
 
-app.get('/stripe-session/:sessionId', async (req, res) => {
-  try {
-    const session = await stripe.checkout.sessions.retrieve(req.params.sessionId)
-    res.json({ metadata: session.metadata })
-  } catch (err) {
-    console.error('Session fetch error:', err)
-    res.status(500).json({ error: 'Failed to fetch session' })
-  }
-})
+
 
 // ─── Gift endpoints ───────────────────────────────────────────────────────────
 // ─── Gift campaign discounts ──────────────────────────────────────────────────
