@@ -264,6 +264,70 @@
   </div>
 </section>
 
+    <!-- ═══════════════════════════════════════ -->
+    <!-- 3b. THE KEEPSAKE — everything in one    -->
+    <!-- ═══════════════════════════════════════ -->
+    <!--
+      Placed immediately after the bento grid, which ends on the photograph of
+      the printed book. Someone who has just seen what the book is and wants it
+      should not have to go hunting for a price.
+
+      Deliberately NOT in the hero. The hero's job is "5 questions free, no card
+      needed", and that is what gets people through the door. Asking £79 of a
+      stranger four seconds into the page would cost more signups than it won
+      sales.
+    -->
+    <section class="reveal bg-[#F5F0E8] px-5 py-16 sm:px-8 sm:py-20">
+      <div class="mx-auto max-w-5xl">
+        <div class="overflow-hidden rounded-3xl bg-[#1C1917]">
+          <div class="grid items-center gap-8 p-8 sm:p-10 md:grid-cols-[1.4fr_1fr] md:p-12">
+
+            <div class="text-center md:text-left">
+              <div class="section-label text-[#9C7C5C]">Or have the whole thing done</div>
+              <h2 class="mt-3 font-display text-2xl font-bold leading-tight tracking-[-0.02em] text-white sm:text-3xl">
+                The Keepsake
+              </h2>
+              <p class="mt-4 text-base leading-[1.8] text-[#A8A29E]">
+                Every question, every photo, and a printed hardback posted to you —
+                with a QR code beside each recorded answer, so your family can hear
+                them tell it. One payment, nothing else to work out.
+              </p>
+              <ul class="mt-6 grid gap-2 text-left sm:grid-cols-2">
+                <li
+                  v-for="feature in keepsakeFeatures"
+                  :key="feature"
+                  class="flex items-start gap-2 text-sm leading-6 text-[#E8DDD0]"
+                >
+                  <span class="mt-0.5 flex-shrink-0 text-[#9C7C5C]">✓</span>{{ feature }}
+                </li>
+              </ul>
+            </div>
+
+            <div class="flex flex-col items-center gap-4 md:items-end md:text-right">
+              <div class="text-center md:text-right">
+                <p class="font-display text-5xl font-bold text-white">£79</p>
+                <p class="mt-1.5 text-xs text-[#9C7C5C]">Hardback and UK delivery included</p>
+              </div>
+              <router-link
+                to="/register?plan=bundle"
+                class="btn-primary-light w-full text-center md:w-auto"
+                @click="trackKeepsake"
+              >
+                Get The Keepsake
+              </router-link>
+              <router-link
+                to="/pricing"
+                class="text-xs text-[#716963] underline-offset-4 transition hover:text-[#C4A882] hover:underline"
+              >
+                Or start free from £0
+              </router-link>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- 4. WHY IT MATTERS -->
     <!-- ═══════════════════════════════════════ -->
     <!-- WHY IT MATTERS — emotional             -->
@@ -661,6 +725,15 @@ const whyNow = [
   },
 ]
 
+const keepsakeFeatures = [
+  'All 100+ guided questions',
+  'Every story type unlocked',
+  'Photos throughout the book',
+  'Voice recording on every answer',
+  'A printed hardback, posted to you',
+  'Extra copies £45',
+]
+
 // Hero "Whose story?" buttons → /register?type=…
 // `type` must match an id in src/data/storyTypes.ts (unknown ids are ignored).
 const storyOptions = [
@@ -757,6 +830,13 @@ useSeo({
         priceCurrency: 'GBP',
         description: 'Professionally printed 6x9 softcover with QR voice codes. UK delivery included.',
       },
+      {
+        '@type': 'Offer',
+        name: 'The Keepsake',
+        price: '79.00',
+        priceCurrency: 'GBP',
+        description: 'Every question, photos, and a printed hardback posted to you, with QR codes that play their voice. One payment.',
+      },
     ],
       },
       {
@@ -772,6 +852,7 @@ useSeo({
 })
 
 function trackStart() { track('upgrade_clicked', { source: 'homepage' }) }
+function trackKeepsake() { track('upgrade_clicked', { source: 'homepage_keepsake', plan: 'bundle' }) }
 function trackStoryType(type: string) { track('story_type_selected', { type, source: 'homepage_hero' }) }
 function trackExampleStory() { track('example_story_clicked', { source: 'homepage' }) }
 function trackPricing(plan: string) { track('upgrade_clicked', { source: 'home_pricing', plan }) }
