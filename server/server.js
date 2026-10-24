@@ -2435,6 +2435,11 @@ app.post('/redeem-print-credit', async (req, res) => {
       binding:  product.label,
       amount:   String(bracket.amount),
       pageCount: String(pages),
+      // maxPages is what /lulu-print-job checks the submitted book against, so
+      // a credit cannot be used to print something longer than it covers.
+      // Without it that check silently passes and the guard is weaker than the
+      // paid path.
+      maxPages: String(bracket.maxPages),
       includesPhotoBook: String(!!product.includesPhotoBook),
       creditId: credit.id,
     }
@@ -2770,20 +2775,50 @@ app.post('/lulu-print-job', async (req, res) => {
 
     // Every print job must be backed by a paid print checkout that hasn't been
     // used yet. (Previously anyone could call this and print at our expense.)
-    let session
-    try {
-      session = await stripe.checkout.sessions.retrieve(String(body.external_id || ''))
-    } catch {
-      return res.status(402).json({ error: 'Payment not found' })
-    }
-    const meta = session.metadata || {}
-    // 'no_payment_required' = a 100% promo code (e.g. your own test orders)
-    const settled = session.payment_status === 'paid' || session.payment_status === 'no_payment_required'
-    if (session.status !== 'complete' || !settled || meta.purchaseType !== 'printed_book') {
-      return res.status(402).json({ error: 'Payment not found' })
-    }
-    if (meta.luluJobId) {
-      return res.status(409).json({ error: 'This order has already been sent to print', id: meta.luluJobId })
+    //
+    // Two kinds of payment qualify. A Stripe checkout, as before. Or a print
+    // credit from The Keepsake (£79), which was paid for at the bundle's
+    // checkout and redeemed at /redeem-print-credit — those carry an
+    // external_id of credit_<uuid> and live in print_sessions, not Stripe.
+    // Every check below is applied identically to both.
+    const externalId = String(body.external_id || '')
+    const isCredit = externalId.startsWith('credit_')
+
+    let session = null
+    let creditRow = null
+    let meta
+
+    if (isCredit) {
+      const { data: row } = await supabaseAdmin
+        .from('print_sessions')
+        .select('id, metadata, lulu_job_id')
+        .eq('id', externalId)
+        .maybeSingle()
+      if (!row) return res.status(402).json({ error: 'Payment not found' })
+
+      creditRow = row
+      meta = row.metadata || {}
+      if (meta.purchaseType !== 'printed_book_credit') {
+        return res.status(402).json({ error: 'Payment not found' })
+      }
+      if (row.lulu_job_id) {
+        return res.status(409).json({ error: 'This order has already been sent to print', id: row.lulu_job_id })
+      }
+    } else {
+      try {
+        session = await stripe.checkout.sessions.retrieve(externalId)
+      } catch {
+        return res.status(402).json({ error: 'Payment not found' })
+      }
+      meta = session.metadata || {}
+      // 'no_payment_required' = a 100% promo code (e.g. your own test orders)
+      const settled = session.payment_status === 'paid' || session.payment_status === 'no_payment_required'
+      if (session.status !== 'complete' || !settled || meta.purchaseType !== 'printed_book') {
+        return res.status(402).json({ error: 'Payment not found' })
+      }
+      if (meta.luluJobId) {
+        return res.status(409).json({ error: 'This order has already been sent to print', id: meta.luluJobId })
+      }
     }
 
     const items = Array.isArray(body.line_items) ? body.line_items : []
@@ -2826,9 +2861,17 @@ app.post('/lulu-print-job', async (req, res) => {
     if (!response.ok) console.error('Lulu print job rejected:', JSON.stringify(data))
     else {
       console.log('Lulu print job created:', data.id)
-      // Mark the payment as used so it can't print a second book
-      await stripe.checkout.sessions.update(session.id, { metadata: { ...meta, luluJobId: String(data.id) } })
-        .catch((e) => console.error('Could not mark session as printed:', e.message))
+      // Mark the payment as used so it can't print a second book.
+      if (isCredit) {
+        const { error: markError } = await supabaseAdmin
+          .from('print_sessions')
+          .update({ lulu_job_id: String(data.id) })
+          .eq('id', creditRow.id)
+        if (markError) console.error('Could not mark credit session as printed:', markError.message)
+      } else {
+        await stripe.checkout.sessions.update(session.id, { metadata: { ...meta, luluJobId: String(data.id) } })
+          .catch((e) => console.error('Could not mark session as printed:', e.message))
+      }
     }
     res.status(response.status).json(data)
   } catch (err) {
