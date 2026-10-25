@@ -54,7 +54,17 @@
             <template v-if="justSaved">Thank you — that's saved. Here's the next one.</template>
             <template v-else>Hello {{ data.storytellerName }}. A question from {{ data.fromName }}:</template>
           </p>
-          <p class="mt-1 text-base text-stone-500">Question {{ currentNumber }} of {{ data.questions.length }}</p>
+          <p class="mt-1 text-base text-stone-500">
+            Question {{ currentNumber }} of {{ data.questions.length }}
+            <!--
+              Their own total, always visible. Even if they land somewhere
+              unexpected, "21 answered so far" makes it obvious nothing has
+              been lost — which is the fear that brought this to light.
+            -->
+            <template v-if="answeredSoFar > 0">
+              · <span class="font-medium text-[#86664A]">{{ answeredSoFar }} answered so far</span>
+            </template>
+          </p>
         </div>
 
         <div class="mt-5 rounded-3xl bg-white p-6 shadow-sm sm:p-8">
@@ -179,14 +189,42 @@ const busy = computed(() => saving.value || voice.isTranscribing.value)
 const current = computed(() => data.value.questions.find((q) => q.id === currentId.value) || null)
 const currentNumber = computed(() => data.value.questions.findIndex((q) => q.id === currentId.value) + 1)
 
+/** Counted from the questions themselves, so it updates as they save. */
+const answeredSoFar = computed(
+  () => data.value.questions.filter((q) => q.answer && q.answer.trim()).length,
+)
+
 function clock(seconds: number) {
   return `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`
 }
 
-/** Next question with no answer, skipping ones they chose to skip this visit. */
+/**
+ * Next question with no answer, skipping ones they chose to skip this visit.
+ *
+ * On arrival (no afterId) this resumes from just past the LAST question they
+ * answered — not from the top.
+ *
+ * It used to start at index 0, which meant anyone who had skipped an early
+ * question was shown that same question on every single visit, with an empty
+ * box and "Question 1 of 104" underneath. To a storyteller who had written
+ * twenty answers, that reads as the site having forgotten everything they did.
+ * One did exactly that on 25 October 2026 and her daughter emailed in a panic.
+ *
+ * Skipped questions are still offered — the list wraps round — just after the
+ * ones they have not reached yet, rather than before them.
+ */
 function pickNext(afterId?: string | null) {
   const qs = data.value.questions
-  const start = afterId ? qs.findIndex((q) => q.id === afterId) + 1 : 0
+
+  let start = 0
+  if (afterId) {
+    start = qs.findIndex((q) => q.id === afterId) + 1
+  } else {
+    let lastAnswered = -1
+    qs.forEach((q, i) => { if (q.answer && q.answer.trim()) lastAnswered = i })
+    start = lastAnswered + 1
+  }
+
   const ordered = [...qs.slice(start), ...qs.slice(0, start)]
   const next = ordered.find((q) => !q.answer && !skipped.value.has(q.id)) || ordered.find((q) => !q.answer)
   currentId.value = next?.id || null

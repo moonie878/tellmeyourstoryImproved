@@ -48,6 +48,8 @@ type AnalyticsEvent =
    | 'tribute_render_failed_before_payment'
    | 'tribute_render_succeeded_before_payment'
    | 'tribute_payment_cancelled'
+   | 'storyteller_answered'
+   | 'storyteller_opened'
 
 type AnalyticsValue =
   | string
