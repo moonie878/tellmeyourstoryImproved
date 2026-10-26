@@ -74,7 +74,7 @@
                 <p class="mt-3 font-display text-lg font-medium text-white">🎁 A gift for Mum</p>
                 <div class="mt-4 rounded-xl border-l-2 border-[#7C5C3B] bg-[#3C3430] p-4">
                   <p class="font-serif text-xs italic leading-relaxed text-[#C4A882]">
-                    "Your stories matter more than you know. I want the kids to hear your voice telling them, years from now."
+                   "I'd love to hear your stories properly. There's no rush and no right answers — just talk whenever you feel like it."
                   </p>
                 </div>
                 <div class="mt-4 flex items-center justify-between border-t border-[#3C3430] pt-4">
@@ -310,7 +310,7 @@
                 <textarea
                   v-model="form.giftMessage"
                   rows="3"
-                  placeholder="Your stories deserve to be kept forever 🤍"
+                  placeholder="I'd love to hear your stories. No rush — just talk whenever you fancy it 🤍"
                   class="mt-1.5 w-full resize-none rounded-xl border border-stone-200 bg-stone-50 px-3.5 py-3 text-sm focus:border-[#7C5C3B] focus:outline-none focus:ring-1 focus:ring-[#7C5C3B]/30"
                 />
                 <p class="mt-1 text-[11px] text-stone-400">They'll see this when they open the gift</p>
