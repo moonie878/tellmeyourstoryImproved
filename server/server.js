@@ -3048,6 +3048,157 @@ async function verifyTurnstileToken(token, remoteIp) {
   return response.json()
 }
 
+// ============================================================================
+// ADD THIS to server.js — the share page, done server-side.
+//
+// Where: next to the /listen route.
+//
+// This replaces four anonymous client-side reads and one unvalidated write
+// with two routes that check the token properly.
+//
+// It also fixes two bugs that are in the current page:
+//
+//   1. expires_at is never checked. An "expired" share link works forever.
+//   2. Comments are inserted with a project_id supplied by the browser and a
+//      token nothing validates — so anyone can post a comment onto any
+//      project in your database by sending a request with its id.
+// ============================================================================
+
+// Public: a shared story, by its share token.
+app.get('/share/:token', async (req, res) => {
+  try {
+    const token = req.params.token
+    if (!token || token.length > 128) return res.status(404).json({ error: 'Story not found' })
+
+    const { data: share } = await supabaseAdmin
+      .from('story_shares')
+      .select('id, project_id, expires_at')
+      .eq('token', token)
+      .maybeSingle()
+
+    if (!share) return res.status(404).json({ error: 'Story not found' })
+
+    // The current page ignores this entirely, so expired links still work.
+    if (share.expires_at && new Date(share.expires_at) < new Date()) {
+      return res.status(404).json({ error: 'This link has expired' })
+    }
+
+    const { data: project } = await supabaseAdmin
+      .from('story_projects')
+      .select('title, story_type')
+      .eq('id', share.project_id)
+      .maybeSingle()
+
+    if (!project) return res.status(404).json({ error: 'Story not found' })
+
+    const { data: answerRows } = await supabaseAdmin
+      .from('story_answers')
+      .select('section_id, answer')
+      .eq('project_id', share.project_id)
+      .not('answer', 'is', null)
+      .neq('answer', '')
+
+    const answers = answerRows || []
+
+    let sections = []
+    if (answers.length) {
+      const sectionIds = answers.map((a) => a.section_id).filter(Boolean)
+
+      const { data: sectionRows } = await supabaseAdmin
+        .from('story_sections')
+        .select('id, chapter, question, order_index')
+        .in('id', sectionIds)
+        .order('order_index', { ascending: true })
+
+      sections = (sectionRows || [])
+        .map((s) => {
+          const a = answers.find((ans) => String(ans.section_id) === String(s.id))
+          return {
+            id: s.id,
+            chapter: s.chapter,
+            question: s.question,
+            answer: a?.answer || '',
+          }
+        })
+        .filter((s) => s.answer.trim())
+    }
+
+    const { data: commentRows } = await supabaseAdmin
+      .from('story_comments')
+      .select('id, section_id, author_name, comment, created_at')
+      .eq('project_id', share.project_id)
+      .order('created_at', { ascending: true })
+
+    res.json({
+      title: project.title || '',
+      storyType: project.story_type || '',
+      sections,
+      comments: commentRows || [],
+    })
+  } catch (err) {
+    console.error('Share load error:', err.message)
+    res.status(500).json({ error: 'Could not load the story' })
+  }
+})
+
+// Public: leave a comment on a shared story.
+// project_id comes from the token, never from the browser.
+app.post('/share/:token/comment', async (req, res) => {
+  try {
+    const token = req.params.token
+    const { sectionId, authorName, comment } = req.body || {}
+
+    if (!token || token.length > 128) return res.status(404).json({ error: 'Story not found' })
+    if (!sectionId || !authorName || !comment) {
+      return res.status(400).json({ error: 'Missing name or comment' })
+    }
+
+    const name = String(authorName).trim().slice(0, 80)
+    const body = String(comment).trim().slice(0, 2000)
+    if (!name || !body) return res.status(400).json({ error: 'Missing name or comment' })
+
+    const { data: share } = await supabaseAdmin
+      .from('story_shares')
+      .select('project_id, expires_at')
+      .eq('token', token)
+      .maybeSingle()
+
+    if (!share) return res.status(404).json({ error: 'Story not found' })
+    if (share.expires_at && new Date(share.expires_at) < new Date()) {
+      return res.status(404).json({ error: 'This link has expired' })
+    }
+
+    // The section must belong to a question that's actually in this story.
+    const { data: answer } = await supabaseAdmin
+      .from('story_answers')
+      .select('section_id')
+      .eq('project_id', share.project_id)
+      .eq('section_id', String(sectionId))
+      .maybeSingle()
+
+    if (!answer) return res.status(400).json({ error: 'Unknown section' })
+
+    const { data, error } = await supabaseAdmin
+      .from('story_comments')
+      .insert({
+        project_id: share.project_id,
+        section_id: sectionId,
+        token,
+        author_name: name,
+        comment: body,
+      })
+      .select('id, section_id, author_name, comment, created_at')
+      .single()
+
+    if (error) throw new Error(error.message)
+
+    res.json({ comment: data })
+  } catch (err) {
+    console.error('Share comment error:', err.message)
+    res.status(500).json({ error: 'Could not post the comment' })
+  }
+})
+
 async function getLuluAccessToken() {
   const response = await fetch(`${LULU_API_URL}/auth/realms/glasstree/protocol/openid-connect/token`, {
     method: 'POST',
