@@ -3049,6 +3049,110 @@ async function verifyTurnstileToken(token, remoteIp) {
 }
 
 // ============================================================================
+// ADD THIS to server.js
+//
+// Where: anywhere among the other public routes. Directly above
+//        app.post('/voice/store', ...)  (currently line 1913) is a sensible home.
+//
+// Why: ListenView.vue currently reads voice_recordings, story_projects and
+//      story_sections straight from Supabase with the anon key. That is only
+//      possible because of the "Public can read voice recordings" policy with
+//      USING true, which hands every recording and transcript in the database
+//      to anyone who asks.
+//
+//      This route does the same reads with the service role, so the anon key
+//      needs no access to those tables at all and the policy can be dropped.
+// ============================================================================
+
+// Public: everything the /listen QR page needs for one recording.
+app.get('/listen/:id', async (req, res) => {
+  try {
+    const { id } = req.params
+
+    // Cheap guard so a malformed QR scan never reaches the database.
+    if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)) {
+      return res.status(404).json({ error: 'Recording not found' })
+    }
+
+    const { data: rec } = await supabaseAdmin
+      .from('voice_recordings')
+      .select('id, project_id, section_id, audio_url, transcript, duration_seconds')
+      .eq('id', id)
+      .maybeSingle()
+
+    if (!rec) return res.status(404).json({ error: 'Recording not found' })
+
+    const [projectResult, sectionResult] = await Promise.all([
+      rec.project_id
+        ? supabaseAdmin.from('story_projects').select('title').eq('id', rec.project_id).maybeSingle()
+        : Promise.resolve({ data: null }),
+      rec.section_id
+        ? supabaseAdmin.from('story_sections').select('question').eq('id', rec.section_id).maybeSingle()
+        : Promise.resolve({ data: null }),
+    ])
+
+    // The other recordings in this story that are set to show a QR code,
+    // in the order their questions appear in the book.
+    let playlist = []
+    if (rec.project_id) {
+      const { data: siblings } = await supabaseAdmin
+        .from('voice_recordings')
+        .select('id, section_id, show_qr')
+        .eq('project_id', rec.project_id)
+
+      const visible = (siblings || []).filter((r) => r.show_qr !== false)
+
+      if (visible.length > 1) {
+        const sectionIds = visible.map((r) => r.section_id).filter(Boolean)
+        const { data: sections } = sectionIds.length
+          ? await supabaseAdmin.from('story_sections').select('id, order_index').in('id', sectionIds)
+          : { data: [] }
+
+        const orderById = new Map((sections || []).map((s) => [s.id, s.order_index ?? 0]))
+        playlist = visible
+          .map((r) => ({ id: r.id, order: orderById.get(r.section_id) ?? Number.MAX_SAFE_INTEGER }))
+          .sort((a, b) => a.order - b.order)
+          .map((r) => r.id)
+      } else {
+        playlist = visible.map((r) => r.id)
+      }
+    }
+
+    res.json({
+      recording: {
+        id: rec.id,
+        audio_url: rec.audio_url,
+        transcript: rec.transcript,
+        duration_seconds: rec.duration_seconds,
+      },
+      storyTitle: projectResult.data?.title || '',
+      question: sectionResult.data?.question || '',
+      playlist,
+    })
+  } catch (err) {
+    console.error('Listen error:', err.message)
+    res.status(500).json({ error: 'Could not load the recording' })
+  }
+})
+
+// ----------------------------------------------------------------------------
+// NOTE ON BEHAVIOUR
+//
+// This deliberately does NOT 404 a recording whose show_qr is false when it is
+// fetched directly by id. Your current ListenView does not check that either,
+// and a QR code may already be printed in somebody's book. show_qr is still
+// honoured for the next/previous playlist, exactly as before.
+//
+// If you would rather a recording with show_qr = false stopped resolving,
+// add this after the `if (!rec)` line — but only if you are confident no
+// printed book contains such a code:
+//
+//   if (rec.show_qr === false) return res.status(404).json({ error: 'Recording not found' })
+//
+// (You would also need to add show_qr back to the select above.)
+// ----------------------------------------------------------------------------
+
+// ============================================================================
 // ADD THIS to server.js — the share page, done server-side.
 //
 // Where: next to the /listen route.

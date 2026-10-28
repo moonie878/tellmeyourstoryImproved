@@ -153,17 +153,20 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { supabase } from '../lib/supabase'
 
 const route = useRoute()
 const router = useRouter()
 
-interface PlaylistItem {
+const API_BASE = import.meta.env.VITE_API_BASE_URL as string
+
+interface Recording {
   id: string
-  order: number
+  audio_url: string
+  transcript: string | null
+  duration_seconds: number | null
 }
 
-const recording   = ref<any>(null)
+const recording   = ref<Recording | null>(null)
 const loading     = ref(true)
 const storyTitle  = ref('')
 const question    = ref('')
@@ -171,7 +174,7 @@ const isPlaying   = ref(false)
 const currentTime = ref(0)
 const duration    = ref(0)
 const audioError  = ref(false)
-const playlist    = ref<PlaylistItem[]>([])
+const playlist    = ref<string[]>([])
 
 /** True when the visitor arrived by pressing Next, so the next story can auto-play. */
 const autoPlayNext = ref(false)
@@ -181,11 +184,11 @@ const progressBarRef = ref<HTMLDivElement | null>(null)
 
 const progressPercent = computed(() => (duration.value ? (currentTime.value / duration.value) * 100 : 0))
 
-const positionInPlaylist = computed(() => playlist.value.findIndex((p) => p.id === recording.value?.id))
-const previousId = computed(() => (positionInPlaylist.value > 0 ? playlist.value[positionInPlaylist.value - 1].id : null))
+const positionInPlaylist = computed(() => playlist.value.findIndex((id) => id === recording.value?.id))
+const previousId = computed(() => (positionInPlaylist.value > 0 ? playlist.value[positionInPlaylist.value - 1] : null))
 const nextId = computed(() =>
   positionInPlaylist.value >= 0 && positionInPlaylist.value < playlist.value.length - 1
-    ? playlist.value[positionInPlaylist.value + 1].id
+    ? playlist.value[positionInPlaylist.value + 1]
     : null,
 )
 
@@ -239,32 +242,10 @@ function seekAudio(event: MouseEvent) {
 }
 
 /**
- * Every recording in the same story that is set to show a QR code,
- * in the order the questions appear in the book.
+ * Everything this page needs now comes from the API, which reads with the
+ * service role. The browser's anon key has no access to voice_recordings,
+ * so a stranger can no longer read other people's recordings or transcripts.
  */
-async function loadPlaylist(projectId: string) {
-  const { data: recs } = await supabase
-    .from('voice_recordings')
-    .select('id, section_id, show_qr, created_at')
-    .eq('project_id', projectId)
-
-  const visible = (recs || []).filter((r: any) => r.show_qr !== false)
-  if (visible.length < 2) {
-    playlist.value = visible.map((r: any) => ({ id: r.id, order: 0 }))
-    return
-  }
-
-  const { data: sections } = await supabase
-    .from('story_sections')
-    .select('id, order_index')
-    .in('id', visible.map((r: any) => r.section_id))
-
-  const orderById = new Map((sections || []).map((s: any) => [s.id, s.order_index ?? 0]))
-  playlist.value = visible
-    .map((r: any) => ({ id: r.id, order: orderById.get(r.section_id) ?? Number.MAX_SAFE_INTEGER }))
-    .sort((a, b) => a.order - b.order)
-}
-
 async function load(id: string) {
   loading.value = !recording.value // keep the card on screen when moving between stories
   isPlaying.value = false
@@ -273,33 +254,26 @@ async function load(id: string) {
   audioError.value = false
 
   try {
-    const { data: rec } = await supabase.from('voice_recordings').select('*').eq('id', id).maybeSingle()
-    if (!rec) {
+    const response = await fetch(`${API_BASE}/listen/${encodeURIComponent(id)}`)
+
+    if (!response.ok) {
       recording.value = null
+      playlist.value = []
       return
     }
 
-    recording.value = rec
-    if (rec.duration_seconds) duration.value = rec.duration_seconds
+    const data = await response.json()
 
-    const [projectResult, sectionResult] = await Promise.all([
-      rec.project_id
-        ? supabase.from('story_projects').select('title').eq('id', rec.project_id).maybeSingle()
-        : Promise.resolve({ data: null }),
-      rec.section_id
-        ? supabase.from('story_sections').select('question').eq('id', rec.section_id).maybeSingle()
-        : Promise.resolve({ data: null }),
-    ])
+    recording.value = data.recording || null
+    storyTitle.value = data.storyTitle || ''
+    question.value = data.question || ''
+    playlist.value = Array.isArray(data.playlist) ? data.playlist : []
 
-    storyTitle.value = (projectResult.data as any)?.title || ''
-    question.value = (sectionResult.data as any)?.question || ''
-
-    // Only reload the playlist when moving into a different story
-    if (rec.project_id && !playlist.value.some((p) => p.id === rec.id)) {
-      await loadPlaylist(rec.project_id)
-    }
+    if (recording.value?.duration_seconds) duration.value = recording.value.duration_seconds
   } catch (err) {
     console.error('Listen page error:', err)
+    recording.value = null
+    playlist.value = []
   } finally {
     loading.value = false
   }
