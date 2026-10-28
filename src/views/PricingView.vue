@@ -70,6 +70,21 @@
       </div>
     </section>
 
+    <section class="px-5 pb-10 sm:px-8">
+  <div class="mx-auto max-w-3xl rounded-3xl border border-[#E8DDD0] bg-white p-8 text-center sm:p-10">
+    <h2 class="font-display text-xl font-bold text-[#1C1917] sm:text-2xl">
+      What if they don't finish?
+    </h2>
+    <p class="mx-auto mt-4 max-w-xl text-sm leading-7 text-[#5C534E]">
+      Most people don't answer all hundred. That's fine, and it's worth saying
+      out loud. Nothing expires, nothing needs renewing, and we will never
+      email anyone to tell them they're behind. Order the book whenever you
+      like — twenty stories in their own voice is a keepsake, not an
+      unfinished one.
+    </p>
+  </div>
+</section>
+
     <!-- Table — desktop -->
     <section class="px-5 pb-8 sm:px-8">
       <div class="mx-auto max-w-6xl">
@@ -749,6 +764,10 @@ const faqs = [
     q: 'Will the recordings and QR codes still work in years to come?',
     a: 'Your recordings are stored securely in your account, and every QR code in the book links through tellmeyourstory.uk. You can also download all of your recordings as audio files, with the typed-up answers, from your account page at any time — so your family always has its own copy.',
   },
+  {
+  q: 'What if they only answer a few questions?',
+  a: "Most people don't answer all 100, and that's completely fine. Your answers are saved for good — there's no subscription to expire and no deadline to miss. You can order a printed book at any point with however many answers there are: twenty stories in their own voice makes a real book, not a book with eighty blank pages in it. And we'll never email anyone to tell them they're behind.",
+},
 ]
 
 // ─── SEO + structured data ────────────────────────────────────────────────
