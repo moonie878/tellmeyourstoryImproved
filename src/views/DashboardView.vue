@@ -536,6 +536,7 @@ import PrintOrderModal from '../components/print/PrintOrderModal.vue'
 import { useShare } from '../composables/useShare'
 import { PRINTED_BOOK_FROM_PRICE } from '../lib/printPricing'
 import { usePhotoBookExport } from '../composables/usePhotoBookExport'
+import { refreshStoryCovers, getProjectImagesForExport } from '../lib/storyImageUrls'
 
 // ─── State ────────────────────────────────────────────────────────────────────
 
@@ -740,8 +741,7 @@ async function prepareInteriorForPricing(story: any) {
     })
 
     async function getAllImagesForExport() {
-      const { data } = await supabase.from('story_images').select('*').eq('project_id', story.id)
-      return data || []
+      return getProjectImagesForExport(story.id)
     }
 
     const { blob: interiorBlob, pageCount: actualPageCount } = await exportTrueBookAsBlob(
@@ -1009,8 +1009,7 @@ async function openPrintModal(story: any, sessionId: string) {
     const subtitle   = 'A life told through memories, moments, and love'
 
     async function getAllImagesForExport() {
-      const { data } = await supabase.from('story_images').select('*').eq('project_id', story.id)
-      return data || []
+      return getProjectImagesForExport(story.id)
     }
 
     // Reuse the interior PDF generated earlier in prepareInteriorForPricing
@@ -1207,9 +1206,13 @@ async function fetchStories() {
     const storiesWithProgress = await Promise.all(
       data.map(async story => ({ ...story, progress: await getProgress(story) }))
     )
-    stories.value = storiesWithProgress
+   stories.value = storiesWithProgress
     isFirstTimeUser.value = storiesWithProgress.length === 0
     storiesLoaded.value = true
+
+    // Cover URLs are signed and expire after 7 days. Without this they render
+    // as broken images until someone opens the story and comes back.
+    await refreshStoryCovers(stories.value)
   }
 }
 

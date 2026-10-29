@@ -2,7 +2,7 @@ export const STORY_TYPES = [
   {
     id: 'mum',
     title: "Mum's Story",
-    projectTitle: 'Mum Story',
+    projectTitle: "Mum's Story",
     description: 'A keepsake filled with love, memories, and the moments that shaped her life.',
     shortLabel: 'Mum Keepsake',
     label: 'Most meaningful',
@@ -10,21 +10,21 @@ export const STORY_TYPES = [
   {
     id: 'dad',
     title: "Dad's Story",
-    projectTitle: 'Dad Story',
+    projectTitle: "Dad's Story",
     description: 'Capture his stories, lessons, humour, and the memories you’ll always want to keep.',
     shortLabel: 'Dad Keepsake',
   },
   {
     id: 'grandma',
     title: "Grandma's Story",
-    projectTitle: 'Grandma Story',
+    projectTitle: "Grandma's Story",
     description: 'Preserve family traditions, stories, and the memories passed down through generations.',
     shortLabel: 'Grandma Keepsake',
   },
   {
     id: 'grandad',
     title: "Grandad's Story",
-    projectTitle: 'Grandad Story',
+    projectTitle: "Grandad's Story",
     description: 'Keep his experiences, stories, and life lessons alive for future generations.',
     shortLabel: 'Grandad Keepsake',
   },
@@ -47,10 +47,11 @@ export const STORY_TYPES = [
   {
     id: 'child_story',
     title: "Your Child's Story",
-    description: 'Capture the moments, milestones, and memories of your child as they grow.',
     projectTitle: "Your Child's Story",
+    description: 'Capture the moments, milestones, and memories of your child as they grow.',
+    shortLabel: 'Child Keepsake',
     label: 'New',
-},
+  },
 ]
 
 export function getStoryMeta(storyType: string) {
