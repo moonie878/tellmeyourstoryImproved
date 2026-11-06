@@ -1,3 +1,12 @@
+/**
+ * STORY_TYPES is what the pickers show. Anything in HIDDEN_STORY_TYPES exists
+ * and works, but is never offered — used for one-off collaborations where the
+ * questions are bespoke and it would only confuse everyone else to see it.
+ *
+ * getStoryMeta looks across both, so a hidden story still gets its proper title
+ * and labels everywhere it's displayed.
+ */
+
 export const STORY_TYPES = [
   {
     id: 'mum',
@@ -54,6 +63,20 @@ export const STORY_TYPES = [
   },
 ]
 
+/** Real story types that are never offered in the pickers. */
+export const HIDDEN_STORY_TYPES = [
+  {
+    id: 'race_season',
+    title: 'A Racing Season',
+    projectTitle: 'My Racing Season',
+    description: 'A season told properly — the rounds, the van, the bike, and the people in it.',
+    shortLabel: 'Racing Season',
+  },
+]
+
+/** Everything that exists, offered or not. Use this for lookups, not display. */
+export const ALL_STORY_TYPES = [...STORY_TYPES, ...HIDDEN_STORY_TYPES]
+
 export function getStoryMeta(storyType: string) {
-  return STORY_TYPES.find((story) => story.id === storyType)
+  return ALL_STORY_TYPES.find((story) => story.id === storyType)
 }
