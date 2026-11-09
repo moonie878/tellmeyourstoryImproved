@@ -54,16 +54,11 @@
             <template v-if="justSaved">Thank you — that's saved. Here's the next one.</template>
             <template v-else>Hello {{ data.storytellerName }}. A question from {{ data.fromName }}:</template>
           </p>
-          <p class="mt-1 text-base text-stone-500">
-            Question {{ currentNumber }} of {{ data.questions.length }}
-            <!--
-              Their own total, always visible. Even if they land somewhere
-              unexpected, "21 answered so far" makes it obvious nothing has
-              been lost — which is the fear that brought this to light.
-            -->
-            <template v-if="answeredSoFar > 0">
-              · <span class="font-medium text-[#86664A]">{{ answeredSoFar }} answered so far</span>
-            </template>
+                    <p v-if="answeredSoFar === 0" class="mt-1 text-base text-stone-500">
+            Start wherever you like. There's no rush, and you can stop any time.
+          </p>
+          <p v-else class="mt-1 text-base text-stone-500">
+            {{ answeredSoFar }} {{ answeredSoFar === 1 ? 'story' : 'stories' }} saved so far
           </p>
         </div>
 
@@ -187,7 +182,6 @@ let recordedTranscript = ''
 
 const busy = computed(() => saving.value || voice.isTranscribing.value)
 const current = computed(() => data.value.questions.find((q) => q.id === currentId.value) || null)
-const currentNumber = computed(() => data.value.questions.findIndex((q) => q.id === currentId.value) + 1)
 
 /** Counted from the questions themselves, so it updates as they save. */
 const answeredSoFar = computed(
