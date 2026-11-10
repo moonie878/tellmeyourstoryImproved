@@ -735,10 +735,7 @@ async function prepareInteriorForPricing(story: any) {
       .select('*')
       .eq('project_id', story.id)
 
-    const mergedSections = (sections || []).map((s: any) => {
-      const answer = answers?.find((a: any) => a.section_id === s.id)
-      return { ...s, answer: answer?.answer || '', is_highlighted: answer?.is_highlighted || false }
-    })
+    const mergedSections = (sections || []).map((s: any) => mergeSectionWithAnswer(s, answers))
 
     async function getAllImagesForExport() {
       return getProjectImagesForExport(story.id)
@@ -849,6 +846,30 @@ function formatStoryType(type: string) {
 
 function formatDate(value: string) {
   return new Date(value).toLocaleDateString()
+}
+
+/**
+ * Join a question to its answer for the book.
+ *
+ * Questions get rewritten over time, but an answer belongs to the wording it
+ * was actually asked under — so every answer carries its own copy of the
+ * question in story_answers.question_text. Where one exists it wins over the
+ * current story_sections text, which means a printed book always shows the
+ * question that was really put to the person, not a later rewrite of it.
+ *
+ * Answers saved before question_text existed have none, and fall back to the
+ * live wording, exactly as before.
+ */
+function mergeSectionWithAnswer(s: any, answers: any[] | null) {
+  const answer = answers?.find((a: any) => String(a.section_id) === String(s.id))
+  const asked  = (answer?.question_text || '').trim()
+
+  return {
+    ...s,
+    question:       asked || s.question,
+    answer:         answer?.answer || '',
+    is_highlighted: answer?.is_highlighted || false,
+  }
 }
 
 // ─── Access helpers ───────────────────────────────────────────────────────────
@@ -1035,10 +1056,7 @@ async function openPrintModal(story: any, sessionId: string) {
         .select('*')
         .eq('project_id', story.id)
 
-      const mergedSections = (sections || []).map((s: any) => {
-        const answer = answers?.find((a: any) => a.section_id === s.id)
-        return { ...s, answer: answer?.answer || '', is_highlighted: answer?.is_highlighted || false }
-      })
+      const mergedSections = (sections || []).map((s: any) => mergeSectionWithAnswer(s, answers))
 
       const result = await exportTrueBookAsBlob(
         story, mergedSections, getAllImagesForExport, loadImageAsBase64, story.cover_image_url || ''

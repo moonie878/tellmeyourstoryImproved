@@ -768,7 +768,7 @@ app.get('/cron/nurture-gate-email', async (req, res) => {
 
       const { data: answerRows } = await supabaseAdmin
         .from('story_answers')
-        .select('project_id, section_id, answer')
+        .select('project_id, section_id, answer, question_text')
         .in('project_id', projectIds)
       const answered = (answerRows || []).filter((a) => a.answer && a.answer.trim())
       if (answered.length < 5) continue
@@ -777,11 +777,14 @@ app.get('/cron/nurture-gate-email', async (req, res) => {
 
       // Their longest answer makes the best preview
       const best = answered.reduce((a, b) => (b.answer.length > a.answer.length ? b : a))
-      const { data: section } = await supabaseAdmin
-        .from('story_sections')
-        .select('question')
-        .eq('id', best.section_id)
-        .maybeSingle()
+      // Quote it under the question it was asked, not a later rewrite.
+      const { data: section } = (best.question_text || '').trim()
+        ? { data: { question: best.question_text.trim() } }
+        : await supabaseAdmin
+            .from('story_sections')
+            .select('question')
+            .eq('id', best.section_id)
+            .maybeSingle()
 
       const firstName =
         user.user_metadata?.full_name?.split(' ')[0] || user.user_metadata?.name?.split(' ')[0] || ''
@@ -1407,7 +1410,7 @@ app.get('/cron/gift-progress', async (req, res) => {
 
       const { data: answers } = await supabaseAdmin
         .from('story_answers')
-        .select('project_id, section_id, answer')
+        .select('project_id, section_id, answer, question_text')
         .in('project_id', projects.map((p) => p.id))
         .not('answer', 'is', null)
 
@@ -1433,12 +1436,16 @@ app.get('/cron/gift-progress', async (req, res) => {
       if (GIFT_INCLUDE_EXCERPT) {
         const best = answered.reduce((a, b) => (b.answer.length > a.answer.length ? b : a))
         answerExcerpt = excerpt(best.answer)
-        const { data: section } = await supabaseAdmin
-          .from('story_sections')
-          .select('question')
-          .eq('id', best.section_id)
-          .maybeSingle()
-        question = section?.question || ''
+        // Quote it under the question it was asked, not a later rewrite.
+        question = (best.question_text || '').trim()
+        if (!question) {
+          const { data: section } = await supabaseAdmin
+            .from('story_sections')
+            .select('question')
+            .eq('id', best.section_id)
+            .maybeSingle()
+          question = section?.question || ''
+        }
       }
 
       report.push({
@@ -1817,7 +1824,7 @@ async function ownerHasPaidAccess(userId, storyType) {
 async function storytellerContext(link) {
   const [{ data: project }, { data: answers }] = await Promise.all([
     supabaseAdmin.from('story_projects').select('id, user_id, title, story_type').eq('id', link.project_id).maybeSingle(),
-    supabaseAdmin.from('story_answers').select('section_id, answer').eq('project_id', link.project_id),
+    supabaseAdmin.from('story_answers').select('section_id, answer, question_text').eq('project_id', link.project_id),
   ])
 
   // Questions belong to the story TYPE (all "mum" stories share one set), not to a project
@@ -1829,10 +1836,18 @@ async function storytellerContext(link) {
         .order('order_index', { ascending: true })
     : { data: [] }
   const answerBySection = {}
-  for (const a of answers || []) if (a.answer && a.answer.trim()) answerBySection[a.section_id] = a.answer
+  // The wording each answer was actually asked under. Questions get rewritten;
+  // an answer belongs to the question that was put to them at the time, so each
+  // answer carries its own copy in story_answers.question_text. Where one
+  // exists it wins over the current story_sections text.
+  const askedBySection = {}
+  for (const a of answers || []) {
+    if (a.answer && a.answer.trim()) answerBySection[a.section_id] = a.answer
+    if (a.question_text && a.question_text.trim()) askedBySection[a.section_id] = a.question_text.trim()
+  }
   const answeredCount = Object.keys(answerBySection).length
   const paid = project ? await ownerHasPaidAccess(project.user_id, project.story_type) : false
-  return { project, sections: sections || [], answerBySection, answeredCount, paid }
+  return { project, sections: sections || [], answerBySection, askedBySection, answeredCount, paid }
 }
 
 function storytellerLimitReached(ctx, sectionId) {
@@ -1852,6 +1867,7 @@ async function notifyOwnerOfAnswer(link, ctx, sectionId, answer) {
     if (!owner?.email) return
 
     const section = ctx.sections.find((s) => s.id === sectionId)
+    const askedQuestion = ctx.askedBySection[sectionId] || section?.question || ''
     const who = escapeHtml(link.storyteller_name)
     await resend.emails.send({
       from: 'Tell Me Your Story <mark-griffiths@tellmeyourstory.uk>',
@@ -1861,7 +1877,7 @@ async function notifyOwnerOfAnswer(link, ctx, sectionId, answer) {
         <div style="font-family: Georgia, serif; max-width: 600px; margin: 0 auto; padding: 40px 20px;">
           <h1 style="font-size: 22px; color: #1C1917;">${who} just answered a question</h1>
           <div style="border-left: 3px solid #C4A882; padding: 4px 0 4px 18px; margin: 24px 0;">
-            <p style="font-size: 13px; color: #86664A; margin: 0 0 8px; font-style: italic;">${escapeHtml(section?.question || '')}</p>
+            <p style="font-size: 13px; color: #86664A; margin: 0 0 8px; font-style: italic;">${escapeHtml(askedQuestion)}</p>
             <p style="font-size: 16px; color: #3C3530; line-height: 1.7; margin: 0;">“${escapeHtml(excerpt(answer, 280))}”</p>
           </div>
           <div style="margin: 28px 0; text-align: center;">
@@ -1897,7 +1913,8 @@ app.get('/storyteller/:token', async (req, res) => {
       questions: ctx.sections.map((s) => ({
         id: s.id,
         chapter: s.chapter,
-        question: s.question,
+        // Already answered? Show the wording they answered, not a later rewrite.
+        question: ctx.askedBySection[s.id] || s.question,
         answer: ctx.answerBySection[s.id] || '',
       })),
     })
@@ -1961,13 +1978,19 @@ app.post('/storyteller/:token/answer', async (req, res) => {
     if (!sectionId || !text) return res.status(400).json({ error: 'Please write or record an answer first' })
 
     const ctx = await storytellerContext(link)
-    if (!ctx.sections.some((s) => s.id === sectionId)) return res.status(400).json({ error: 'Unknown question' })
+    const section = ctx.sections.find((s) => s.id === sectionId)
+    if (!section) return res.status(400).json({ error: 'Unknown question' })
     if (storytellerLimitReached(ctx, sectionId)) return res.status(402).json({ error: 'limit', limitReached: true })
+
+    // Store the question with the answer. An existing one is kept — they
+    // answered that wording, whatever story_sections says now.
+    const questionText = ctx.askedBySection[sectionId] || section.question || null
 
     const { error } = await supabaseAdmin
       .from('story_answers')
-      .upsert({ project_id: link.project_id, section_id: sectionId, answer: text, updated_at: new Date().toISOString() }, { onConflict: 'project_id,section_id' })
+      .upsert({ project_id: link.project_id, section_id: sectionId, answer: text, question_text: questionText, updated_at: new Date().toISOString() }, { onConflict: 'project_id,section_id' })
     if (error) throw error
+    if (questionText) ctx.askedBySection[sectionId] = questionText
 
     const wasNew = !ctx.answerBySection[sectionId]
     const answeredCount = ctx.answeredCount + (wasNew ? 1 : 0)
@@ -3082,12 +3105,22 @@ app.get('/listen/:id', async (req, res) => {
 
     if (!rec) return res.status(404).json({ error: 'Recording not found' })
 
-    const [projectResult, sectionResult] = await Promise.all([
+    const [projectResult, sectionResult, answerResult] = await Promise.all([
       rec.project_id
         ? supabaseAdmin.from('story_projects').select('title').eq('id', rec.project_id).maybeSingle()
         : Promise.resolve({ data: null }),
       rec.section_id
         ? supabaseAdmin.from('story_sections').select('question').eq('id', rec.section_id).maybeSingle()
+        : Promise.resolve({ data: null }),
+      // The printed QR code sits under the question as it was printed, so the
+      // page has to show that wording rather than a later rewrite.
+      rec.project_id && rec.section_id
+        ? supabaseAdmin
+            .from('story_answers')
+            .select('question_text')
+            .eq('project_id', rec.project_id)
+            .eq('section_id', rec.section_id)
+            .maybeSingle()
         : Promise.resolve({ data: null }),
     ])
 
@@ -3126,7 +3159,7 @@ app.get('/listen/:id', async (req, res) => {
         duration_seconds: rec.duration_seconds,
       },
       storyTitle: projectResult.data?.title || '',
-      question: sectionResult.data?.question || '',
+      question: (answerResult.data?.question_text || '').trim() || sectionResult.data?.question || '',
       playlist,
     })
   } catch (err) {
@@ -3197,7 +3230,7 @@ app.get('/share/:token', async (req, res) => {
 
     const { data: answerRows } = await supabaseAdmin
       .from('story_answers')
-      .select('section_id, answer')
+      .select('section_id, answer, question_text')
       .eq('project_id', share.project_id)
       .not('answer', 'is', null)
       .neq('answer', '')
@@ -3220,7 +3253,9 @@ app.get('/share/:token', async (req, res) => {
           return {
             id: s.id,
             chapter: s.chapter,
-            question: s.question,
+            // The question as it was asked, falling back to the current wording
+            // for answers saved before question_text existed.
+            question: (a?.question_text || '').trim() || s.question,
             answer: a?.answer || '',
           }
         })

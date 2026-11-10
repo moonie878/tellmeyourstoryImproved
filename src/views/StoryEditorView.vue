@@ -431,6 +431,22 @@ const currentSectionIndex = ref(0)
 const project             = ref<StoryProject | null>(null)
 const pdfSettings         = ref<PdfSettings>(getDefaultPdfSettings())
 
+// ── Question wording ───────────────────────────────────────────────────────────
+// Questions get rewritten over time, but an answer belongs to the wording it
+// was actually asked under. Every answer therefore carries its own copy of the
+// question in story_answers.question_text, and these two maps keep both
+// versions to hand, keyed by section id:
+//
+//   liveQuestion  — what story_sections says today
+//   askedQuestion — what this project's saved answer was asked (absent if the
+//                   question has never been answered here)
+//
+// section.question is then set to the asked wording wherever one exists, so the
+// editor, the PDF, the true book, the Word doc, the video and every preview
+// print the question that was really put to them — not a later rewrite.
+const liveQuestion        = ref<Record<string, string>>({})
+const askedQuestion       = ref<Record<string, string>>({})
+
 // ── Access state ───────────────────────────────────────────────────────────────
 const isPaidUser              = ref(false)
 const hasCurrentStoryAccess   = ref(false)
@@ -813,6 +829,10 @@ async function loadSections() {
     .order('order_index', { ascending: true })
 
   if (sectionData) {
+    const live: Record<string, string> = {}
+    for (const s of sectionData) live[s.id] = s.question
+    liveQuestion.value = live
+
     sections.value = sectionData.map((s) => ({
       id: s.id, chapter: s.chapter, question: s.question, answer: '', is_highlighted: false,
     }))
@@ -827,12 +847,27 @@ async function loadAnswers() {
     // Set flag BEFORE updating sections so watcher doesn't fire during load
     isInitialLoad.value = false  // ← move to here
 
+    const asked: Record<string, string> = {}
+
     sections.value = sections.value.map((section) => {
       const saved = data
         .filter((a) => a.section_id === section.id)
         .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())[0]
-      return { ...section, answer: saved?.answer || '', is_highlighted: saved?.is_highlighted || false }
+
+      // Where the answer carries its own question, that is the one that was
+      // asked — it wins over whatever story_sections says now.
+      const snapshot = (saved?.question_text || '').trim()
+      if (snapshot) asked[section.id] = snapshot
+
+      return {
+        ...section,
+        question: snapshot || liveQuestion.value[section.id] || section.question,
+        answer: saved?.answer || '',
+        is_highlighted: saved?.is_highlighted || false,
+      }
     })
+
+    askedQuestion.value = asked
   } else {
     isInitialLoad.value = false  // ← also set if no data
   }
@@ -982,11 +1017,23 @@ function saveAnswer(section: StorySection): Promise<void> {
 async function performSave(section: StorySection) {
   isSavingAnswer.value = true
   saveError.value = ''
+  // The question goes in alongside the answer. If this answer already has one
+  // it is kept — they answered that wording, not whatever it says today.
+  const questionText =
+    askedQuestion.value[section.id] || liveQuestion.value[section.id] || section.question
+
   const { error } = await supabase.from('story_answers').upsert(
-    [{ project_id: projectId, section_id: section.id, answer: section.answer, is_highlighted: !!section.is_highlighted }],
+    [{
+      project_id: projectId,
+      section_id: section.id,
+      answer: section.answer,
+      is_highlighted: !!section.is_highlighted,
+      question_text: questionText,
+    }],
     { onConflict: 'project_id,section_id' }
   )
   if (error) { saveStatus.value = ''; saveError.value = 'Could not save your answer. Please try again.'; isSavingAnswer.value = false; return }
+  if (questionText) askedQuestion.value[section.id] = questionText
   saveError.value = ''
   lastSavedAt.value = new Date()
   saveStatus.value = 'Saved'
