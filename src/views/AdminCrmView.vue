@@ -47,6 +47,15 @@
 
       <template v-else-if="board">
 
+        <!-- Something didn't read properly. Say so loudly — a number that is
+             wrong looks exactly like a number that is right. -->
+        <div v-if="board.warnings?.length" class="mb-5 rounded-2xl border border-red-200 bg-red-50 px-5 py-4">
+          <p class="text-sm font-semibold text-red-900">Some of these numbers are not trustworthy</p>
+          <ul class="mt-2 space-y-1">
+            <li v-for="(w, i) in board.warnings" :key="i" class="text-sm leading-relaxed text-red-800">{{ w }}</li>
+          </ul>
+        </div>
+
         <!-- Stage filters -->
         <div class="flex flex-wrap gap-2">
           <button

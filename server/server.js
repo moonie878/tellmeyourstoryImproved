@@ -3414,14 +3414,21 @@ async function requireAdmin(req, res) {
   return user
 }
 
-/** Reads a whole table in pages. Supabase caps a single select at 1,000 rows. */
-async function crmSelectAll(table, columns) {
+/**
+ * Reads a whole table in pages. Supabase caps a single select at 1,000 rows.
+ *
+ * orderBy matters more than it looks: paging with .range() and no ORDER BY
+ * lets Postgres return rows in any order it likes, so the same row can appear
+ * on two pages while another is never returned at all. Any table that can
+ * exceed 1,000 rows is ordered on a unique key.
+ */
+async function crmSelectAll(table, columns, orderBy = []) {
   const out = []
   for (let from = 0; from < 200000; from += 1000) {
-    const { data, error } = await supabaseAdmin
-      .from(table)
-      .select(columns)
-      .range(from, from + 999)
+    let query = supabaseAdmin.from(table).select(columns)
+    for (const col of orderBy) query = query.order(col, { ascending: true })
+
+    const { data, error } = await query.range(from, from + 999)
     if (error) throw error
     out.push(...(data || []))
     if (!data || data.length < 1000) break
@@ -3429,14 +3436,33 @@ async function crmSelectAll(table, columns) {
   return out
 }
 
-/** Same, but a missing table or column logs and yields [] instead of a 500. */
-async function crmSelectAllSafe(table, columns) {
-  try {
-    return await crmSelectAll(table, columns)
-  } catch (err) {
-    console.warn(`CRM: skipping ${table} — ${err.message}`)
-    return []
+/**
+ * Tries each column set in turn and uses the first that works, so one missing
+ * column costs that column rather than the whole table.
+ *
+ * Whatever it falls back to is recorded in `warnings` and shown on the page.
+ * A silent fallback is how a board ends up quietly reporting zeros that look
+ * exactly like real zeros.
+ */
+async function crmSelectAllSafe(table, columnSets, { orderBy = [], warnings } = {}) {
+  const sets = Array.isArray(columnSets) ? columnSets : [columnSets]
+
+  for (let i = 0; i < sets.length; i++) {
+    try {
+      const rows = await crmSelectAll(table, sets[i], i === 0 ? orderBy : [])
+      if (i > 0 && warnings) {
+        warnings.push(`${table}: fell back to "${sets[i]}" — some columns are missing, so dates on this table may be blank.`)
+      }
+      return rows
+    } catch (err) {
+      console.warn(`CRM: ${table} "${sets[i]}" failed — ${err.message}`)
+      if (i === sets.length - 1) {
+        if (warnings) warnings.push(`${table}: could not be read at all (${err.message}). Every number drawn from it is wrong, not zero.`)
+        return []
+      }
+    }
   }
+  return []
 }
 
 function crmFirstName(user) {
@@ -3484,15 +3510,49 @@ const CRM_STAGES = [
 
 /** Assembles the whole board in a handful of queries, joined in memory. */
 async function crmBoard() {
+  // Anything that degraded is reported on the page rather than hidden.
+  const warnings = []
+  const safe = (table, sets, orderBy = []) => crmSelectAllSafe(table, sets, { orderBy, warnings })
+
   const [users, projects, answers, access, credits, links, recordings, emails] = await Promise.all([
     listAllUsers(),
-    crmSelectAllSafe('story_projects',    'id, user_id, title, story_type, created_at'),
-    crmSelectAllSafe('story_answers',     'project_id, answer, created_at, updated_at'),
-    crmSelectAllSafe('user_access',       'user_id, access_type, story_type, variant'),
-    crmSelectAllSafe('print_credits',     'user_id, used_at'),
-    crmSelectAllSafe('storyteller_links', 'project_id, storyteller_email, created_at'),
-    crmSelectAllSafe('voice_recordings',  'project_id'),
-    crmSelectAllSafe('nurture_emails',    'user_id, email_type, created_at'),
+
+    safe('story_projects', [
+      'id, user_id, title, story_type, created_at',
+      'id, user_id, title, story_type',
+    ], ['id']),
+
+    // The one that matters most, so it degrades one column at a time.
+    // (project_id, section_id) is the upsert conflict target, so it is unique
+    // and safe to page on.
+    safe('story_answers', [
+      'project_id, section_id, answer, updated_at, created_at',
+      'project_id, section_id, answer, updated_at',
+      'project_id, section_id, answer, created_at',
+      'project_id, section_id, answer',
+      'project_id, answer',
+    ], ['project_id', 'section_id']),
+
+    safe('user_access', [
+      'user_id, access_type, story_type, variant',
+      'user_id, access_type, story_type',
+      'user_id, access_type',
+    ]),
+
+    safe('print_credits', ['user_id, used_at', 'user_id']),
+
+    safe('storyteller_links', [
+      'project_id, storyteller_email, created_at',
+      'project_id, storyteller_email',
+      'project_id',
+    ]),
+
+    safe('voice_recordings', ['project_id']),
+
+    safe('nurture_emails', [
+      'user_id, email_type, created_at',
+      'user_id, email_type',
+    ], ['user_id', 'email_type']),
   ])
 
   // project id -> owner, so project-keyed tables can be rolled up per user
@@ -3613,6 +3673,7 @@ async function crmBoard() {
 
   return {
     generatedAt: new Date().toISOString(),
+    warnings,
     stages: CRM_STAGES,
     counts,
     totals: {
