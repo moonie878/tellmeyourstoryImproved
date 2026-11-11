@@ -3353,3 +3353,551 @@ async function getLuluAccessToken() {
   if (!response.ok) throw new Error(`Lulu auth failed: ${response.status} ${text.slice(0, 200)}`)
   return JSON.parse(text).access_token
 }
+// ============================================================================
+// ADMIN CRM
+//
+// One page that answers "who are these people and what should I do about it",
+// so it stops being a SQL editor session every time.
+//
+// Design notes, because they matter:
+//
+//   1. Everything here runs with the service role and is gated on YOUR user id
+//      (ADMIN_USER_IDS on Render). The browser never gets a list of users, and
+//      the anon key needs no new access to anything. This is deliberate — a
+//      CRM built as a client-side page reading auth.users is exactly the hole
+//      that was just closed on five other tables.
+//
+//   2. Nothing in here sends email on a schedule. Every send is a button press
+//      by you, logged to nurture_emails as manual_<template> so the same person
+//      can't be sent the same thing twice by accident.
+//
+//   3. Opt-out is checked at send time, not list time — checking 300 Resend
+//      contacts to draw a table would be slow and pointless.
+//
+// Env on Render:
+//   ADMIN_USER_IDS — comma-separated auth user ids allowed to use these routes
+// ============================================================================
+
+const ADMIN_USER_IDS = (process.env.ADMIN_USER_IDS || '')
+  .split(',')
+  .map((s) => s.trim())
+  .filter(Boolean)
+
+const CRM_DORMANT_DAYS = 14
+
+/** Verifies the bearer token belongs to an admin. Responds and returns null if not. */
+async function requireAdmin(req, res) {
+  const token = (req.headers.authorization || '').replace(/^Bearer\s+/i, '')
+  if (!token) {
+    res.status(401).json({ error: 'Not signed in' })
+    return null
+  }
+
+  const { data, error } = await supabaseAdmin.auth.getUser(token)
+  const user = data?.user
+  if (error || !user) {
+    res.status(401).json({ error: 'Not signed in' })
+    return null
+  }
+
+  if (!ADMIN_USER_IDS.length) {
+    console.error('CRM: ADMIN_USER_IDS is not set — refusing every request')
+    res.status(503).json({ error: 'CRM is not configured' })
+    return null
+  }
+
+  if (!ADMIN_USER_IDS.includes(user.id)) {
+    res.status(403).json({ error: 'Not allowed' })
+    return null
+  }
+
+  return user
+}
+
+/** Reads a whole table in pages. Supabase caps a single select at 1,000 rows. */
+async function crmSelectAll(table, columns) {
+  const out = []
+  for (let from = 0; from < 200000; from += 1000) {
+    const { data, error } = await supabaseAdmin
+      .from(table)
+      .select(columns)
+      .range(from, from + 999)
+    if (error) throw error
+    out.push(...(data || []))
+    if (!data || data.length < 1000) break
+  }
+  return out
+}
+
+/** Same, but a missing table or column logs and yields [] instead of a 500. */
+async function crmSelectAllSafe(table, columns) {
+  try {
+    return await crmSelectAll(table, columns)
+  } catch (err) {
+    console.warn(`CRM: skipping ${table} — ${err.message}`)
+    return []
+  }
+}
+
+function crmFirstName(user) {
+  const meta = user.user_metadata || {}
+  const full = meta.full_name || meta.name || ''
+  return String(full).trim().split(/\s+/)[0] || ''
+}
+
+function crmDaysSince(value) {
+  if (!value) return null
+  const t = new Date(value).getTime()
+  if (Number.isNaN(t)) return null
+  return Math.floor((Date.now() - t) / 86400000)
+}
+
+/**
+ * The stage ladder.
+ *
+ * Ordered by what needs doing about it, not by how far along they are — the
+ * first match wins, so each person sits in exactly one stage. The ordering is
+ * the opinion here: someone who paid and hasn't started outranks everything
+ * else, because that is the most expensive silence in the business.
+ */
+function crmStage(u) {
+  if (u.printed)                               return 'printed'
+  if (u.paid && u.answers < 3)                 return 'paid_idle'
+  if (u.paid && u.answers >= 20)               return 'ready_to_print'
+  if (u.answers > 0 && u.daysSinceAnswer !== null && u.daysSinceAnswer >= CRM_DORMANT_DAYS) return 'dormant'
+  if (u.answers >= 10)                         return 'engaged'
+  if (u.answers >= 1)                          return 'writing'
+  if (u.projectCount > 0)                      return 'empty'
+  return 'new'
+}
+
+const CRM_STAGES = [
+  { id: 'paid_idle',      label: 'Paid, not started',  note: 'Money taken, nothing written. Write to these by hand, today.' },
+  { id: 'ready_to_print', label: 'Ready to print',     note: 'Enough answers and they have access. They may not know it is ready.' },
+  { id: 'printed',        label: 'Printed',            note: 'Got the book. Ask for a review, nothing else.' },
+  { id: 'engaged',        label: 'Answering well',     note: '10+ answers. Leave them alone unless they stall.' },
+  { id: 'writing',        label: 'Started',            note: '1-9 answers. The free limit is where most of these stop.' },
+  { id: 'dormant',        label: 'Gone quiet',         note: 'Had answers, silent 14+ days. Automated already.' },
+  { id: 'empty',          label: 'Story, no answers',  note: 'The biggest group. A template will not fix this one.' },
+  { id: 'new',            label: 'No story yet',       note: 'Signed up and stopped at the first decision.' },
+]
+
+/** Assembles the whole board in a handful of queries, joined in memory. */
+async function crmBoard() {
+  const [users, projects, answers, access, credits, links, recordings, emails] = await Promise.all([
+    listAllUsers(),
+    crmSelectAllSafe('story_projects',    'id, user_id, title, story_type, created_at'),
+    crmSelectAllSafe('story_answers',     'project_id, answer, created_at, updated_at'),
+    crmSelectAllSafe('user_access',       'user_id, access_type, story_type, variant'),
+    crmSelectAllSafe('print_credits',     'user_id, used_at'),
+    crmSelectAllSafe('storyteller_links', 'project_id, storyteller_email, created_at'),
+    crmSelectAllSafe('voice_recordings',  'project_id'),
+    crmSelectAllSafe('nurture_emails',    'user_id, email_type, created_at'),
+  ])
+
+  // project id -> owner, so project-keyed tables can be rolled up per user
+  const ownerOf = new Map()
+  const projectsByUser = new Map()
+  for (const p of projects) {
+    ownerOf.set(p.id, p.user_id)
+    if (!projectsByUser.has(p.user_id)) projectsByUser.set(p.user_id, [])
+    projectsByUser.get(p.user_id).push(p)
+  }
+
+  const answersByUser = new Map()   // user -> count of non-empty answers
+  const lastAnswerByUser = new Map()
+  for (const a of answers) {
+    if (!a.answer || !a.answer.trim()) continue
+    const uid = ownerOf.get(a.project_id)
+    if (!uid) continue
+    answersByUser.set(uid, (answersByUser.get(uid) || 0) + 1)
+    const when = a.updated_at || a.created_at
+    if (when && (!lastAnswerByUser.get(uid) || when > lastAnswerByUser.get(uid))) {
+      lastAnswerByUser.set(uid, when)
+    }
+  }
+
+  const voiceByUser = new Map()
+  for (const r of recordings) {
+    const uid = ownerOf.get(r.project_id)
+    if (!uid) continue
+    voiceByUser.set(uid, (voiceByUser.get(uid) || 0) + 1)
+  }
+
+  const invitedUsers = new Set()
+  for (const l of links) {
+    const uid = ownerOf.get(l.project_id)
+    if (uid) invitedUsers.add(uid)
+  }
+
+  const accessByUser = new Map()
+  for (const row of access) {
+    if (!accessByUser.has(row.user_id)) accessByUser.set(row.user_id, [])
+    accessByUser.get(row.user_id).push(row)
+  }
+
+  const creditsByUser = new Map()
+  for (const c of credits) {
+    if (!creditsByUser.has(c.user_id)) creditsByUser.set(c.user_id, [])
+    creditsByUser.get(c.user_id).push(c)
+  }
+
+  const emailsByUser = new Map()
+  for (const e of emails) {
+    if (!emailsByUser.has(e.user_id)) emailsByUser.set(e.user_id, [])
+    emailsByUser.get(e.user_id).push(e)
+  }
+
+  const rows = users.map((user) => {
+    const theirProjects = projectsByUser.get(user.id) || []
+    const theirAccess   = accessByUser.get(user.id) || []
+    const theirCredits  = creditsByUser.get(user.id) || []
+    const theirEmails   = emailsByUser.get(user.id) || []
+
+    const answerCount    = answersByUser.get(user.id) || 0
+    const lastAnswerAt   = lastAnswerByUser.get(user.id) || null
+    const voiceCount     = voiceByUser.get(user.id) || 0
+
+    const hasStory  = theirAccess.some((a) => a.access_type === 'story')
+    const hasExport = theirAccess.some((a) => a.access_type === 'export')
+
+    const u = {
+      id:              user.id,
+      email:           user.email || '',
+      firstName:       crmFirstName(user),
+      createdAt:       user.created_at,
+      lastSignInAt:    user.last_sign_in_at || null,
+      emailOptIn:      (user.user_metadata || {}).email_opt_in !== false,
+
+      projectCount:    theirProjects.length,
+      projects:        theirProjects.map((p) => ({
+                         id: p.id, title: p.title, storyType: p.story_type, createdAt: p.created_at,
+                       })),
+      answers:         answerCount,
+      lastAnswerAt,
+      daysSinceAnswer: crmDaysSince(lastAnswerAt),
+      daysSinceSignIn: crmDaysSince(user.last_sign_in_at),
+
+      paid:            hasStory && hasExport,
+      accessTypes:     [...new Set(theirAccess.map((a) => a.variant || a.story_type || a.access_type))],
+      creditsUnused:   theirCredits.filter((c) => !c.used_at).length,
+      printed:         theirCredits.some((c) => !!c.used_at),
+
+      voiceCount,
+      invited:         invitedUsers.has(user.id),
+      emailsSent:      theirEmails.map((e) => e.email_type),
+    }
+
+    u.stage = crmStage(u)
+
+    // Orthogonal to stage — things worth a nudge whatever stage they are in.
+    u.flags = []
+    if (u.projectCount > 0 && !u.invited)        u.flags.push('never_invited')
+    if (u.answers >= 5 && u.voiceCount === 0)    u.flags.push('no_voice')
+    if (!u.emailOptIn)                           u.flags.push('opted_out')
+    if (u.creditsUnused > 0)                     u.flags.push('book_unclaimed')
+
+    return u
+  })
+
+  // Most urgent first, then by how much they have written.
+  const order = CRM_STAGES.map((s) => s.id)
+  rows.sort((a, b) => {
+    const d = order.indexOf(a.stage) - order.indexOf(b.stage)
+    return d !== 0 ? d : b.answers - a.answers
+  })
+
+  const counts = {}
+  for (const s of CRM_STAGES) counts[s.id] = 0
+  for (const r of rows) counts[r.stage] = (counts[r.stage] || 0) + 1
+
+  return {
+    generatedAt: new Date().toISOString(),
+    stages: CRM_STAGES,
+    counts,
+    totals: {
+      users:        rows.length,
+      paid:         rows.filter((r) => r.paid).length,
+      withAnswers:  rows.filter((r) => r.answers > 0).length,
+      withVoice:    rows.filter((r) => r.voiceCount > 0).length,
+      everInvited:  rows.filter((r) => r.invited).length,
+    },
+    users: rows,
+  }
+}
+
+// ─── Templates ──────────────────────────────────────────────────────────────
+// Short. Says why they are getting it. One link that works.
+//
+// These are the hand-sent ones. Anything that can be decided by a clock is
+// already a /cron route — these are the states where a template alone would be
+// the wrong answer and the email is really just an opener for a reply.
+
+function crmEmailShell({ heading, body, ctaLabel, ctaUrl, whyLine, email }) {
+  return `
+    <div style="font-family: Georgia, serif; max-width: 600px; margin: 0 auto; padding: 40px 20px;">
+      <h1 style="font-size: 22px; color: #1C1917; margin: 0 0 20px; line-height: 1.4;">${heading}</h1>
+      ${body}
+      ${ctaUrl ? `
+      <div style="margin: 30px 0; text-align: center;">
+        <a href="${ctaUrl}" style="display: inline-block; background: #7C5C3B; color: white; padding: 13px 32px; border-radius: 100px; font-size: 15px; text-decoration: none; font-weight: 500;">${ctaLabel}</a>
+      </div>` : ''}
+      <p style="font-size: 15px; color: #3C3530; line-height: 1.7; margin: 24px 0 0;">Mark<br>
+        <span style="font-size: 13px; color: #8C847E;">Tell Me Your Story</span>
+      </p>
+      <p style="font-size: 12px; color: #8C847E; line-height: 1.6; margin: 24px 0 0;">${whyLine}</p>
+      ${gateEmailFooter(email)}
+    </div>`
+}
+
+const P = 'style="font-size: 15px; color: #3C3530; line-height: 1.7; margin: 0 0 16px;"'
+
+const CRM_TEMPLATES = [
+  {
+    id: 'welcome',
+    label: 'Welcome',
+    appliesTo: ['new', 'empty'],
+    subject: () => 'Welcome — start with one question',
+    build: (c) => ({
+      heading: `Welcome${c.firstName ? `, ${c.firstName}` : ''}`,
+      body: `
+        <p ${P}>You don't have to plan anything. Open the first question, answer it however it comes out, and that's a page of the book done.</p>
+        <p ${P}>If typing feels like hard work, tap the microphone instead and talk. It types it up for you and keeps the recording, so their voice ends up in the printed book behind a QR code.</p>`,
+      ctaLabel: 'Answer the first question',
+      ctaUrl: c.storyUrl || `${SITE_URL}/dashboard`,
+      whyLine: 'You\'re getting this because you created an account at tellmeyourstory.uk.',
+    }),
+  },
+  {
+    id: 'paid_not_started',
+    label: 'Paid, not started',
+    appliesTo: ['paid_idle'],
+    subject: () => 'Your Keepsake is ready whenever you are',
+    build: (c) => ({
+      heading: 'Can I give you a hand with this?',
+      body: `
+        <p ${P}>${c.firstName ? `Hi ${c.firstName}` : 'Hi'} — you bought the Keepsake and the story hasn't been started yet. That's completely fine, there's no deadline on it at all.</p>
+        <p ${P}>But if something got in the way, I'd rather know. It's far more likely to be my fault than yours, and I can fix it.</p>
+        <p ${P}>If it's easier, I can send the questions straight to them instead — one a week, by email, answered in their own time, nothing for you to chase. Just reply and say the word.</p>`,
+      ctaLabel: 'Open your story',
+      ctaUrl: c.storyUrl || `${SITE_URL}/dashboard`,
+      whyLine: `You're getting this because you bought a Keepsake and I keep an eye on the ones that haven't got going yet.`,
+    }),
+  },
+  {
+    id: 'ready_to_print',
+    label: 'Ready to print',
+    appliesTo: ['ready_to_print', 'engaged'],
+    subject: (c) => `${c.answers} answers — it's ready to print`,
+    build: (c) => ({
+      heading: `There's a book in there now`,
+      body: `
+        <p ${P}>${c.firstName ? `${c.firstName}, y` : 'Y'}ou've answered ${c.answers} questions in ${c.storyTitleSafe}. That's past the point where it stops being a form and starts being a book.</p>
+        <p ${P}>You can see every page exactly as it will be printed before you pay anything${c.creditsUnused > 0 ? ', and your printed hardback is already included in what you paid — there is nothing more to pay' : ''}.</p>`,
+      ctaLabel: 'Preview your book',
+      ctaUrl: `${SITE_URL}/dashboard`,
+      whyLine: `You're getting this because you've answered ${c.answers} questions in a story you started.`,
+    }),
+  },
+  {
+    id: 'never_invited',
+    label: 'You don\'t have to write it yourself',
+    appliesTo: ['empty', 'writing', 'dormant'],
+    subject: () => 'You don\'t have to write it all yourself',
+    build: (c) => ({
+      heading: 'Let them answer it',
+      body: `
+        <p ${P}>Most people assume they have to sit down and write someone else's life story for them. You don't.</p>
+        <p ${P}>You can send the questions straight to them. They get one a week by email, answer it by typing or just talking into their phone, and it lands in your story automatically. No account, no app, nothing to set up at their end.</p>
+        <p ${P}>It also tends to come out better, because the words are actually theirs.</p>`,
+      ctaLabel: 'Send them the questions',
+      ctaUrl: `${SITE_URL}/dashboard`,
+      whyLine: 'You\'re getting this because you started a story at tellmeyourstory.uk.',
+    }),
+  },
+  {
+    id: 'no_voice',
+    label: 'The voice bit',
+    appliesTo: ['writing', 'engaged', 'ready_to_print'],
+    subject: () => 'The part most people skip',
+    build: (c) => ({
+      heading: 'You can record their voice',
+      body: `
+        <p ${P}>${c.firstName ? `${c.firstName}, y` : 'Y'}ou've written ${c.answers} answers, all typed. There's a microphone button on every question, and it's the bit that matters most.</p>
+        <p ${P}>Record the answer instead of typing it and two things happen: it types it up for you, and the recording gets a QR code printed next to that question in the book. Someone can scan it in twenty years and hear them say it.</p>
+        <p ${P}>It's worth going back and re-recording even one answer you've already written.</p>`,
+      ctaLabel: 'Open your story',
+      ctaUrl: c.storyUrl || `${SITE_URL}/dashboard`,
+      whyLine: `You're getting this because you've answered ${c.answers} questions without recording any of them.`,
+    }),
+  },
+]
+
+/** Everything a template needs about one person. */
+async function crmUserContext(userId) {
+  const { data: userData, error: userErr } = await supabaseAdmin.auth.admin.getUserById(userId)
+  const user = userData?.user
+  if (userErr || !user) throw new Error('User not found')
+
+  const [{ data: projects }, { data: access }, { data: credits }] = await Promise.all([
+    supabaseAdmin.from('story_projects').select('id, title, story_type, created_at').eq('user_id', userId),
+    supabaseAdmin.from('user_access').select('access_type, story_type, variant').eq('user_id', userId),
+    supabaseAdmin.from('print_credits').select('used_at').eq('user_id', userId),
+  ])
+
+  const theirProjects = projects || []
+  const ids = theirProjects.map((p) => p.id)
+
+  let answers = []
+  if (ids.length) {
+    const { data } = await supabaseAdmin
+      .from('story_answers')
+      .select('project_id, answer')
+      .in('project_id', ids)
+    answers = (data || []).filter((a) => a.answer && a.answer.trim())
+  }
+
+  // Whichever story they have put the most into is the one to link to.
+  const perProject = {}
+  for (const a of answers) perProject[a.project_id] = (perProject[a.project_id] || 0) + 1
+  const main = theirProjects.slice().sort((a, b) => (perProject[b.id] || 0) - (perProject[a.id] || 0))[0] || null
+
+  return {
+    user,
+    email:          user.email || '',
+    firstName:      crmFirstName(user),
+    answers:        answers.length,
+    projectCount:   theirProjects.length,
+    storyUrl:       main ? `${SITE_URL}/story/${main.id}` : `${SITE_URL}/dashboard`,
+    storyTitleSafe: escapeHtml(main?.title || 'your story'),
+    creditsUnused:  (credits || []).filter((c) => !c.used_at).length,
+    accessTypes:    (access || []).map((a) => a.variant || a.story_type || a.access_type),
+  }
+}
+
+function crmRenderTemplate(templateId, ctx) {
+  const tpl = CRM_TEMPLATES.find((t) => t.id === templateId)
+  if (!tpl) throw new Error('Unknown template')
+
+  const parts = tpl.build(ctx)
+  return {
+    templateId,
+    label:   tpl.label,
+    subject: tpl.subject(ctx),
+    html:    crmEmailShell({ ...parts, email: ctx.email }),
+  }
+}
+
+// ─── Routes ─────────────────────────────────────────────────────────────────
+
+// The board.
+app.get('/admin/crm', async (req, res) => {
+  const admin = await requireAdmin(req, res)
+  if (!admin) return
+
+  try {
+    const board = await crmBoard()
+    res.json({ ...board, templates: CRM_TEMPLATES.map((t) => ({ id: t.id, label: t.label, appliesTo: t.appliesTo })) })
+  } catch (err) {
+    console.error('CRM board error:', err.message)
+    res.status(500).json({ error: 'Could not build the board' })
+  }
+})
+
+// What an email would look like, without sending it.
+app.get('/admin/crm/preview', async (req, res) => {
+  const admin = await requireAdmin(req, res)
+  if (!admin) return
+
+  try {
+    const { userId, templateId } = req.query
+    if (!userId || !templateId) return res.status(400).json({ error: 'Need userId and templateId' })
+
+    const ctx = await crmUserContext(String(userId))
+    const rendered = crmRenderTemplate(String(templateId), ctx)
+
+    // Say up front whether the send would actually be allowed.
+    const optedOut     = (ctx.user.user_metadata || {}).email_opt_in === false
+    const unsubscribed = await isUnsubscribed(ctx.email)
+
+    res.json({
+      ...rendered,
+      to: ctx.email,
+      sendable: !optedOut && !unsubscribed,
+      blockedReason: optedOut ? 'They opted out of email when they signed up'
+                   : unsubscribed ? 'They unsubscribed'
+                   : null,
+    })
+  } catch (err) {
+    console.error('CRM preview error:', err.message)
+    res.status(500).json({ error: err.message })
+  }
+})
+
+// Send one email, by hand, to one person.
+app.post('/admin/crm/email', async (req, res) => {
+  const admin = await requireAdmin(req, res)
+  if (!admin) return
+
+  try {
+    const { userId, templateId, test } = req.body || {}
+    if (!userId || !templateId) return res.status(400).json({ error: 'Need userId and templateId' })
+
+    const ctx = await crmUserContext(String(userId))
+    const rendered = crmRenderTemplate(String(templateId), ctx)
+
+    // A test goes to you, never to them.
+    if (test) {
+      await resend.emails.send({
+        from: 'Tell Me Your Story <mark-griffiths@tellmeyourstory.uk>',
+        to: admin.email,
+        subject: `[TEST] ${rendered.subject}`,
+        html: rendered.html,
+      })
+      return res.json({ ok: true, test: true, to: admin.email })
+    }
+
+    // Consent, both ways round: what they chose at signup, and any unsubscribe
+    // since. Neither is overridable from the CRM — there is no force flag here
+    // on purpose.
+    if ((ctx.user.user_metadata || {}).email_opt_in === false) {
+      return res.status(403).json({ error: 'They opted out of email when they signed up' })
+    }
+    if (await isUnsubscribed(ctx.email)) {
+      return res.status(403).json({ error: 'They unsubscribed' })
+    }
+
+    const emailType = `manual_${templateId}`
+
+    const { data: already } = await supabaseAdmin
+      .from('nurture_emails')
+      .select('id')
+      .eq('user_id', ctx.user.id)
+      .eq('email_type', emailType)
+      .maybeSingle()
+
+    if (already) {
+      return res.status(409).json({ error: 'They have already had this one' })
+    }
+
+    await resend.emails.send({
+      from: 'Tell Me Your Story <mark-griffiths@tellmeyourstory.uk>',
+      to: ctx.email,
+      replyTo: 'mark-griffiths@tellmeyourstory.uk',
+      subject: rendered.subject,
+      html: rendered.html,
+      headers: {
+        'List-Unsubscribe': `<${unsubscribeUrl(ctx.email)}>`,
+        'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
+      },
+    })
+
+    await supabaseAdmin.from('nurture_emails').insert({ user_id: ctx.user.id, email_type: emailType })
+
+    console.log('CRM manual send:', emailType, '->', ctx.email)
+    res.json({ ok: true, to: ctx.email, emailType })
+  } catch (err) {
+    console.error('CRM send error:', err.message)
+    res.status(500).json({ error: 'Could not send it' })
+  }
+})
