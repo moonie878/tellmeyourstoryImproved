@@ -143,7 +143,12 @@ const routes: RouteRecordRaw[] = [
       component: () => import('../views/MilestoneBirthdayGiftView.vue'),
     },
 
-
+   {
+  path: '/admin/crm',
+  name: 'admin-crm',
+  component: () => import('../views/AdminCrmView.vue'),
+  meta: { requiresAuth: true, prerender: false },
+},
   // ── Redirects (also add as real 301s in vercel.json) ──────────────────────
   // Same view was served at two URLs — duplicate content. Keep one.
   { path: '/christmas-gift-ideas-for-grandparents', redirect: '/christmas-gifts-for-grandparents' },
