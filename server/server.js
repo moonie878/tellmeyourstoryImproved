@@ -3385,6 +3385,14 @@ const ADMIN_USER_IDS = (process.env.ADMIN_USER_IDS || '')
 
 const CRM_DORMANT_DAYS = 14
 
+// Your own accounts. They stay in the list, flagged, but are kept out of the
+// totals — one test account with 220 answers makes every average a fiction.
+// Env on Render: CRM_EXCLUDE_EMAILS=a@b.com,c@d.com
+const CRM_TEST_EMAILS = (process.env.CRM_EXCLUDE_EMAILS || '')
+  .split(',')
+  .map((s) => s.trim().toLowerCase())
+  .filter(Boolean)
+
 /** Verifies the bearer token belongs to an admin. Responds and returns null if not. */
 async function requireAdmin(req, res) {
   const token = (req.headers.authorization || '').replace(/^Bearer\s+/i, '')
@@ -3508,6 +3516,17 @@ const CRM_STAGES = [
   { id: 'new',            label: 'No story yet',       note: 'Signed up and stopped at the first decision.' },
 ]
 
+/** Headline numbers, over real customers only. */
+function crmTotals(rows) {
+  return {
+    users:       rows.length,
+    paid:        rows.filter((r) => r.paid).length,
+    withAnswers: rows.filter((r) => r.answers > 0).length,
+    withVoice:   rows.filter((r) => r.voiceCount > 0).length,
+    everInvited: rows.filter((r) => r.invited).length,
+  }
+}
+
 /** Assembles the whole board in a handful of queries, joined in memory. */
 async function crmBoard() {
   // Anything that degraded is reported on the page rather than hidden.
@@ -3522,13 +3541,11 @@ async function crmBoard() {
       'id, user_id, title, story_type',
     ], ['id']),
 
-    // The one that matters most, so it degrades one column at a time.
+    // story_answers has updated_at but no created_at — confirmed 11 Nov.
     // (project_id, section_id) is the upsert conflict target, so it is unique
     // and safe to page on.
     safe('story_answers', [
-      'project_id, section_id, answer, updated_at, created_at',
       'project_id, section_id, answer, updated_at',
-      'project_id, section_id, answer, created_at',
       'project_id, section_id, answer',
       'project_id, answer',
     ], ['project_id', 'section_id']),
@@ -3549,10 +3566,8 @@ async function crmBoard() {
 
     safe('voice_recordings', ['project_id']),
 
-    safe('nurture_emails', [
-      'user_id, email_type, created_at',
-      'user_id, email_type',
-    ], ['user_id', 'email_type']),
+    // No created_at on this one either — only the list of types is used.
+    safe('nurture_emails', ['user_id, email_type'], ['user_id', 'email_type']),
   ])
 
   // project id -> owner, so project-keyed tables can be rolled up per user
@@ -3648,7 +3663,8 @@ async function crmBoard() {
       emailsSent:      theirEmails.map((e) => e.email_type),
     }
 
-    u.stage = crmStage(u)
+    u.stage  = crmStage(u)
+    u.isTest = CRM_TEST_EMAILS.includes(u.email.toLowerCase()) || ADMIN_USER_IDS.includes(user.id)
 
     // Orthogonal to stage — things worth a nudge whatever stage they are in.
     u.flags = []
@@ -3656,6 +3672,7 @@ async function crmBoard() {
     if (u.answers >= 5 && u.voiceCount === 0)    u.flags.push('no_voice')
     if (!u.emailOptIn)                           u.flags.push('opted_out')
     if (u.creditsUnused > 0)                     u.flags.push('book_unclaimed')
+    if (u.isTest)                                u.flags.push('test_account')
 
     return u
   })
@@ -3676,13 +3693,8 @@ async function crmBoard() {
     warnings,
     stages: CRM_STAGES,
     counts,
-    totals: {
-      users:        rows.length,
-      paid:         rows.filter((r) => r.paid).length,
-      withAnswers:  rows.filter((r) => r.answers > 0).length,
-      withVoice:    rows.filter((r) => r.voiceCount > 0).length,
-      everInvited:  rows.filter((r) => r.invited).length,
-    },
+    totals: crmTotals(rows.filter((r) => !r.isTest)),
+    testAccountsExcluded: rows.filter((r) => r.isTest).length,
     users: rows,
   }
 }

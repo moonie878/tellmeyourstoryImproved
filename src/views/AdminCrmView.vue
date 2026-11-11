@@ -15,13 +15,17 @@
             </p>
           </div>
 
-          <div v-if="board" class="flex flex-wrap items-center gap-5 sm:gap-7">
+          <div v-if="board" class="flex flex-wrap items-end gap-5 sm:gap-7">
             <div v-for="t in totalTiles" :key="t.label">
               <p class="font-display text-2xl font-bold" :class="t.accent ? 'text-[#7C5C3B]' : 'text-stone-900'">
                 {{ t.value }}
               </p>
               <p class="mt-0.5 text-[11px] uppercase tracking-wider text-stone-400">{{ t.label }}</p>
             </div>
+            <p v-if="board.testAccountsExcluded" class="max-w-[9rem] text-[11px] leading-tight text-stone-400">
+              {{ board.testAccountsExcluded }} test
+              {{ board.testAccountsExcluded === 1 ? 'account' : 'accounts' }} left out of these
+            </p>
           </div>
         </div>
       </div>
@@ -369,6 +373,7 @@ const FLAGS = [
   { id: 'no_voice',       label: 'No recordings' },
   { id: 'book_unclaimed', label: 'Unclaimed book' },
   { id: 'opted_out',      label: 'Opted out' },
+  { id: 'test_account',   label: 'Test account' },
 ]
 
 // Step 4 of the brief, written down where it can't get lost.
