@@ -75,7 +75,7 @@
               autocomplete="email"
               placeholder="your@email.com"
               @blur="validateEmail"
-              class="mt-1 w-full rounded-xl border px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#7C5C3B]"
+              class="mt-1 w-full rounded-xl border px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-[#7C5C3B]"
               :class="fieldErrors.email ? 'border-red-400' : 'border-stone-200'"
             />
             <p v-if="fieldErrors.email" class="mt-1 text-xs text-red-500">{{ fieldErrors.email }}</p>
@@ -92,13 +92,13 @@
                 autocomplete="new-password"
                 placeholder="At least 8 characters"
                 @blur="validatePassword"
-                class="w-full rounded-xl border px-4 py-3 pr-11 text-sm focus:outline-none focus:ring-2 focus:ring-[#7C5C3B]"
+                class="w-full rounded-xl border px-4 py-3 pr-11 text-base focus:outline-none focus:ring-2 focus:ring-[#7C5C3B]"
                 :class="fieldErrors.password ? 'border-red-400' : 'border-stone-200'"
               />
               <button
                 type="button"
                 @click="showPassword = !showPassword"
-                class="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600"
+                class="absolute right-0.5 top-1/2 -translate-y-1/2 p-3 text-stone-400 transition hover:text-stone-600"
                 tabindex="-1"
                 :aria-label="showPassword ? 'Hide password' : 'Show password'"
               >
@@ -115,7 +115,11 @@
           </div>
 
           <label class="flex items-start gap-3 text-sm text-stone-500 cursor-pointer">
-            <input type="checkbox" v-model="emailOptIn" class="mt-0.5 accent-[#7C5C3B]" />
+            <input
+              type="checkbox"
+              v-model="emailOptIn"
+              class="mt-0 h-5 w-5 flex-shrink-0 cursor-pointer rounded accent-[#7C5C3B]"
+            />
             <span>Send me story prompts and reminders so I don't forget to capture these moments (optional)</span>
           </label>
 
