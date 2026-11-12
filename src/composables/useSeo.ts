@@ -7,7 +7,7 @@ import type { Router, RouteLocationNormalized } from 'vue-router'
 //  - useSeo({...}):      call in a view to override title/description/schema
 
 export const SITE_URL = 'https://tellmeyourstory.uk'
-const DEFAULT_IMAGE = `${SITE_URL}/images/example-story-hero-cover.jpg`
+const DEFAULT_IMAGE = `${SITE_URL}/images/A-product.jpg`
 const DEFAULT_IMAGE_ALT = "Tell Me Your Story — capture a loved one's life story"
 
 export interface SeoInput {
