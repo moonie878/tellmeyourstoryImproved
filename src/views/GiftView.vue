@@ -102,6 +102,20 @@
           Every gift includes 100+ guided questions and voice recording, with a QR code beside each recorded story
           if they order a printed book (from £{{ printFrom }} including UK delivery).
         </p>
+        <!--
+          Someone choosing a gift could not see what any of it looked like
+          without leaving this page via the top nav. Opens in a new tab so they
+          keep their place.
+        -->
+        <a
+          href="/example"
+          target="_blank"
+          rel="noopener"
+          class="mt-4 inline-flex items-center gap-1.5 rounded-full border border-[#E8DDD0] bg-white px-4 py-2 text-sm font-medium text-[#7C5C3B] transition hover:border-[#7C5C3B]"
+        >
+          See a finished story first
+          <span aria-hidden="true">→</span>
+        </a>
       </div>
 
       <!--
@@ -143,6 +157,12 @@
             >
               Gift this
             </button>
+            <a
+              href="/example"
+              target="_blank"
+              rel="noopener"
+              class="text-xs text-[#9C7C5C] underline underline-offset-2 transition hover:text-white"
+            >See what it looks like →</a>
           </div>
         </div>
       </div>
@@ -200,6 +220,13 @@
           >
             Gift this
           </button>
+
+          <a
+            href="/example"
+            target="_blank"
+            rel="noopener"
+            class="mt-3 text-center text-xs text-stone-400 underline underline-offset-2 transition hover:text-[#7C5C3B]"
+          >See a sample →</a>
         </div>
 
       </div>
@@ -516,8 +543,24 @@ const keepsake = computed<GiftProduct>(() => {
 })
 
 const selectedKey = ref<string | null>(null)
-// Recomputed if the campaign discount arrives after a product was picked
-const selectedProduct = computed(() => products.value.find((p) => p.key === selectedKey.value) || null)
+
+/**
+ * Recomputed if the campaign discount arrives after a product was picked.
+ *
+ * The Keepsake has to be looked up separately. It is deliberately NOT in
+ * `products` so the digital grid stays a 2x2 — which meant selecting it found
+ * nothing here, `selectedProduct` stayed null, and the modal (v-if on exactly
+ * that) never opened. The £79 gift, the only one including the printed book,
+ * was unbuyable from this page: the button simply did nothing.
+ *
+ * The server has always accepted it — GIFT_PRODUCTS.keepsake exists and grants
+ * the print credit at redemption. Only this lookup was missing.
+ */
+const selectedProduct = computed<GiftProduct | null>(() => {
+  if (!selectedKey.value) return null
+  if (selectedKey.value === keepsake.value.key) return keepsake.value
+  return products.value.find((p) => p.key === selectedKey.value) || null
+})
 const loading = ref(false)
 const formError = ref('')
 
