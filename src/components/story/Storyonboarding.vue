@@ -171,14 +171,17 @@
 
           <!-- Voice badge -->
           <div v-if="hasVoiceRecording" class="mb-2 flex items-center gap-2 rounded-lg bg-[#F5F0E8] p-2">
-            <div class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded bg-white">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-[#7C5C3B]" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <!-- The real code — the same one that will be printed beside this
+                 answer in the book. Until the upload finishes, a placeholder. -->
+            <div class="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded bg-white p-0.5">
+              <img v-if="qrDataUrl" :src="qrDataUrl" alt="QR code for this recording" class="h-full w-full" />
+              <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-[#7C5C3B]/40" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                 <path d="M3 11V3h8v8H3zm2-2h4V5H5v4zm8-6h8v8h-8V3zm2 2v4h4V5h-4zM3 21v-8h8v8H3zm2-2h4v-4H5v4z"/>
               </svg>
             </div>
             <div class="text-left">
               <p class="text-[10px] font-medium text-stone-700">Their voice, on the page</p>
-              <p class="text-[9px] text-stone-500">Scan the QR code in the printed book to listen</p>
+              <p class="text-[9px] text-stone-500">This code is printed beside the answer</p>
             </div>
           </div>
 
@@ -192,6 +195,44 @@
 
       <!-- Page shadow / "book spine" hint -->
       <div class="mx-4 h-2 rounded-b-lg bg-stone-100"></div>
+    </div>
+
+    <!--
+      The moment the whole product is for — a voice coming out of a book — used
+      to arrive only after printing, weeks later. This puts it here, seconds after
+      the first recording: the same /listen page a printed QR code opens.
+      A phone can't scan its own screen, so the button is the main route and the
+      QR code only shows where a second device can scan it.
+    -->
+    <div v-if="hasVoiceRecording" class="mx-auto mt-8 max-w-md rounded-3xl border border-[#E8DDD0] bg-[#FAF7F4] p-6 text-center">
+      <p class="text-xs font-medium uppercase tracking-widest text-[#7C5C3B]">Hear it now</p>
+      <p class="mt-2 font-serif text-lg text-stone-900">
+        This is what happens when someone scans the page.
+      </p>
+
+      <template v-if="listenUrl">
+        <a
+          :href="listenUrl"
+          target="_blank"
+          rel="noopener"
+          @click="onListenOpened('button')"
+          class="mt-5 inline-flex min-h-[48px] items-center justify-center gap-2 rounded-full bg-[#1C1917] px-7 text-sm font-semibold text-white transition hover:opacity-90"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
+          Play it
+        </a>
+
+        <div v-if="qrDataUrl" class="mt-6 hidden flex-col items-center sm:flex">
+          <img :src="qrDataUrl" alt="QR code that plays this recording" class="h-36 w-36 rounded-lg bg-white p-2 shadow-sm" />
+          <p class="mt-2 text-sm text-stone-500">Or point your phone's camera at this</p>
+        </div>
+      </template>
+
+      <p v-else-if="recordingSaveFailed" class="mt-4 text-sm text-stone-500">
+        Your words are saved. The recording didn't upload this time — you can record it again from your story.
+      </p>
+
+      <p v-else class="mt-4 text-sm text-stone-500" role="status">Getting your recording ready…</p>
     </div>
 
     <div class="mt-8 text-center">
@@ -211,9 +252,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, nextTick, onUnmounted } from 'vue'
+import { ref, computed, watch, onMounted, nextTick, onUnmounted } from 'vue'
 import type { StorySection } from '../../types/story'
 import { useVoiceRecording } from '../../lib/useVoiceRecording_whisper'
+import { generateQRDataUrl } from '../../utils/qrUtils'
+import { track } from '../../lib/analytics'
 
 const props = defineProps<{
   firstSection: StorySection | null
@@ -234,6 +277,32 @@ const imagePreview = ref('')
 const imageFile = ref<File | null>(null)
 const hasVoiceRecording = ref(false)
 const transcriptionNotice = ref('')
+
+// ── Hear it now ───────────────────────────────────────────────────────────────
+// The saved recording's id gives the same /listen page a printed QR code opens.
+const recordingId = ref<string | null>(null)
+const recordingSaveFailed = ref(false)
+const qrDataUrl = ref('')
+
+const listenUrl = computed(() =>
+  recordingId.value ? `${window.location.origin}/listen/${recordingId.value}` : '',
+)
+
+// The upload can still be running when they reach the preview, so the code
+// appears whenever the id arrives rather than only at that moment.
+watch(listenUrl, async (url) => {
+  qrDataUrl.value = ''
+  if (!url) return
+  try {
+    qrDataUrl.value = await generateQRDataUrl(url)
+  } catch (err) {
+    console.error('QR generation failed:', err)
+  }
+})
+
+function onListenOpened(via: 'button') {
+  track('onboarding_listen_opened', { projectId: props.projectId, via })
+}
 
 const voiceRecording = useVoiceRecording()
 
@@ -271,15 +340,22 @@ async function handleVoiceToggle() {
       answer.value = before ? `${before}\n\n${result.transcript}` : result.transcript
     }
     hasVoiceRecording.value = true
+    recordingSaveFailed.value = false
 
-    // Save the recording
-    await voiceRecording.saveRecording(
+    // Save the recording — and keep its id, so the preview can play it back
+    const saved = await voiceRecording.saveRecording(
       result.blob,
       result.transcript,
       result.durationSeconds,
       props.firstSection.id,
       props.projectId
     )
+
+    if (saved?.id) {
+      recordingId.value = saved.id
+    } else {
+      recordingSaveFailed.value = true
+    }
   } else {
     await voiceRecording.startRecording(answer.value)
   }
@@ -317,6 +393,10 @@ function submitFirstAnswer() {
   })
 
   phase.value = 'preview'
+
+  if (hasVoiceRecording.value) {
+    track('onboarding_listen_offered', { projectId: props.projectId })
+  }
 }
 
 function continueToEditor() {
