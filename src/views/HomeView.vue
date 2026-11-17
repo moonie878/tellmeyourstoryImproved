@@ -84,6 +84,13 @@
       </div>
     </section>
 
+<ListenDemo
+  recording-id="2bb6ba7a-cfb6-4813-b01e-5481b69df727"
+  chapter="Relationships & Love"
+  question="The question exactly as it's printed"
+  excerpt="The first two sentences of your answer."
+/>
+
         <!-- ═══════════════════════════════════════ -->
     <!-- 1b. WHY YOU'D WANT ONE                  -->
     <!-- ═══════════════════════════════════════ -->
@@ -639,6 +646,7 @@ import EmailCaptureForm from '../components/Marketing/EmailCaptureForm.vue'
 import PricingTable from '../components/pricing/PricingTable.vue'
 import { PRINTED_BOOK_FROM_PRICE } from '../lib/printPricing'
 import { PRINT_CUTOFF_LABEL } from '../lib/christmas'
+import ListenDemo from '../components/ListenDemo.vue'
 
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 
