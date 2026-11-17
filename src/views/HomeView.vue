@@ -85,10 +85,10 @@
     </section>
 
 <ListenDemo
-  recording-id="2bb6ba7a-cfb6-4813-b01e-5481b69df727"
+  recording-id="d9590900-658a-44f8-927f-c35ff8f7d90b"
   chapter="Relationships & Love"
-  question="The question exactly as it's printed"
-  excerpt="The first two sentences of your answer."
+  question="How would you describe your family dynamic?"
+  excerpt=" Dad was the quiet authority and Mum was the engine. He didn't say much, but when he did, that was final. Mum ran everything, the house, the money, the school letters, the arguments between my brother"
 />
 
         <!-- ═══════════════════════════════════════ -->
