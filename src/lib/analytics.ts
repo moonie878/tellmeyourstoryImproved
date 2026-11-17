@@ -50,6 +50,8 @@ type AnalyticsEvent =
    | 'tribute_payment_cancelled'
    | 'storyteller_answered'
    | 'storyteller_opened'
+   | 'onboarding_listen_opened'
+   | 'onboarding_listen_offered'
 
 type AnalyticsValue =
   | string
