@@ -3494,10 +3494,14 @@ function crmDaysSince(value) {
  * the opinion here: someone who paid and hasn't started outranks everything
  * else, because that is the most expensive silence in the business.
  */
+const CRM_PRINT_PAUSE_DAYS = 7
+
 function crmStage(u) {
   if (u.printed)                               return 'printed'
   if (u.paid && u.answers < 3)                 return 'paid_idle'
-  if (u.paid && u.answers >= 20)               return 'ready_to_print'
+  // Still answering this week? Leave them in Answering well; a "ready to
+  // print" nudge mid-flow interrupts them. Ready once they've paused 7+ days.
+  if (u.paid && u.answers >= 20 && (u.daysSinceAnswer === null || u.daysSinceAnswer >= CRM_PRINT_PAUSE_DAYS)) return 'ready_to_print'
   if (u.answers > 0 && u.daysSinceAnswer !== null && u.daysSinceAnswer >= CRM_DORMANT_DAYS) return 'dormant'
   if (u.answers >= 10)                         return 'engaged'
   if (u.answers >= 1)                          return 'writing'
@@ -3507,9 +3511,9 @@ function crmStage(u) {
 
 const CRM_STAGES = [
   { id: 'paid_idle',      label: 'Paid, not started',  note: 'Money taken, nothing written. Write to these by hand, today.' },
-  { id: 'ready_to_print', label: 'Ready to print',     note: 'Enough answers and they have access. They may not know it is ready.' },
+  { id: 'ready_to_print', label: 'Ready to print',     note: 'Paid, 20+ answers, nothing new for 7+ days. They may not know it is ready.' },
   { id: 'printed',        label: 'Printed',            note: 'Got the book. Ask for a review, nothing else.' },
-  { id: 'engaged',        label: 'Answering well',     note: '10+ answers. Leave them alone unless they stall.' },
+  { id: 'engaged',        label: 'Answering well',     note: '10+ answers, or paid and still answering this week. Leave them alone unless they stall.' },
   { id: 'writing',        label: 'Started',            note: '1-9 answers. The free limit is where most of these stop.' },
   { id: 'dormant',        label: 'Gone quiet',         note: 'Had answers, silent 14+ days. Automated already.' },
   { id: 'empty',          label: 'Story, no answers',  note: 'The biggest group. A template will not fix this one.' },
