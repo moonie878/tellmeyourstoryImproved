@@ -252,7 +252,7 @@
           <!-- Facts -->
           <dl class="grid grid-cols-2 gap-x-4 gap-y-3 text-sm">
             <div><dt class="text-[11px] uppercase tracking-wider text-stone-400">Answers</dt><dd class="mt-0.5 font-display font-semibold text-stone-800">{{ selected.answers }}</dd></div>
-            <div><dt class="text-[11px] uppercase tracking-wider text-stone-400">Recordings</dt><dd class="mt-0.5 font-display font-semibold text-stone-800">{{ selected.voiceCount }}</dd></div>
+            <div><dt class="text-[11px] uppercase tracking-wider text-stone-400">Recordings</dt><dd class="mt-0.5 font-display font-semibold text-stone-800">{{ selected.voiceCount }} <span class="text-xs font-normal text-stone-500">({{ selected.voicedAnswers ?? 0 }} of {{ selected.answers }} answers spoken)</span></dd></div>
             <div><dt class="text-[11px] uppercase tracking-wider text-stone-400">Last answer</dt><dd class="mt-0.5 text-stone-700">{{ agoLabel(selected.daysSinceAnswer) }}</dd></div>
             <div><dt class="text-[11px] uppercase tracking-wider text-stone-400">Paid</dt><dd class="mt-0.5 text-stone-700">{{ selected.paid ? (selected.accessTypes.join(', ') || 'yes') : 'no' }}</dd></div>
           </dl>
@@ -370,7 +370,7 @@ const maskEmails    = ref(false)
 
 const FLAGS = [
   { id: 'never_invited',  label: 'Never invited anyone' },
-  { id: 'no_voice',       label: 'No recordings' },
+  { id: 'no_voice',       label: 'Mostly typed' },
   { id: 'book_unclaimed', label: 'Unclaimed book' },
   { id: 'opted_out',      label: 'Opted out' },
   { id: 'test_account',   label: 'Test account' },

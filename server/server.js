@@ -3564,7 +3564,8 @@ async function crmBoard() {
       'project_id',
     ]),
 
-    safe('voice_recordings', ['project_id']),
+    // section_id lets us count answers that were spoken, not just recordings.
+    safe('voice_recordings', ['project_id, section_id', 'project_id']),
 
     // No created_at on this one either — only the list of types is used.
     safe('nurture_emails', ['user_id, email_type'], ['user_id', 'email_type']),
@@ -3579,13 +3580,24 @@ async function crmBoard() {
     projectsByUser.get(p.user_id).push(p)
   }
 
+  // Which (project, section) pairs have a recording. section_id is uuid on
+  // voice_recordings and text on story_answers; both arrive as the same string.
+  const recordedSections = new Set()
+  for (const r of recordings) {
+    if (r.section_id) recordedSections.add(`${r.project_id}|${r.section_id}`)
+  }
+
   const answersByUser = new Map()   // user -> count of non-empty answers
+  const voicedAnswersByUser = new Map() // user -> answers that have a recording
   const lastAnswerByUser = new Map()
   for (const a of answers) {
     if (!a.answer || !a.answer.trim()) continue
     const uid = ownerOf.get(a.project_id)
     if (!uid) continue
     answersByUser.set(uid, (answersByUser.get(uid) || 0) + 1)
+    if (a.section_id && recordedSections.has(`${a.project_id}|${a.section_id}`)) {
+      voicedAnswersByUser.set(uid, (voicedAnswersByUser.get(uid) || 0) + 1)
+    }
     const when = a.updated_at || a.created_at
     if (when && (!lastAnswerByUser.get(uid) || when > lastAnswerByUser.get(uid))) {
       lastAnswerByUser.set(uid, when)
@@ -3632,6 +3644,7 @@ async function crmBoard() {
     const answerCount    = answersByUser.get(user.id) || 0
     const lastAnswerAt   = lastAnswerByUser.get(user.id) || null
     const voiceCount     = voiceByUser.get(user.id) || 0
+    const voicedAnswers  = voicedAnswersByUser.get(user.id) || 0
 
     const hasStory  = theirAccess.some((a) => a.access_type === 'story')
     const hasExport = theirAccess.some((a) => a.access_type === 'export')
@@ -3659,6 +3672,8 @@ async function crmBoard() {
       printed:         theirCredits.some((c) => !!c.used_at),
 
       voiceCount,
+      voicedAnswers,
+      typedAnswers:    Math.max(0, answerCount - voicedAnswers),
       invited:         invitedUsers.has(user.id),
       emailsSent:      theirEmails.map((e) => e.email_type),
     }
@@ -3669,7 +3684,9 @@ async function crmBoard() {
     // Orthogonal to stage — things worth a nudge whatever stage they are in.
     u.flags = []
     if (u.projectCount > 0 && !u.invited)        u.flags.push('never_invited')
-    if (u.answers >= 5 && u.voiceCount === 0)    u.flags.push('no_voice')
+    // Mostly typing: 5+ answers and under a fifth of them spoken. Catches the
+    // people who made one recording (e.g. in onboarding) then typed the rest.
+    if (u.answers >= 5 && u.voicedAnswers < Math.max(1, Math.ceil(u.answers * 0.2))) u.flags.push('no_voice')
     if (!u.emailOptIn)                           u.flags.push('opted_out')
     if (u.creditsUnused > 0)                     u.flags.push('book_unclaimed')
     if (u.isTest)                                u.flags.push('test_account')
