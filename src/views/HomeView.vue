@@ -729,7 +729,7 @@ const whyNow = [
   },
   {
     title: 'Because the alternative costs thousands',
-    body: `A professional memoir service runs from £1,000 to £30,000. This starts at £3.99, and a printed hardback is ${printFrom} including UK delivery.`,
+    body: `A professional memoir service runs from £1,000 to £30,000. This starts at £3.99, and a printed softcover book is ${printFrom} including UK delivery. The £79 Keepsake includes a hardback.`,
   },
 ]
 
@@ -780,6 +780,10 @@ const faqs = [
   {
     q: 'What if they don’t like typing?',
     a: 'They don’t have to. Tap the microphone and speak — the words are transcribed automatically and the recording is saved alongside the answer.',
+  },
+  {
+    q: 'Is the story written by AI?',
+    a: 'No. Every word is theirs, in their own voice. When they speak an answer, software turns the speech into text so nobody has to type it, and the original recording is kept. If they get stuck, an optional helper can suggest a few questions to jog their memory, but it never writes or rewrites their answers.',
   },
   {
     q: 'Is it a subscription?',
