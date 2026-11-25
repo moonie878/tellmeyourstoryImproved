@@ -146,6 +146,38 @@
       <p v-if="nextId" class="mt-4 text-center text-sm text-stone-500">
         When this story ends, we'll take you straight to the next one.
       </p>
+
+      <!--
+        Everyone who lands here has just scanned a QR code in a book, or been
+        sent a link by family. They're the people most likely to want one for
+        their own parents, and until now the page gave them nowhere to go.
+        Kept below the player and quiet, so it never gets in the way of listening.
+      -->
+      <section class="mt-8 rounded-3xl border border-[#E8DDD0] bg-white/70 px-6 py-6 text-center">
+        <h2 class="font-display text-lg font-bold text-stone-900">
+          Someone in your family has stories like this
+        </h2>
+        <p class="mt-2 text-sm leading-6 text-stone-600">
+          Send your mum, dad or grandparent one question a week. They answer by talking,
+          and it becomes a book with their voice behind every QR code.
+        </p>
+        <div class="mt-5 flex flex-col items-center gap-3">
+          <router-link
+            to="/register"
+            class="flex min-h-[48px] w-full items-center justify-center rounded-full bg-[#7C5C3B] px-6 text-base font-semibold text-white transition hover:opacity-90 sm:w-auto"
+            @click="trackCta('start')"
+          >
+            Start one for your family, 5 questions free
+          </router-link>
+          <router-link
+            to="/gift"
+            class="text-sm font-medium text-[#7C5C3B] underline underline-offset-2"
+            @click="trackCta('gift')"
+          >
+            Or give it as a gift
+          </router-link>
+        </div>
+      </section>
     </div>
   </div>
 </template>
@@ -153,6 +185,7 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { track } from '../lib/analytics'
 
 const route = useRoute()
 const router = useRouter()
@@ -191,6 +224,10 @@ const nextId = computed(() =>
     ? playlist.value[positionInPlaylist.value + 1]
     : null,
 )
+
+function trackCta(action: 'start' | 'gift') {
+  track('listen_cta_clicked', { action, recording_id: recording.value?.id })
+}
 
 function formatTime(seconds: number) {
   if (isNaN(seconds) || !isFinite(seconds) || seconds < 0) return '0:00'
