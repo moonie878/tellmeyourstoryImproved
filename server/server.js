@@ -3881,6 +3881,26 @@ const CRM_TEMPLATES = [
       whyLine: `You're getting this because you've answered ${c.answers} questions without recording any of them.`,
     }),
   },
+  {
+    id: 'black_friday',
+    label: 'Black Friday sale',
+    // Fits everyone: it's an offer, not a nudge about where they're up to.
+    appliesTo: ['paid_idle', 'ready_to_print', 'printed', 'engaged', 'writing', 'dormant', 'empty', 'new'],
+    // Can only be sent while SITE_SALE is running, so it never promises an
+    // offer that checkout has stopped applying.
+    needsSale: true,
+    subject: () => `${SITE_SALE.percent}% off everything until Monday`,
+    build: (c) => ({
+      heading: `${SITE_SALE.label}: ${SITE_SALE.percent}% off everything`,
+      body: `
+        <p ${P}>${c.firstName ? `Hi ${c.firstName}, j` : 'J'}ust a short one. Until the end of Monday 30 November, everything on Tell Me Your Story is ${SITE_SALE.percent}% off: every plan, the Keepsake with its printed hardback, printed books, tribute videos and gifts.</p>
+        <p ${P}>If it's for Christmas, order the Keepsake by 3 December so the book arrives in time. After that, a gift still works: they get their link straight away and can start on Christmas Day.</p>
+        <p ${P}>The discount comes off automatically at checkout. No code needed.</p>`,
+      ctaLabel: `See the prices`,
+      ctaUrl: `${SITE_URL}/pricing`,
+      whyLine: `You're getting this because you have an account at tellmeyourstory.uk and said yes to emails.`,
+    }),
+  },
 ]
 
 /** Everything a template needs about one person. */
@@ -3928,6 +3948,7 @@ async function crmUserContext(userId) {
 function crmRenderTemplate(templateId, ctx) {
   const tpl = CRM_TEMPLATES.find((t) => t.id === templateId)
   if (!tpl) throw new Error('Unknown template')
+  if (tpl.needsSale && !siteSalePercent()) throw new Error('The sale is not running, so this email cannot be sent')
 
   const parts = tpl.build(ctx)
   return {
@@ -3984,6 +4005,58 @@ app.get('/admin/crm/preview', async (req, res) => {
   }
 })
 
+// One real send to one person, with every consent and duplicate check.
+// Returns { status: 'sent' | 'skipped', reason?, to? }. Never throws for a
+// person being ineligible; only for something actually broken.
+async function crmSendOne(userId, templateId) {
+  const ctx = await crmUserContext(String(userId))
+  const email = (ctx.email || '').toLowerCase()
+
+  if (CRM_TEST_EMAILS.includes(email) || ADMIN_USER_IDS.includes(ctx.user.id)) {
+    return { status: 'skipped', reason: 'test_account', to: ctx.email }
+  }
+  if ((ctx.user.user_metadata || {}).email_opt_in === false) {
+    return { status: 'skipped', reason: 'opted_out', to: ctx.email }
+  }
+  if (await isUnsubscribed(ctx.email)) {
+    return { status: 'skipped', reason: 'unsubscribed', to: ctx.email }
+  }
+
+  const emailType = `manual_${templateId}`
+  const { data: already } = await supabaseAdmin
+    .from('nurture_emails')
+    .select('id')
+    .eq('user_id', ctx.user.id)
+    .eq('email_type', emailType)
+    .maybeSingle()
+  if (already) return { status: 'skipped', reason: 'already_sent', to: ctx.email }
+
+  const rendered = crmRenderTemplate(String(templateId), ctx)
+
+  await resend.emails.send({
+    from: 'Tell Me Your Story <mark-griffiths@tellmeyourstory.uk>',
+    to: ctx.email,
+    replyTo: 'mark-griffiths@tellmeyourstory.uk',
+    subject: rendered.subject,
+    html: rendered.html,
+    headers: {
+      'List-Unsubscribe': `<${unsubscribeUrl(ctx.email)}>`,
+      'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
+    },
+  })
+
+  await supabaseAdmin.from('nurture_emails').insert({ user_id: ctx.user.id, email_type: emailType })
+  console.log('CRM manual send:', emailType, '->', ctx.email)
+  return { status: 'sent', to: ctx.email, emailType }
+}
+
+const CRM_SKIP_MESSAGES = {
+  test_account: 'That is a test account',
+  opted_out:    'They opted out of email when they signed up',
+  unsubscribed: 'They unsubscribed',
+  already_sent: 'They have already had this one',
+}
+
 // Send one email, by hand, to one person.
 app.post('/admin/crm/email', async (req, res) => {
   const admin = await requireAdmin(req, res)
@@ -4010,44 +4083,65 @@ app.post('/admin/crm/email', async (req, res) => {
     // Consent, both ways round: what they chose at signup, and any unsubscribe
     // since. Neither is overridable from the CRM — there is no force flag here
     // on purpose.
-    if ((ctx.user.user_metadata || {}).email_opt_in === false) {
-      return res.status(403).json({ error: 'They opted out of email when they signed up' })
+    const result = await crmSendOne(userId, templateId)
+    if (result.status === 'skipped') {
+      const code = result.reason === 'already_sent' ? 409 : 403
+      return res.status(code).json({ error: CRM_SKIP_MESSAGES[result.reason] || 'Not sent' })
     }
-    if (await isUnsubscribed(ctx.email)) {
-      return res.status(403).json({ error: 'They unsubscribed' })
-    }
-
-    const emailType = `manual_${templateId}`
-
-    const { data: already } = await supabaseAdmin
-      .from('nurture_emails')
-      .select('id')
-      .eq('user_id', ctx.user.id)
-      .eq('email_type', emailType)
-      .maybeSingle()
-
-    if (already) {
-      return res.status(409).json({ error: 'They have already had this one' })
-    }
-
-    await resend.emails.send({
-      from: 'Tell Me Your Story <mark-griffiths@tellmeyourstory.uk>',
-      to: ctx.email,
-      replyTo: 'mark-griffiths@tellmeyourstory.uk',
-      subject: rendered.subject,
-      html: rendered.html,
-      headers: {
-        'List-Unsubscribe': `<${unsubscribeUrl(ctx.email)}>`,
-        'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
-      },
-    })
-
-    await supabaseAdmin.from('nurture_emails').insert({ user_id: ctx.user.id, email_type: emailType })
-
-    console.log('CRM manual send:', emailType, '->', ctx.email)
-    res.json({ ok: true, to: ctx.email, emailType })
+    res.json({ ok: true, to: result.to, emailType: result.emailType })
   } catch (err) {
     console.error('CRM send error:', err.message)
-    res.status(500).json({ error: 'Could not send it' })
+    res.status(500).json({ error: err.message.includes('sale') ? err.message : 'Could not send it' })
+  }
+})
+
+// Send one template to a list of people (everyone currently shown on the
+// board). Same checks as a single send, person by person: opted out,
+// unsubscribed, test accounts and anyone who has already had it are skipped.
+// Because "already had it" is recorded per person, running it twice is safe.
+// Paced at about two a second to stay inside Resend's rate limit.
+const CRM_BULK_MAX = 1000
+let crmBulkRunning = false
+
+app.post('/admin/crm/email-bulk', async (req, res) => {
+  const admin = await requireAdmin(req, res)
+  if (!admin) return
+
+  const { userIds, templateId } = req.body || {}
+  if (!Array.isArray(userIds) || !userIds.length || !templateId) {
+    return res.status(400).json({ error: 'Need userIds and templateId' })
+  }
+  if (userIds.length > CRM_BULK_MAX) {
+    return res.status(400).json({ error: `At most ${CRM_BULK_MAX} people at once` })
+  }
+  const tpl = CRM_TEMPLATES.find((t) => t.id === templateId)
+  if (!tpl) return res.status(400).json({ error: 'Unknown template' })
+  if (tpl.needsSale && !siteSalePercent()) {
+    return res.status(400).json({ error: 'The sale is not running, so this email cannot be sent' })
+  }
+  if (crmBulkRunning) return res.status(409).json({ error: 'A bulk send is already running' })
+
+  crmBulkRunning = true
+  const summary = { sent: 0, skipped: {}, failed: 0, failures: [] }
+  try {
+    for (const userId of [...new Set(userIds.map(String))]) {
+      try {
+        const r = await crmSendOne(userId, templateId)
+        if (r.status === 'sent') {
+          summary.sent++
+          await new Promise((resolve) => setTimeout(resolve, 600))
+        } else {
+          summary.skipped[r.reason] = (summary.skipped[r.reason] || 0) + 1
+        }
+      } catch (err) {
+        summary.failed++
+        if (summary.failures.length < 20) summary.failures.push(err.message)
+        console.error('CRM bulk send failed for', userId, err.message)
+      }
+    }
+    console.log('CRM bulk send:', templateId, summary)
+    res.json({ ok: true, templateId, ...summary })
+  } finally {
+    crmBulkRunning = false
   }
 })

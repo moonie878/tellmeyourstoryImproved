@@ -133,6 +133,147 @@
           </div>
         </div>
 
+        <!-- Dates -->
+        <div class="mt-4 flex flex-wrap items-center gap-2 text-xs text-stone-600">
+          <label for="crm-date-field" class="text-stone-400">Dates:</label>
+          <select
+            id="crm-date-field"
+            v-model="dateField"
+            class="rounded-full border border-stone-200 bg-white px-3 py-2 text-xs text-stone-700 focus:border-[#7C5C3B] focus:outline-none"
+          >
+            <option v-for="d in DATE_FIELDS" :key="d.id" :value="d.id">{{ d.label }}</option>
+          </select>
+          <label for="crm-date-from" class="text-stone-400">from</label>
+          <input
+            id="crm-date-from"
+            v-model="dateFrom"
+            type="date"
+            class="rounded-full border border-stone-200 bg-white px-3 py-1.5 text-xs text-stone-700 focus:border-[#7C5C3B] focus:outline-none"
+          />
+          <label for="crm-date-to" class="text-stone-400">to</label>
+          <input
+            id="crm-date-to"
+            v-model="dateTo"
+            type="date"
+            class="rounded-full border border-stone-200 bg-white px-3 py-1.5 text-xs text-stone-700 focus:border-[#7C5C3B] focus:outline-none"
+          />
+          <button
+            v-for="q in DATE_QUICK"
+            :key="q.days"
+            type="button"
+            @click="quickRange(q.days)"
+            class="rounded-full border border-stone-200 bg-white px-3 py-1.5 text-[11px] font-medium text-stone-500 transition hover:bg-stone-50"
+          >
+            {{ q.label }}
+          </button>
+          <button
+            v-if="dateFrom || dateTo"
+            type="button"
+            @click="dateFrom = ''; dateTo = ''"
+            class="px-2 py-1.5 text-[11px] font-medium text-[#7C5C3B] underline underline-offset-2"
+          >
+            Clear dates
+          </button>
+        </div>
+
+        <!-- Email everyone shown -->
+        <div class="mt-4 rounded-2xl border border-stone-200 bg-white">
+          <button
+            type="button"
+            class="flex w-full items-center justify-between gap-3 px-5 py-3 text-left"
+            @click="showBulk = !showBulk; bulkConfirm = false"
+          >
+            <span class="text-sm font-medium text-stone-800">
+              Email everyone shown · {{ filtered.length }}
+            </span>
+            <span class="text-stone-400">{{ showBulk ? '▲' : '▼' }}</span>
+          </button>
+
+          <div v-if="showBulk" class="border-t border-stone-100 px-5 py-4">
+            <p class="text-xs leading-relaxed text-stone-500">
+              Sends one template to everyone the filters above are showing. Opted-out, unsubscribed and test accounts
+              are always skipped, and so is anyone who has already had this template, so sending twice is safe.
+            </p>
+
+            <select
+              v-model="bulkTemplate"
+              @change="bulkConfirm = false; bulkResult = null; bulkError = ''"
+              class="mt-3 w-full max-w-md rounded-xl border border-stone-200 bg-white px-4 py-2.5 text-sm text-stone-700 focus:border-[#7C5C3B] focus:outline-none"
+            >
+              <option value="">Choose a template…</option>
+              <option v-for="t in board.templates" :key="t.id" :value="t.id">{{ t.label }}</option>
+            </select>
+
+            <template v-if="bulkTemplate">
+              <ul class="mt-4 grid max-w-md grid-cols-2 gap-x-6 gap-y-1 text-sm">
+                <li class="text-stone-500">Shown</li><li class="text-right font-medium tabular-nums text-stone-800">{{ filtered.length }}</li>
+                <li class="text-stone-500">Opted out</li><li class="text-right tabular-nums text-stone-500">−{{ bulkCounts.optedOut }}</li>
+                <li class="text-stone-500">Test accounts</li><li class="text-right tabular-nums text-stone-500">−{{ bulkCounts.test }}</li>
+                <li class="text-stone-500">Already had it</li><li class="text-right tabular-nums text-stone-500">−{{ bulkCounts.already }}</li>
+                <li class="border-t border-stone-100 pt-1 font-semibold text-stone-900">Will get it</li>
+                <li class="border-t border-stone-100 pt-1 text-right font-semibold tabular-nums text-[#7C5C3B]">{{ bulkCounts.eligible.length }}</li>
+              </ul>
+              <p class="mt-2 text-[11px] text-stone-400">
+                Anyone who has unsubscribed since signing up is also skipped when it sends, so the final number can be a little lower.
+              </p>
+
+              <div class="mt-4 flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  @click="bulkTest"
+                  :disabled="bulkSending || !bulkCounts.eligible.length"
+                  class="rounded-full border border-stone-200 px-5 py-2.5 text-sm font-medium text-stone-700 transition hover:bg-stone-50 disabled:opacity-50"
+                >
+                  Send test to me
+                </button>
+
+                <button
+                  v-if="!bulkConfirm"
+                  type="button"
+                  @click="bulkConfirm = true"
+                  :disabled="bulkSending || !bulkCounts.eligible.length"
+                  class="rounded-full bg-[#7C5C3B] px-5 py-2.5 text-sm font-semibold text-white transition hover:opacity-90 disabled:opacity-40"
+                >
+                  Send to {{ bulkCounts.eligible.length }} {{ bulkCounts.eligible.length === 1 ? 'person' : 'people' }}
+                </button>
+
+                <template v-else>
+                  <button
+                    type="button"
+                    @click="bulkSend"
+                    :disabled="bulkSending"
+                    class="rounded-full bg-[#9B3B3B] px-5 py-2.5 text-sm font-semibold text-white transition hover:opacity-90 disabled:opacity-50"
+                  >
+                    {{ bulkSending ? 'Sending… keep this tab open' : `Yes, send to ${bulkCounts.eligible.length}` }}
+                  </button>
+                  <button
+                    v-if="!bulkSending"
+                    type="button"
+                    @click="bulkConfirm = false"
+                    class="rounded-full border border-stone-200 px-5 py-2.5 text-sm font-medium text-stone-600 transition hover:bg-stone-50"
+                  >
+                    Cancel
+                  </button>
+                </template>
+              </div>
+
+              <p v-if="bulkSending" class="mt-3 text-xs text-stone-500">
+                About {{ Math.max(1, Math.ceil(bulkCounts.eligible.length * 0.8 / 60)) }} min. It sends about two a second.
+              </p>
+              <p v-if="bulkInfo" class="mt-3 text-sm text-[#4A7C59]">{{ bulkInfo }}</p>
+              <p v-if="bulkError" class="mt-3 text-sm text-red-700">{{ bulkError }}</p>
+
+              <div v-if="bulkResult" class="mt-4 rounded-xl bg-[#F0F5F1] px-4 py-3 text-sm text-stone-800">
+                <p class="font-semibold text-[#3B6D11]">Sent to {{ bulkResult.sent }}.</p>
+                <p v-if="skippedSummary" class="mt-1 text-stone-600">Skipped: {{ skippedSummary }}.</p>
+                <p v-if="bulkResult.failed" class="mt-1 text-red-700">
+                  {{ bulkResult.failed }} failed. Run it again later; nobody gets it twice.
+                </p>
+              </div>
+            </template>
+          </div>
+        </div>
+
         <!-- Table -->
         <div class="mt-5 overflow-hidden rounded-2xl border border-stone-200 bg-white">
           <div class="overflow-x-auto">
@@ -368,6 +509,39 @@ const showPolicy    = ref(false)
 // On for screenshots. Real addresses are other people's data, not mine to post.
 const maskEmails    = ref(false)
 
+// Date filter. Dates are compared on the visitor's local day.
+const DATE_FIELDS = [
+  { id: 'createdAt',    label: 'Signed up' },
+  { id: 'lastAnswerAt', label: 'Last answer' },
+  { id: 'lastSignInAt', label: 'Last seen' },
+]
+const DATE_QUICK = [
+  { label: 'Last 7 days',  days: 7 },
+  { label: 'Last 30 days', days: 30 },
+]
+const dateField = ref('createdAt')
+const dateFrom  = ref('')
+const dateTo    = ref('')
+
+function isoDay(d: Date) {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+}
+function quickRange(days: number) {
+  const from = new Date()
+  from.setDate(from.getDate() - (days - 1))
+  dateFrom.value = isoDay(from)
+  dateTo.value = ''
+}
+
+// Email everyone shown
+const showBulk     = ref(false)
+const bulkTemplate = ref('')
+const bulkConfirm  = ref(false)
+const bulkSending  = ref(false)
+const bulkResult   = ref<any>(null)
+const bulkError    = ref('')
+const bulkInfo     = ref('')
+
 const FLAGS = [
   { id: 'never_invited',  label: 'Never invited anyone' },
   { id: 'no_voice',       label: 'Mostly typed' },
@@ -440,8 +614,87 @@ const filtered = computed(() => {
   for (const f of flagFilters.value) rows = rows.filter((u: any) => u.flags.includes(f))
   const q = search.value.trim().toLowerCase()
   if (q) rows = rows.filter((u: any) => u.email.toLowerCase().includes(q))
+  if (dateFrom.value || dateTo.value) {
+    const from = dateFrom.value ? new Date(`${dateFrom.value}T00:00:00`).getTime() : -Infinity
+    const to   = dateTo.value   ? new Date(`${dateTo.value}T23:59:59.999`).getTime() : Infinity
+    rows = rows.filter((u: any) => {
+      const v = u[dateField.value]
+      if (!v) return false // never answered / never signed in: outside any range
+      const t = new Date(v).getTime()
+      return t >= from && t <= to
+    })
+  }
   return rows
 })
+
+/** What a bulk send to the current list would do, before it's done. */
+const bulkCounts = computed(() => {
+  const emailType = `manual_${bulkTemplate.value}`
+  let test = 0, optedOut = 0, already = 0
+  const eligible: string[] = []
+  for (const u of filtered.value) {
+    if (u.isTest) test++
+    else if (!u.emailOptIn) optedOut++
+    else if ((u.emailsSent || []).includes(emailType)) already++
+    else eligible.push(u.id)
+  }
+  return { test, optedOut, already, eligible }
+})
+
+const SKIP_LABELS: Record<string, string> = {
+  test_account: 'test accounts',
+  opted_out:    'opted out',
+  unsubscribed: 'unsubscribed',
+  already_sent: 'already had it',
+}
+const skippedSummary = computed(() =>
+  Object.entries(bulkResult.value?.skipped || {})
+    .map(([k, n]) => `${n} ${SKIP_LABELS[k] || k}`)
+    .join(', '),
+)
+
+/** The real email, rendered for the first person on the list, sent to me. */
+async function bulkTest() {
+  bulkError.value = ''
+  bulkInfo.value = ''
+  const first = bulkCounts.value.eligible[0]
+  if (!first) return
+  try {
+    const res = await fetch(`${API_BASE}/admin/crm/email`, {
+      method: 'POST',
+      headers: await authHeaders(),
+      body: JSON.stringify({ userId: first, templateId: bulkTemplate.value, test: true }),
+    })
+    const json = await res.json().catch(() => ({}))
+    if (!res.ok) throw new Error(json.error || 'Could not send the test')
+    bulkInfo.value = `Test sent to ${json.to}`
+  } catch (err: any) {
+    bulkError.value = err.message
+  }
+}
+
+async function bulkSend() {
+  bulkSending.value = true
+  bulkError.value = ''
+  bulkInfo.value = ''
+  bulkResult.value = null
+  try {
+    const res = await fetch(`${API_BASE}/admin/crm/email-bulk`, {
+      method: 'POST',
+      headers: await authHeaders(),
+      body: JSON.stringify({ userIds: bulkCounts.value.eligible, templateId: bulkTemplate.value }),
+    })
+    const json = await res.json().catch(() => ({}))
+    if (!res.ok) throw new Error(json.error || 'Could not send')
+    bulkResult.value = json
+    bulkConfirm.value = false
+    await load()
+  } catch (err: any) {
+    bulkError.value = `${err.message}. Anyone already sent to is recorded, so it's safe to run again.`
+  } finally {
+    bulkSending.value = false
+  }
+}
 
 function stageLabel(id: string) {
   return board.value?.stages.find((s: any) => s.id === id)?.label || id
