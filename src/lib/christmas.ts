@@ -21,12 +21,12 @@ const SEASON_START_MONTH = 10
  * When the discount stops being a quiet reward for arriving on a campaign link
  * and starts being advertised on the banner.
  *
- * Black Friday through to Christmas Day. Discounts are expected that week, so
- * shouting about it then costs no credibility — whereas a banner running "20%
- * off" from October would just be the price with a sticker on it.
+ * Brought forward from Black Friday (27 Nov) to 25 Nov so the offer runs for
+ * the whole final countdown to the 3 December print date. Still short enough
+ * that it reads as a Christmas offer, not the everyday price with a sticker.
  */
 const DISCOUNT_START_MONTH = 11
-const DISCOUNT_START_DAY = 27
+const DISCOUNT_START_DAY = 25
 
 const pad = (n: number) => String(n).padStart(2, '0')
 
