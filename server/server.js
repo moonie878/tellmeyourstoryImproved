@@ -4008,11 +4008,13 @@ app.get('/admin/crm/preview', async (req, res) => {
 // One real send to one person, with every consent and duplicate check.
 // Returns { status: 'sent' | 'skipped', reason?, to? }. Never throws for a
 // person being ineligible; only for something actually broken.
-async function crmSendOne(userId, templateId) {
+// allowTestAccounts: a one-to-one send may go to your own test accounts (that's
+// how you check an email for real); a bulk send never does.
+async function crmSendOne(userId, templateId, { allowTestAccounts = false } = {}) {
   const ctx = await crmUserContext(String(userId))
   const email = (ctx.email || '').toLowerCase()
 
-  if (CRM_TEST_EMAILS.includes(email) || ADMIN_USER_IDS.includes(ctx.user.id)) {
+  if (!allowTestAccounts && (CRM_TEST_EMAILS.includes(email) || ADMIN_USER_IDS.includes(ctx.user.id))) {
     return { status: 'skipped', reason: 'test_account', to: ctx.email }
   }
   if ((ctx.user.user_metadata || {}).email_opt_in === false) {
@@ -4083,7 +4085,7 @@ app.post('/admin/crm/email', async (req, res) => {
     // Consent, both ways round: what they chose at signup, and any unsubscribe
     // since. Neither is overridable from the CRM — there is no force flag here
     // on purpose.
-    const result = await crmSendOne(userId, templateId)
+    const result = await crmSendOne(userId, templateId, { allowTestAccounts: true })
     if (result.status === 'skipped') {
       const code = result.reason === 'already_sent' ? 409 : 403
       return res.status(code).json({ error: CRM_SKIP_MESSAGES[result.reason] || 'Not sent' })
