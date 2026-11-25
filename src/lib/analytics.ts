@@ -53,6 +53,7 @@ type AnalyticsEvent =
    | 'onboarding_listen_opened'
    | 'onboarding_listen_offered'
    | 'home_listen_opened'
+   | 'listen_cta_clicked'
 
 type AnalyticsValue =
   | string
