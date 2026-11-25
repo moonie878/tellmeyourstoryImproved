@@ -2273,6 +2273,61 @@ app.post('/verify-turnstile', async (req, res) => {
   }
 })
 
+// ─── Site-wide sale (Black Friday) ────────────────────────────────────────────
+// One switch for a sale across every checkout: plans, the £79 Keepsake, printed
+// books, tribute videos and gifts. The discount is applied HERE, by Stripe
+// coupon or server-side price, never by the browser. Change the dates or set
+// percent to 0 to turn it off. Dates are UK (GMT in November).
+const SITE_SALE = {
+  label:    'Black Friday',
+  percent:  20,
+  start:    '2026-11-25T00:00:00Z',
+  end:      '2026-11-30T23:59:59Z',   // Cyber Monday, end of day
+  couponId: 'BLACKFRIDAY2026',
+}
+
+function siteSalePercent() {
+  if (!SITE_SALE.percent) return 0
+  const now = new Date()
+  return now >= new Date(SITE_SALE.start) && now <= new Date(SITE_SALE.end) ? SITE_SALE.percent : 0
+}
+
+// The banner asks this; it can't set anything.
+app.get('/site-sale', (req, res) => {
+  const percent = siteSalePercent()
+  res.json(percent ? { percent, label: SITE_SALE.label, endsAt: SITE_SALE.end } : { percent: 0 })
+})
+
+// Creates the Stripe coupon the first time it's needed, then reuses it.
+let saleCouponReady = null
+function ensureSaleCoupon() {
+  if (!saleCouponReady) {
+    saleCouponReady = stripe.coupons.retrieve(SITE_SALE.couponId).catch(() =>
+      stripe.coupons.create({
+        id:          SITE_SALE.couponId,
+        percent_off: SITE_SALE.percent,
+        duration:    'once',
+        name:        `${SITE_SALE.label} ${SITE_SALE.percent}% off`,
+      })
+    ).catch((err) => { saleCouponReady = null; throw err })
+  }
+  return saleCouponReady
+}
+
+// Stripe won't take a fixed discount and a promo-code box on the same checkout,
+// so during the sale the coupon goes on automatically and the box is hidden.
+// If the coupon can't be made, checkout still works at full price with the box.
+async function checkoutDiscountFields() {
+  if (!siteSalePercent()) return { allow_promotion_codes: true }
+  try {
+    await ensureSaleCoupon()
+    return { discounts: [{ coupon: SITE_SALE.couponId }] }
+  } catch (err) {
+    console.error('Sale coupon unavailable, charging full price:', err.message)
+    return { allow_promotion_codes: true }
+  }
+}
+
 // ─── Checkout sessions ────────────────────────────────────────────────────────
 // What each Stripe price unlocks. The webhook grants access from this, so the
 // browser can't pay for the £3.99 plan and claim the £17.99 one.
@@ -2295,7 +2350,7 @@ app.post('/create-checkout-session', async (req, res) => {
 
     const session = await stripe.checkout.sessions.create({
       mode: 'payment',
-      allow_promotion_codes: true,
+      ...(await checkoutDiscountFields()),
       line_items: [{ price: priceId, quantity: 1 }],
       success_url: `${FRONTEND_URL}/story/${projectId}?payment=success`,
       cancel_url:  `${FRONTEND_URL}/story/${projectId}?payment=cancelled`,
@@ -2361,7 +2416,7 @@ app.post('/create-print-checkout', async (req, res) => {
     const session = await stripe.checkout.sessions.create({
       mode: 'payment',
       payment_method_types: ['card'],
-      allow_promotion_codes: true,
+      ...(await checkoutDiscountFields()),
       line_items: [
         {
           price_data: {
@@ -2554,7 +2609,7 @@ app.post('/create-tribute-checkout', async (req, res) => {
     const session = await stripe.checkout.sessions.create({
       mode: 'payment',
       payment_method_types: ['card'],
-      allow_promotion_codes: true,
+      ...(await checkoutDiscountFields()),
       line_items: [
         {
           price_data: {
@@ -2628,7 +2683,7 @@ function activeCampaignPercent(key) {
 
 // The gift page asks this to display the discount; it can't set it.
 app.get('/gift-campaign/:key', (req, res) => {
-  res.json({ percent: activeCampaignPercent(req.params.key) })
+  res.json({ percent: Math.max(activeCampaignPercent(req.params.key), siteSalePercent()) })
 })
 
 app.post('/create-gift-checkout', async (req, res) => {
@@ -2638,7 +2693,8 @@ app.post('/create-gift-checkout', async (req, res) => {
     if (!productKey || !GIFT_PRODUCTS[productKey]) return res.status(400).json({ error: 'Invalid product' })
 
     const product         = GIFT_PRODUCTS[productKey]
-    const discountPercent = activeCampaignPercent(campaign)
+    // Gift campaign or site sale, whichever is bigger. They never stack.
+    const discountPercent = Math.max(activeCampaignPercent(campaign), siteSalePercent())
     const unitAmount      = discountPercent
       ? Math.round(product.amount * (1 - discountPercent / 100))
       : product.amount
@@ -2672,7 +2728,7 @@ app.post('/create-gift-checkout', async (req, res) => {
         variant:         product.variant,
         storyType:       product.storyType,
         discountPercent: String(discountPercent),
-        campaign:        discountPercent ? String(campaign) : '',
+        campaign:        discountPercent ? String(campaign || 'site-sale') : '',
       },
     })
 

@@ -395,7 +395,11 @@ const CAMPAIGN_LABELS: Record<string, string> = {
   'mothers-day': "Mother's Day",
   'fathers-day': "Father's Day",
 }
-const campaignLabel = computed(() => (campaignKey && CAMPAIGN_LABELS[campaignKey]) || 'seasonal')
+// Set while a site-wide sale (SITE_SALE in server.js) is running, e.g. "Black Friday".
+const saleLabel = ref('')
+const campaignLabel = computed(
+  () => saleLabel.value || (campaignKey && CAMPAIGN_LABELS[campaignKey]) || 'seasonal',
+)
 
 // The print deadline only belongs on the banner during the Christmas season and
 // while books can still arrive. Both read from lib/christmas.ts, so the date
@@ -406,12 +410,21 @@ const showPrintDeadline = computed(
 )
 
 onMounted(async () => {
-  if (!campaignKey) return
+  // Always ask: a site-wide sale applies even without a campaign link. The
+  // server returns the bigger of the campaign and the sale, the same figure
+  // checkout charges, so the page can never show a price checkout won't honour.
   try {
-    const r = await fetch(`${SERVER_URL}/gift-campaign/${encodeURIComponent(campaignKey)}`)
-    if (r.ok) campaignDiscountRef.value = Number((await r.json()).percent) || 0
+    const [campaignRes, saleRes] = await Promise.all([
+      fetch(`${SERVER_URL}/gift-campaign/${encodeURIComponent(campaignKey || 'none')}`),
+      fetch(`${SERVER_URL}/site-sale`),
+    ])
+    if (campaignRes.ok) campaignDiscountRef.value = Number((await campaignRes.json()).percent) || 0
+    if (saleRes.ok) {
+      const sale = await saleRes.json()
+      if (Number(sale.percent) > 0 && sale.label) saleLabel.value = sale.label
+    }
   } catch {
-    // No discount shown if the server can't be reached — full price is charged anyway
+    // No discount shown if the server can't be reached — checkout still charges correctly
   }
 })
 

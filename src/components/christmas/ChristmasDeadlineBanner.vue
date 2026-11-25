@@ -11,8 +11,17 @@
       <div class="mx-auto flex max-w-6xl items-center justify-center gap-3 py-2.5 pl-4 pr-10 sm:px-12 sm:py-3">
 
         <p class="text-center text-[13px] leading-snug sm:text-sm">
+          <!-- Site-wide sale (SITE_SALE in server.js) beats every other message -->
+          <template v-if="salePercent > 0">
+            <strong class="font-semibold">{{ saleLabel }}: {{ salePercent }}% off everything</strong>
+            <span class="sm:hidden"> · ends {{ saleEndsShort }}</span>
+            <span class="hidden sm:inline">
+              — plans, the Keepsake, printed books and gifts. Taken off at checkout, ends {{ saleEndsLong }}.
+            </span>
+          </template>
+
           <!-- Early season -->
-          <template v-if="phase === 'early'">
+          <template v-else-if="phase === 'early'">
             <span class="mr-1" aria-hidden="true">🎄</span>
             <strong class="font-semibold">For Christmas?</strong>
             <!-- Mobile: short date so the deadline is always visible -->
@@ -112,19 +121,36 @@ const SERVER_URL = import.meta.env.VITE_SERVER_URL || 'https://tellmeyourstoryim
 const discountPercent = ref(0)
 const showDiscount = computed(() => discountPercent.value > 0 && phase.value !== 'off')
 
-const visible = computed(() => phase.value !== 'off' && !dismissed.value)
+// Black Friday etc. Read from the server so the banner only promises what
+// checkout applies. Runs whatever the Christmas phase is.
+const salePercent = ref(0)
+const saleLabel = ref('Sale')
+const saleEndsAt = ref<Date | null>(null)
+const fmtEnds = (opts: Intl.DateTimeFormatOptions) =>
+  saleEndsAt.value ? saleEndsAt.value.toLocaleDateString('en-GB', { timeZone: 'Europe/London', ...opts }) : ''
+const saleEndsShort = computed(() => fmtEnds({ weekday: 'short' }))                                 // "Mon"
+const saleEndsLong  = computed(() => fmtEnds({ weekday: 'long', day: 'numeric', month: 'long' }))   // "Monday 30 November"
+const onSale = computed(() => salePercent.value > 0)
 
-const variantClasses = computed(() =>
-  phase.value === 'countdown' ? 'bg-[#8C3A2B] text-white' : 'bg-[#2C2420] text-white',
-)
+/** Dismissing the sale banner is remembered separately from the Christmas ones. */
+const dismissPhase = computed(() => (onSale.value ? 'sale' : phase.value))
 
-const ctaClasses = computed(() =>
-  phase.value === 'countdown'
+const visible = computed(() => (onSale.value || phase.value !== 'off') && !dismissed.value)
+
+const variantClasses = computed(() => {
+  if (onSale.value) return 'bg-[#1C1917] text-white'
+  return phase.value === 'countdown' ? 'bg-[#8C3A2B] text-white' : 'bg-[#2C2420] text-white'
+})
+
+const ctaClasses = computed(() => {
+  if (onSale.value) return 'bg-[#E8C79A] text-[#1C1917] hover:opacity-90'
+  return phase.value === 'countdown'
     ? 'bg-white text-[#8C3A2B] hover:opacity-90'
-    : 'bg-[#7C5C3B] text-white hover:opacity-90',
-)
+    : 'bg-[#7C5C3B] text-white hover:opacity-90'
+})
 
 const ctaLabel = computed(() => {
+  if (onSale.value) return 'Shop the sale'
   if (showDiscount.value) return `Get ${discountPercent.value}% off`
   return phase.value === 'digital' ? 'Buy a digital gift' : 'Christmas gifts'
 })
@@ -132,23 +158,25 @@ const ctaLabel = computed(() => {
 // While the discount is being advertised, send people straight to the gift page
 // with the campaign on it — the offer in the banner has to be the offer they land on.
 const ctaTarget = computed(() =>
-  showDiscount.value || phase.value === 'digital'
+  onSale.value
+    ? '/pricing'
+    : showDiscount.value || phase.value === 'digital'
     ? '/gift?campaign=christmas'
     : '/christmas-gifts-for-grandparents',
 )
 
 function dismiss() {
   dismissed.value = true
-  track('christmas_banner_dismissed', { phase: phase.value })
+  track('christmas_banner_dismissed', { phase: dismissPhase.value })
   try {
-    localStorage.setItem(dismissKey(phase.value), '1')
+    localStorage.setItem(dismissKey(dismissPhase.value as ChristmasPhase), '1')
   } catch {
     // Private browsing — it'll just show again next visit
   }
 }
 
 function trackClick() {
-  track('christmas_banner_clicked', { phase: phase.value })
+  track('christmas_banner_clicked', { phase: dismissPhase.value })
 }
 
 onMounted(async () => {
@@ -164,6 +192,23 @@ onMounted(async () => {
   } catch {
     dismissed.value = false
   }
+
+  // Site-wide sale. Asked separately so a slow server (Render waking up) never
+  // holds back the Christmas message; the banner switches over when it answers.
+  fetch(`${SERVER_URL}/site-sale`)
+    .then((r) => (r.ok ? r.json() : null))
+    .then((sale) => {
+      if (!sale || !(Number(sale.percent) > 0)) return
+      salePercent.value = Number(sale.percent)
+      saleLabel.value = sale.label || 'Sale'
+      saleEndsAt.value = sale.endsAt ? new Date(sale.endsAt) : null
+      try {
+        dismissed.value = localStorage.getItem(dismissKey('sale' as ChristmasPhase)) === '1'
+      } catch {
+        dismissed.value = false
+      }
+    })
+    .catch(() => { /* no sale shown; checkout decides the price anyway */ })
 
   // Only ask about the discount inside the window it would be shown in.
   if (!isDiscountWindow()) return
