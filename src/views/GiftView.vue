@@ -116,6 +116,18 @@
           See a finished story first
           <span aria-hidden="true">→</span>
         </a>
+
+        <!-- Gift buyers are the most nervous buyers: show the rating before any price. -->
+        <a
+          :href="TRUSTPILOT_URL"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="mt-3 flex items-center justify-center gap-2 text-sm text-stone-600 transition hover:text-stone-900"
+        >
+          <span class="text-base tracking-wide text-[#00B67A]" aria-hidden="true">★★★★★</span>
+          <span>Rated <strong class="text-stone-900">5.0</strong> on <span class="font-semibold text-[#00B67A]">Trustpilot</span></span>
+          <span class="text-xs text-stone-400">· 10 reviews</span>
+        </a>
       </div>
 
       <!--
@@ -229,6 +241,33 @@
           >See a sample →</a>
         </div>
 
+      </div>
+
+      <!-- What buyers say. Real Trustpilot reviews, the same ones on the homepage. -->
+      <div class="mt-12">
+        <p class="text-center text-[11px] font-medium uppercase tracking-[0.22em] text-[#9C7C5C]">What families say</p>
+        <div class="mt-5 grid gap-4 md:grid-cols-3">
+          <figure
+            v-for="review in reviews"
+            :key="review.name"
+            class="flex flex-col rounded-2xl border border-[#E8DDD0] bg-white p-5"
+          >
+            <p class="text-sm tracking-wide text-[#00B67A]" aria-label="5 out of 5 stars">★★★★★</p>
+            <blockquote class="mt-3 flex-1 text-sm italic leading-6 text-stone-600">"{{ review.quote }}"</blockquote>
+            <figcaption class="mt-4 text-xs">
+              <span class="font-semibold text-stone-800">{{ review.name }}</span>
+              <span class="text-stone-400"> · Verified Trustpilot review</span>
+            </figcaption>
+          </figure>
+        </div>
+        <p class="mt-4 text-center">
+          <a
+            :href="TRUSTPILOT_URL"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="text-xs font-medium text-[#7C5C3B] underline underline-offset-2"
+          >Read all reviews on Trustpilot →</a>
+        </p>
       </div>
     </section>
 
@@ -427,6 +466,24 @@ onMounted(async () => {
     // No discount shown if the server can't be reached — checkout still charges correctly
   }
 })
+
+const TRUSTPILOT_URL = 'https://uk.trustpilot.com/review/tellmeyourstory.uk'
+
+// Word for word from Trustpilot. Keep in step with the homepage testimonials.
+const reviews = [
+  {
+    name: 'Suzanne-May G.',
+    quote: "I wasn't sure what to expect at first, but I found the app really easy to use. It guides you through everything step by step. I loved being able to add memories and stories in my own way, and seeing it all come together was really special.",
+  },
+  {
+    name: 'Hollie',
+    quote: "An amazing app to use to record your memories and make stories for your family to cherish! It's made to what you want and how you want to tell them. We absolutely love the ones we have made!",
+  },
+  {
+    name: 'Jayne B.',
+    quote: 'This app takes you through every step to create lovely memories and tributes. Such a lovely idea to create something truly special for family and friends to look back on.',
+  },
+]
 
 const occasions = [
   'Birthdays',
